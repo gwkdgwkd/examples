@@ -1,0 +1,68 @@
+https://www.cnblogs.com/luckydml/p/11828599.html
+
+ Linux基于webRTC的二次开发(一)
+
+最近在做Linux平台下webRTC的二次开发，一路摸索，中间踩了不少坑，这一篇博客先来简单介绍下Linux上如何使用GCC编译webRTC。
+为什么使用GCC编译？
+
+这其实是无奈之举，Linux下webRTC中的ninja工程使用的是Clang进行编译，且依赖其内置的stdc标准库。然而我现有的开发环境所使用的编译器为GCC,在使用Clang进行webRTC二次开发时遇到各种编译错误，只好改用GCC重新编译webRTC。
+1.获取webRTC源码
+
+需要准备一个梯子，同时使用工具进行终端穿墙。
+获取源码流程可以查看官方文档https://webrtc.org/native-code/development/
+首先安装Chromium depot tools;
+
+git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+
+将depot tools路径添加道环境变量中
+
+export PATH=$PATH:/path/to/depot_tools
+
+然后获取webRTC源码
+
+mkdir webrtc-checkout
+cd webrtc-checkout
+fetch --nohooks webrtc
+gclient sync
+
+webrtc源码下载下来很大，确保翻墙工具有足够的流量
+2.修改BUILD.gn
+
+如果不修改GN files会出现一堆错误，编译无法通过
+关闭-Werror编译选项
+build/config/complier/BUILD.gn
+修改treat_warnings_as_errors=false
+使用系统stdc标准库
+build/config/c++/BUILD.gn
+注释掉
+
+cflags_cc += [
+    "-nostdinc++"
+]
+cflags += ["-fno-builtin-abs"]
+ldflags += ["-nodefaultlibs"]
+libs += [
+    "c",
+    "gcc_s",
+    "m",
+    "rt",
+]
+
+使用gcc编译命令为
+
+gn gen webrtc-checkout/src/out/Default --args="is_clang=false"
+ninja -C webrtc-checkout/src/out/Default
+
+编译过程中可能会遇到因为源码问题导致编译出错，修改即可
+编译成功后，即可使用gcc二次编译开发
+注意编译时需添加一些编译选项
+使用cmake构建工程时添加
+
+set(CMAKE_CXX_FLAGS "-fno-rtti")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWEBRTC_LINUX=1 -DWEBRTC_POSIX=1")
+
+
+
+按上面方法做，会报错，test相关
+参考https://blog.csdn.net/zhangpeng_linux/article/details/85857927
+使用rtc_include_tests=false，编译通过
