@@ -14,20 +14,135 @@ import "fmt" // 含有格式化输出、接收输入的函数。
 // go get gopl.io/ch1/helloworld
 func main() {
 	// Go语言原生支持Unicode,它可以处理全世界任何语言的文本。
-	fmt.Println("hello，世界")
-	fmt.Print("hello，世界\n")
+	fmt.Println("hello，世界") // 在输出内容的结尾添加一个换行符
+	fmt.Print("hello，世界\n") // 直接输出内容
 	fmt.Printf("%s\n", "hello，世界")
 
 	// go语言中有两种注释的方法,单行//和多行/*...*/
 	fmt.Println("A", "B", "C") // A B C
 	fmt.Print("A", "B", "C\n") // ABC
 
-	// go语音中变量定义了以后必须要使用
+	// go语音中变量定义了以后必须要使用,定义变量的三种方式
 	var a int = 10
 	var b = "nihao"
 	c := 1.5
 	fmt.Println("a=", a, "b=", b, "c=", c)
 	fmt.Printf("a=%v b=%v c=%v\n", a, b, c)
+
+	// printf系列函数都支持format格式化参数:
+	// 1.通用占位符
+	// %v,值的默认格式表示
+	fmt.Printf("%v\n", 100) // 100
+	fmt.Printf("%v\n", false) // false
+	o := struct{ name string }{"小王子"}
+	fmt.Printf("%v\n", o) // {小王子}
+	// %+v,类似%v，但输出结构体时会添加字段名
+	fmt.Printf("%+v\n", o) // {name:小王子}
+	// %#v,值的Go语法表示
+	fmt.Printf("%#v\n", o) // struct { name string }{name:"小王子"}
+	// %T,打印值的类型
+	fmt.Printf("%T\n", o) // struct { name string }
+	// %%,百分号
+	fmt.Printf("100%%\n") // 100%
+
+	// 2.布尔型
+	// %t,true或false
+	fmt.Printf("%t %t\n", true, false) // true false
+	
+	// 3.整型
+	n := 75
+	// %b,表示为二进制
+	fmt.Printf("%b\n", n) // 1001011
+	// %c,该值对应的unicode码值
+	fmt.Printf("%c\n", n) // K
+	// %d,表示为十进制
+	fmt.Printf("%d\n", n) // 75
+	// %o,表示为八进制
+	fmt.Printf("%o\n", n) // 113
+	// %x,表示为十六进制，使用a-f
+	fmt.Printf("%x\n", n) // 4b
+	// %X,表示为十六进制，使用A-F
+	fmt.Printf("%X\n", n) // 4B
+	// %U,表示为Unicode格式：U+1234，等价于”U+%04X”
+	fmt.Printf("%x %U\n", '我', '我') // 6211 U+6211
+	// %q,该值对应的单引号括起来的go语法字符字面值，必要时会采用安全的转义表示
+	fmt.Printf("%q\n", n) // 'K'
+
+	// 4.浮点数与复数
+	f := 12.34
+	// %b,无小数部分、二进制指数的科学计数法，如-123456p-78
+	fmt.Printf("%b\n", f) // 6946802425218990p-49
+	// %e,科学计数法，如-1234.456e+78
+	fmt.Printf("%e\n", f) // 1.234000e+01
+	// %E,科学计数法，如-1234.456E+78
+	fmt.Printf("%E\n", f) // 1.234000E+01
+	// %f,有小数部分但无指数部分，如123.456
+	fmt.Printf("%f\n", f) // 12.340000
+	// %F,等价于%f
+	fmt.Printf("%F\n", f) // 12.340000
+	// %g,根据实际情况采用%e或%f格式（以获得更简洁、准确的输出）
+	fmt.Printf("%g\n", f) // 12.34
+	// %G,根据实际情况采用%E或%F格式（以获得更简洁、准确的输出）
+	fmt.Printf("%G\n", f) // 12.34
+
+	// 5.字符串和[]byte
+	s := "小王子"
+	// %s,直接输出字符串或者[]byte
+	fmt.Printf("%s\n", s) // 小王子 
+	// %q,该值对应的双引号括起来的go语法字符串字面值，必要时会采用安全的转义表示
+	fmt.Printf("%q\n", s) // "小王子"
+	// %x,每个字节用两字符十六进制数表示（使用a-f)
+	fmt.Printf("%x\n", s) // e5b08fe78e8be5ad90
+	// %X,每个字节用两字符十六进制数表示（使用A-F）
+	fmt.Printf("%X\n", s) // E5B08FE78E8BE5AD90
+
+	// 6.指针
+	p := 10
+	// %p,表示为十六进制，并加上前导的0x
+	fmt.Printf("%p\n", &p) // 0xc420012160
+	fmt.Printf("%#p\n", &p) // c420012160
+
+	// 7.宽度标识符
+	/*
+	宽度通过一个紧跟在百分号后面的十进制数指定，如果未指定宽度，则表示值时除必需之外不作填充。
+	精度通过（可选的）宽度后跟点号后跟的十进制数指定。如果未指定精度，会使用默认精度；如果点
+	号后没有跟数字，表示精度为0。
+	*/
+	// %f,默认宽度，默认精度
+	fmt.Printf("%f\n", f) // 12.340000
+	// %9f,宽度9，默认精度
+	fmt.Printf("%9f\n", f) // 12.340000
+	// %.2f,默认宽度，精度2
+	fmt.Printf("%.2f\n", f) // 12.34
+	// %9.2f,宽度9，精度2
+	fmt.Printf("%9.2f\n", f) //     12.34
+	// %9.f,宽度9，精度0
+	fmt.Printf("%9.f\n", f) //        12
+
+	// 8.其他falg
+	// '+',总是输出数值的正负号；对%q（%+q）会生成全部是ASCII字符的输出（通过转义）；
+	fmt.Printf("%+d %+d\n", 5, -6) // +5 -6
+	fmt.Printf("%+q\n","是什么") // "\u662f\u4ec0\u4e48"
+	// ' ',对数值，正数前加空格而负数前加负号；对字符串采用%x或%X时（% x或% X）会给各打印的字节之间加空格
+	fmt.Printf("% d % d\n", 5, -6) //  5 -6
+	fmt.Printf("% x\n","是什么") // e6 98 af e4 bb 80 e4 b9 88
+	fmt.Printf("% X\n","是什么") // E6 98 AF E4 BB 80 E4 B9 88
+	// '-',在输出右边填充空白而不是默认的左边（即从默认的右对齐切换为左对齐）；
+	fmt.Printf("[%-5s]\n","是什么") // [是什么  ]
+	fmt.Printf("[%-5.2s]\n","是什么") // [是什   ]
+	fmt.Printf("[%-5.7s]\n","是什么") // [是什么  ]
+	fmt.Printf("[%5.7s]\n","是什么") // [  是什么]
+	// '#',八进制数前加0（%#o），十六进制数前加0x（%#x）或0X（%#X），指针去掉前面的0x（%#p）对%q（%#q），对%U（%#U）会输出空格和单引号括起来的go字面值；
+	fmt.Printf("%#o\n", 10) // 012
+	fmt.Printf("%#x\n", 12) // 0xc
+	fmt.Printf("%#X\n", 12) // 0xC
+	fmt.Printf("%#p %p\n", &p, &p) // c420012160 0xc420012160
+	fmt.Printf("%#q ;%q\n", "是什么", "是什么") // `是什么` ;"是什么"
+	fmt.Printf("%#q ;%q\n", 5, 5) // '\x05' ;'\x05'
+	fmt.Printf("%#U ;%U\n", '我', '我') // U+6211 '我' ;U+6211
+	// '0',使用0而不是空格填充，对于数值类型会把填充的0放在正负号后面；
+	fmt.Printf("[%05s]\n","是什么") // [00是什么]
+
 }
 
 /*
