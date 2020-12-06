@@ -22,7 +22,7 @@ func main() {
 	fmt.Println("A", "B", "C") // A B C
 	fmt.Print("A", "B", "C\n") // ABC
 
-	// go语音中变量定义了以后必须要使用,定义变量的三种方式
+	// go语音中变量定义了以后必须要使用,否则报错
 	var a int = 10
 	var b = "nihao"
 	c := 1.5
