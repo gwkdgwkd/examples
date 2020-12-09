@@ -143,9 +143,15 @@ func main() {
 	fmt.Printf("%#p %p\n", &p, &p)        // c420012160 0xc420012160
 	fmt.Printf("%#q ;%q\n", "是什么", "是什么") // `是什么` ;"是什么"
 	fmt.Printf("%#q ;%q\n", 5, 5)         // '\x05' ;'\x05'
+	fmt.Printf("%#q ;%[1]q\n", 'a')       // 'a' ;'a'
+	fmt.Printf("%#q ;%[1]q\n", '\n')      // '\n' ;'\n'
 	fmt.Printf("%#U ;%U\n", '我', '我')     // U+6211 '我' ;U+6211
 	// '0',使用0而不是空格填充，对于数值类型会把填充的0放在正负号后面；
-	fmt.Printf("[%05s]\n", "是什么") // [00是什么]
+	fmt.Printf("[%05s]\n", "是什么")         // [00是什么]
+	fmt.Printf("%d,%[1]o,%#[1]o\n", 0666) // 438,666,0666, %之后的[1]副词告诉Printf函数再次使用第一个操作数
+	x := int64(0xdeadbeef)
+	fmt.Printf("%d,%[1]x,%#[1]x,%#[1]X\n", x) // 3735928559,deadbeef,0xdeadbeef,0XDEADBEEF
+	fmt.Printf("%d,%x,%#[1]x,%#[2]X\n", x, x) // 同上，%后的#副词告诉Printf在用%o、%x或%X输出时生成0、0x或0X前缀。
 
 }
 
