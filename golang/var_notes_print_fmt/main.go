@@ -67,6 +67,8 @@ func main() {
 	fmt.Printf("%x\n", n) // 4b
 	// %X,表示为十六进制，使用A-F
 	fmt.Printf("%X\n", n) // 4B
+	// % x,参数用于在每个十六进制数字前插入一个空格
+	fmt.Printf("% x\n", "中国") // e4 b8 ad e5 9b bd
 	// %U,表示为Unicode格式：U+1234，等价于”U+%04X”
 	fmt.Printf("%x %U\n", '我', '我') // 6211 U+6211
 	// %q,该值对应的单引号括起来的go语法字符字面值，必要时会采用安全的转义表示
