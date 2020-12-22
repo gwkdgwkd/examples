@@ -1,10 +1,13 @@
 package main
 
-import "fmt"
-import "log"
-import "os"
-import "time"
-import "runtime"
+import (
+	"fmt"
+	"log"
+	"os"
+	"runtime"
+	"time"
+)
+
 // import "io"
 // import "bufio"
 
@@ -72,7 +75,7 @@ func test3() (x int, y int) { return } // 这称之为bare return
 // 	return	fmt.Errorf("server %s failed to respond after %s", url, timeout)
 // }
 
-func test4() (int, error) {return 5, fmt.Errorf("hello error")}
+func test4() (int, error) { return 5, fmt.Errorf("hello error") }
 
 // 函数被看作第一类值(first-class values):函数像其他值一样,拥有类型,可以被
 // 赋值给其他变量,传递给函数,从函数返回。对函数值(function value)的调用类似函数调用。
@@ -97,9 +100,9 @@ func squares() func() int {
 
 // 参数数量可变的函数称为为可变参数函数。在声明可变参数函数时,需要在参数列表的最后一个参数类型之前
 // 加上省略符号“...”,这表示该函数会接收任意数量的该类型参数。
-func sum(vals...int) int { // vals被看作是类型为[]int的切片
+func sum(vals ...int) int { // vals被看作是类型为[]int的切片
 	total := 0
-	for	_, val := range	vals {
+	for _, val := range vals {
 		total += val
 	}
 	return total
@@ -108,10 +111,10 @@ func sum(vals...int) int { // vals被看作是类型为[]int的切片
 // 虽然在可变参数函数内部,...int型参数的行为看起来很像切片类型,但实际上,可变参数函
 // 数和以切片作为参数的函数是不同的。
 func ff(...int) {}
-func gg([]int) {}
+func gg([]int)  {}
 
 // interfac{}表示函数的最后一个参数可以接收任意类型
-func errorf(linenum	int, format	string,	args...interface{})	{
+func errorf(linenum int, format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, "Line %d: ", linenum)
 	fmt.Fprintf(os.Stderr, format, args...)
 	fmt.Fprintln(os.Stderr)
@@ -132,11 +135,11 @@ func bigSlowOperation() {
 	// do something
 	time.Sleep(2 * time.Second)
 }
-func trace(msg	string)	func()	{
+func trace(msg string) func() {
 	start := time.Now()
 	log.Printf("enter %s", msg)
-	return func() {	
-		log.Printf("exit %s (%s)", msg, time.Since(start))	
+	return func() {
+		log.Printf("exit %s (%s)", msg, time.Since(start))
 	}
 }
 
@@ -144,9 +147,10 @@ func trace(msg	string)	func()	{
 // 的匿名函数可以访问该函数包括返回值变量在内的所有变量,所以,对匿名函数采用defer机
 // 制,可以使其观察函数的返回值。
 func double(x int) (result int) {
-	defer func() { fmt.Printf("double(%d) = %d\n", x,result)}()
+	defer func() { fmt.Printf("double(%d) = %d\n", x, result) }()
 	return x + x
 }
+
 // 被延迟执行的匿名函数甚至可以修改函数返回给调用者的返回值:
 func triple(x int) (result int) {
 	defer func() { result += x }()
@@ -164,10 +168,10 @@ func triple(x int) (result int) {
 // 息。通常,我们不需要再次运行程序去定位问题,日志信息已经提供了足够的诊断依据。
 // 不是所有的panic异常都来自运行时,直接调用内置的panic函数也会引发panic异常;panic函
 // 数接受任何值作为参数。当某些不应该发生的场景发生时,就应该调用panic。
-func fff(x int)	{
+func fff(x int) {
 	fmt.Printf("f(%d)\n", x+0/x) //	panics if x == 0
 	defer fmt.Printf("defer %d\n", x)
-	fff(x	- 1)
+	fff(x - 1)
 }
 
 // 为了方便诊断问题,runtime包允许程序员输出堆栈信
@@ -183,12 +187,12 @@ func printStack() {
 // 有些情况下,我们无法恢复。某些致命错误会导致Go在运行时终止程序,如内存不足。
 // 使用panic和recover编写一个不包含return语句但能返回一个非零值的函数:
 func returnN() (result int) {
-    defer func() {
-        if p := recover(); p != nil {
-            result = p.(int)
-        }
-    }()
-    panic(3)
+	defer func() {
+		if p := recover(); p != nil {
+			result = p.(int)
+		}
+	}()
+	panic(3)
 }
 
 func main() {
@@ -276,7 +280,7 @@ func main() {
 	f := square
 	fmt.Println(f(3)) // 9
 	f = negative
-	fmt.Println(f(3)) // -3
+	fmt.Println(f(3))     // -3
 	fmt.Printf("%T\n", f) // func(int) int
 	// f = product // cannot use product (type func(int, int) int) as type func(int) int in assignment
 
@@ -298,21 +302,21 @@ func main() {
 	fmt.Println(f2()) // 16
 	// 通过这个例子看到变量的生命周期不由它的作用域决定:squares返回后,变量x仍然隐式的存在于f中。
 
-	fmt.Println(sum()) // 0	
-	fmt.Println(sum(3)) // 3	
-	fmt.Println(sum(1,	2,	3,	4))	// 10
+	fmt.Println(sum())           // 0
+	fmt.Println(sum(3))          // 3
+	fmt.Println(sum(1, 2, 3, 4)) // 10
 
 	fmt.Printf("%T\n", ff) // func(...int)
 	fmt.Printf("%T\n", gg) // func([]int)
 
 	linenum, name := 12, "count"
-	errorf(linenum,	"undefined: %s", name)	// Line 12: undefined: count
+	errorf(linenum, "undefined: %s", name) // Line 12: undefined: count
 
 	bigSlowOperation()
 	// 2020/12/21 23:44:30 enter bigSlowOperation
 	// 2020/12/21 23:44:40 exit bigSlowOperation (10.000289891s)
 
-	_ =	double(4) // double(4) = 8
+	_ = double(4)          // double(4) = 8
 	fmt.Println(triple(4)) // 12
 
 	fmt.Println(returnN())
