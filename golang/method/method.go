@@ -192,4 +192,50 @@ func main() {
 	mm.Point = nn.Point                 // mm和nn共享指针
 	nn.ScaleBy(2)
 	fmt.Println(*nn.Point, *mm.Point) // {2 2} {2 2}
+
+	// 选择一个方法,并且在同一个表达式里执行,比如常见的p.Distance()形式,实际上
+	// 将其分成两步来执行也是可能的。p.Distance叫作“选择器”,选择器会返回一个方法"值"->一
+	// 个将方法(Point.Distance)绑定到特定接收器变量的函数。这个函数可以不通过指定其接收器
+	// 即可被调用;即调用时不需要指定接收器(因为已经在前文中指定过了),只要传入函数的参数即可
+	py := Point{1, 2}
+	qu := Point{4, 6}
+	distanceFromP := py.Distance       // method value
+	fmt.Println(distanceFromP(qu))     // 5
+	var origin Point                   // {0, 0}
+	fmt.Println(distanceFromP(origin)) // 2.23606797749979,sqrt(5)
+	scaleP := py.ScaleBy               // method value
+	scaleP(2)                          // p becomes (2, 4)
+	scaleP(3)                          // then (6, 12)
+	scaleP(10)                         // then (60, 120)
+
+	// 和方法"值"相关的还有方法表达式。当调用一个方法时,与调用一个普通的函数相比,必
+	// 须要用选择器(p.Distance)语法来指定方法的接收器。
+	// 当T是一个类型时,方法表达式可能会写作T.f或者(*T).f,会返回一个函数"值",这种函
+	// 数会将其第一个参数用作接收器,所以可以用通常(不写选择器)的方式来对其进行调用:
+	pm := Point{1, 2}
+	qm := Point{4, 6}
+	distance := Point.Distance    // method expression
+	fmt.Println(distance(pm, qm)) // 5
+	fmt.Printf("%T\n", distance)  // func(main.Point, main.Point) float64
+	scale := (*Point).ScaleBy
+	scale(&pm, 2)
+	fmt.Println(pm)           // {2	4}
+	fmt.Printf("%T\n", scale) // func(*main.Point, float64)
+	// 当根据一个变量来决定调用同一个类型的哪个函数时,方法表达式就显得很有用了。可
+	// 以根据选择来调用接收器各不相同的方法。
+
+	// 一个对象的变量或者方法如果对调用方是不可见的话,一般就被定义为“封装”。封装有时候也
+	// 被叫做信息隐藏,同时也是面向对象编程最关键的一个方面。
+
+	// Go语言只有一种控制可见性的手段:大写首字母的标识符会从定义它们的包中被导出,小写
+	// 字母的则不会。这种限制包内成员的方式同样适用于struct或者一个类型的方法。因而如果
+	// 想要封装一个对象,必须将其定义为一个struct,哪怕只有一个字段。
+
+	// 封装提供了三方面的优点:
+	// 首先,因为调用方不能直接修改对象的变量值,其只需要关注少量的语句并且只要弄懂少量变量的可能的值即可。
+	// 第二,隐藏实现的细节,可以防止调用方依赖那些可能变化的具体实现,这样使设计包的程
+	// 序员在不破坏对外的api情况下能得到更大的自由。
+	// 封装的第三个优点也是最重要的优点,是阻止了外部调用方对对象内部的值任意地进行修
+	// 改。因为对象内部变量只可以被同一个包内的函数修改,所以包的作者可以让这些函数确保
+	// 对象内部的一些值的不变性。
 }
