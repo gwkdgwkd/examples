@@ -112,6 +112,21 @@ func CelsiusFlag(name string, value Celsius, usage string) *Celsius {
 	return &f.Celsius
 }
 
+const debug = true
+
+// If out is non-nil, output will be written to	it.
+func f(out io.Writer) {
+	// 当main函数调用函数f时(debug为false),它给f函数的out参数赋了一个*bytes.Buffer的空指针,所以out的动
+	// 态值是nil。然而,它的动态类型是*bytes.Buffer,意思就是out变量是一个包含空指针值的非
+	// 空接口,所以防御性检查out!=nil的结果依然是true。
+	fmt.Printf("%v %T\n", out, out) // *bytes.Buffer
+	if out != nil {
+		// 动态分配机制依然决定(*bytes.Buffer).Write的方法会被调用,但是这次的接收者的值是nil。
+		// 对于一些如*os.File的类型,nil是一个有效的接收者,但是*bytes.Buffer类型不行。调用时尝
+		// 试去获取缓冲区时会发生panic。
+		out.Write([]byte("done!\n"))
+	}
+}
 func main() {
 	// 接口指定的规则非常简单:表达一个类型属于某个接口只要这个类型实现这个接口
 	// var w io.Writer
@@ -218,4 +233,12 @@ func main() {
 
 	// 当我们处理错误或者调试的过程中,得知接口值的动态类型是非常有帮助的。所以我们使用
 	// fmt包的%T动作。fmt包内部,使用反射来获取接口动态类型的名称。
+
+	var buf *bytes.Buffer
+	// var buf io.Writer // 可以避免一开始就将一个不完全的值赋值给这个接口
+	if debug {
+		buf = new(bytes.Buffer) // enable collection of output
+	}
+	// debug为false时，panic
+	f(buf) // panic: runtime error: invalid memory address or nil pointer dereference
 }
