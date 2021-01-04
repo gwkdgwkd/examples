@@ -25,6 +25,7 @@ package main
 // 要传入C函数的Go指针指向的数据本身不能包含指针或其他引用类型;并且C函数在返回后不能继续持有Go指针;
 // 并且在C函数返回之前,Go指针是被锁定的,不能导致对应指针数据被移动或栈的调整
 
+// #cgo CFLAGS: -I./
 // #cgo LDFLAGS:-L./ -lhello
 // #include <stdio.h>
 // #include <stdlib.h>
@@ -38,10 +39,11 @@ import "C"
 import "unsafe"
 
 func main() {
-    s := "Hello Cgo"
-    cs := C.CString(s)
-    C.print(cs)
-    C.free(unsafe.Pointer(cs))
+	s := "Hello Cgo"
+	cs := C.CString(s)
+	C.print(cs)
+	C.free(unsafe.Pointer(cs))
 
-    C.hello()
+	// export LD_LIBRARY_PATH=/disk/me/examples/golang/unsafe
+	C.hello()
 }
