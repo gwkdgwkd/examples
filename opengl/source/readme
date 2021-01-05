@@ -1,7 +1,7 @@
 git clone https://github.com/glfw/glfw.git
 
 
-g++ main.cc ../src/glad.c -I/disk/me/examples/opengl/source/include -L/disk/me/examples/opengl/source/build/src -lGLEW -lglfw3 -lGL -lX11 -lpthread -lXrandr -lXi -ldl
+g++ -std=c++11  *.cc ../source/src/glad.c -I/disk/me/examples/opengl/source/include -L/disk/me/examples/opengl/source/build/src -lGLEW -lglfw3 -lGL -lX11 -lpthread -lXrandr -lXi -ldl
 
 OpenGL的文档很乱，很难找到比较系统的教程。这里推荐几个不错的，若读者知道更好的，请下方评论。建议学习现代OpenGL。
 1. LearnOpenGL
