@@ -148,8 +148,21 @@ int main()
         // update shader uniform
         float timeValue = glfwGetTime();
         float greenValue = sin(timeValue) / 2.0f + 0.5f;
+        // 我们用glGetUniformLocation查询uniform ourColor的位置值。我们为查询函数提供着色器程序和uniform的名字（这是我们希望获得的位置值的来源）。
+        // 如果glGetUniformLocation返回-1就代表没有找到这个位置值。最后，我们可以通过glUniform4f函数设置uniform值。注意，查询uniform地址不要求你
+        // 之前使用过着色器程序，但是更新一个uniform之前你必须先使用程序（调用glUseProgram)，因为它是在当前激活的着色器程序中设置uniform的。
+        // 首先需要找到着色器中uniform属性的索引/位置值。
         int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+        // 当我们得到uniform的索引/位置值后，我们就可以更新它的值了。
         glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        // 因为OpenGL在其核心是一个C库，所以它不支持类型重载，在函数参数不同的时候就要为其定义新的函数；glUniform是一个典型例子。这个函数有一个特定的后
+        // 缀，标识设定的uniform的类型。可能的后缀有：
+        // f 	函数需要一个float作为它的值
+        // i 	函数需要一个int作为它的值
+        // ui 	函数需要一个unsigned int作为它的值
+        // 3f 	函数需要3个float作为它的值
+        // fv 	函数需要一个float向量/数组作为它的值
+        // 每当你打算配置一个OpenGL的选项时就可以简单地根据这些规则选择适合你的数据类型的重载函数。
 
         // render the triangle
         glDrawArrays(GL_TRIANGLES, 0, 3);
