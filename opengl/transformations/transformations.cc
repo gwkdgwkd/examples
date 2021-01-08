@@ -3,6 +3,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+// 我们需要的GLM的大多数功能都可以从下面这3个头文件中找到：
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -168,13 +169,16 @@ int main()
 
         // 把一个向量(1, 0, 0)位移(1, 1, 0)个单位
         // glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
-        // glm::mat4 trans;
+        // 下面就是矩阵初始化的一个例子，如果使用的是0.9.9及以上版本下面这行代码就需要改为: glm::mat4 trans = glm::mat4(1.0f)
+        // glm::mat4 trans; // 定义一个mat4类型的trans，默认是一个4×4单位矩阵。
+        // 创建一个变换矩阵，我们是把单位矩阵和一个位移向量传递给glm::translate函数来完成这个工作的:
         // trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
-        // vec = trans * vec;
+        // vec = trans * vec; // 把向量乘以位移矩阵并且输出最后的结果
         // std::cout << vec.x << vec.y << vec.z << std::endl; // (2, 1, 0)
         
         // 把箱子逆时针旋转90度。然后缩放0.5倍，使它变成原来的一半大
         // glm::mat4 trans;
+        // GLM希望它的角度是弧度制的(Radian)，所以我们使用glm::radians将角度转化为弧度。
         // trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
         // trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
 
@@ -185,11 +189,22 @@ int main()
         // create transformations
         glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
         transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+        // 使用GLFW的时间函数来获取不同时间的角度：
         transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        // 先把箱子围绕原点(0, 0, 0)旋转，之后，我们把旋转过后的箱子位移到屏幕的右下角。记住，实际的变换顺序应该与阅读顺序相反：
+        // 尽管在代码中我们先位移再旋转，实际的变换却是先应用旋转再是位移的。
 
         // get matrix's uniform location and set matrix
         ourShader.use();
-        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+        // 要把变换矩阵传递给着色器：
+        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform"); // 首先查询uniform变量的地址
+        // 用有Matrix4fv后缀的glUniform函数把矩阵数据发送给着色器。
+        // 第一个参数你现在应该很熟悉了，它是uniform的位置值。
+        // 第二个参数告诉OpenGL我们将要发送多少个矩阵，这里是1。
+        // 第三个参数询问我们我们是否希望对我们的矩阵进行置换(Transpose)，也就是说交换我们矩阵的行和列。OpenGL开发者通常使用一种
+        // 内部矩阵布局，叫做列主序(Column-major Ordering)布局。GLM的默认布局就是列主序，所以并不需要置换矩阵，我们填GL_FALSE。
+        // 最后一个参数是真正的矩阵数据，但是GLM并不是把它们的矩阵储存为OpenGL所希望接受的那种，因此我们要先用GLM的自带的函数
+        // value_ptr来变换这些数据。
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
         // render container
@@ -321,3 +336,12 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // 使用矩阵进行变换的真正力量在于，根据矩阵之间的乘法，我们可以把多个变换组合到一个矩阵中。让我们看看我们是否能生成一个变换矩阵，让它组合多个变换。
 // 当矩阵相乘时我们先写位移再写缩放变换的。矩阵乘法是不遵守交换律的，这意味着它们的顺序很重要。当矩阵相乘时，在最右边的矩阵是第一个与向量相乘的，所以你应
 // 该从右向左读这个乘法。建议您在组合矩阵时，先进行缩放操作，然后是旋转，最后才是位移，否则它们会（消极地）互相影响。
+
+// OpenGL没有自带任何的矩阵和向量知识，所以我们必须定义自己的数学类和函数。在教程中我们更希望抽象所有的数学细节，使用已经做好了的数学库。幸运的是，有个易于
+// 使用，专门为OpenGL量身定做的数学库，那就是GLM。
+// GLM是OpenGL Mathematics的缩写，它是一个只有头文件的库，也就是说我们只需包含对应的头文件就行了，不用链接和编译。
+// GLM库从0.9.9版本起，默认会将矩阵类型初始化为一个零矩阵（所有元素均为0），而不是单位矩阵（对角元素为1，其它元素为0）。如果你使用的是0.9.9或0.9.9以上的
+// 版本，你需要将所有的矩阵初始化改为 glm::mat4 mat = glm::mat4(1.0f)。
+
+// 为什么矩阵在图形领域是一个如此重要的工具？我们可以定义无限数量的变换，而把它们组合为仅仅一个矩阵，如果愿意的话我们还可以重复使用它。在着色器中使用矩阵可以
+// 省去重新定义顶点数据的功夫，它也能够节省处理时间，因为我们没有一直重新发送我们的数据（这是个非常慢的过程）。

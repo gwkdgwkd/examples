@@ -19,11 +19,15 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
+// 不要忘记正z轴是从屏幕指向你的，如果我们希望摄像机向后移动，我们就沿着z轴的正方向移动。
+glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f); // 摄像机位置
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
 
 // timing
+// 图形程序和游戏通常会跟踪一个时间差(Deltatime)变量，它储存了渲染上一帧所用的时间。我们把所有速度都去乘以deltaTime值。结果就是，如果我们的deltaTime很大，
+// 就意味着上一帧的渲染花费了更多时间，所以这一帧的速度需要变得更高来平衡渲染所花去的时间。使用这种方法时，无论你的电脑快还是慢，摄像机的速度都会相应平衡，这样
+// 每个用户的体验就都一样了。我们跟踪两个全局变量来计算出deltaTime值：
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
@@ -212,6 +216,7 @@ int main()
     {
         // per-frame time logic
         // --------------------
+        // 每一帧中我们计算出新的deltaTime以备后用。
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -235,6 +240,9 @@ int main()
         ourShader.use();
 
         // camera/view transformation
+        // GLM已经提供了这些支持。我们要做的只是定义一个摄像机位置，一个目标位置和一个表示世界空间中的上向量的向量（我们计算右向量使用的那个上向量）。
+        // 接着GLM就会创建一个LookAt矩阵，我们可以把它当作我们的观察矩阵：(glm::LookAt函数需要一个位置、目标和上向量。)
+        // 方向是当前的位置加上我们刚刚定义的方向向量。这样能保证无论我们怎么移动，摄像机都会注视着目标方向。
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         ourShader.setMat4("view", view);
 
@@ -276,7 +284,10 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    float cameraSpeed = 2.5 * deltaTime; 
+    // 添加几个需要检查的按键命令：
+    // 当我们按下WASD键的任意一个，摄像机的位置都会相应更新。如果我们希望向前或向后移动，我们就把位置向量加上或减去方向向量。如果我们希望向左右移动，
+    // 们使用叉乘来创建一个右向量(Right Vector)，并沿着它相应移动就可以了。这样就创建了使用摄像机时熟悉的横移(Strafe)效果。
+    float cameraSpeed = 2.5 * deltaTime;  // 有了deltaTime，在计算速度的时候可以将其考虑进去了
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -295,3 +306,22 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
 }
+
+// 摄像机方向:
+// 用场景原点向量减去摄像机位置向量的结果就是摄像机的指向向量。由于我们知道摄像机指向z轴负方向，但我们希望方向向量(Direction Vector)指向摄像机的z轴正方向。
+// 如果我们交换相减的顺序，我们就会获得一个指向摄像机正z轴方向的向量：
+// glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+// glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
+// 我们需要的另一个向量是一个右向量(Right Vector)，它代表摄像机空间的x轴的正方向。为获取右向量我们需要先使用一个小技巧：先定义一个上向量(Up Vector)。接下
+// 来把上向量和第二步得到的方向向量进行叉乘。两个向量叉乘的结果会同时垂直于两向量，因此我们会得到指向x轴正方向的那个向量（如果我们交换两个向量叉乘的顺序就会得
+// 到相反的指向x轴负方向的向量）：
+// glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); 
+// glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+// 现在我们已经有了x轴向量和z轴向量，获取一个指向摄像机的正y轴向量就相对简单了：我们把右向量和方向向量进行叉乘：
+// glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
+
+// Look At:
+// 使用矩阵的好处之一是如果你使用3个相互垂直（或非线性）的轴定义了一个坐标空间，你可以用这3个轴外加一个平移向量来创建一个矩阵，并且你可以用这个矩阵乘以任何向
+// 量来将其变换到那个坐标空间。这正是LookAt矩阵所做的，现在我们有了3个相互垂直的轴和一个定义摄像机空间的位置坐标，我们可以创建我们自己的LookAt矩阵了
+// 注意，位置向量是相反的，因为我们最终希望把世界平移到与我们自身移动的相反方向。把这个LookAt矩阵作为观察矩阵可以很高效地把所有世界坐标变换到刚刚定义的观察空间。
+// LookAt矩阵就像它的名字表达的那样：它会创建一个看着(Look at)给定目标的观察矩阵。
