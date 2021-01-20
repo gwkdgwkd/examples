@@ -160,8 +160,8 @@ int main()
     glBindVertexArray(0);
 
     // Load textures
-    GLuint cubeTexture = loadTexture(FileSystem::getPath("resources/textures/marble.jpg").c_str());
-    GLuint floorTexture = loadTexture(FileSystem::getPath("resources/textures/metal.png").c_str());
+    GLuint cubeTexture = loadTexture("../source/resources/marble.jpg");
+    GLuint floorTexture = loadTexture("../source/resources/metal.png");
     #pragma endregion
 
     // Game loop
