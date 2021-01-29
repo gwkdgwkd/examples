@@ -66,6 +66,7 @@ Ctrl+P : 窗口下可以直接输入文件名，跳转到该文件
 自动保存:File -> AutoSave(中文界面下“文件”->“自动保存”) 或者 Ctrl+Shift+P，输入 auto
 生成可执行文件:ctrl+shift+B
 调用终端:ctrl+~
+打开setting配置界面:ctrl+,
 
 三、修改默认快捷键
 打开默认键盘快捷方式设置：File -> Preferences -> Keyboard Shortcuts( 中文界面时：“文件”->"首选项"->"键盘快捷方式")，或者：Alt+F -> p -> k -> Enter
