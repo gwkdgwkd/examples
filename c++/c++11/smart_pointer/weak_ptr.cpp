@@ -28,12 +28,12 @@ int main() {
   // wp3指针和sp指针有相同的指针。再次强调，weak_ptr类型指针不会导致堆内存空间的引用计数增加或减少。
 
   // weak_ptr模板类提供的成员方法:
-  // operator=() 重载=赋值运算符，是的weak_ptr指针可以直接被weak_ptr或者shared_ptr类型指针赋值。
-  // swap(x) 	 其中x表示一个同类型的weak_ptr类型指针，该函数可以互换2个同类型weak_ptr指针的内容。
-  // reset() 	 将当前weak_ptr指针置为空指针。
-  // use_count() 查看指向和当前weak_ptr指针相同的shared_ptr指针的数量。
-  // expired() 	 判断当前weak_ptr指针为否过期（指针为空，或者指向的堆内存已经被释放）。
-  // lock() 	 如果当前weak_ptr已经过期，则该函数会返回一个空的shared_ptr指针；反之，该函数返回一个和当前weak_ptr指向相同的shared_ptr指针。
+  // operator=()  重载=赋值运算符，是的weak_ptr指针可以直接被weak_ptr或者shared_ptr类型指针赋值。
+  // swap(x) 	    其中x表示一个同类型的weak_ptr类型指针，该函数可以互换2个同类型weak_ptr指针的内容。
+  // reset() 	    将当前weak_ptr指针置为空指针。
+  // use_count()  查看指向和当前weak_ptr指针相同的shared_ptr指针的数量。
+  // expired() 	  判断当前weak_ptr指针为否过期（指针为空，或者指向的堆内存已经被释放）。
+  // lock() 	    如果当前weak_ptr已经过期，则该函数会返回一个空的shared_ptr指针；反之，该函数返回一个和当前weak_ptr指向相同的shared_ptr指针。
   // weak_ptr<T>模板类没有重载*和->运算符，因此weak_ptr类型指针只能访问某一shared_ptr指针指向的堆内存空间，无法对其进行修改。
 
   std::shared_ptr<int> sp1(new int(10));

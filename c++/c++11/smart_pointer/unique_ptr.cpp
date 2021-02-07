@@ -35,7 +35,7 @@ int main() {
   std::unique_ptr<int, myDel> p8(new int, myDel());
 
   // unique_ptr<T>模板类提供的成员方法:
-  // operator*() 	获取当前unique_ptr指针指向的数据。
+  // operator*() 	  获取当前unique_ptr指针指向的数据。
   // operator->() 	重载->号，当智能指针指向的数据类型为自定义的结构体时，通过->运算符可以获取其内部的指定成员。
   // operator =() 	重载了=赋值号，从而可以将nullptr或者一个右值unique_ptr指针直接赋值给当前同类型的unique_ptr指针。
   // operator []() 	重载了[]运算符，当unique_ptr指针指向一个数组时，可以直接通过[]获取指定下标位置处的数据。
@@ -45,7 +45,7 @@ int main() {
   // release() 	    释放当前unique_ptr指针对所指堆内存的所有权，但该存储空间并不会被销毁。
   // reset(p) 	    其中p表示一个普通指针，如果p为nullptr，则当前unique_ptr也变成空指针；
   //                反之，则该函数会释放当前unique_ptr指针指向的堆内存（如果有），然后获取p所指堆内存的所有权（p为nullptr）。
-  // swap(x) 	    交换当前unique_ptr指针和同类型的x指针。
+  // swap(x) 	      交换当前unique_ptr指针和同类型的x指针。
   // 除此之外，C++11标准还支持同类型的unique_ptr指针之间，以及unique_ptr和nullptr之间，做==，!=，<，<=，>，>=运算。
 
   std::unique_ptr<int> pp(new int);

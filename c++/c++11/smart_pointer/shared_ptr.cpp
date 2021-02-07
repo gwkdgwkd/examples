@@ -66,14 +66,14 @@ int main() {
   std::shared_ptr<int> pq3(new int[10], [](int* p) { delete[] p; });
 
   // shared_ptr<T>模板类提供的成员方法:
-  // operator=() 	重载赋值号，使得同一类型 shared_ptr智能指针可以相互赋值。
-  // operator*() 	重载*号，获取当前shared_ptr智能指针对象指向的数据。
-  // operator->() 	重载->号，当智能指针指向的数据类型为自定义的结构体时，通过->运算符可以获取其内部的指定成员。
-  // swap() 	    交2个相同类型shared_pt智能指针的内容。
-  // reset() 	    当函数没有实参时，该函数会使当前shared_ptr所指堆内存的引用计数减1，同时将当前对象重置为一个空指针；
+  // operator=() 	  重载赋值号，使得同一类型 shared_ptr智能指针可以相互赋值。
+  // operator*() 	  重载*号，获取当前shared_ptr智能指针对象指向的数据。
+  // operator->()   重载->号，当智能指针指向的数据类型为自定义的结构体时，通过->运算符可以获取其内部的指定成员。
+  // swap() 	      交2个相同类型shared_pt智能指针的内容。
+  // reset() 	      当函数没有实参时，该函数会使当前shared_ptr所指堆内存的引用计数减1，同时将当前对象重置为一个空指针；
   //                当为函数传递一个新申请的堆内存时，则调用该函数的shared_ptr对象会获得该存储空间的所有权，并且引用计数的初始值为1。
   // get() 	        获得shared_ptr对象内部包含的普通指针。
-  // use_count() 	返回同当前shared_ptr对象（包括它）指向相同的所有shared_ptr对象的数量。
+  // use_count() 	  返回同当前shared_ptr对象（包括它）指向相同的所有shared_ptr对象的数量。
   // unique() 	    判断当前shared_ptr对象指向的堆内存，是否不再有其它shared_ptr对象再指向它。
   // operator bool()判断当前shared_ptr对象是否为空智能指针，如果是空指针，返回false；反之，返回true。
   // 除此之外，C++11标准还支持同一类型的shared_ptr对象，或者shared_ptr和nullptr之间，进行==，!=，<，<=，>，>=运算。
