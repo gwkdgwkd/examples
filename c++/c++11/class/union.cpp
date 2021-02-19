@@ -17,17 +17,17 @@ union U {
 
 // C++11标准规定，任何非引用类型都可以成为联合体的数据成员，这种联合体也被称为非受限联合体。例如:
 class Student {
-public:
+ public:
   Student(bool g, int a) : gender(g), age(a) {}
 
-private:
+ private:
   bool gender;
   int age;
 };
 // 因为Student类带有自定义的构造函数，所以是一个非POD类型的，这导致编译器报错。这种规定只是C++为了兼容C语言而制定，然而在长期的编程实践中发现，这种规定是没有必要的。
 union T {
   // 含有非POD类型的成员，gcc-5.1.0版本报错
-  Student s; // member ‘Student T::s’ with constructor not allowed in union
+  Student s;  // member ‘Student T::s’ with constructor not allowed in union
   char name[10];
 };
 
@@ -71,10 +71,10 @@ union U2 {
   string s;
   int n;
 
-public:
+ public:
   // 构造时，采用placement_new将s构造在其地址&s上，唯一作用只是调用了一下string类的构造函数。
   U2() { new (&s) string; }
-  ~U2() { s.~string(); } // 在析构时还需要调用string类的析构函数。
+  ~U2() { s.~string(); }  // 在析构时还需要调用string类的析构函数。
 };
 
 // 非受限联合体的匿名声明和“枚举式类”:
@@ -83,17 +83,17 @@ union U3 {
   // 联合体U内定义了一个不具名的联合体，该联合体包含一个int类型的成员变量，我们称这个联合体为匿名联合体。
   union {
     int x;
-  }; // 此联合体为匿名联合体
+  };  // 此联合体为匿名联合体
 };
 // 同样的，非受限联合体也可以匿名，而当非受限的匿名联合体运用于类的声明时，这样的类被称为“枚举式类”。示例如下:
 class Student1 {
-public:
+ public:
   Student1(bool g, int a) : gender(g), age(a) {}
   bool gender;
   int age;
 };
 class Singer {
-public:
+ public:
   enum Type { STUDENT, NATIVE, FOREIGENR };
   Singer(bool g, int a) : s(g, a) { t = STUDENT; }
   Singer(int i) : id(i) { t = NATIVE; }
@@ -105,11 +105,11 @@ public:
   }
   ~Singer() {}
 
-private:
+ private:
   Type t;
   // 使用了一个匿名非受限联合体，它作为类Singer的“变长成员”来使用，这样的变长成员给类的编写带来了更大的灵活性，这是C++98标准中无法达到的。
   union {
-    Student1 s; // member ‘Student T::s’ with constructor not allowed in union
+    Student1 s;  // member ‘Student T::s’ with constructor not allowed in union
     int id;
     char name[10];
   };
