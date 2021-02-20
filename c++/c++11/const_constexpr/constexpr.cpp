@@ -36,10 +36,10 @@ constexpr int display(int x) {
 // 3)函数在使用之前，必须有对应的定义语句。函数的使用分为“声明”和“定义”两部分，普通的函数调用只需要提前写好该函数的声明部分即可（函数的定义
 // 部分可以放在调用位置之后甚至其它文件中），但常量表达式函数在使用前，必须要有该函数的定义。
 // 普通函数在调用时，只需要保证调用位置之前有相应的声明即可；而常量表达式函数则不同，调用位置之前必须要有该函数的定义，否则会导致程序编译失败。
-int noconst_dis(int x);        // 普通函数的声明
-constexpr int display3(int x); // 常量表达式函数的声明
+int noconst_dis(int x);         // 普通函数的声明
+constexpr int display3(int x);  // 常量表达式函数的声明
 // 放在main后面也可以编译通过，和描述的不太一样 ???
-constexpr int display3(int x) { return 1 + 2 + x; } // 常量表达式函数的定义
+constexpr int display3(int x) { return 1 + 2 + x; }  // 常量表达式函数的定义
 
 // 4)return返回的表达式必须是常量表达式，举个例子：
 int num = 3;
@@ -64,21 +64,24 @@ struct myType {
   int age;
 };
 // 注意，constexpr修饰类的构造函数时，要求该构造函数的函数体必须为空，且采用初始化列表的方式为各个成员赋值时，必须使用常量表达式。
-// 注意，C++11标准中，不支持用 constexpr修饰带有virtual的成员方法。
+// 注意，C++11标准中，不支持用constexpr修饰带有virtual的成员方法。
 
 // constexpr修饰模板函数:
 struct myType1 {
   const char *name;
   int age;
 };
-template <typename T> constexpr T dispaly5(T t) { return t; }
+template <typename T>
+constexpr T dispaly5(T t) {
+  return t;
+}
 
 int main() {
   // 数组的长度就必须是一个常量表达式：
-  int url1[10];    //正确
-  int url2[6 + 4]; //正确
+  int url1[10];     //正确
+  int url2[6 + 4];  //正确
   int length = 6;
-  int url3[length]; //错误，length是变量(现在也不会报错了)
+  int url3[length];  //错误，length是变量(现在也不会报错了)
 
   // constexpr修饰普通变量:
   // C++11标准中，定义变量时可以用constexpr修饰。使用constexpr修改普通变量时，变量必须经过初始化且初始值必须是一个常量表达式。
@@ -87,9 +90,9 @@ int main() {
   cout << url4[1] << endl;
   // constexpr用const关键字替换也可以正常执行，这是因为num的定义同时满足“num是const常量且使用常量表达式为其初始化”这2个条件，由此编译器会认定num是一个常量表达式。
 
-  int a[display3(3)] = {1, 2, 3, 4}; // 调用常量表达式函数
+  int a[display3(3)] = {1, 2, 3, 4};  // 调用常量表达式函数
   cout << a[2] << endl;
-  cout << noconst_dis(3) << endl; // 调用普通函数
+  cout << noconst_dis(3) << endl;  // 调用普通函数
 
   // the value of ‘num’ is not usable in a constant expression
   // int a[display4(3)] = {1, 2, 3, 4};
@@ -114,4 +117,4 @@ int main() {
   return 0;
 }
 
-int noconst_dis(int x) { return 1 + 2 + x; } // 普通函数的定义
+int noconst_dis(int x) { return 1 + 2 + x; }  // 普通函数的定义
