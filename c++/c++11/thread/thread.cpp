@@ -484,3 +484,5 @@ int main() {
 
 // GCC默认没有加载pthread库，据说在后续的版本中可以不用在编译时添加-pthread选项。
 // g++ -std=c++11 thread.cpp -lpthread
+
+// https://www.bookstack.cn/books/CPP-Concurrency-In-Action-2ed-2019
