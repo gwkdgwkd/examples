@@ -60,6 +60,41 @@ using namespace std;
 //   p1-=i、p1+=i、p1+i 、p1-i：双向迭代器p1不支持使用 -=、+=、+、- 运算符。
 //   p1<p2、p1>p2、p1<=p2、p1>=p2：双向迭代器p1、p2不支持使用<、>、<=、>=比较运算符。
 
+// list模板类中，与“添加或插入新元素”相关的成员方法有如下几个：
+//  push_front()：向list容器首个元素前添加新元素；
+//  push_back()：向list容器最后一个元素后添加新元素；
+//  emplace_front()：在容器首个元素前直接生成新的元素；
+//  emplace_back()：在容器最后一个元素后直接生成新的元素；
+//  emplace()：在容器的指定位置直接生成新的元素；
+//  insert()：在指定位置插入新元素；
+//  splice()：将其他list容器存储的多个元素添加到当前list容器的指定位置处。
+// 除了insert()和splice()方法有多种语法格式外，其它成员方法都仅有1种语法格式
+// 同样是实现插入元素的功能，无论是push_front()、push_back()还是insert()，都有以emplace为名且功能和前者相同的成员函数。后者是C++11标准新添加的，在大多数场景中，
+// 都可以完全替代前者实现同样的功能。更重要的是，实现同样的功能，emplace系列方法的执行效率更高。
+
+// list insert()成员方法
+// iterator insert(pos,elem) 在迭代器pos指定的位置之前插入一个新元素elem，并返回表示新插入元素位置的迭代器。
+// iterator insert(pos,n,elem) 在迭代器pos指定的位置之前插入n个元素 elem，并返回表示第一个新插入元素位置的迭代器。
+// iterator insert(pos,first,last) 在pos位置之前，插入（array、vector、deque等）中位于[first,last)区域的所有元素，并返回表示第一个新插入元素位置的迭代器。
+// iterator insert(pos,initlist) 在迭代器pos指定的位置之前，插入初始化列表（ { }括起来的多个元素）中所有的元素，并返回表示第一个新插入元素位置的迭代器。
+
+// list splice()成员方法
+// void splice(iterator position, list& x); position为迭代器，用于指明插入位置；x为另一个list容器。
+//  此格式的splice()方法的功能是，将x容器中存储的所有元素全部移动当前list容器中position指明的位置处。
+// void splice (iterator position, list& x, iterator i); position为迭代器，用于指明插入位置；x为另一个list容器；i也是一个迭代器，用于指向x容器中某个元素。
+//  此格式的splice()方法的功能是将x容器中i指向的元素移动到当前容器中position指明的位置处。
+// void splice (iterator position, list& x, iterator first, iterator last); position为迭代器，用于指明插入位置；x为另一个list容器；first和last都是迭代器，
+//  [fist,last)用于指定x容器中的某个区域。此格式的splice()方法的功能是将x容器[first, last)范围内所有的元素移动到当前容器position指明的位置处。
+
+// 对list容器存储的元素执行删除操作，需要借助该容器模板类提供的成员函数。幸运的是，相比其它STL容器模板类，list模板类提供了更多用来实现此操作的成员函数
+// pop_front() 	删除位于list容器头部的一个元素。
+// pop_back() 	删除位于list容器尾部的一个元素。
+// erase() 	    该成员函数既可以删除list容器中指定位置处的元素，也可以删除容器中某个区域内的多个元素。
+// clear() 	    删除list容器存储的所有元素。
+// remove(val) 	删除容器中所有等于val的元素。
+// unique() 	删除容器中相邻的重复元素，只保留一份。
+// remove_if() 	删除容器中满足条件的元素。
+
 // list容器底层存储结构:
 // list容器时提到，该容器的底层是用双向链表实现的，甚至一些STL版本中（比如SGI STL），list容器的底层实现使用的是双向循环链表。
 // 使用链表存储数据，并不会将它们存储到一整块连续的内存空间中。恰恰相反，各元素占用的存储空间（又称为节点）是独立的、分散的，它们之间的线性关系通过指针来维持。
@@ -140,6 +175,28 @@ using namespace std;
 // T& front() {return *begin();}
 // T& back() {return *(--end();)}
 
+// if(cont.size() == 0)
+// if(cont.empty())
+// 本质上上面两行代码是等价的,在实际场景中，到底应该使用哪一种呢？
+// 建议使用empty()成员方法。理由很简单，无论是哪种容器，只要其模板类中提供了empty()成员方法，使用此方法都可以保证在O(1) 时间复杂度内完成对“容器是否为空”的判断；
+// 但对于list容器来说，使用size()成员方法判断“容器是否为空”，可能要消耗O(n)的时间复杂度。这个结论适用于很多容器。
+// 为什么list容器这么特殊呢？这和list模板类提供了独有的splice()成员方法有关。
+// 在实现list容器的过程中我们发现，用户经常需要知道当前list容器中存有多少个元素，于是我们想让size()成员方法的执行效率达到O(1)。
+// 为了实现这个目的，我们必须重新设计list，使它总能以最快的效率知道自己含有多少个元素。
+// 要想令size()的执行效率达到O(1)，最直接的实现方式是：在list模板类中设置一个专门用于统计存储元素数量的size变量，其位于所有成员方法的外部。与此同时，在每一个可用来为容
+// 器添加或删除元素的成员方法中，添加对size变量值的更新操作。由此，size()成员方法只需返回size这个变量即可（时间复杂度为O(1)）。
+// 不仅如此，由于list容器底层采用的是链式存储结构（也就是链表），该结构最大的特点就是，某一链表中存有元素的节点，无需经过拷贝就可以直接链接到其它链表中，且整个过程只需要
+// 消耗O(1)的时间复杂度。考虑到之所以选用list容器，就是看中了其底层存储结构的这一特性。因此，作为list容器设计者的我们，自然也想将splice()方法的时间复杂度设计为O(1)。
+// 这里就产生了一个矛盾，即如果将size()设计为O(1)时间复杂度，则由于splice()成员方法会修改list容器存储元素的个数，因此该方法中就需要添加更新size变量的代码（无疑是通过
+// 遍历链表来实现），意味着splice()成员方法的执行效率将无法达到O(1)；反之，如果将splice()成员方法的执行效率提高到O(1)，则size()成员方法将无法实现O(1)的时间复杂度。
+// 也就是说，list容器中的size()和splice()总有一个要做出让步，即只能实现其中一个方法的执行效率达到O(1)。
+// 值得一提的是，不同版本的STL标准库，其底层解决此冲突的抉择是不同的。以本教程所用的C++ STL标准模板库为例，其选择将splice()成员方法的执行效率达到O(1)，而size()成员方
+// 法的执行效率为O(n)。当然，有些版本的STL标准库中，选择将size()方法的执行效率设计为O(1)。
+// 但不论怎样，选用empty()判断容器是否为空，效率总是最高的。所以，如果程序中需要判断当前容器是否为空，应优先考虑使用empty()。
+
+// 二元谓词函数
+bool demo(int first, int second) { return (first == 2 && second == 3); }
+
 int main() {
   // list容器的创建:
   // 1. 创建一个没有任何元素的空list容器
@@ -219,6 +276,106 @@ int main() {
   cout << endl;  // 10 - 2 3 20
   // 对于非const类型的list容器，迭代器不仅可以访问容器中的元素，也可以对指定元素的值进行修改。
   // 对于修改容器指定元素的值，list模板类提供有专门的成员函数assign()
+
+  std::list<int> values22{1, 2, 3};
+  values22.push_front(0);      // {0,1,2,3}
+  values22.push_back(4);       // {0,1,2,3,4}
+  values22.emplace_front(-1);  // {-1,0,1,2,3,4}
+  values22.emplace_back(5);    // {-1,0,1,2,3,4,5}
+  // emplace(pos,value),其中pos表示指明位置的迭代器，value为要插入的元素值
+  values22.emplace(values22.end(), 6);  //{-1,0,1,2,3,4,5,6}
+  for (auto p = values22.begin(); p != values22.end(); ++p) {
+    cout << *p << " ";
+  }
+  cout << endl;  // -1 0 1 2 3 4 5 6
+
+  std::list<int> values33{1, 2};
+  values33.insert(values33.begin(), 3);   // {3,1,2}
+  values33.insert(values33.end(), 2, 5);  // {3,1,2,5,5}
+  std::array<int, 3> tt{7, 8, 9};
+  values33.insert(values33.end(), tt.begin(), tt.end());  // {3,1,2,5,5,7,8,9}
+  values33.insert(values33.end(), {10, 11});  // {3,1,2,5,5,7,8,9,10,11}
+  for (auto p = values33.begin(); p != values33.end(); ++p) {
+    cout << *p << " ";
+  }
+  cout << endl;  // 3 1 2 5 5 7 8 9 10 11
+
+  auto print_list = [](list<int> &l) -> void {
+    for (auto iter = l.begin(); iter != l.end(); ++iter) {
+      cout << *iter << " ";
+    }
+    cout << endl;
+  };
+
+  list<int> mylist1{1, 2, 3, 4}, mylist2{10, 20, 30};
+  list<int>::iterator itt = ++mylist1.begin();  // 指向mylist1容器中的元素2
+  mylist1.splice(itt, mylist2);
+  cout << "mylist1: ";
+  print_list(mylist1);  // mylist1: 1 10 20 30 2 3 4
+  cout << "mylist2: ";
+  print_list(mylist2);  // mylist2:
+  mylist2.splice(mylist2.begin(), mylist1, itt);
+  cout << "mylist1: ";
+  print_list(mylist1);  // mylist1: 1 10 20 30 3 4
+  cout << "mylist2: ";
+  print_list(mylist2);  // mylist2: 2
+  mylist2.splice(mylist2.begin(), mylist1, mylist1.begin(), mylist1.end());
+  print_list(mylist1);  // mylist1:
+  cout << "mylist2: ";
+  print_list(mylist2);  // mylist2: 1 10 20 30 3 4 2
+
+  list<int> v11{1, 2, 3, 4};
+  v11.pop_front();
+  print_list(v11);  // {2,3,4}
+  v11.pop_back();
+  print_list(v11);  // {2,3}
+  v11.clear();
+  print_list(v11);  // {}
+
+  // erase()成员函数有以下2种语法格式：
+  // iterator erase (iterator position);
+  // iterator erase (iterator first, iterator last);
+  // 删除list容器中position迭代器所指位置处的元素
+  v11.insert(v11.end(), {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11});
+  print_list(v11);  // 1 2 3 4 5 6 7 8 9 10 11
+  auto del = v11.begin();
+  ++del;
+  v11.erase(del);
+  print_list(v11);  // 1 3 4 5 6 7 8 9 10 11
+  // 可实现删除list容器中first迭代器和last迭代器限定区域内的所有元素,包括first指向的元素，但不包括last指向的元素。
+  del = v11.begin();
+  del++;
+  del++;
+  auto del1 = v11.end();
+  --del1;
+  --del1;
+  --del1;
+  v11.erase(del, del1);
+  print_list(v11);  // 1 3 9 10 11
+
+  // erase()成员函数是按照被删除元素所在的位置来执行删除操作，如果想根据元素的值来执行删除操作，可以使用remove()成员函数
+  list<int> v22{1, 2, 3, 4, 3};
+  print_list(v22);  // 1 2 3 4 3
+  v22.remove(3);
+  print_list(v22);  // 1 2 4
+
+  // unique()函数也有以下2种语法格式：
+  // void unique()
+  // void unique（BinaryPredicate）  // 传入一个二元谓词函数
+  // 以上2种格式都能实现去除list容器中相邻重复的元素，仅保留一份。但第2种格式的优势在于，能自定义去重的规则
+  list<int> v33{1, 2, 2, 3, 4, 7, 5, 2, 6, 7, 7};
+  print_list(v33);  // 1 2 2 3 4 7 5 2 6 7 7
+  v33.unique();     // 删除相邻重复的元素，仅保留一份
+  print_list(v33);  // 1 2 3 4 7 5 2 6 7
+  v33.unique(demo);  // demo为二元谓词函数，是我们自定义的去重规则
+  print_list(v33);  // 1 2 4 7 5 2 6 7
+  // 除了以上一定谓词函数的方式，还可以使用lamba表达式以及函数对象的方式定义。
+  // 通过调用无参的unique()，仅能删除相邻重复（也就是相等）的元素，而通过我们自定义去重的规则，可以更好的满足在不同场景下去重的需求。
+
+  // 通过将自定义的谓词函数（不限定参数个数）传给remove_if()成员函数，list容器中能使谓词函数成立的元素都会被删除。
+  std::list<int> v44{15, 36, 7, 17, 20, 39, 4, 1};
+  v44.remove_if([](int value) { return (value < 10); });
+  print_list(v44);  // 15 36 17 20 39
 
   return 0;
 }
