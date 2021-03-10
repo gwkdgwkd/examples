@@ -41,6 +41,27 @@ using namespace std;
 //                                  及底层采用的基础容器类型，都必须相同。
 // 和queue一样，priority_queue也没有迭代器，因此访问元素的唯一方式是遍历容器，通过不断移除访问过的元素，去访问下一个元素。
 
+// priority_queue容器的底层实现:
+// priority_queue优先级队列之所以总能保证优先级最高的元素位于队头，最重要的原因是其底层采用堆数据结构存储结构。
+// priority_queue底层不是采用vector或deque容器存储数据吗，这里又说使用堆结构存储数据，它们之间不冲突吗？显然，它们之间是不冲突的。
+// 首先，vector和deque是用来存储元素的容器，而堆是一种数据结构，其本身无法存储数据，只能依附于某个存储介质，辅助其组织数据存储的先后次序。其次，priority_queue底层采用
+// vector或者deque作为基础容器，这毋庸置疑。但由于vector或deque容器并没有提供实现priority_queue容器适配器“First in,Largest out”特性的功能，因此STL选择使用堆来重
+// 新组织vector或deque容器中存储的数据，从而实现该特性。
+// 虽然不使用堆结构，通过编写算法调整vector或者deque容器中存储元素的次序，也能使其具备“First in,Largest out”的特性，但执行效率通常没有使用堆结构高。
+// 堆是完全二叉树的基础上，要求树中所有的父节点和子节点之间，都要满足既定的排序规则：
+//  如果排序规则为从大到小排序，则表示堆的完全二叉树中，每个父节点的值都要不小于子节点的值，这种堆通常称为大顶堆；
+//  如果排序规则为从小到大排序，则表示堆的完全二叉树中，每个父节点的值都要不大于子节点的值，这种堆通常称为小顶堆；
+// 无论是通过大顶堆或者小顶堆，总可以筛选出最大或最小的那个元素（优先级最大），并将其移至序列的开头，此功能也正是priority_queue容器适配器所需要的。
+// 为了验证priority_queue底层确实采用堆存储结构实现的，我们可以尝试用堆结合基础容器vector或deque实现priority_queue。
+// 值得庆幸的是，STL 已经为我们封装好了可以使用堆存储结构的方法，它们都位于<algorithm>头文件中。
+// 常用的几个和堆存储结构相关的方法:
+// make_heap(first,last,comp) 	选择位于[first,last)区域内的数据，并根据comp排序规则建立堆，其中fist和last可以是指针或者迭代器，默认是建立大顶堆。
+// push_heap(first,last,comp) 	当向数组或容器中添加数据之后，此数据可能会破坏堆结构，该函数的功能是重建堆。
+// pop_heap(first,last,comp) 	将位于序列头部的元素（优先级最高）移动序列尾部，并使[first,last-1]区域内的元素满足堆存储结构。
+// sort_heap(first,last,comp) 	对[first,last)区域内的元素进行堆排序，将其变成一个有序序列。
+// is_heap_until(first,last,comp) 	发现[first,last)区域内的最大堆。
+// is_heap(first,last,comp) 	检查[first,last)区域内的元素，是否为堆结构。
+
 int main() {
   // 创建priority_queue容器适配器的方法，大致有以下几种:
   // 1 创建一个空的priority_queue容器适配器，第底层采用默认的vector容器，排序方式也采用默认的std::less<T>方法
@@ -63,6 +84,41 @@ int main() {
   while (!values.empty()) {
     std::cout << values.top() << " ";
     values.pop();
+  }
+  cout << endl;  // 4 3 2 1
+
+  // 结合vector容器提供的成员函数，模拟了priority_queue容器适配器部分成员函数的底层实现：
+  auto display = [](vector<int>& val) -> void {
+    for (auto v : val) {
+      cout << v << " ";
+    }
+    cout << endl;
+  };
+  vector<int> values3{2, 1, 3, 4};
+  make_heap(values3.begin(), values3.end());
+  display(values3);  // 4 2 3 1
+  cout << "添加元素：\n";
+  values3.push_back(5);
+  display(values3);  // 4 2 3 1 5
+  push_heap(values3.begin(), values3.end());
+  display(values3);  // 5 4 3 1 2
+  cout << "移除元素：\n";
+  pop_heap(values3.begin(), values3.end());
+  display(values3);  // 4 2 3 1 5
+  values3.pop_back();
+  display(values3);  // 4 2 3 1
+
+  // 创建优先级队列
+  std::vector<int> values4{2, 1, 3, 4};
+  display(values4);  // 2 1 3 4
+  std::priority_queue<int> copy_values(values4.begin(), values4.end());
+  copy_values.push(5);
+  display(values4);  // 2 1 3 4
+  copy_values.pop();
+  display(values4);  // 2 1 3 4
+  while (!copy_values.empty()) {
+    std::cout << copy_values.top() << " ";
+    copy_values.pop();
   }
   cout << endl;  // 4 3 2 1
 
