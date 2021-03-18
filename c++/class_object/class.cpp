@@ -206,6 +206,150 @@ Demo1::~Demo1() { cout << m_s << endl; }
 void func() { Demo1 obj1("1"); }
 Demo1 obj2("2");
 
+// C++允许数组的每个元素都是对象，这样的数组称为对象数组。
+class CSample {
+ public:
+  CSample() {  // 构造函数1
+    cout << "Constructor 1 Called" << endl;
+  }
+  CSample(int n) {  // 构造函数2
+    cout << "Constructor 2 Called" << endl;
+  }
+};
+// 在构造函数有多个参数时，数组的初始化列表中要显式地包含对构造函数的调用。
+class CTest {
+ public:
+  CTest(int n) {}         // 构造函数(1)
+  CTest(int n, int m) {}  // 构造函数(2)
+  CTest() {}              // 构造函数(3)
+};
+
+// 一个类的成员变量如果是另一个类的对象，就称之为“成员对象”。包含成员对象的类叫封闭类（enclosed class）。
+// 创建封闭类的对象时，它包含的成员对象也需要被创建，这就会引发成员对象构造函数的调用。成员对象到底是用哪个构造函数初始化的呢？需要借助封闭类构造函数的初始化列表。
+//  对于基本类型的成员变量，“参数表”中只有一个值，就是初始值，在调用构造函数时，会把这个初始值直接赋给成员变量。
+//  但是对于成员对象，“参数表”中存放的是构造函数的参数，它可能是一个值，也可能是多个值，它指明了该成员对象如何被初始化。
+// 总之，生成封闭类对象的语句一定要让编译器能够弄明白其成员对象是如何初始化的，否则就会编译错误。
+class Tyre {
+ public:
+  Tyre(int radius, int width);
+  void show() const;
+
+ private:
+  int m_radius;
+  int m_width;
+};
+Tyre::Tyre(int radius, int width) : m_radius(radius), m_width(width) {}
+void Tyre::show() const {
+  cout << "轮毂半径：" << this->m_radius << "吋" << endl;
+  cout << "轮胎宽度：" << this->m_width << "mm" << endl;
+}
+class Engine {
+ public:
+  Engine(float displacement = 2.0);
+  void show() const;
+
+ private:
+  float m_displacement;
+};
+Engine::Engine(float displacement) : m_displacement(displacement) {}
+void Engine::show() const {
+  cout << "排量：" << this->m_displacement << "L" << endl;
+}
+class Car {
+ public:
+  Car(int price, int radius, int width);
+  void show() const;
+
+ private:
+  int m_price;
+  Tyre m_tyre;
+  Engine m_engine;
+};
+Car::Car(int price, int radius, int width)
+    : m_price(price), m_tyre(radius, width){};
+void Car::show() const {
+  cout << "价格：" << this->m_price << "￥" << endl;
+  this->m_tyre.show();
+  this->m_engine.show();
+}
+// 封闭类对象生成时，先执行所有成员对象的构造函数，然后才执行封闭类自己的构造函数。成员对象构造函数的执行次序和成员对象在类定义中的次序一致，与它们在构造函数初始化
+// 列表中出现的次序无关。当封闭类对象消亡时，先执行封闭类的析构函数，然后再执行成员对象的析构函数，成员对象析构函数的执行次序和构造函数的执行次序相反，即先构造的后
+// 析构，这是C++处理此类次序问题的一般规律。
+class Tyre1 {
+ public:
+  Tyre1() { cout << "Tyre constructor" << endl; }
+  ~Tyre1() { cout << "Tyre destructor" << endl; }
+};
+class Engine1 {
+ public:
+  Engine1() { cout << "Engine constructor" << endl; }
+  ~Engine1() { cout << "Engine destructor" << endl; }
+};
+class Car1 {
+ private:
+  Engine1 engine;
+  Tyre1 tyre;
+
+ public:
+  Car1() { cout << "Car constructor" << endl; }
+  ~Car1() { cout << "Car destructor" << endl; }
+};
+
+// this是C++中的一个关键字，也是一个const指针，它指向当前对象，通过它可以访问当前对象的所有成员。所谓当前对象，是指正在使用的对象。
+// this只能用在类的内部，通过this可以访问类的所有成员，包括private、protected、public属性的。this是一个指针，要用->来访问成员变量或成员函数。
+// this虽然用在类的内部，但是只有在对象被创建以后才会给this赋值，并且这个赋值的过程是编译器自动完成的，不需要用户干预，用户也不能显式地给this赋值。
+// 注意：
+//  this是const指针，它的值是不能被修改的，一切企图修改该指针的操作，如赋值、递增、递减等都是不允许的。
+//  this只能在成员函数内部使用，用在其他地方没有意义，也是非法的。
+//  只有当对象被创建后this才有意义，因此不能在static成员函数中使用
+// this实际上是成员函数的一个形参，在调用成员函数时将对象的地址作为实参传递给this。
+// 不过this这个形参是隐式的，它并不出现在代码中，而是在编译阶段由编译器默默地将它添加到参数列表中。
+// this作为隐式形参，本质上是成员函数的局部变量，所以只能用在成员函数的内部，并且只有在通过对象调用成员函数时才给this赋值。
+// 成员函数最终被编译成与对象无关的普通函数，除了成员变量，会丢失所有信息，所以编译时要在成员函数中添加一个额外的参数，把当前对象的首地址传入，以此来关联成员函数和成员变量。
+// 这个额外的参数，实际上就是this，它是成员函数和成员变量关联的桥梁。
+class S {
+ public:
+  void setname(char *name);
+  void show();
+  void printThis();
+
+ private:
+  char *name;
+};
+void S::setname(char *name) { this->name = name; }
+void S::show() { cout << this->name << endl; }
+void S::printThis() { cout << this << endl; }
+
+// 类其实也是一种作用域，每个类都会定义它自己的作用域。在类的作用域之外，普通的成员只能通过对象（可以是对象本身，也可以是对象指针或对象引用）来访问，静态成员既可以通过对象访问，
+// 又可以通过类访问，而typedef定义的类型只能通过类来访问。
+// 一个类就是一个作用域的事实能够很好的解释为什么我们在类的外部定义成员函数时必须同时提供类名和函数名。在类的外部，类内部成员的名字是不可见的。
+class A {
+ public:
+  typedef int INT;
+  static void show();
+  INT work();
+
+ private:
+  int n;
+};
+void A::show() { cout << "show()" << endl; }
+// 函数的返回值类型出现在函数名之前，当成员函数定义在类的外部时，返回值类型中使用的名字都位于类的作用域之外，此时必须指明该名字是哪个类的成员。
+A::INT A::work() {
+  cout << "work()" << endl;
+  // 一旦遇到类名，定义的剩余部分就在类的作用域之内了，这里的剩余部分包括参数列表和函数体。结果就是，可以直接使用类的其他成员而无需再次授权了。
+  n = 10;
+  return n;
+}
+
+// C++中保留了C语言的struct关键字，并且加以扩充。在C语言中，struct只能包含成员变量，不能包含成员函数。
+// 而在C++中，struct类似于class，既可以包含成员变量，又可以包含成员函数。
+// C++中的struct和class基本是通用的，唯有几个细节不同：
+//  使用class时，类中的成员默认都是private属性的；而使用struct时，结构体中的成员默认都是public属性的。
+//  class继承默认是private继承，而struct继承默认是public继承。
+//  class可以使用模板，而struct不能。
+// C++没有抛弃C语言中的struct关键字，其意义就在于给C语言程序开发人员有一个归属感，并且能让C++编译器兼容以前用C语言开发出来的项目。
+// 在编写C++代码时，我强烈建议使用class来定义类，而使用struct来定义结构体，这样做语义更加明确。
+
 int main() {
   // 在创建对象时，class关键字可要可不要，但是出于习惯我们通常会省略掉class关键字
   class Student LiLei1;
@@ -253,5 +397,85 @@ int main() {
   // 3
   // 2
 
+  // 对象数组中的每个元素都需要用构造函数初始化。具体哪些元素用哪些构造函数初始化，取决于定义数组时的写法
+  cout << "step1" << endl;
+  CSample array1[2];
+  cout << "step2" << endl;
+  CSample array2[2] = {4, 5};
+  cout << "step3" << endl;
+  CSample array3[2] = {3};
+  cout << "step4" << endl;
+  CSample *array4 = new CSample[2];
+  delete[] array4;
+  // step1
+  // Constructor 1 Called
+  // Constructor 1 Called
+  // step2
+  // Constructor 2 Called
+  // Constructor 2 Called
+  // step3
+  // Constructor 2 Called
+  // Constructor 1 Called
+  // step4
+  // Constructor 1 Called
+  // Constructor 1 Called
+
+  CTest array5[3] = {1, CTest(1, 2)};
+  CTest array6[3] = {CTest(2, 3), CTest(1, 2), 1};
+  CTest *pArray[3] = {new CTest(4), new CTest(1, 2)};
+
+  Car car(200000, 19, 245);
+  car.show();
+  // 价格：200000￥
+  // 轮毂半径：19吋
+  // 轮胎宽度：245mm
+  // 排量：2L
+
+  Car1 car1;
+  // Engine constructor
+  // Tyre constructor
+  // Car constructor
+  // Car destructor
+  // Tyre destructor
+  // Engine destructor
+
+  S *ps = new S;
+  ps->setname((char *)"李华");
+  ps->show();
+
+  ps->printThis();     // 0x8ad160
+  cout << ps << endl;  // 0x8ad160
+  S *ps2 = new S;
+  ps2->printThis();     // 0x8ad180
+  cout << ps2 << endl;  // 0x8ad180
+
+  A a;
+  a.work();       // 通过对象访问普通成员
+  a.show();       // 通过对象访问静态成员
+  A::show();      // 通过类访问静态成员
+  A::INT n = 10;  // 通过类访问typedef定义的类型
+
   return 0;
 }
+
+// 总结：
+// 类的成员有成员变量和成员函数两种。
+// 成员函数之间可以互相调用，成员函数内部可以访问成员变量。
+// 私有成员只能在类的成员函数内部访问。默认情况下，class类的成员是私有的，struct类的成员是公有的。
+// 可以用“对象名.成员名”、“引用名.成员名”、“对象指针->成员名”的方法访问对象的成员变量或调用成员函数。成员函数被调用时，可以用上述三种方法指定函数是作用在哪个对象上的。
+// 对象所占用的存储空间的大小等于各成员变量所占用的存储空间的大小之和（如果不考虑成员变量对齐问题的话）。
+// 定义类时，如果一个构造函数都不写，则编译器自动生成默认（无参）构造函数和复制构造函数。如果编写了构造函数，则编译器不自动生成默认构造函数。
+// 一个类不一定会有默认构造函数，但一定会有复制构造函数。
+// 任何生成对象的语句都要说明对象是用哪个构造函数初始化的。即便定义对象数组，也要对数组中的每个元素如何初始化进行说明。如果不说明，则编译器认为对象是用默认构造函数或参数
+// 全部可以省略的构造函数初始化。在这种情况下，如果类没有默认构造函数或参数全部可以省略的构造函数，则编译出错。
+// 对象在消亡时会调用析构函数。
+// 每个对象有各自的一份普通成员变量，但是静态成员变量只有一份，被所有对象所共享。静态成员函数不具体作用于某个对象。即便对象不存在，也可以访问类的静态成员。静态成员函数内
+// 部不能访问非静态成员变量，也不能调用非静态成员函数。
+// 常量对象上面不能执行非常量成员函数，只能执行常量成员函数。
+// 包含成员对象的类叫封闭类。任何能够生成封闭类对象的语句，都要说明对象中包含的成员对象是如何初始化的。如果不说明，则编译器认为成员对象是用默认构造函数或参数全部可以省略
+// 的构造函数初始化。
+// 在封闭类的构造函数的初始化列表中可以说明成员对象如何初始化。封闭类对象生成时，先执行成员对象的构造函数，再执行自身的构造函数；封闭类对象消亡时，先执行自身的析构函数，
+// 再执行成员对象的析构函数。
+// const 成员和引用成员必须在构造函数的初始化列表中初始化，此后值不可修改。
+// 友元分为友元函数和友元类。友元关系不能传递。
+// 成员函数中出现的this指针，就是指向成员函数所作用的对象的指针。因此，静态成员函数内部不能出现this指针。成员函数实际上的参数个数比表面上看到的多一个this指针。
