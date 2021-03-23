@@ -103,6 +103,61 @@ void Senior::partying() {
 // eating()函数，它在vtable中的索引为1，通过p调用时会把p->eating();转换为(*(*(p+0)+1))(p);对于不同的虚函数，仅仅改变索引（下标）即可。
 // 以上是针对单继承进行的讲解。当存在多继承时，虚函数表的结构就会变得复杂，尤其是有虚继承时，还会增加虚基类表，更加让人抓狂。
 
+typedef void (*Fun)(void);
+class Base {
+ public:
+  virtual void f() { cout << "Base::f" << endl; }
+  virtual void g() { cout << "Base::g" << endl; }
+  virtual void h() { cout << "Base::h" << endl; }
+};
+class Derive : public Base {
+ public:
+  virtual void g() { cout << "Derive::g" << endl; }
+  virtual void i() { cout << "Derive::i" << endl; }
+};
+
+// 多继承的虚函数表：
+//  在多继承情况下，有多少个有虚函数的基类就有多少个虚函数表指针。
+//  当子类有多出来的虚函数时，添加在第一个虚函数表中，父类指针不能调用
+//  当有多个虚函数表时，虚函数表的结果是0代表没有下一个虚函数表。不同操作系统中代表有下一个虚函数表的标识不同。
+class BaseA {
+  // int i;
+
+ public:
+  virtual void A() { cout << "BaseA::A" << endl; }
+  virtual void B() { cout << "BaseA::B" << endl; }
+  virtual void C() { cout << "BaseA::C" << endl; }
+};
+class BaseB {
+  // double d;
+
+ public:
+  virtual void D() { cout << "BaseB::D" << endl; }
+  virtual void E() { cout << "BaseB::E" << endl; }
+  virtual void F() { cout << "BaseB::F" << endl; }
+};
+class DeriveAB : public BaseA, BaseB {
+  // char a;
+
+ public:
+  virtual void B() { cout << "DeriveAB::B" << endl; }
+  virtual void F() { cout << "DeriveAB::F" << endl; }
+  virtual void G() { cout << "DeriveAB::G" << endl; }
+};
+
+typedef void (*VFPTR)();
+void PrintVTable(VFPTR vTable[]) {
+  cout << "虚表地址>" << vTable << endl;
+  // for (int i = 0; vTable[i] != nullptr; ++i) {
+  // 多个虚函数表时，判断第一个表结束的标识有问题，怎么判断？
+  for (int i = 0; vTable[i] != nullptr && i < 5; ++i) {
+    printf("第%d个虚函数地址 :0X%x,->", i, vTable[i]);
+    VFPTR f = vTable[i];
+    f();
+  }
+  cout << endl;
+}
+
 int main() {
   People *p = new People("赵红", 29);
   p->display();
@@ -113,6 +168,109 @@ int main() {
   // Class People：赵红今年29岁了。
   // Class Student：王刚今年16岁了，考了84.5分。
   // Class Senior：李智以92的成绩从大学毕业了，并且顺利找到了工作，Ta今年22岁。
+
+  Base b;  // ubuntu中，第二维步长为2，不然段错误。2要换成4，why？
+  cout << sizeof(b) << endl;  // 8
+  Fun fptr1 = (Fun) * ((int *)*(int *)((int *)&b + 0) + 0);
+  Fun fptr2 = (Fun) * ((int *)*(int *)((int *)&b + 0) + 2);
+  Fun fptr3 = (Fun) * ((int *)*(int *)((int *)&b + 0) + 4);
+  fptr1();  // Base::f
+  fptr2();  // Base::g
+  fptr3();  // Base::h
+  int **pVtab = (int **)&b;
+  Fun fptr4 = (Fun)pVtab[0][0];
+  Fun fptr5 = (Fun)pVtab[0][2];
+  Fun fptr6 = (Fun)pVtab[0][4];
+  fptr4();                      // Base::f
+  fptr5();                      // Base::g
+  fptr6();                      // Base::h
+  cout << pVtab[0][5] << endl;  // 0
+  VFPTR *vTableb = (VFPTR *)(*(int *)&b);
+  PrintVTable(vTableb);
+  // 虚表地址>0x402108
+  // 第0个虚函数地址 :0X401b66,->Base::f
+  // 第1个虚函数地址 :0X401b92,->Base::g
+  // 第2个虚函数地址 :0X401bbe,->Base::h
+
+  Derive d;
+  cout << sizeof(d) << endl;  // 8
+  Fun fptr11 = (Fun) * ((int *)*(int *)((int *)&d + 0) + 0);
+  Fun fptr12 = (Fun) * ((int *)*(int *)((int *)&d + 0) + 2);
+  Fun fptr13 = (Fun) * ((int *)*(int *)((int *)&d + 0) + 4);
+  Fun fptr14 = (Fun) * ((int *)*(int *)((int *)&d + 0) + 6);
+  fptr11();  // Base::f
+  fptr12();  // Derive::g
+  fptr13();  // Base::h
+  fptr14();  // Derive::i
+  int **pVtab1 = (int **)&d;
+  Fun fptr15 = (Fun)pVtab1[0][0];
+  Fun fptr16 = (Fun)pVtab1[0][2];
+  Fun fptr17 = (Fun)pVtab1[0][4];
+  Fun fptr18 = (Fun)pVtab1[0][6];
+  fptr15();                      // Base::f
+  fptr16();                      // Derive::g
+  fptr17();                      // Base::h
+  fptr18();                      // Derive::i
+  cout << pVtab1[0][8] << endl;  // 0
+  VFPTR *vTableb1 = (VFPTR *)(*(int *)&d);
+  PrintVTable(vTableb1);
+  // 虚表地址>0x4020f8
+  // 第0个虚函数地址 :0X401b88,->Base::f
+  // 第1个虚函数地址 :0X401c0c,->Derive::g
+  // 第2个虚函数地址 :0X401be0,->Base::h
+  // 第3个虚函数地址 :0X401c38,->Derive::i
+
+  DeriveAB d1;
+  cout << sizeof(d1) << endl;  // 16　(两个指针么？)
+  // 第一维的偏移怎么算？类中有成员变量会段错误
+  Fun fptr21 = (Fun) * ((int *)*(int *)((int *)&d1 + 0) + 0);
+  Fun fptr22 = (Fun) * ((int *)*(int *)((int *)&d1 + 0) + 2);
+  Fun fptr23 = (Fun) * ((int *)*(int *)((int *)&d1 + 0) + 4);
+  Fun fptr24 = (Fun) * ((int *)*(int *)((int *)&d1 + 0) + 6);
+  Fun fptr25 = (Fun) * ((int *)*(int *)((int *)&d1 + 0) + 8);
+  Fun fptr26 = (Fun) * ((int *)*(int *)((int *)&d1 + 2) + 0);
+  Fun fptr27 = (Fun) * ((int *)*(int *)((int *)&d1 + 2) + 2);
+  Fun fptr28 = (Fun) * ((int *)*(int *)((int *)&d1 + 2) + 4);
+  fptr21();  // BaseA::A
+  fptr22();  // DeriveAB::B
+  fptr23();  // BaseA::C
+  fptr24();  // DeriveAB::F
+  fptr25();  // DeriveAB::G
+  fptr26();  // BaseB::D
+  fptr27();  // BaseB::E
+  fptr28();  // DeriveAB::F
+  int **pVtab2 = (int **)&d1;
+  Fun fptr31 = (Fun)pVtab2[0][0];
+  Fun fptr32 = (Fun)pVtab2[0][2];
+  Fun fptr33 = (Fun)pVtab2[0][4];
+  Fun fptr34 = (Fun)pVtab2[0][6];
+  Fun fptr35 = (Fun)pVtab2[0][8];
+  cout << pVtab2[0][10] << endl;  // -8
+  Fun fptr36 = (Fun)pVtab2[1][0];
+  Fun fptr37 = (Fun)pVtab2[1][2];
+  Fun fptr38 = (Fun)pVtab2[1][4];
+  fptr31();  // BaseA::A
+  fptr32();  // DeriveAB::B
+  fptr33();  // BaseA::C
+  fptr34();  // DeriveAB::F
+  fptr35();  // DeriveAB::G
+  fptr36();  // BaseB::D
+  fptr37();  // BaseB::E
+  fptr38();  // DeriveAB::F
+  VFPTR *vTableb21 = (VFPTR *)(*(int *)&d1);
+  PrintVTable(vTableb21);
+  // 虚表地址>0x402270
+  // 第0个虚函数地址 :0X401e32,->BaseA::A
+  // 第1个虚函数地址 :0X401ee2,->DeriveAB::B
+  // 第2个虚函数地址 :0X401e5e,->BaseA::C
+  // 第3个虚函数地址 :0X401f0e,->DeriveAB::F
+  // 第4个虚函数地址 :0X401f40,->DeriveAB::G
+  VFPTR *vTableb22 = (VFPTR *)(*(int *)((char *)&d1 + sizeof(BaseA)));
+  PrintVTable(vTableb22);
+  // 虚表地址>0x4022a8
+  // 第0个虚函数地址 :0X401e8a,->BaseB::D
+  // 第1个虚函数地址 :0X401eb6,->BaseB::E
+  // 第2个虚函数地址 :0X401f39,->DeriveAB::F
 
   return 0;
 }
