@@ -70,6 +70,63 @@ template <typename T>
 void Swap(T a[], T b[], int len);     // 模板②：交换两个数组
 void printArray(int arr[], int len);  // 打印数组元素
 
+// 在使用类模板创建对象时，程序员需要显式的指明实参（也就是具体的类型）:template<typename T1, typename T2> class Point;
+// 可以在栈上创建对象，也可以在堆上创建对象：
+//  Point<int, int> p1(10, 20);  // 在栈上创建对象
+//  Point<char*, char*> *p = new Point<char*, char*>("东京180度", "北纬210度");  // 在堆上创建对象
+// 因为已经显式地指明了T1、T2的具体类型，所以编译器就不用再自己推断了，直接拿来使用即可。
+// 而对于函数模板，调用函数时可以不显式地指明实参（也就是具体的类型）。这种通过函数实参来确定模板实参（也就是类型参数的具体类型）的过程称为模板实参推断。
+// 在模板实参推断过程中，编译器使用函数调用中的实参类型来寻找类型参数的具体类型。
+// 对于普通函数（非模板函数），发生函数调用时会对实参的类型进行适当的转换，以适应形参的类型。这些转换包括：
+//  算数转换：例如int转换为float，char转换为int，double转换为 int等。
+//  派生类向基类的转换：也就是向上转型
+//  const转换：也即将非const类型转换为const类型，例如将char *转换为const char *。
+//  数组或函数指针转换：如果函数形参不是引用类型，那么数组名会转换为数组指针，函数名也会转换为函数指针。
+//  用户自定的类型转换。
+// void func1(int n, float f);
+// void func2(int *arr, const char *str);
+// int nums[5];
+// char *url = "http://c.biancheng.net";
+// func1(12.5, 45);  // 12.5会从double转换为int，45会从int转换为float
+// func2(nums, url);  // nums会从int [5]转换为int *，url会从char *转换为const char *
+// 而对于函数模板，类型转换则受到了更多的限制，仅能进行「const 转换」和「数组或函数指针转换」，其他的都不能应用于函数模板。
+template <typename T>
+void func1(T a, T b) {}
+template <typename T>
+void func2(T *buffer) {}
+template <typename T>
+void func3(const T &stu) {}
+template <typename T>
+void func4(T a) {}
+// 当函数形参是引用类型时，数组不会转换为指针。
+template <typename T>
+void func5(T &a) {}
+struct S {};
+template <typename T>
+void func6(T &a, T &b);
+
+// 函数模板的实参推断是指「在函数调用过程中根据实参的类型来寻找类型参数的具体类型」的过程，这在大部分情况下是奏效的，但是当类型参数的个数较多时，
+// 就会有个别的类型无法推断出来，这个时候就必须显式地指明实参。
+// 「为函数模板显式地指明实参」和「为类模板显式地指明实参」的形式是类似的，就是在函数名后面添加尖括号<>，里面包含具体的类型。
+// 显式指明的模板实参会按照从左到右的顺序与对应的模板参数匹配：第一个实参与第一个模板参数匹配，第二个实参与第二个模板参数匹配，以此类推。
+// 只有尾部（最右）的类型参数的实参可以省略，而且前提是它们可以从传递给函数的实参中推断出来。
+template <typename T1, typename T2>
+void func7(T1 a) {
+  T2 b;
+}
+// 对于上面的func7()，虽然只有T2的类型不能自动推断出来，但是由于它位于类型参数列表的尾部（最右），所以必须同时指明T1和T2的类型。
+template <typename T1, typename T2>
+void func8(T2 a) {
+  T1 b;
+}
+// 由于T2的类型能够自动推断出来，并且它位于参数列表的尾部（最右），所以可以省略。
+
+// 显式地指明实参时可以应用正常的类型转换
+// 函数模板仅能进行「const 转换」和「数组或函数指针转换」两种形式的类型转换，但是当我们显式地指明类型参数的实参（具体类型）时，就可以使用正常的类型转
+// 换（非模板函数可以使用的类型转换）了。
+template <typename T>
+void func9(T a, T b) {}
+
 int main() {
   int n1 = 100, n2 = 200;
   SwapT(&n1, &n2);
@@ -105,6 +162,34 @@ int main() {
   Swap(a, b, len);
   printArray(a, len);  // 10, 20, 30, 40, 50
   printArray(b, len);  // 1, 2, 3, 4, 5
+
+  int name[20];
+  S stu1;
+  // 12.5的类型为double，30的类型为int，编译器不知道该将T实例化为double还是int，也不会尝试将int转换为double，或者将double转换为int，所以调用失败。
+  // func1(12.5, 30);
+  func2(name);  // name的类型从int[20]换转换为int *，所以T的真实类型为int
+  func3(stu1);  // 非const转换为const，T的真实类型为S
+  func4(name);  // name的类型从int[20]换转换为int *，所以T的真实类型为int *
+  func5(name);  // name依然为int[20]，不会转换为int *，所以T的真实类型为int[20]
+  // name它本来的类型是int[20]：
+  // 对于func2(name)和func4(name)，name的类型会从int[20]转换为int *，也即将数组转换为指针，所以T的类型分别为int *和int。
+  // 对于func5(name)，name的类型依然为int[20]，不会转换为int *，所以T的类型为int[20]。
+
+  int str1[20];
+  int str2[10];
+  // 由于str1、str2的类型分别为int[20]和int[10]，在函数调用过程中又不会转换为指针，所以编译器不知道应该将T实例化为int[20]还是int[10]，导致调用失败。
+  // func6(str1, str2);
+
+  // func(10);
+  // func()有两个类型参数，分别是T1和T2，但是编译器只能从函数调用中推断出T1的类型来，不能推断出T2的类型来，所以这种调用是失败的，必须显式地指明T1、T2的具体类型。
+  func7<int, int>(10);
+
+  func8<int>(10);       // 省略T2的类型
+  func8<int, int>(20);  // 指明T1、T2的类型
+
+  // func9(10, 23.5);  // Error
+  // 已经显式地指明了T的类型为float，编译器不会再为「T 的类型到底是int还是double」而纠结了，所以可以从容地使用正常的类型转换了。
+  func9<float>(20, 93.7);  // Correct
 
   return 0;
 }
