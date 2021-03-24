@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iomanip>
 #include <iostream>
 
 using namespace std;
@@ -21,6 +22,8 @@ class Complex {
   Complex &operator-=(const Complex &c);
   Complex &operator*=(const Complex &c);
   Complex &operator/=(const Complex &c);
+  friend istream &operator>>(istream &in, Complex &A);
+  friend ostream &operator<<(ostream &out, Complex &A);
 
  public:  //成员函数
   double real() const { return m_real; }
@@ -96,6 +99,14 @@ Complex &Complex::operator/=(const Complex &c) {
                  (pow(c.m_real, 2) + pow(c.m_imag, 2));
   return *this;
 }
+istream &operator>>(istream &in, Complex &A) {
+  in >> A.m_real >> A.m_imag;
+  return in;
+}
+ostream &operator<<(ostream &out, Complex &A) {
+  out << A.m_real << " + " << A.m_imag << " i ";
+  return out;
+}
 
 // 以全局函数的形式重载了 +、-、*、/、==、!=，以成员函数的形式重载了 +=、-=、*=、/=，而且应该坚持这样做，不能一股脑都写作成员函数或者全局函数。
 // Complex(double real);在作为普通构造函数的同时，还能将double类型转换为Complex类型，集合了“构造函数”和“类型转换”的功能，所以被称为「转换构造函数」。
@@ -155,6 +166,122 @@ Complex1 operator+(const Complex1 &c1, const Complex1 &c2) {
 // 另外有一部分运算符重载必须是全局函数，这样能保证参数的对称性；除了 C++ 规定的几个特定的运算符外，暂时还没有发现必须以成员函数的形式重载的运算符。
 // C++规定，箭头运算符->、下标运算符[]、函数调用运算符()、赋值运算符=只能以成员函数的形式重载。
 
+// 在C++中，标准库本身已经对左移运算符<<和右移运算符>>分别进行了重载，使其能够用于不同数据的输入输出，但是输入输出的对象只能是C++内置的数据类型（例如bool、int、
+// double等）和标准库所包含的类类型（例如string、complex、ofstream、ifstream等）。
+// 如果我们自己定义了一种新的数据类型，需要用输入输出运算符去处理，那么就必须对它们进行重载。
+// cout是ostream类的对象，cin是istream类的对象，要想达到这个目标，就必须以全局函数（友元函数）的形式重载<<和>>，否则就要修改标准库中的类，这显然不是我们所期望的。
+// istream表示输入流，cin是istream类的对象，只不过这个对象是在标准库中定义的。之所以返回istream类对象的引用，是为了能够连续读取复数。
+// ostream表示输出流，cout是ostream类的对象。由于采用了引用的方式进行参数传递，并且也返回了对象的引用，所以重载后的运算符可以实现连续输出。
+
+// C++ 规定，下标运算符[]必须以成员函数的形式进行重载。该重载函数在类中的声明格式如下：
+// 返回值类型 & operator[] (参数);
+// const 返回值类型 & operator[] (参数) const;
+// 使用第一种声明方式，[]不仅可以访问元素，还可以修改元素。使用第二种声明方式，[]只能访问而不能修改元素。在实际开发中，应该同时提供以上两种形式，
+// 这样做是为了适应const对象，因为通过const对象只能调用const成员函数，如果不提供第二种形式，那么将无法访问const对象的任何元素。
+class Array {
+ public:
+  Array(int length = 0);
+  ~Array();
+
+ public:
+  int &operator[](int i);
+  const int &operator[](int i) const;
+
+ public:
+  int length() const { return m_length; }
+  void display() const;
+
+ private:
+  int m_length;
+  int *m_p;
+};
+Array::Array(int length) : m_length(length) {
+  if (length == 0) {
+    m_p = NULL;
+  } else {
+    m_p = new int[length];
+  }
+}
+Array::~Array() { delete[] m_p; }
+int &Array::operator[](int i) { return m_p[i]; }
+const int &Array::operator[](int i) const { return m_p[i]; }
+void Array::display() const {
+  for (int i = 0; i < m_length; i++) {
+    if (i == m_length - 1) {
+      cout << m_p[i] << endl;
+    } else {
+      cout << m_p[i] << ", ";
+    }
+  }
+}
+
+// 自增++和自减--都是一元运算符，它的前置形式和后置形式都可以被重载。
+class stopwatch {
+ public:
+  stopwatch() : m_min(0), m_sec(0) {}
+
+ public:
+  void setzero() {
+    m_min = 0;
+    m_sec = 0;
+  }
+  stopwatch run();
+  stopwatch operator++();     // ++i，前置形式
+  stopwatch operator++(int);  // i++，后置形式
+  friend ostream &operator<<(ostream &, const stopwatch &);
+
+ private:
+  int m_min;  //分钟
+  int m_sec;  //秒钟
+};
+stopwatch stopwatch::run() {
+  ++m_sec;
+  if (m_sec == 60) {
+    m_min++;
+    m_sec = 0;
+  }
+  return *this;
+}
+// operator++()函数实现自增的前置形式，直接返回run()函数运行结果即可。
+stopwatch stopwatch::operator++() { return run(); }
+// operator++ (int n)函数实现自增的后置形式，返回值是对象本身，但是之后再次使用该对象时，对象自增了，
+// 所以在该函数的函数体中，先将对象保存，然后调用一次run()函数，之后再将先前保存的对象返回。
+// 在这个函数中参数n是没有任何意义的，它的存在只是为了区分是前置形式还是后置形式。
+stopwatch stopwatch::operator++(int n) {
+  stopwatch s = *this;
+  run();
+  return s;
+}
+ostream &operator<<(ostream &out, const stopwatch &s) {
+  out << setfill('0') << setw(2) << s.m_min << ":" << setw(2) << s.m_sec;
+  return out;
+}
+
+// 内存管理运算符new、new[]、delete和delete[]也可以进行重载，其重载形式既可以是类的成员函数，也可以是全局函数。
+// 一般情况下，内建的内存管理运算符就够用了，只有在需要自己管理内存时才会重载。
+//  void *className::operator new(size_t size){}  // 以成员函数的形式重载new运算符
+//  void *operator new(size_t size){}  // 以全局函数的形式重载new运算符
+// 两种重载形式的返回值相同，都是void *类型，并且都有一个参数，为size_t类型。在重载new或new[]时，无论是作为成员函数还是作为全局函数，它的第一个参数必须是size_t类型。
+// size_t表示的是要分配空间的大小，对于new[]的重载函数而言，size_t则表示所需要分配的所有空间的总和。size_t在头文件<cstdio>中被定义为typedef unsigned int size_t;
+// 重载函数也可以有其他参数，但都必须有默认值，并且第一个参数的类型必须是size_t。
+// delete运算符也有两种重载形式:
+//  void className::operator delete( void *ptr){}  // 以类的成员函数的形式进行重载
+//  void operator delete( void *ptr){}  // 以全局函数的形式进行重载
+// 两种重载形式的返回值都是void类型，并且都必须有一个void类型的指针作为参数，该指针指向需要释放的内存空间。
+// 如果类中没有定义new和delete的重载函数，那么会自动调用内建的new和delete运算符。
+
+// 在C++中，类型的名字（包括类的名字）本身也是一种运算符，即类型强制转换运算符。
+// 类型强制转换运算符是单目运算符，也可以被重载，但只能重载为成员函数，不能重载为全局函数。
+// 经过适当重载后，(类型名)对象这个对对象进行强制类型转换的表达式就等价于对象.operator类型名()，即变成对运算符函数的调用。
+class Complex2 {
+  double real, imag;
+
+ public:
+  Complex2(double r = 0, double i = 0) : real(r), imag(i){};
+  // 对double运算符重载，在本该出现double类型的变量或常量的地方，如果出现了一个Complex类型的对象，那么该对象的operator double成员函数就会被调用，然后取其返回值使用。
+  operator double() { return real; }  // 重载强制类型转换运算符double
+};
+
 int main() {
   Complex c1(25, 35);
   Complex c2(10, 20);
@@ -207,6 +334,47 @@ int main() {
   // Complex1 c14 = 28.23 - c11;  // 成员函数，不对称的。
   Complex1 c15 = c11 - 28.23;
   cout << c15.real() << " + " << c15.imag() << "i" << endl;  // 53.23 + 35i
+
+  Complex c21, c22, c23;
+  cin >> c21 >> c22;
+  c23 = c21 + c22;
+  cout << "c1 + c2 = " << c23 << endl;
+  c23 = c21 - c22;
+  cout << "c1 - c2 = " << c23 << endl;
+  c23 = c1 * c22;
+  cout << "c1 * c2 = " << c23 << endl;
+  c23 = c21 / c22;
+  cout << "c1 / c2 = " << c23 << endl;
+  // c1 + c2 = 244 + 66i
+  // c1 - c2 = -222 + -22i
+  // c1 * c2 = 4285 + 9255i
+  // c1 / c2 = 0.0628012 + 0.0825611i
+
+  Array A(5);
+  for (int i = 0, len = A.length(); i < len; i++) {
+    A[i] = i * 5;
+  }
+  A.display();
+  const Array B(5);
+  // 需要说明的是，B是const对象，如果Array类没有提供const版本的operator[]，那么代码将报错。 虽然只是读取对象的数据，并没有试图修改对象，
+  // 但是它调用了非const版本的operator[]，编译器不管实际上有没有修改对象，只要是调用了非const的成员函数，编译器就认为会修改对象（至少有这种风险）。
+  cout << B[5 - 1] << endl;
+  // 重载[]运算符以后，表达式arr[i]会被转换为：arr.operator[](i);
+
+  stopwatch s1, s2;
+  s1 = s2++;
+  cout << "s1: " << s1 << endl;  // 00:00
+  cout << "s2: " << s2 << endl;  // 00:01
+  s1.setzero();
+  s2.setzero();
+  s1 = ++s2;
+  cout << "s1: " << s1 << endl;  // 00:01
+  cout << "s2: " << s2 << endl;  // 00:01
+
+  Complex2 cc(1.2, 3.4);
+  cout << (double)cc << endl;  // 1.2  (double)c等价于c.operator double()
+  double nn = 2 + cc;          // 等价于double n = 2 + c.operator double()
+  cout << nn << endl;          // 3.2
 
   return 0;
 }
