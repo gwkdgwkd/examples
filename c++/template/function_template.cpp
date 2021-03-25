@@ -188,7 +188,7 @@ int main() {
   func8<int, int>(20);  // 指明T1、T2的类型
 
   // func9(10, 23.5);  // Error
-  // 已经显式地指明了T的类型为float，编译器不会再为「T 的类型到底是int还是double」而纠结了，所以可以从容地使用正常的类型转换了。
+  // 已经显式地指明了T的类型为float，编译器不会再为「T的类型到底是int还是double」而纠结了，所以可以从容地使用正常的类型转换了。
   func9<float>(20, 93.7);  // Correct
 
   return 0;
