@@ -47,6 +47,43 @@ void func_outer() {
   cout << "[2]This statement will not be executed." << endl;
 }
 
+// C++语言本身或者标准库抛出的异常都是exception的子类，称为标准异常（Standard Exception）。
+// try{
+//   可能抛出异常的语句
+// }catch(exception &e){
+//   处理异常的语句
+// }
+// 之所以使用引用，是为了提高效率。如果不使用引用，就要经历一次对象拷贝（要调用拷贝构造函数）的过程。
+// exception类位于<exception>头文件中，它被声明为：
+// class exception {
+//  public:
+//   exception() throw();                              // 构造函数
+//   exception(const exception &) throw();             // 拷贝构造函数
+//   exception &operator=(const exception &) throw();  // 运算符重载
+//   virtual ~exception() throw();                     // 虚析构函数
+//   virtual const char *what() const throw();         // 虚函数
+// }
+// 这里需要说明的是what()函数。what()函数返回一个能识别异常的字符串，正如它的名字“what”一样，可以粗略地告诉你这是什么异常。
+// 不过C++标准并没有规定这个字符串的格式，各个编译器的实现也不同，所以what()的返回值仅供参考。
+
+// exception类的继承层次：
+// exception类的直接派生类：
+// logic_error 逻辑错误。
+//    length_error 试图生成一个超出该类型最大长度的对象时抛出该异常，例如vector的resize操作。
+//    domain_error 参数的值域错误，主要用在数学函数中，例如使用一个负值调用只能操作非负数的函数。
+//    out_of_range 超出有效范围。
+//    invalid_argument 参数不合适。在标准库中，当利用string对象构造bitset时，而string中的字符不是0或1的时候，抛出该异常。
+// runtime_error 运行时错误。
+//    range_error 计算结果超出了有意义的值域范围。
+//    overflow_error 算术计算上溢。
+//    underflow_error 算术计算下溢。
+// bad_alloc 使用new或new[]分配内存失败时抛出的异常。
+// bad_typeid 使用typeid操作一个NULL指针，而且该指针是带有虚函数的类，这时抛出bad_typeid异常。
+// bad_cast 使用dynamic_cast转换失败时抛出的异常。
+// ios_base::failure io过程中出现的异常。
+// bad_exception 这是个特殊的异常，如果函数的异常列表里声明了bad_exception异常，当函数内部抛出了异常列表中没有的异常时，
+//               如果调用的unexpected()函数中抛出了异常，不论什么类型，都会被替换为bad_exception类型。
+
 int main() {
   string str = "http://c.biancheng.net";
   char ch1 = str[100];  // 下标越界，ch1为垃圾值
