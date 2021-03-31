@@ -1,0 +1,1 @@
+extern const int num3 = 30;
