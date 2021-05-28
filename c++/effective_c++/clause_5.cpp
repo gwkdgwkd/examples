@@ -36,7 +36,7 @@ class NamedObject {
 //   毕竟编译器为derived class所生成订的copy assignment操作符想象中可以处理base class成分，但当无法调用时，就不生成，也就不允许赋值操作。
 class Base {
  private:
-  Empty& operator=(const Base& rhs) {}
+  Base& operator=(const Base& rhs) {}
 };
 class Derived : public Base {};
 
