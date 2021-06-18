@@ -15,7 +15,7 @@ using namespace std;
 
 // 你所能改变的是如何为对象分配内存。new操作符调用一个函数来完成必需的内存分配，你能够重写或重载这个函数来改变它的行为。
 // new操作符为分配内存所调用函数的名字是operator new。函数operator new 通常这样声明：
-void *operator new(size_t size);
+// void *operator new(size_t size);
 // 返回值类型是void*，因为这个函数返回一个未经处理（raw）的指针，未初始化的内存。
 // 参数size_t确定分配多少内存。你能增加额外的参数重载函数operator new，但是第一个参数类型必须是size_t。
 // 就象malloc一样，operator new的职责只是分配内存。它对构造函数一无所知。
@@ -33,10 +33,10 @@ Widget *constructWidgetInBuffer(void *buffer, int widgetSize) {
   // 被调用的operator new函数除了待有强制的参数size_t外，还必须接受void*指针参数，指向构造对象占用的内存空间。这个operator new就是placement new。
 }
 // placement new看上去象这样：
-void *operator new(size_t, void *location) {
-  // 没有用的（但是强制的）参数size_t没有名字，以防止编译器发出警告说它没有被使用
-  return location;
-}
+// void *operator new(size_t, void *location) {
+//   // 没有用的（但是强制的）参数size_t没有名字，以防止编译器发出警告说它没有被使用
+//   return location;
+// }
 
 // operator new的目的是为对象分配内存然后返回指向该内存的指针。
 // 在使用placement new的情况下，调用者已经获得了指向内存的指针，因为调用者知道对象应该放在哪里。placement new必须做的就是返回转递给它的指针。
@@ -54,8 +54,8 @@ void operator delete(void *memoryToBeDeallocated);
 
 // 如果你用placement new在内存中建立对象，你应该避免在该内存中用delete操作符。
 // 因为delete操作符调用operator delete来释放内存，但是包含对象的内存最初不是被operator new分配的，placement new只是返回转递给它的指针。
-void *mallocShared(size_t size);
-void freeShared(void *memory);
+void *mallocShared(size_t size) {}
+void freeShared(void *memory) {}
 
 // 数组分配函数，叫做operator new[]（经常被称为array new）。
 // 它与operator new一样能被重载。这就允许你控制数组的内存分配，就象你能控制单个对象内存分配一样。
