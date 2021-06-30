@@ -76,4 +76,6 @@ int main() {
   // 这样写：
   WidgetContainer cw;
   WCIterator i2 = find(cw.begin(), cw.end(), bestWidget);
+
+  return 0;
 }
