@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <iostream>
 
 using namespace std;
@@ -140,37 +141,83 @@ class Point3d : public Point2d {
 // 在多重继承中支持virtual functions，其复杂度围绕在第二个及后续的基类身上，以及“必须在执行期调整this指针”这一点。
 class Base1 {
  public:
-  Base1();
-  virtual ~Base1();
-  virtual void speakClearly();
-  virtual Base1 *clone() const;
+  Base1() {}
+  virtual ~Base1() {}
+  virtual void speakClearly() {}
+  virtual Base1 *clone() const {}
 
  protected:
   float data_Base1;
+
+  // 内存布局：
+  //  __vptr__Base1
+  //  data_Base1
+  // Virtual Table Base1
+  //  type_info for Base1
+  //  Base1::~Base1()
+  //  Base1::SpeakClearly()
+  //  Base1::clone()
 };
 class Base2 {
  public:
-  Base2();
-  virtual ~Base2();
-  virtual void mumble();
-  virtual Base2 *clone() const;
+  Base2() {}
+  virtual ~Base2() {}
+  virtual void mumble() {}
+  virtual Base2 *clone() const {}
 
  protected:
   float data_Base2;
+
+  // 内存布局：
+  //  __vptr__Base2
+  //  data_Base2
+  // Virtual Table Base2
+  //  type_info for Base2
+  //  Base2::~Base1()
+  //  Base2::mumble()
+  //  Base2::clone()
 };
 class Derived : public Base1, public Base2 {
  public:
-  Derived();
-  virtual ~Derived();
-  virtual Derived *clone() const;
+  Derived() {}
+  virtual ~Derived() {}
+  virtual Derived *clone() const {}
 
  protected:
   float data_Derived;
+
+  // 内存布局：
+  //  __vptr__Base1
+  //  data_Base1
+  //  __vptr__Base2
+  //  data_Base2
+  //  data_Derived
+  // Virtual Table Derived(shared with Base1)
+  //  type_info for Derived
+  //  Derived::~Derived()
+  //  Base1::SpeakClearly()
+  //  Derived::clone()
+  //  Base2::mumble() * // *表示需要调整this指针
+  // Virtual Table Derived/Base2
+  //  type_info for Derived
+  //  Derived::~Derived() *
+  //  Base2::mumble()
+  //  Derived::clone() *
 
   // Derived支持virtual functions的困难度，统统落在Base2 subobjcet身上。有三个问题需要解决：
   //  virtual destructor
   //  被继承下来的Base2::mumble
   //  一组clone函数实体
+
+  // 有两个virtual tables被编译器产生出来：
+  //  1. 主要实体，与Base1（最左端base class）共享。
+  //  2. 次要实体，与Base2（第二个base clase）有关。
+  // 针对每一个virtual tables，派生类对象中有对应的vptr。vptrs将在构造函数中被设定初值。
+  // 用以支持“一个类拥有多个virtual tables”的传统方法是，将每一个表格以外部对象的形式产生出来，并给予独一无二的名称，比如：
+  //  vtbl__Derived;  // 主要表格
+  //  vtbl__Base2__Derived;  // 次要表格
+  // 当将一个派生类对象地址指定给一个Base1指针或Derived指针时，被处理的virtual table是主要表格，
+  // 而当将一个派生类对象地址指定给一个Base2指针时，被处理的virtual table是次要表格。
 };
 // Base2 *pbase2 = new Derived;
 // 新的Derived对象的地址必须调整，以指向其Base2 subobject。编译期会产生以下代码：
@@ -200,5 +247,141 @@ class Derived : public Base1, public Base2 {
 //    虽然两个delete操作导致调用相同的派生类析构函数，但它们需要两个不同的vitrual table slots:
 //    pbase1不需要调整this指针，因为Base1是最左端的base class，已经指向了Derived对象的起始处。vitrual table slot放置的是真正的destructor地址。
 //    pbase2需要调整this指针。其vitrual table slot需要相关的thunk地址。
+// 在多重继承下，一个派生类内含n-1个额外的virtual tables，n表示上一层次基类的数目（单一继承不会有额外的virtual tables）。
 
-int main() { return 0; }
+// 虚拟继承下的virtual Function
+class P2d {
+ public:
+  P2d(float = 0.0, float = 0.0) {}
+  virtual ~P2d() {}
+  virtual void mumble() {}
+  virtual float z() {}
+
+ protected:
+  float _x, _y;
+
+  // 内存布局：
+  //  __vptr__P2d
+  //  _x
+  //  _y
+  // Virtual Table P2d
+  //  type_info for P2d
+  //  P2d::~P2d()
+  //  P2d::mumble()
+  //  P2d::z()
+};
+class P3d : public virtual P2d {
+ public:
+  P3d(float = 0.0, float = 0.0, float = 0.0) {}
+  virtual ~P3d() {}
+  float z() {}
+
+ protected:
+  float _z;
+
+  // 内存布局：
+  //  __vptr__P3d
+  //  _z
+  //  __vptr__P2d
+  //  _x
+  //  _y
+  // Virtual Table P2d subobject of P3d
+  //  type_info for P3d
+  //  P3d::~P3d()
+  //  P3d::mumble()  P2d？
+  //  P3d::z()
+  // Virtual Table P3d
+  //  offset to virtual base
+  //  type_info for P3d
+  //  P3d::~P3d()
+  //  P3d::mumble()  P2d？
+  //  P3d::z()
+};
+// 虽然P3d有唯一一个base class，但P3d和P2d的起始部分并不小“非虚拟的单一继承”情况那样一致。
+// 由于P2d和P3d的对象不再相符，两者之间的转换也就需要调整this指针。
+// 建议：不要在一个virtual base class总声明nostatic data members。否则，距离复杂的深渊越来越近，中不可被。
+
+// 4.3 函数的效能
+
+// 4.4 指向Member Functions的指针
+
+// 取一个非静态成员函数地址，如果该函数不是虚拟的，则得到的结果是它在内存中真正的地址。
+// 这个值也需要被绑定于某个对象的地址上，才能通过它调用该函数。所有的非静态成员函数都需要对象的地址（以参数this指出）。
+class P {
+ public:
+  virtual ~P() {}
+  double x() { cout << "P::x" << endl; }
+  double y() { cout << "P::y" << endl; }
+  virtual float z() { cout << "P::z" << endl; }
+};
+// 使用一个成员函数指针，如果不使用虚函数、多重继承、虚拟继承等（调用太过复杂），并不会比使用一个非成员函数指针的成本更高。
+
+// 支持”指向virtual member Functions”的指针
+// 虚函数地址在编译期是未知的，只知道虚函数在virtual table中的索引值。对虚函数取地址，能获得的只是一个索引值。
+// 对于一个“指向成员函数的指针”评估求值，会因为该值有两种意义而复杂化：
+// 能够寻址出nonvirtual x()代表的内存地址和virtual z()代表的virtual table中的索引值。
+// 编译器必须能够是指向成员函数的指针含有两种数值，更重要的是其数值可以被区别代表内存地址或是virtual table中的索引值。
+
+// 多重继承下，指向Member Function的指针
+// 为了支持多重继承和虚拟继承，Stroustrup设计了下面的结构体：
+// struct __mptr {
+//   int delta;  // this指针的offset值
+//   int index;
+//   union {
+//     ptrofunc faddr;
+//     int v_offset;  // 不指向virtual table时，会被设为-1
+//   };
+// };
+// (ptr->*pmf)(); 转换为：
+// (pmf.index < 0) ? (*pmf.faddr)(ptr) : (*ptr->vptr[pmf.index](ptr));
+// 这种方法收到的批评是，每一个调用操作都得付出上述成本，微软把这个检查拿掉，导入一个所谓的vcall thunk。
+// faddr要不就是成员函数地址，要不是就是vcall thunk的地址。
+// 上面的结构的另一个副作用是，当传递一个不变值的指针给memver function时，需要产生一个临时对象。
+// 许多编译器在自身内部根据不同的类特性提供多种指向member functions的指针形式。
+
+// 4.5 Inline Functions
+
+// 并不能够强迫任何函数变成inline。关键字inline只是一项请求。如果被编译器接受，就必须认为它可以用一个表达式合理地将这个函数扩展开来。
+// 一般而言，处理一个inline函数，有两个阶段：
+//  1 分析函数定义，以决定函数的“intrin
+
+int main() {
+  // 有三种情况，第二或后继的base class会影响对virtual functiron的支持：
+
+  // 1 通过一个“指向第二个基类”的指针，调用派生类虚函数
+  Base2 *ptr = new Derived;
+  // ptr指向Derived对象中的Base2 subobject，为了能够正确执行，ptr必须调整指向Derived对象的起始处。
+  delete ptr;  // 调用Derived::~Derived，ptr必须被向后调整sizeof(Base1)个btyes
+
+  // 2 通过一个“指向派生类”的指针，调用第二个基类中一个继承而来的虚函数。派生类指针必须再次调整，以指向第二个base subobject。
+  Derived *pder = new Derived;
+  pder->mumble();  // pder必须调整sizeof（Base1）个btyes
+
+  // 3 发生于一个语言扩充性质之下：允许一个虚函数返的返回值类型有所变化，可能是基类类型，也可能是publicly derived type。
+  // Derived::clone()函数返回一个Derived class指针，默默地改写了它的两个base class函数实体。
+  Base2 *pb1 = new Derived;
+  // 当通过 “指向第二个base class”的指针来调用clone()时，this指针的offset问题于是诞生：
+  Base2 *pb2 = pb1->clone();  // 调Derived::clone，调整返回值指向Base2 subobject
+  // 当调用clone时，pb1会被调整指向Derived对象的其实地址，于是clone的Derived版本会被调用；
+  // 会返回一个指针，指向一个新的Derived对象；该对象的地址在被指给pb2之前，必须先经过调整，以指向Base2 subobject。
+
+  P p;
+  double (P::*coord)() = &P::x;
+  (p.*coord)();  // P::x   (coord)(&p);
+  coord = &P::y;
+  P *pp = &p;
+  (pp->*coord)();  // P::y  (coord)(pp);
+
+  float (P::*pmf)() = &P::z;
+  P *pp1 = new P;
+  pp1->z();               // P::z
+  (pp->*pmf)();           // P::z  (*pp->vptr[(int)pmf])(ptr);
+  cout << &P::z << endl;  // 1
+  cout << &P::x << endl;  // 1
+  cout << &P::y << endl;  // 1
+  printf("%p\n", &P::z);  // 0x11
+  printf("%p\n", &P::x);  // 0x401266
+  printf("%p\n", &P::y);  // 0x401292
+
+  return 0;
+}
