@@ -290,6 +290,128 @@ class Derived : public Base {
 
 // 5.3 对象复制语意学
 
+// 当设计一个class，并赋值时，可以有三种选择：
+//  1 什么都不做，因此得以实施默认行为。
+//  2 提供一个explicit copy assignment operator。
+//  3 明确地拒绝一个对象指定个另一个对象。
+//    只要将赋值操作符声明为private，并且不提供定义即可。
+//    声明为private，就不再允许任何地点（除了成员函数以及类的友元中）进行赋值操作。
+//    不提供函数定义，是因为一旦某个成员函数或友元企图影响一份拷贝，程序在链接时就会失败。
+
+// 如果只要支持简单的拷贝操作，那么默认的行为不但足够而且有效率，没有理由再自己提供一个赋值操作符。
+// 只有在默认行为所导致的语意不安全或不正确时，才需要设计一个赋值操作符。
+
+class Point3 {
+ public:
+  Point3(float x = 0.0, float y = 0.0) {}
+
+ protected:
+  float _x, _y;
+  // 坐标内带数值，所以不会发生“别名化”或“内存泄露”。默认的赋值操作符是安全的。
+  // 依赖默认的memberwise copy，编译器会产生出一个实体吗？
+  // 与拷贝构造函数一样，不会。已经有了bitwise copy语意，所以implicit赋值操作符被视为毫无用处，也根本不会被合成出来。
+};
+
+// 一个类对于默认的赋值操作符，在以下情况不会表现出bitwise copy语意：
+//  1 当类内带一个成员对象，而且对象有一个赋值操作符时。
+//  2 当一个类的基类有一个赋值操作符时。
+//  3 当一个类声明了任何虚函数（不能直接拷贝vptr地址）时。
+//  4 当类继承自一个虚基类（不论此base class有没有赋值操作符）时。
+// C++标准上说，赋值操作符并不表示bitwise copy是有用的。实际上，只有有用的才会被合成出来。
+
+class Point4 {
+ public:
+  Point4(float x = 0.0, float y = 0.0) {}
+  Point4& operator=(const Point4& p) {
+    _x = p._x;
+    _y = p._y;
+    return *this;
+  }
+
+ protected:
+  float _x, _y;
+};
+class Point3d4 : virtual public Point4 {
+ public:
+  Point3d4(float x = 0.0, float y = 0.0, float z = 0.0) {}
+  // 如果没有定义赋值操作符，编译器就合成一个。类似：
+  // inline Point3d4& operator=(Point3d4* const this, const Point3d4& p) {
+  //   this->Point4::operator=(p);
+  //   _z = p._z;
+  //   return *this;
+  // }
+  // 赋值操作符缺乏member assignment list，不能这样写：
+  // inline Point3d4& operator=(const Point3d4& p) : Point4(p), z(p._z) {}
+  // 调用基类赋值操作符的两种方式：
+  // Point4::operator(p);
+  // (*(Point4*)this) = p;
+  // 缺少copy assignment list，看来或许只是一件小事，但如果没有它，编译器一般而言就没有办法压抑上一层基类的赋值操作符被调用。
+
+ protected:
+  float _z;
+};
+class Vertex4 : virtual public Point4 {
+ public:
+  Vertex4& operator=(const Vertex4& v) {
+    this->Point4::operator=(v);
+    _next = v._next;
+    return *this;
+  }
+
+ protected:
+  char* _next;
+};
+class Vertex3d4 : public Point3d4, public Vertex4 {
+ public:
+  Vertex3d4& operator=(const Vertex3d4& v) {
+    this->Point4::operator=(v);
+    this->Point3d4::operator=(v);
+    this->Vertex4::operator=(v);
+  }
+  // 如何能够在Point3d4和Vertex4的赋值操作符中压抑Point4的赋值操作符呢？
+  // 编译器不能够重复传统的构造函数解决方法：附加上额外的参数。
+  // 这是因为，和构造函数以及析构函数不同的是，“取赋值操作符地址”的操作是合法的。下面的代码是毫无瑕疵的合法程序代码：
+  // typedef Point3d4& (Point3d4::*pmfPoint3d4)(const Point3d4&);
+  // pmfPoint3d4 pmf = &Point3d4::operator=;
+  // (x.*pmf)(x);
+  // 然而我们无法支持它，仍然需要根据其独特的继承体系，安插任何可能数目的参数给赋值操作符。
+  // 另一个方法是，编译器可能为赋值操作符产生分化函数，以支持这个类成为most_derived class或成为中间的基类。
+  // 如果赋值操作符别编译器产生的话，那么“split function解决方案”可说是定义明确。但如果它是被类设计者完成的，那么就不算是定义明确。
+};
+
+// 事实上，赋值操作符在虚拟继承情况下行为不佳，需要小心的设计和说明。
+// 建议尽可能不要允许一个虚基类的拷贝操作。甚至不要在任何虚基类中声明数据。
+
+// 5.4 对象的功能
+
+// 5.5 析构语意学
+
+// 如果类没有定义析构函数，那么只有在类内带成员对象（或是类自己的基类）拥有析构函数的情况下，编译器才会自动合成出一个来。
+// 否则，析构函数会别视为不需要，也就不需要被合成（当然更不需要被调用）。
+// 应该因为“需要”而非“感觉”来提供析构函数，更不要因为你不确定是否需要一个析构函数，于是就提供它。
+
+// 一个自定义的析构函数被扩展的方式类似构造函数别扩展的方式，但顺序相反：
+//  1 如果对象内带一个vptr，那么首先重设相关的virtual table。
+//  2 析构函数本身现在被执行，也就是说vptr会在程序员的执行代码前被重设。
+//  3 如果类拥有成员对象，而后者拥有析构函数，那么它们会以其声明顺序的相反顺序被调用。
+//  4 如果有任何直接的（上一层）nonvirtual base class拥有析构函数，它们会以其声明顺序的相反顺序被调用。
+//  5 如果有任何虚基类拥有析构函数，而当前这个类是最尾端（most-derived)的类，那么它们会以其原来的构造顺序的相反顺序被调用。
+// 顺序有问题么？应该是2,3,1,4,5吧。
+//  1 析构函数的本身首先被执行。
+//  2 类拥有成员对象，而后者拥有析构函数，那么它们会以其声明顺序的相反顺序被调用。
+//  3 如果对象内带一个vptr，则现在被重新设定，指向适当的基类的virtual table。
+//  4 同上
+//  5 同上
+
+// 就像构造函数一样，目前对于析构函数的一种最佳实现策略就是维护两份析构函数实体：
+//  1 一个complete object实体，总是设定好vptrs，并调用virtual base class destructors。
+//  2 一个base class subobject实体；除非在析构函数中调用虚函数，否则它绝不会调用虚基类析构函数并设定vptr。
+
+// 一个对象的生命结束于其析构函数开始执行时。
+// 由于每一个base class析构函数都轮番被调用，所以派生类对象实际上变成了一个不完整的对象。
+// PVertex对象归还其内存空间之前，会依次变成一个vertex3d对象、一个Vertex对象、一个Point3d对象，
+// 对象的蜕变会因为vptr的重新设定（在每一个析构函数中，在程序员提供的代码执行之前）而收到影响。
+
 int main() {
   PVertex p;
   // Point2 C
@@ -312,6 +434,11 @@ int main() {
   // Derived::test
   // Base i
   // Derived i j
+
+  Point3 a3, b3;
+  a3 = b3;
+  // 并没有赋值操作符被调用。从语意或从效率上考虑，这都是我们所需要的。
+  // 可能还是会提拷贝构造函数，为的是把NRV优化打开。拷贝构造函数的出现不应该让我们认为一定要提供赋值操作符。
 
   return 0;
 }
