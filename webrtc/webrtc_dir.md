@@ -36,6 +36,8 @@
 ```
 gn gen out/Default --args='target_os="linux" target_cpu="x64"'
 ninja -C out/Default
+-C选项告诉ninja，进入out/Default目录来编译。所以，它等同于：
+cd out/Release;ninja
 ```
 
 # 使用历史版本
@@ -70,6 +72,19 @@ gclient sync
    }  
    ```
 
+# 遇到的问题
+## 两个peerconnection_client互联，被连接的client崩溃
+```
+现象：
+# Fatal error in: ../../rtc_base/physical_socket_server.cc, line 1171
+# last system error: 11
+# Check failed: !waiting_
+# Aborted (core dumped)
 
+解决办法1：
+不使用debug版本
+is_debug = false
 
-
+解决办法2：
+回退到81bbd7199a2e97680a4488c2da4f8248137e12e0版本（别忘记gclient sync）
+```
