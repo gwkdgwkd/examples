@@ -15,10 +15,21 @@
 using nlohmann::json;
 
 namespace ns {
+struct data {
+  std::string d;
+  int i;
+  struct test {
+    bool b;
+    int j;
+  } t;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(data::test, data::test::b, data::test::j)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(data, d, i, t)
 struct person {
   std::string name;
   std::string address;
   int age;
+  data d;
 };
 // void to_json(json& j, const person& p) {
 //   j = json{{"name", p.name}, {"address", p.address}, {"age", p.age}};
@@ -28,7 +39,7 @@ struct person {
 //   j.at("address").get_to(p.address);
 //   j.at("age").get_to(p.age);
 // }
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(person, name, address, age)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(person, name, address, age, d)
 
 class address {
  private:
@@ -423,7 +434,9 @@ int main() {
     std::cout << j << std::endl;
     // {"address":"744 Evergreen Terrace","age":60,"name":"Ned Flanders"}
     ns::person per{j["name"].get<std::string>(),
-                   j["address"].get<std::string>(), j["age"].get<int>()};
+                   j["address"].get<std::string>(),
+                   j["age"].get<int>(),
+                   {"str", 5}};
 
     json j2 = p;
     std::cout << j2 << std::endl;
