@@ -28,7 +28,9 @@ Singleton* Singleton::m_instance = nullptr;
 // 这是单例模式最经典的实现方式，将构造函数和拷贝构造函数都设为私有的，而且采用了延迟初始化的方式，在第一次调用getInstance()的时候才会生成对象，
 // 不调用就不会生成对象，不占据内存。然而，在多线程的情况下，这种方法是不安全的。
 // 正常情况下，如果线程A调用getInstance()时，将m_instance初始化了，那么线程B再调用getInstance()时，就不会再执行new了，直接返回之前构造好的对象。
-// 然而存在这种情况，线程A执行m_instance = new Singleton()还没完成，这个时候m_instance仍然为nullptr，线程B也正在执行m_instance = new Singleton()，
+// 然而存在这种情况，线程A执行m_instance = new
+// Singleton()还没完成，这个时候m_instance仍然为nullptr，线程B也正在执行m_instance
+// = new Singleton()，
 // 这是就会产生两个对象，线程A和B可能使用的是同一个对象，也可能是两个对象，这样就可能导致程序错误，同时，还会发生内存泄漏。
 Singleton* Singleton::getInstance1() {
   if (m_instance == nullptr) {
@@ -38,13 +40,15 @@ Singleton* Singleton::getInstance1() {
   return m_instance;
 }
 
-std::mutex Singleton::m_mutex;
-
 // 线程安全版本，但锁的代价过高
-// 这种写法不会出现上面两个线程都执行new的情况，当线程A在执行m_instance = new Singleton()的时候，线程B如果调用了getInstance()，一定会被阻塞在加锁处，
+// 这种写法不会出现上面两个线程都执行new的情况，当线程A在执行m_instance = new
+// Singleton()的时候，线程B如果调用了getInstance()，一定会被阻塞在加锁处，
 // 等待线程A执行结束后释放这个锁。从而是线程安全的。
-// 但这种写法的性能不高，因为每次调用getInstance()都会加锁释放锁，而这个步骤只有在第一次new Singleton()才是有必要的，只要m_instance被创建出来了，
-// 不管多少线程同时访问，使用if(m_instance == nullptr)进行判断都是足够的（只是读操作，不需要加锁），没有线程安全问题，加了锁之后反而存在性能问题。
+// 但这种写法的性能不高，因为每次调用getInstance()都会加锁释放锁，而这个步骤只有在第一次new
+// Singleton()才是有必要的，只要m_instance被创建出来了，
+// 不管多少线程同时访问，使用if(m_instance ==
+// nullptr)进行判断都是足够的（只是读操作，不需要加锁），没有线程安全问题，加了锁之后反而存在性能问题。
+std::mutex Singleton::m_mutex;
 Singleton* Singleton::getInstance2() {
   // Lock lock；
   std::lock_guard<std::mutex> lock(m_mutex);
@@ -72,9 +76,11 @@ Singleton* Singleton::getInstance3() {
       //  2 在分配的内存处构造Singleton类型的对象。
       //  3 把分配的内存的地址赋给指针m_instance。
       // 可能会认为这三个步骤是按顺序执行的，但实际上只能确定步骤1是最先执行的，步骤2，3却不一定。问题就出现在这。
-      // 假如某个线程A在调用执行m_instance = new Singleton()的时候是按照1,3,2的顺序的，那么刚刚执行完步骤3
+      // 假如某个线程A在调用执行m_instance = new
+      // Singleton()的时候是按照1,3,2的顺序的，那么刚刚执行完步骤3
       // 给Singleton类型分配了内存（此时m_instance就不是nullptr了）就切换到了线程B，由于m_instance已经不是
-      // nullptr了，所以B直接执行return m_instance得到一个对象，而这个对象并没有真正的被构造！严重bug发生了。
+      // nullptr了，所以B直接执行return
+      // m_instance得到一个对象，而这个对象并没有真正的被构造！严重bug发生了。
     }
   }
 
@@ -147,7 +153,6 @@ Singleton2* Singleton2::m_instance = nullptr;  // 静态成员需要先初始化
 //  gcc 4.0之后的编译器支持这种写法。
 //  C++11及以后的版本（如C++14）的多线程下，正确。
 //  C++11之前不能这么写。
-
 class Singleton3 {
  public:
   // 注意返回的是引用
@@ -238,5 +243,53 @@ class Singleton6 {
  private:
   static Singleton6* m_pInstance;
 };
+
+// 工作中用到的：
+// A macro to disallow the copy constructor and operator= functions.
+// This should be used in the private: declarations for a class.
+#define DISALLOW_COPY_AND_ASSIGN(type) \
+  type(const type&);                   \
+  void operator=(const type&)
+// A macro to disallow all the implicit constructors, namely the
+// default constructor, copy constructor and operator= functions.
+//
+// This should be used in the private: declarations for a class
+// that wants to prevent anyone from instantiating it. This is
+// especially useful for classes containing only static methods.
+#define DISALLOW_IMPLICIT_CONSTRUCTORS(type) \
+  type();                                    \
+  DISALLOW_COPY_AND_ASSIGN(type)
+template <typename T>
+class SingletonInterface {
+ public:
+  static T* GetInstance() {
+    static T s_instance;
+    return &s_instance;
+  }
+
+ protected:
+  SingletonInterface() {}
+  ~SingletonInterface() {}
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SingletonInterface);
+};
+// class RadioState : public SingletonInterface<RadioState>
+template <typename T>
+class SingletonInterfaceSp {
+ public:
+  static std::shared_ptr<T> GetInstance() {
+    static std::shared_ptr<T> s_instance = std::shared_ptr<T>(new T());
+    return s_instance;
+  }
+
+ protected:
+  SingletonInterfaceSp() {}
+  ~SingletonInterfaceSp() {}
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SingletonInterfaceSp);
+};
+// class RadioState : public SingletonInterfaceSp<RadioState>
 
 int main() { return 0; }
