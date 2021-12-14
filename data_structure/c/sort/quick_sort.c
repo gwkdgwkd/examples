@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// 提到排序算法，多数人最先想到的就是快速排序算法。
+// 快速排序算法是在分治算法基础上设计出来的一种排序算法，和其它排序算法相比，快速排序算法具有效率高、耗费资源少、容易实现等优点。
 // C语言中自带函数库中就有快速排序——qsort函数 ，包含在<stdlib.h>头文件中。
+
 // 快速排序算法是在起泡排序的基础上进行改进的一种算法，其实现的基本思想是：
-//  通过一次排序将整个无序表分成相互独立的两部分，其中一部分中的数据都比另一部分中包含的数据的值小，然后继续沿用此方法分别对两部分进行同样的操作，
-//  直到每一个小部分不可再分，所得到的整个序列就成为了有序序列。
+//  通过一次排序将整个无序表分成相互独立的两部分，其中一部分中的数据都比另一部分中包含的数据的值小，
+//  然后继续沿用此方法分别对两部分进行同样的操作，直到每一个小部分不可再分，所得到的整个序列就成为了有序序列。
 
 // 例如，对无序表{49，38，65，97，76，13，27，49}进行快速排序，大致过程为：
 //  首先从表中选取一个记录的关键字作为分割点（称为“枢轴”或者支点，一般选择第一个关键字），例如选取49；
@@ -18,7 +21,9 @@
 
 #define MAX 9
 // 单个记录的结构体
-typedef struct { int key; } SqNote;
+typedef struct {
+  int key;
+} SqNote;
 // 记录表的结构体
 typedef struct {
   SqNote r[MAX];
@@ -59,7 +64,66 @@ void QSort(SqList *L, int low, int high) {
 }
 void QuickSort(SqList *L) { QSort(L, 1, L->length); }
 
+int partition(int *arr, int p, int q) {
+  int temp = 0;
+  // lo、hi分别表示指向首个元素和倒数第2个元素的指针
+  int lo = p;
+  int hi = q - 1;
+  int pivot = arr[q];  // pivot表示选中的中间值
+  while (1) {
+    // lo从左往右遍历，直至找到一个不小于pivot的元素
+    while (arr[lo] < pivot) {
+      lo++;
+    };
+    // hi从右往左遍历，直至找到一个不大于pivot的元素
+    while (hi > 0 && arr[hi] > pivot) {
+      hi--;
+    }
+    if (lo >= hi) {  // 如果lo≥hi，退出循环
+      break;
+    } else {
+      // 交换arr[lo]和arr[hi]的值
+      temp = arr[lo];
+      arr[lo] = arr[hi];
+      arr[hi] = temp;
+      // lo和hi都向前移动一个位置，准备继续遍历
+      lo++;
+      hi--;
+    }
+  }
+  // 交换arr[lo]和arr[q]的值
+  temp = arr[lo];
+  arr[lo] = pivot;
+  arr[q] = temp;
+
+  return lo;  // 返回中间值所在序列中的位置
+}
+void quick_sort(int *arr, int p, int q) {
+  int par;
+  // 如果待排序序列不存在，或者仅包含1个元素，则不再进行分割
+  if (q - p <= 0) {
+    return;
+  } else {
+    // 调用partition()函数，分割[p,q]区域
+    par = partition(arr, p, q);
+    // 以[p,par-1]作为新的待排序序列，继续分割
+    quick_sort(arr, p, par - 1);
+    // 以[par+1,q]作为新的待排序序列，继续分割
+    quick_sort(arr, par + 1, q);
+  }
+}
+void print(int *list, int size) {
+  for (int i = 0; i < size; i++) {
+    printf("%d ", list[i]);
+  }
+  printf("\n");
+}
+
 int main() {
+  int a[] = {35, 33, 42, 10, 14, 19, 27, 44};
+  quick_sort(a, 0, sizeof(a) / sizeof(int) - 1);
+  print(a, sizeof(a) / sizeof(int));  // 10 14 19 27 33 35 42 44
+
   SqList *L = (SqList *)malloc(sizeof(SqList));
   L->length = 8;
   L->r[1].key = 49;

@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+// 对数据量较少的序列实现升序或降序排序，可以考虑使用选择排序算法，它对应的时间复杂度为O(n^2)。
 // 简单选择排序的实现思想为：对于具有n个记录的无序表遍历n-1次，第i次从无序表中第i个记录开始，找出后序关键字中最小的记录，然后放置在第i的位置上。
 
 #define MAX 9
 // 单个记录的结构体
-typedef struct { int key; } SqNote;
+typedef struct {
+  int key;
+} SqNote;
 // 记录表的结构体
 typedef struct {
   SqNote r[MAX];
@@ -41,7 +43,35 @@ void SelectSort(SqList *L) {
   }
 }
 
+void SelectionSort(int *list, int size) {
+  int i, j;
+  int min, temp;
+  // 从第1个元素开始遍历，直至倒数第2个元素
+  for (i = 0; i < size - 1; i++) {
+    min = i;  // 事先假设最小值为第i个元素
+    // 从第i+1个元素开始遍历，查找真正的最小值
+    for (j = i + 1; j < size; j++) {
+      if (list[j] < list[min]) {
+        min = j;
+      }
+    }
+    // 如果最小值所在位置不为i，交换最小值和第i个元素的位置
+    if (min != j) {
+      temp = list[min];
+      list[min] = list[i];
+      list[i] = temp;
+    }
+  }
+}
+
 int main() {
+  int array[] = {13, 27, 38, 49, 49, 65, 76, 97};
+  SelectionSort(array, sizeof(array) / sizeof(int));
+  for (int i = 0; i < sizeof(array) / sizeof(int); i++) {
+    printf("%d ", array[i]);
+  }
+  printf("\n");  // 13 27 38 49 49 65 76 97
+
   SqList *L = (SqList *)malloc(sizeof(SqList));
   L->length = 8;
   L->r[0].key = 49;

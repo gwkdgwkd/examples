@@ -1,15 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// 一种不同于插入排序和选择排序的排序方法——归并排序，其排序的实现思想是先将所有的记录完全分开，然后两两合并，在合并的过程中将其排好序，最终能够得到一个完整的有序表。
-// 对于含有n个记录的无序表，首先默认表中每个记录各为一个有序表（只不过表的长度都为1），然后进行两两合并，使n个有序表变为⌈n/2⌉个长度为2或者1的有
-// 序表（例如4个小有序表合并为2个大的有序表），通过不断地进行两两合并，直到得到一个长度为n的有序表为止。这种归并排序方法称为：2-路归并排序。
+// 归并排序算法是在分治算法(分而后立)基础上设计出来的一种排序算法，对应的时间复杂度为O(nlogn)。
+// 归并排序算法实现排序的思路是：
+//   将整个待排序序列划分成多个不可再分的子序列，每个子序列中仅有1个元素；
+//   所有的子序列进行两两合并，合并过程中完成排序操作，最终合并得到的新序列就是有序序列。
+
+// 对于含有n个记录的无序表，首先默认表中每个记录各为一个有序表（只不过表的长度都为1），然后进行两两合并，使n个有序表变
+// 为⌈n/2⌉个长度为2或者1的有序表（例如4个小有序表合并为2个大的有序表），通过不断地进行两两合并，直到得到一个长度为n的有序表为止。
+// 这种归并排序方法称为：2-路归并排序。
+
 // 归并过程中，每次得到的新的子表本身有序，所以最终得到的为有序表。
-// 归并排序算法在具体实现时，首先需要将整个记录表进行折半分解，直到分解为一个记录作为单独的一张表为止，然后在进行两两合并。整个过程为分而后立的过程。
-// 归并排序算法的时间复杂度为O(nlogn)。该算法相比于堆排序和快速排序，其主要的优点是：当记录表中含有值相同的记录时，排序前和排序后在表中的相对位置不会改变。
+// 归并排序算法在具体实现时，首先需要将整个记录表进行折半分解，直到分解为一个记录作为单独的一张表为止，然后在进行两两合并。
+
+// 该算法相比于堆排序和快速排序，其主要的优点是：当记录表中含有值相同的记录时，排序前和排序后在表中的相对位置不会改变。
 
 #define MAX 8
-typedef struct { int key; } SqNode;
+typedef struct {
+  int key;
+} SqNode;
 typedef struct {
   SqNode r[MAX];
   int length;
@@ -48,7 +57,60 @@ void MSort(SqNode SR[], SqNode TR1[], int s, int t) {
 // 归并排序
 void MergeSort(SqList *L) { MSort(L->r, L->r, 1, L->length); }
 
+// 实现归并操作的函数，归并的2个区域分别为[p,mid]和[mid+1,q]
+void merge(int *arr, int p, int mid, int q) {
+  int i, j, k;
+  int leftarr[100], rightarr[100];
+  int numL = mid - p + 1;
+  int numR = q - mid;
+  // 将arr数组中[p,mid]区域内的元素逐一拷贝到leftarr数组中
+  for (i = 0; i < numL; i++) {
+    leftarr[i] = arr[p - 1 + i];
+  }
+  // 将arr数组中[mid+1,q]区域内的元素逐一拷贝到rightarr数组中
+  leftarr[i] = 2147483647;
+  for (i = 0; i < numR; i++) {
+    rightarr[i] = arr[mid + i];
+  }
+  rightarr[i] = 2147483647;
+  i = 0;
+  j = 0;
+  // 逐一比较leftarr和rightarr中的元素，每次将较小的元素拷贝到arr数组中的[p,q]区域内
+  for (k = p; k <= q; k++) {
+    if (leftarr[i] <= rightarr[j]) {
+      arr[k - 1] = leftarr[i];
+      i++;
+    } else {
+      arr[k - 1] = rightarr[j];
+      j++;
+    }
+  }
+}
+// 实现分割操作的函数，[p,q]用于指定归并排序的区域范围，
+void merge_sort(int *arr, int p, int q) {
+  int mid;
+  if (arr == NULL || p > q || p == q) {
+    return;
+  }
+  mid = (p + q) / 2;
+  // 将[p,q]分为[p,mid]和[mid+1,q]区域
+  merge_sort(arr, p, mid);
+  merge_sort(arr, mid + 1, q);
+  // 对分好的[p,mid]和[mid,q]进行归并操作
+  merge(arr, p, mid, q);
+}
+void print(int *list, int size) {
+  for (int i = 0; i < size; i++) {
+    printf("%d ", list[i]);
+  }
+  printf("\n");
+}
+
 int main() {
+  int a[] = {35, 33, 42, 10, 14, 19, 27, 44};
+  merge_sort(a, 1, sizeof(a) / sizeof(int));
+  print(a, sizeof(a) / sizeof(int));  // 10 14 19 27 33 35 42 44
+
   SqList *L = (SqList *)malloc(sizeof(SqList));
   L->length = 7;
   L->r[1].key = 49;
