@@ -8,7 +8,7 @@
 #include "wapped_shader_program.h"
 #include "wapped_texture.h"
 #include "egl_core.h"
-#include "libpng/png_decoder.h"
+#include "png_decoder.h"
 
 class ShowPngConductor {
 

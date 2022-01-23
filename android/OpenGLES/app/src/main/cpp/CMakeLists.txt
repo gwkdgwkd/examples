@@ -9,20 +9,22 @@ cmake_minimum_required(VERSION 3.10.2)
 
 project("opengles")
 
+# https://blog.csdn.net/baidu_35757025/article/details/78409949
 # https://blog.csdn.net/tom_221x/article/details/61210028
 include_directories(
         src/main/cpp/libpng
 )
 
+add_definitions(-D__ANDROID__)
 add_library(
         png STATIC
 
+        libpng/png.c
         libpng/pngget.c
         libpng/pngread.c
         libpng/pngrutil.c
         libpng/pngtrans.c
         libpng/pngwtran.c
-        libpng/png.c
         libpng/pngmem.c
         libpng/pngrio.c
         libpng/pngset.c
@@ -32,6 +34,7 @@ add_library(
         libpng/pngpread.c
         libpng/pngrtran.c
         libpng/pngwrite.c
+        libpng/image.c
 )
 set_target_properties(
         png
@@ -39,10 +42,6 @@ set_target_properties(
         ARCHIVE_OUTPUT_DIRECTORY
         "${CMAKE_CURRENT_SOURCE_DIR}/${ANDROID_ABI}"
 )
-set_target_properties(png PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/${ANDROID_ABI}/libpng.a)
-#${CMAKE_CURRENT_SOURCE_DIR}/build/intermediates/cmake/debug/obj/${CMAKE_ANDROID_ARCH_ABI}/libpng.a)
-#${CMAKE_CURRENT_SOURCE_DIR}/${ANDROID_ABI}/libpng.a)
-
 target_link_libraries(
         png
         z
@@ -65,6 +64,7 @@ add_library( # Sets the name of the library.
         egl_core.cpp
         wapped_texture.cpp
         show_png_conductor.cpp
+        png_decoder.cpp
         )
 
 

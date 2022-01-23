@@ -126,7 +126,7 @@
 /** Update By Xiaokai: 仅在Android下面开启Neon优化 **/
 #  if defined(__ANDROID__) && (defined(__ARM_NEON__) || defined(__ARM_NEON)) && \
    defined(PNG_ALIGNED_MEMORY_SUPPORTED)
-#     define PNG_ARM_NEON_OPT 2
+#     define PNG_ARM_NEON_OPT 0
 #  else
 #     define PNG_ARM_NEON_OPT 0
 #  endif

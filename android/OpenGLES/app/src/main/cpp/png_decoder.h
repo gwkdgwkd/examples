@@ -1,8 +1,8 @@
-#ifndef PNG_FUNCTION_LAB_DECODER_H
-#define PNG_FUNCTION_LAB_DECODER_H
+#ifndef OPENGLES_PNG_DECODER_H
+#define OPENGLES_PNG_DECODER_H
 
 extern "C" {
-	#include "./image.h"
+	#include "libpng/image.h"
 }
 
 typedef unsigned char byte;
@@ -28,5 +28,5 @@ public:
 
 };
 
-#endif //PNG_FUNCTION_LAB_DECODER_H
+#endif //OPENGLES_PNG_DECODER_H
 
