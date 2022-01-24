@@ -9,15 +9,15 @@ public:
     WappedShaderProgram();
     ~WappedShaderProgram();
 
+    enum {
+        ATTRIBUTE_VERTEX, ATTRIBUTE_TEXCOORD,
+    };
+
     bool Init();
     GLuint GetProgram() { return program_; }
     GLint GetUniformSampler() { return uniformSampler_; }
 
 private:
-    enum {
-        ATTRIBUTE_VERTEX, ATTRIBUTE_TEXCOORD,
-    };
-
     bool CheckShaderErrors(GLuint shader);
     bool CheckProgramErrors(GLuint program);
     bool CompileShader(GLuint *shader, GLenum type, const char *source);

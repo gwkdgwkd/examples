@@ -51,16 +51,16 @@ bool WappedShaderProgram::Init() {
     program_ = glCreateProgram();
 
     // attach vertex shader
-    if (CompileShader(&vertex_shader_, GL_VERTEX_SHADER, VERTEX_SHADER)) {
-        glAttachShader(program_, vertex_shader_);
+    if (!CompileShader(&vertex_shader_, GL_VERTEX_SHADER, VERTEX_SHADER)) {
         return ret;
     }
+    glAttachShader(program_, vertex_shader_);
 
     // attach fragment shader
-    if (CompileShader(&fragment_shader_, GL_FRAGMENT_SHADER, FRAGMENT_SHADER)) {
-        glAttachShader(program_, fragment_shader_);
+    if (!CompileShader(&fragment_shader_, GL_FRAGMENT_SHADER, FRAGMENT_SHADER)) {
         return ret;
     }
+    glAttachShader(program_, fragment_shader_);
 
     // bind attribute
     glBindAttribLocation(program_, ATTRIBUTE_VERTEX, "position");

@@ -18,7 +18,7 @@ public class ShowPngActivity extends AppCompatActivity {
     private SurfaceView surfaceView;
     private RelativeLayout preview_parent_layout;
 
-    private String picPath = "/mnt/sdcard/1.png";
+    private String picPath = "/storage/emulated/0/Download/WeiXin/1.png";
 
     private Callback previewCallback = new Callback() {
         public void surfaceCreated(SurfaceHolder holder) {

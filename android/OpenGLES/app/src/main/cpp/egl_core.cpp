@@ -29,14 +29,23 @@ bool EGLCore::CreateWindowSurface(ANativeWindow *window) {
         release();
         return false;
     }
+
     ANativeWindow_setBuffersGeometry(window, 0, 0, format);
     if (!(surface_ = eglCreateWindowSurface(display_, config_, window, 0))) {
         LOGE("eglCreateWindowSurface() returned error %d", eglGetError());
         return false;
     }
+
     return true;
 }
 
+bool EGLCore::MakeCurrent() {
+    if(!eglMakeCurrent(display_, surface_, surface_, context_)) {
+        LOGE("eglMakeCurrent failed!");
+        return false;
+    }
+    return true;
+}
 
 bool EGLCore::SwapBuffers() {
     TRACE_FUNC();
@@ -46,12 +55,15 @@ bool EGLCore::SwapBuffers() {
 bool EGLCore::Init(ANativeWindow *window) {
     TRACE_FUNC();
     if (!InitEGL()) {
+        LOGE("InitEGL failed!");
         return false;
     }
-    if (CreateWindowSurface(window)) {
+    LOGI("window %p", window);
+    if (!CreateWindowSurface(window)) {
+        LOGE("CreateWindowSurface failed!");
         return false;
     }
-    return eglMakeCurrent(display_, surface_, surface_, context_);;
+    return MakeCurrent();
 }
 
 bool EGLCore::InitEGL() {

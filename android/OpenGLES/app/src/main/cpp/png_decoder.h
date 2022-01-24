@@ -7,24 +7,20 @@ extern "C" {
 
 typedef unsigned char byte;
 
-/**
- * PNG图像解码
- */
 class PngPicDecoder {
 private:
-	FILE* pngFile;
+	FILE* png_file_;
 
-	byte* compressedData;
-	int actualSize;
+	byte* compressed_data_;
+	int actual_size_;
 public:
 	PngPicDecoder();
-	/** 开启解码线程 **/
-	virtual ~PngPicDecoder();
-	/** 打开本地文件不需要传递 探针的参数以及重试策略 **/
-	int openFile(char *pngFilePath);
-	RawImageData getRawImageData();
-	void releaseRawImageData(const RawImageData* data);
-	void closeFile();
+
+	virtual ~PngPicDecoder() {};
+	int OpenFile(char *pngFilePath);
+	RawImageData GetRawImageData();
+	void ReleaseRawImageData(const RawImageData* data);
+	void CloseFile();
 
 };
 

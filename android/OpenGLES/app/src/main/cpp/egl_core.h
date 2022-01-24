@@ -15,6 +15,7 @@ public:
 
     bool Init(ANativeWindow*);
 	bool SwapBuffers();
+	bool MakeCurrent();
 
     void release();
 

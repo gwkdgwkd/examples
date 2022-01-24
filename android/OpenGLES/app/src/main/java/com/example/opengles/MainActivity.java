@@ -37,10 +37,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int READ_EXTERNAL_STORAGE_REQUEST_CODE = 1;
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG,"====================2");
             // 申请READ_EXTERNAL_STORAGE权限
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     READ_EXTERNAL_STORAGE_REQUEST_CODE);
         }
+        Log.i(TAG,"====================1");
     }
 
     @Override
