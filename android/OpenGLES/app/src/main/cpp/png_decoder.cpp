@@ -2,8 +2,6 @@
 #include <errno.h>
 #include "log.h"
 
-#define LOG_TAG "PngPicDecoder"
-
 PngPicDecoder::PngPicDecoder() : png_file_(nullptr) {}
 
 int PngPicDecoder::OpenFile(char *pngFilePath) {

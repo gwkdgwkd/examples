@@ -24,6 +24,9 @@
         <activity
             android:name=".ShowPngActivity"
             android:label="@string/app_name" ></activity>
+        <activity
+            android:name=".TriangleRenderActivity"
+            android:label="TriangleRender" ></activity>
     </application>
 
 </manifest>

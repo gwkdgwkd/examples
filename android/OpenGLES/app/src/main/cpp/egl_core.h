@@ -1,7 +1,6 @@
 #ifndef OPENGLES_EGL_CORE_H
 #define OPENGLES_EGL_CORE_H
 
-
 #include <android/native_window.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -17,7 +16,7 @@ public:
 	bool SwapBuffers();
 	bool MakeCurrent();
 
-    void release();
+    void Release();
 
 private:
 	bool InitEGL();

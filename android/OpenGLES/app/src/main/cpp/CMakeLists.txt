@@ -95,3 +95,23 @@ target_link_libraries( # Specifies the target library.
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib})
+
+
+add_library(
+        trianglerender
+        SHARED
+        com_example_opengles_TriangleRenderActivity.cpp
+        triangle_render.cpp
+        egl_core.cpp
+        )
+
+find_library(
+        log-lib
+        log
+        )
+target_link_libraries(
+        trianglerender
+        GLESv2
+        EGL
+        android
+        ${log-lib})

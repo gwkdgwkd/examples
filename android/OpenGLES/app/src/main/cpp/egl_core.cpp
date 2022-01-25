@@ -11,7 +11,7 @@ EGLCore::EGLCore() {
     surface_ = EGL_NO_SURFACE;
 }
 
-void EGLCore::release() {
+void EGLCore::Release() {
     TRACE_FUNC();
     eglDestroySurface(display_, surface_);
     surface_ = EGL_NO_SURFACE;
@@ -26,7 +26,7 @@ bool EGLCore::CreateWindowSurface(ANativeWindow *window) {
     EGLint format;
     if (!eglGetConfigAttrib(display_, config_, EGL_NATIVE_VISUAL_ID, &format)) {
         LOGE("eglGetConfigAttrib() returned error %d", eglGetError());
-        release();
+        Release();
         return false;
     }
 
@@ -91,7 +91,7 @@ bool EGLCore::InitEGL(EGLContext shared_context) {
 
     if (!eglChooseConfig(display_, attribs, &config_, 1, &numConfigs)) {
         LOGE("eglChooseConfig() returned error %d", eglGetError());
-        release();
+        Release();
         return false;
     }
 
@@ -100,7 +100,7 @@ bool EGLCore::InitEGL(EGLContext shared_context) {
                                       NULL == shared_context ? EGL_NO_CONTEXT : shared_context,
                                       eglContextAttributes))) {
         LOGE("eglCreateContext() returned error %d", eglGetError());
-        release();
+        Release();
         return false;
     }
 

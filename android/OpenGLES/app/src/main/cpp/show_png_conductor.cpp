@@ -118,7 +118,7 @@ void ShowPngConductor::Destroy() {
         wapped_shader_program_ptr_ = NULL;
     }
     if (egl_core_ptr_) {
-        egl_core_ptr_->release();
+        egl_core_ptr_->Release();
         egl_core_ptr_ = NULL;
     }
     return;

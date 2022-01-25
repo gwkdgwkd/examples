@@ -3,8 +3,6 @@ package com.example.opengles;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -15,6 +13,10 @@ import android.widget.RelativeLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class ShowPngActivity extends AppCompatActivity {
+    static {
+        System.loadLibrary("opengles");
+    }
+
     private SurfaceView surfaceView;
     private RelativeLayout preview_parent_layout;
 

@@ -2,7 +2,7 @@
 
 FFMPEGDIR=`pwd`
 FFMPEG=ffmpeg
-NDK=/home/wlliang/android/android-ndk-r23b
+NDK=/disk/as/SDK/ndk/21.4.7075529
 TOOLCHAIN=${NDK}/toolchains/llvm/prebuilt/linux-x86_64/
 API=21
 
@@ -50,23 +50,25 @@ clean()
 function build_ffmpeg_for_android
 {
 	cd ${FFMPEG}
+	
 	./configure \
 	--prefix=$PREFIX \
-	--disable-neon \
-	--disable-hwaccels \
-	--disable-gpl \
+	--enable-neon \
+	--enable-hwaccels \
+	--enable-gpl \
 	--disable-postproc \
-	--enable-shared \
+	--disable-debug \
+	--enable-small \
 	--enable-jni \
-	--disable-mediacodec \
-	--disable-decoder=h264_mediacodec \
-	--disable-static \
+	--enable-mediacodec \
+	--enable-decoder=h264_mediacodec \
+	--enable-shared \
+	--enable-static \
 	--disable-doc \
 	--disable-ffmpeg \
 	--disable-ffplay \
 	--disable-ffprobe \
 	--disable-avdevice \
-	--disable-doc \
 	--disable-symver \
 	--cross-prefix=$CROSS_PREFIX \
 	--target-os=android \
@@ -78,8 +80,8 @@ function build_ffmpeg_for_android
 	--enable-cross-compile \
 	--sysroot=$SYSROOT \
 	--extra-cflags="-Os -fpic $OPTIMIZE_CFLAGS" \
-	--extra-ldflags="$ADDI_LDFLAGS" \
-	$ADDITIONAL_CONFIGURE_FLAG
+	--extra-ldflags="$ADDI_LDFLAGS"
+
 	make clean
 	make
 	make install
