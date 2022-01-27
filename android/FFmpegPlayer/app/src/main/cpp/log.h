@@ -17,10 +17,11 @@ class TraceFunc {
 public:
     explicit TraceFunc(std::string function, std::string file, int line)
             : function_(std::move(function)), file_(std::move(file)), line_(line) {
-        LOGI("%s %d [Trace] %s : E <<<",file_.c_str(),line_,function_.c_str());
+        LOGI("%s %d [Trace] %s : E <<<", file_.c_str(), line_, function_.c_str());
     }
+
     virtual ~TraceFunc() {
-        LOGI("%s %d [Trace] %s : X >>>",file_.c_str(),line_,function_.c_str());
+        LOGI("%s %d [Trace] %s : X >>>", file_.c_str(), line_, function_.c_str());
     }
 
 private:
@@ -28,7 +29,6 @@ private:
     std::string file_;
     int line_;
 };  // TraceFunc
-
 
 #define TRACE_FUNC() TraceFunc trace_func(__FUNCTION__, __FILE__, __LINE__)
 

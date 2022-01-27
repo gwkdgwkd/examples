@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/sample_text"
+        android:id="@+id/tw_version"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello World!"
@@ -19,150 +19,159 @@
         app:layout_constraintVertical_bias="0.022" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tw_player"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
-        android:text="Player"
-        app:layout_constraintTop_toBottomOf="@+id/sample_text"
+        android:text="Player: "
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tw_version"
         tools:layout_editor_absoluteX="5dp" />
 
+    <Button
+        android:id="@+id/b_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Play"
+        app:layout_constraintStart_toEndOf="@+id/tw_player"
+        app:layout_constraintTop_toTopOf="@+id/tw_player" />
+
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/tw_video_decoder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
         android:text="Video Decoder:"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tw_player"
         tools:layout_editor_absoluteX="5dp" />
 
     <RadioGroup
-        android:id="@+id/gggg"
+        android:id="@+id/rg_video_decoder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintStart_toEndOf="@+id/textView2"
-        app:layout_constraintTop_toTopOf="@id/textView2">
+        app:layout_constraintStart_toEndOf="@+id/tw_video_decoder"
+        app:layout_constraintTop_toTopOf="@id/tw_video_decoder">
 
         <RadioButton
-            android:id="@+id/radioMale"
+            android:id="@+id/rb_media_codec"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="MediaCodec" />
 
         <RadioButton
-            android:id="@+id/radioFemale"
+            android:id="@+id/rb_libx264"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="libx264" />
     </RadioGroup>
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/tw_render"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
         android:text="Render:"
-        app:layout_constraintTop_toBottomOf="@id/textView2"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tw_video_decoder"
         tools:layout_editor_absoluteX="5dp" />
 
     <RadioGroup
-        android:id="@+id/ggggh"
+        android:id="@+id/rg_render"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintStart_toEndOf="@+id/textView3"
-        app:layout_constraintTop_toTopOf="@id/textView3">
+        app:layout_constraintStart_toEndOf="@+id/tw_render"
+        app:layout_constraintTop_toTopOf="@id/tw_render">
 
         <RadioButton
-            android:id="@+id/radioMale1"
+            android:id="@+id/rb_anative_window"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="ANativeWindow" />
 
         <RadioButton
-            android:id="@+id/radioFemale2"
+            android:id="@+id/rb_opengles"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="OpenGL ES" />
     </RadioGroup>
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/tw_yuv2rgb"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
         android:text="YUV to RGB:"
-        app:layout_constraintTop_toBottomOf="@id/textView3"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tw_render"
         tools:layout_editor_absoluteX="5dp" />
 
     <RadioGroup
-        android:id="@+id/gggghg"
+        android:id="@+id/rg_yuv2rgb"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintStart_toEndOf="@+id/textView4"
-        app:layout_constraintTop_toTopOf="@id/textView4">
+        app:layout_constraintStart_toEndOf="@+id/tw_yuv2rgb"
+        app:layout_constraintTop_toTopOf="@id/tw_yuv2rgb">
 
         <RadioButton
-            android:id="@+id/radioMale3"
+            android:id="@+id/rb_libswscale"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="libswscale" />
 
         <RadioButton
-            android:id="@+id/radioFemale3"
+            android:id="@+id/rb_libyuv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="libyuv" />
 
         <RadioButton
-            android:id="@+id/radioFemale4"
+            android:id="@+id/rb_shader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="shader" />
     </RadioGroup>
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/tw_features"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
         android:text="Features:"
-        app:layout_constraintTop_toBottomOf="@id/textView4"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tw_yuv2rgb"
         tools:layout_editor_absoluteX="5dp" />
 
     <CheckBox
-        android:id="@+id/checkBox1"
+        android:id="@+id/cb_waveform"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Display waveform"
-        app:layout_constraintTop_toBottomOf="@id/gggghg"
-        app:layout_constraintStart_toEndOf="@id/textView5"/>
+        app:layout_constraintStart_toEndOf="@id/tw_features"
+        app:layout_constraintTop_toTopOf="@id/tw_features" />
+
     <CheckBox
-        android:id="@+id/checkBox2"
+        android:id="@+id/cb_vr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="VR"
-        app:layout_constraintTop_toBottomOf="@id/gggghg"
-        app:layout_constraintStart_toEndOf="@id/checkBox1"/>
+        app:layout_constraintStart_toEndOf="@id/cb_waveform"
+        app:layout_constraintTop_toTopOf="@id/tw_features" />
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/tw_recorder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
         android:text="Recorder"
-        app:layout_constraintTop_toBottomOf="@id/textView5"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tw_features"
         tools:layout_editor_absoluteX="5dp" />
 
 
