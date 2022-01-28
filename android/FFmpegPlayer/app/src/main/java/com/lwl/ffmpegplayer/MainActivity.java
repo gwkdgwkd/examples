@@ -1,18 +1,31 @@
 package com.lwl.ffmpegplayer;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lwl.ffmpegplayer.databinding.ActivityMainBinding;
+import com.lwl.ffmpegplayer.util.CommonUtils;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
-
+    private static final String[] REQUEST_PERMISSIONS = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.MODIFY_AUDIO_SETTINGS,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.INTERNET,
+    };
+    private static final int PERMISSION_REQUEST_CODE = 1;
     private ActivityMainBinding binding;
     private Button start_play;
 
@@ -25,6 +38,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         start_play = (Button) findViewById(R.id.b_play);
         start_play.setOnClickListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        CommonUtils.copyAssetsDirToSDCard(this, "amedia", "/sdcard");
+//        if (!hasPermissionsGranted(REQUEST_PERMISSIONS)) {
+//            ActivityCompat.requestPermissions(this, REQUEST_PERMISSIONS, PERMISSION_REQUEST_CODE);
+//        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (!hasPermissionsGranted(REQUEST_PERMISSIONS)) {
+                Toast.makeText(this, "We need the permission: WRITE_EXTERNAL_STORAGE", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    protected boolean hasPermissionsGranted(String[] permissions) {
+        for (String permission : permissions) {
+            if (ActivityCompat.checkSelfPermission(this, permission)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

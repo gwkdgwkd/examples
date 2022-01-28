@@ -3,7 +3,14 @@
 #include <cstdio>
 #include <cstring>
 #include <stdarg.h>
-#include "log.h"
+#include "utils/log.h"
+
+
+static const int AUDIO_DST_SAMPLE_RATE = 44100; // 音频编码采样率
+static const int AUDIO_DST_CHANNEL_COUNTS = 2; // 音频编码通道数
+static const uint64_t AUDIO_DST_CHANNEL_LAYOUT = AV_CH_LAYOUT_STEREO; // 音频编码声道格式
+static const AVSampleFormat DST_SAMPLT_FORMAT = AV_SAMPLE_FMT_S16;
+static const int ACC_NB_SAMPLES = 1024; // ACC音频一帧采样数
 
 static void log_callback(void *ptr, int level, const char *fmt, va_list vl) {
     va_list vl2;
@@ -28,9 +35,10 @@ FFmpegPipeline::FFmpegPipeline(const char *url) : url_(url) {
     audio_stream_idx_ = -1;
     frame_ = nullptr;
     packet_ = nullptr;
+    swr_ctx_ = nullptr;
     thread_ = nullptr;
 
-    av_log_set_callback(log_callback);
+//    av_log_set_callback(log_callback);
 }
 
 FFmpegPipeline::~FFmpegPipeline() {
@@ -67,6 +75,13 @@ bool FFmpegPipeline::Init() {
 
     if (!video_stream_ && !audio_stream_) {
         LOGE("Could not find audio or video stream in the input, aborting");
+        return ret;
+    }
+
+    if (!InitSwscale(audio_dec_ctx_->channel_layout, audio_dec_ctx_->sample_rate,
+                     audio_dec_ctx_->sample_fmt, ACC_NB_SAMPLES, AUDIO_DST_CHANNEL_LAYOUT,
+                     AUDIO_DST_SAMPLE_RATE, DST_SAMPLT_FORMAT)) {
+        LOGE("InitSwscale failed!");
         return ret;
     }
 
@@ -137,6 +152,30 @@ bool FFmpegPipeline::OpenCodecContext(int *stream_idx,
     return true;
 }
 
+AudioFrame *FFmpegPipeline::GetAudioFrame() {
+    TRACE_FUNC();
+    return audio_frame_queue_.Empty() ? nullptr : audio_frame_queue_.Pop();
+}
+
+int FFmpegPipeline::OutputAudioFrame(AVFrame *frame) {
+    TRACE_FUNC();
+    LOGI("dst_frame_data_size_ is %d",dst_frame_data_size_);
+    AudioFrame *audio_frame = new AudioFrame(dst_frame_data_size_);
+    int ret = swr_convert(swr_ctx_, &(audio_frame->data_), dst_frame_data_size_ / 2,
+                          (const uint8_t **) frame->data, frame->nb_samples);
+    if (ret <= 0) {
+        LOGE("swr_convert failed!");
+        return ret;
+    }
+
+    audio_frame_queue_.Push(audio_frame);
+    return ret;
+}
+
+int FFmpegPipeline::OutputVideoFrame(AVFrame *frame) {
+    return 0;
+}
+
 int FFmpegPipeline::DecodePacket(AVCodecContext *dec, const AVPacket *pkt) {
     int ret = 0;
 
@@ -161,10 +200,10 @@ int FFmpegPipeline::DecodePacket(AVCodecContext *dec, const AVPacket *pkt) {
         }
 
         // render the frame
-//        if (dec->codec->type == AVMEDIA_TYPE_VIDEO)
-//            ret = output_video_frame(frame_);
-//        else
-//            ret = output_audio_frame(frame_);
+        if (dec->codec->type == AVMEDIA_TYPE_VIDEO)
+            ret = OutputVideoFrame(frame_);
+        else
+            ret = OutputAudioFrame(frame_);
 
         av_frame_unref(frame_);
         if (ret < 0) {
@@ -173,6 +212,46 @@ int FFmpegPipeline::DecodePacket(AVCodecContext *dec, const AVPacket *pkt) {
     }
 
     return 0;
+}
+
+bool FFmpegPipeline::InitSwscale(int64_t src_ch_layout, int src_rate,
+                                 enum AVSampleFormat src_sample_fmt, int src_nb_samples,
+                                 int64_t dst_ch_layout, int dst_rate,
+                                 enum AVSampleFormat dst_sample_fmt) {
+    TRACE_FUNC();
+    LOGI("src: sample rate: %d, format: %d, layout: %lld", src_rate,
+         src_sample_fmt, src_ch_layout);
+    LOGI("dst: sample rate: %d, format: %d, layout: %lld", dst_rate,
+         dst_sample_fmt, dst_ch_layout);
+
+    bool ret = false;
+
+    swr_ctx_ = swr_alloc();
+    if (!swr_ctx_) {
+        LOGE("Could not allocate resampler context");
+        return ret;
+    }
+
+    /* set options */
+    av_opt_set_int(swr_ctx_, "in_channel_layout", src_ch_layout, 0);
+    av_opt_set_int(swr_ctx_, "in_sample_rate", src_rate, 0);
+    av_opt_set_sample_fmt(swr_ctx_, "in_sample_fmt", src_sample_fmt, 0);
+
+    av_opt_set_int(swr_ctx_, "out_channel_layout", dst_ch_layout, 0);
+    av_opt_set_int(swr_ctx_, "out_sample_rate", dst_rate, 0);
+    av_opt_set_sample_fmt(swr_ctx_, "out_sample_fmt", dst_sample_fmt, 0);
+
+    /* initialize the resampling context */
+    if ((ret = swr_init(swr_ctx_)) < 0) {
+        LOGE("Failed to initialize the resampling context");
+        return ret;
+    }
+
+    dst_nb_samples_ = (int) av_rescale_rnd(src_nb_samples, dst_rate, src_rate, AV_ROUND_UP);
+    dst_frame_data_size_ = av_samples_get_buffer_size(NULL, av_get_channel_layout_nb_channels(
+            dst_ch_layout), dst_nb_samples_, dst_sample_fmt, 1);
+
+    return true;
 }
 
 void FFmpegPipeline::DecodeThread() {

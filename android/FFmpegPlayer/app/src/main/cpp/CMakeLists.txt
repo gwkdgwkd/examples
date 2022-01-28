@@ -6,13 +6,15 @@ set(jnilibs ${CMAKE_SOURCE_DIR}/lib)
 set(libname ffmpegplayer)
 include_directories(
         include
-        ${CMAKE_SOURCE_DIR}/util
+        ${CMAKE_SOURCE_DIR}/utils
+        ${CMAKE_SOURCE_DIR}/opensles
 )
 link_directories(${jnilibs}/${ANDROID_ABI})
 file(GLOB src-files ${CMAKE_SOURCE_DIR}/*.cpp)
+file(GLOB opensles-files ${CMAKE_SOURCE_DIR}/opensles/*.cpp)
 
 project("ffmpegplayer")
-add_library(${libname} SHARED ${src-files})
+add_library(${libname} SHARED ${src-files} ${opensles-files})
 
 find_library(
         log-lib
