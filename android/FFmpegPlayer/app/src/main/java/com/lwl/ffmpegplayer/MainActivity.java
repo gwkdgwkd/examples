@@ -19,11 +19,7 @@ import com.lwl.ffmpegplayer.util.CommonUtils;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
     private static final String[] REQUEST_PERMISSIONS = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.MODIFY_AUDIO_SETTINGS,
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.INTERNET,
     };
     private static final int PERMISSION_REQUEST_CODE = 1;
     private ActivityMainBinding binding;
@@ -44,9 +40,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume() {
         super.onResume();
         CommonUtils.copyAssetsDirToSDCard(this, "amedia", "/sdcard");
-//        if (!hasPermissionsGranted(REQUEST_PERMISSIONS)) {
-//            ActivityCompat.requestPermissions(this, REQUEST_PERMISSIONS, PERMISSION_REQUEST_CODE);
-//        }
+        if (!hasPermissionsGranted(REQUEST_PERMISSIONS)) {
+            ActivityCompat.requestPermissions(this, REQUEST_PERMISSIONS, PERMISSION_REQUEST_CODE);
+        }
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

@@ -24,8 +24,10 @@ void PlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     if (audio_render == nullptr) return;
     if (!audio_render->IsQueueSelf(bq)) return;
     if (audio_render->IsQueueLooping()) {
+        LOGE("=============================1");
         AudioFrame *frame = ffmpeg_pipeline_ptr->GetAudioFrame();
         if (frame) {
+            LOGE("=============================2 %d",frame->data_size_);
             audio_render->SendQueueLoop(frame->data_, frame->data_size_);
         }
     }
@@ -33,19 +35,21 @@ void PlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Init
         (JNIEnv *env, jobject obj, jstring jurl, jint, jint) {
+    TRACE_FUNC();
     const char *url = env->GetStringUTFChars(jurl, nullptr);
     ffmpeg_pipeline_ptr = new FFmpegPipeline(url);
     ffmpeg_pipeline_ptr->Init();
 
     audio_render = new SLRender();
     audio_render->SetQueueCallBack(PlayerCallback);
-    audio_render->Start();
-    audio_render->SendQueueLoop("", 1);    // 开启轮询
-
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Play
-        (JNIEnv *env, jobject obj) {}
+        (JNIEnv *env, jobject obj) {
+    TRACE_FUNC();
+    audio_render->Start();
+    audio_render->SendQueueLoop("", 1);    // 开启轮询
+}
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_SeekToPosition
         (JNIEnv *env, jobject obj, jfloat) {}

@@ -154,7 +154,11 @@ bool FFmpegPipeline::OpenCodecContext(int *stream_idx,
 
 AudioFrame *FFmpegPipeline::GetAudioFrame() {
     TRACE_FUNC();
-    return audio_frame_queue_.Empty() ? nullptr : audio_frame_queue_.Pop();
+    while(audio_frame_queue_.Empty()) {
+        LOGE("================3 %d",audio_frame_queue_.Size());
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
+    }
+    return audio_frame_queue_.Pop();
 }
 
 int FFmpegPipeline::OutputAudioFrame(AVFrame *frame) {
