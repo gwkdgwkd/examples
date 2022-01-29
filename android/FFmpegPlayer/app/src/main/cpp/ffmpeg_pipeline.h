@@ -1,4 +1,4 @@
-#ifndef FFMPEG_PLAYER_FFMPEG_PIPELINE_H
+#ifndef FFMPEG_PLAYER_FFMPEG_DEMUXER_H
 #define FFMPEG_PLAYER_FFMPEG_PIPELINE_H
 
 #include <string>
@@ -107,4 +107,4 @@ private:
     std::thread *thread_;
 };
 
-#endif //FFMPEG_PLAYER_FFMPEG_PIPELINE_H
+#endif //FFMPEG_PLAYER_FFMPEG_DEMUXER_H

@@ -11,6 +11,7 @@ include_directories(
 )
 link_directories(${jnilibs}/${ANDROID_ABI})
 file(GLOB src-files ${CMAKE_SOURCE_DIR}/*.cpp)
+file(GLOB ffmpeg-files ${CMAKE_SOURCE_DIR}/ffmpeg/*.cpp)
 file(GLOB utils-files ${CMAKE_SOURCE_DIR}/utils/*.cpp)
 file(GLOB audio-render-files ${CMAKE_SOURCE_DIR}/render/audio/*.cpp)
 file(GLOB video-render-files ${CMAKE_SOURCE_DIR}/render/video/*.cpp)
@@ -21,7 +22,8 @@ add_library(${libname}
         ${src-files}
         ${utils-files}
         ${audio-render-files}
-        ${video-render-files})
+        ${video-render-files}
+        ${ffmpeg-files})
 
 find_library(
         log-lib

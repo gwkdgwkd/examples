@@ -4,6 +4,7 @@
 #include "render/audio/openSlEs_pcm_render.h"
 #include "render/video/video_render_interface.h"
 #include "render/video/native_window_render.h"
+#include "ffmpeg/ffmpeg_demuxer.h"
 #include "utils/log.h"
 
 #ifdef __cplusplus

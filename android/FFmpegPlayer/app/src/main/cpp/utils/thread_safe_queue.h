@@ -14,36 +14,36 @@ public:
 
     ThreadSafeQueue(ThreadSafeQueue const &other) {
         std::lock_guard <std::mutex> lk(other.m_mutex);
-        m_dataQueue = other.m_dataQueue;
+        data_queue_ = other.m_dataQueue;
     }
 
     void Push(T new_value) {
-        std::lock_guard <std::mutex> lk(m_mutex);
-        m_dataQueue.push(new_value);
-        m_condVar.notify_one();
+        std::lock_guard <std::mutex> lk(mutex_);
+        data_queue_.push(new_value);
+        condition_.notify_one();
     }
 
     T Pop() {
-        std::unique_lock <std::mutex> lk(m_mutex);
+        std::unique_lock <std::mutex> lk(mutex_);
         if (Empty()) return nullptr;
-        T res = m_dataQueue.front();
-        m_dataQueue.pop();
+        T res = data_queue_.front();
+        data_queue_.pop();
         return res;
     }
 
     bool Empty() const {
-        return m_dataQueue.empty();
+        return data_queue_.empty();
     }
 
     int Size() {
-        std::unique_lock <std::mutex> lk(m_mutex);
-        return m_dataQueue.size();
+        std::unique_lock <std::mutex> lk(mutex_);
+        return data_queue_.size();
     }
 
 private:
-    mutable std::mutex m_mutex;
-    std::queue <T> m_dataQueue;
-    std::condition_variable m_condVar;
+    mutable std::mutex mutex_;
+    std::queue <T> data_queue_;
+    std::condition_variable condition_;
 };
 
 #endif // OPENGLES_UTILS_THREADSAFEQUEUE_H
