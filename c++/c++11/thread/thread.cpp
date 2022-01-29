@@ -8,6 +8,8 @@
 #include <mutex>
 #include <thread>
 
+// https://www.freesion.com/article/32321338069/
+
 using namespace std;
 
 // 计算机术语中的"并发"，指的是在单个系统里同时执行多个独立的活动，而不是顺序的一个接一个的执行。对于单核CPU来说，在某个时刻只可能处理一个任务，
