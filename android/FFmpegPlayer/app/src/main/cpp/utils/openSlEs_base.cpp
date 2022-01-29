@@ -25,7 +25,6 @@ void SLBase::SetQueueState(bool isLoop) {
 
 // 像队列发送数据并轮询
 bool SLBase::SendQueueLoop(const void *pBuffer, SLuint32 size) {
-    TRACE_FUNC();
     if(!isQueueLooping) return false;
     SLresult result = (*queueItf)->Enqueue(queueItf, pBuffer,size);
     if(result!=SL_RESULT_SUCCESS) return false;
@@ -39,7 +38,6 @@ bool SLBase::SendQueueLoop(const void *pBuffer, SLuint32 size) {
  * @return
  */
 bool SLBase::IsQueueSelf(SLAndroidSimpleBufferQueueItf queue) {
-    TRACE_FUNC();
     if(queue == queueItf)
         return true;
     else

@@ -1,5 +1,5 @@
-#ifndef AUDIO_OPENSLES_PCM_RENDER_H
-#define AUDIO_OPENSLES_PCM_RENDER_H
+#ifndef RENDER_AUDIO_OPENSLES_PCM_RENDER_H
+#define RENDER_AUDIO_OPENSLES_PCM_RENDER_H
 
 #include <SLES/OpenSLES.h>
 #include "openSlEs_base.h"
@@ -25,4 +25,4 @@ protected:
     virtual bool SetStateStoping();         // 设置XXX器停止状态
 };
 
-#endif //AUDIO_OPENSLES_PCM_RENDER_H
+#endif // RENDER_AUDIO_OPENSLES_PCM_RENDER_H

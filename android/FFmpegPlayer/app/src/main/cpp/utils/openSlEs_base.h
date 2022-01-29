@@ -1,5 +1,5 @@
-#ifndef AUDIO_OPENSLES_BASE_H
-#define AUDIO_OPENSLES_BASE_H
+#ifndef OPENGLES_UTILS_AUDIO_OPENSLES_BASE_H
+#define OPENGLES_UTILS_AUDIO_OPENSLES_BASE_H
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
@@ -46,4 +46,4 @@ protected:
 
 };
 
-#endif //AUDIO_OPENSLES_BASE_H
+#endif // OPENGLES_UTILS_AUDIO_OPENSLES_BASE_H

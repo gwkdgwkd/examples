@@ -5,7 +5,6 @@
 #include <stdarg.h>
 #include "utils/log.h"
 
-
 static const int AUDIO_DST_SAMPLE_RATE = 44100; // 音频编码采样率
 static const int AUDIO_DST_CHANNEL_COUNTS = 2; // 音频编码通道数
 static const uint64_t AUDIO_DST_CHANNEL_LAYOUT = AV_CH_LAYOUT_STEREO; // 音频编码声道格式
@@ -36,6 +35,7 @@ FFmpegPipeline::FFmpegPipeline(const char *url) : url_(url) {
     frame_ = nullptr;
     packet_ = nullptr;
     swr_ctx_ = nullptr;
+    sws_ctx_ = nullptr;
     thread_ = nullptr;
 
 //    av_log_set_callback(log_callback);
@@ -78,9 +78,9 @@ bool FFmpegPipeline::Init() {
         return ret;
     }
 
-    if (!InitSwscale(audio_dec_ctx_->channel_layout, audio_dec_ctx_->sample_rate,
-                     audio_dec_ctx_->sample_fmt, ACC_NB_SAMPLES, AUDIO_DST_CHANNEL_LAYOUT,
-                     AUDIO_DST_SAMPLE_RATE, DST_SAMPLT_FORMAT)) {
+    if (!InitSwresample(audio_dec_ctx_->channel_layout, audio_dec_ctx_->sample_rate,
+                        audio_dec_ctx_->sample_fmt, ACC_NB_SAMPLES, AUDIO_DST_CHANNEL_LAYOUT,
+                        AUDIO_DST_SAMPLE_RATE, DST_SAMPLT_FORMAT)) {
         LOGE("InitSwscale failed!");
         return ret;
     }
@@ -99,9 +99,11 @@ bool FFmpegPipeline::Init() {
         LOGE("Could not allocate packet");
     }
 
-    thread_ = new std::thread(&FFmpegPipeline::DecodeThread, this);
-
     return true;
+}
+
+void FFmpegPipeline::Start() {
+    thread_ = new std::thread(&FFmpegPipeline::DecodeThread, this);
 }
 
 bool FFmpegPipeline::OpenCodecContext(int *stream_idx,
@@ -153,17 +155,13 @@ bool FFmpegPipeline::OpenCodecContext(int *stream_idx,
 }
 
 AudioFrame *FFmpegPipeline::GetAudioFrame() {
-    TRACE_FUNC();
-    while(audio_frame_queue_.Empty()) {
-        LOGE("================3 %d",audio_frame_queue_.Size());
+    while (audio_frame_queue_.Empty()) {
         std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
     return audio_frame_queue_.Pop();
 }
 
 int FFmpegPipeline::OutputAudioFrame(AVFrame *frame) {
-    TRACE_FUNC();
-    LOGI("dst_frame_data_size_ is %d",dst_frame_data_size_);
     AudioFrame *audio_frame = new AudioFrame(dst_frame_data_size_);
     int ret = swr_convert(swr_ctx_, &(audio_frame->data_), dst_frame_data_size_ / 2,
                           (const uint8_t **) frame->data, frame->nb_samples);
@@ -176,7 +174,22 @@ int FFmpegPipeline::OutputAudioFrame(AVFrame *frame) {
     return ret;
 }
 
+void FFmpegPipeline::SetVideoRander(VideoRenderInterface *video_render) {
+    TRACE_FUNC();
+    video_render_ = video_render;
+}
+
 int FFmpegPipeline::OutputVideoFrame(AVFrame *frame) {
+    sws_scale(sws_ctx_, frame->data, frame->linesize, 0,
+              video_dec_ctx_->height, rgb_frame_->data, rgb_frame_->linesize);
+    NativeImage image;
+    image.format = IMAGE_FORMAT_RGBA;
+    image.width = render_width_;
+    image.height = render_height_;
+    image.ppPlane[0] = rgb_frame_->data[0];
+    image.pLineSize[0] = image.width * 4;
+    video_render_->RenderVideoFrame(&image);
+
     return 0;
 }
 
@@ -218,10 +231,10 @@ int FFmpegPipeline::DecodePacket(AVCodecContext *dec, const AVPacket *pkt) {
     return 0;
 }
 
-bool FFmpegPipeline::InitSwscale(int64_t src_ch_layout, int src_rate,
-                                 enum AVSampleFormat src_sample_fmt, int src_nb_samples,
-                                 int64_t dst_ch_layout, int dst_rate,
-                                 enum AVSampleFormat dst_sample_fmt) {
+bool FFmpegPipeline::InitSwresample(int64_t src_ch_layout, int src_rate,
+                                    enum AVSampleFormat src_sample_fmt, int src_nb_samples,
+                                    int64_t dst_ch_layout, int dst_rate,
+                                    enum AVSampleFormat dst_sample_fmt) {
     TRACE_FUNC();
     LOGI("src: sample rate: %d, format: %d, layout: %lld", src_rate,
          src_sample_fmt, src_ch_layout);
@@ -254,6 +267,37 @@ bool FFmpegPipeline::InitSwscale(int64_t src_ch_layout, int src_rate,
     dst_nb_samples_ = (int) av_rescale_rnd(src_nb_samples, dst_rate, src_rate, AV_ROUND_UP);
     dst_frame_data_size_ = av_samples_get_buffer_size(NULL, av_get_channel_layout_nb_channels(
             dst_ch_layout), dst_nb_samples_, dst_sample_fmt, 1);
+
+    return true;
+}
+
+bool FFmpegPipeline::GetVideoWidthAndHeight(int *w, int *h) {
+    *w = video_dec_ctx_->width;
+    *h = video_dec_ctx_->height;
+    return true;
+}
+
+bool FFmpegPipeline::InitSwscale(int src_width, int src_height, enum AVPixelFormat src_format,
+                                 int dst_width, int dst_height, enum AVPixelFormat dst_format) {
+    TRACE_FUNC();
+    render_width_ = dst_width;
+    render_height_ = dst_height;
+    video_width_ = video_dec_ctx_->width;
+    video_height_ = video_dec_ctx_->height;
+    src_width = video_dec_ctx_->width;
+    src_height = video_dec_ctx_->height;
+    src_format = video_dec_ctx_->pix_fmt;
+    LOGI("src: src_width: %d, src_height: %d, src_format: %d", src_width, src_height, src_format);
+    LOGI("dst: dst_width: %d, dst_height: %d, dst_format: %d", dst_width, dst_height, dst_format);
+
+    rgb_frame_ = av_frame_alloc();
+    int buffer_size = av_image_get_buffer_size(dst_format, dst_width, dst_height, 1);
+    frame_buffer_ = (uint8_t *) av_malloc(buffer_size * sizeof(uint8_t));
+    av_image_fill_arrays(rgb_frame_->data, rgb_frame_->linesize,
+                         frame_buffer_, dst_format, dst_width, dst_height, 1);
+
+    sws_ctx_ = sws_getContext(src_width, src_height, src_format, dst_width, dst_height, dst_format,
+                              SWS_FAST_BILINEAR, NULL, NULL, NULL);
 
     return true;
 }

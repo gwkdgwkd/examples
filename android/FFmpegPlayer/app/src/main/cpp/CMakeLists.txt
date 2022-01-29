@@ -11,10 +11,17 @@ include_directories(
 )
 link_directories(${jnilibs}/${ANDROID_ABI})
 file(GLOB src-files ${CMAKE_SOURCE_DIR}/*.cpp)
-file(GLOB opensles-files ${CMAKE_SOURCE_DIR}/opensles/*.cpp)
+file(GLOB utils-files ${CMAKE_SOURCE_DIR}/utils/*.cpp)
+file(GLOB audio-render-files ${CMAKE_SOURCE_DIR}/render/audio/*.cpp)
+file(GLOB video-render-files ${CMAKE_SOURCE_DIR}/render/video/*.cpp)
 
 project("ffmpegplayer")
-add_library(${libname} SHARED ${src-files} ${opensles-files})
+add_library(${libname}
+        SHARED
+        ${src-files}
+        ${utils-files}
+        ${audio-render-files}
+        ${video-render-files})
 
 find_library(
         log-lib

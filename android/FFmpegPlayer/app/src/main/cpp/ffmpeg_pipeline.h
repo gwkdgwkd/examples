@@ -4,9 +4,12 @@
 #include <string>
 #include <thread>
 #include <mutex>
+#include <functional>
 #include <condition_variable>
 
 #include "thread_safe_queue.h"
+#include "native_image.h"
+#include "render/video/video_render_interface.h"
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -15,6 +18,8 @@ extern "C" {
 #include <libavutil/channel_layout.h>
 #include <libavutil/samplefmt.h>
 #include <libswresample/swresample.h>
+#include <libswscale/swscale.h>
+#include <libavutil/imgutils.h>
 
 #include <libavcodec/version.h>
 #include <libavformat/version.h>
@@ -41,7 +46,6 @@ public:
     int data_size_ = 0;
 };
 
-
 class FFmpegPipeline {
 public:
     FFmpegPipeline(const char *url);
@@ -49,8 +53,14 @@ public:
 
     std::string GetFFmpegVersion();
     bool Init();
+    void Start();
 
     AudioFrame* GetAudioFrame();
+
+    bool InitSwscale(int src_width, int src_height, enum AVPixelFormat srcFormat,
+                     int dst_width, int dst_height, enum AVPixelFormat dstFormat);
+    bool GetVideoWidthAndHeight(int *w, int *h);
+    void SetVideoRander(VideoRenderInterface *video_render);
 
 private:
     bool OpenCodecContext(int *stream_idx,
@@ -61,7 +71,7 @@ private:
     int OutputAudioFrame(AVFrame *frame);
     int OutputVideoFrame(AVFrame *frame);
 
-    bool InitSwscale(int64_t src_ch_layout, int src_rate, enum AVSampleFormat src_sample_fmt,
+    bool InitSwresample(int64_t src_ch_layout, int src_rate, enum AVSampleFormat src_sample_fmt,
                      int src_nb_samples, int64_t dst_ch_layout, int dst_rate,
                      enum AVSampleFormat dst_sample_fmt);
 
@@ -81,6 +91,15 @@ private:
     int dst_nb_samples_;
     int dst_frame_data_size_;
     ThreadSafeQueue<AudioFrame *> audio_frame_queue_;
+
+    AVFrame *rgb_frame_ = nullptr;
+    uint8_t *frame_buffer_ = nullptr;
+    SwsContext *sws_ctx_ = nullptr;
+    int render_width_;
+    int render_height_;
+    int video_width_;
+    int video_height_;
+    VideoRenderInterface *video_render_;
 
     // thread
     std::mutex mutex_;

@@ -1,7 +1,9 @@
 #include "com_lwl_ffmpegplayer_NativeFFmpegPlayer.h"
 
 #include "ffmpeg_pipeline.h"
-#include "openSlEs_pcm_render.h"
+#include "render/audio/openSlEs_pcm_render.h"
+#include "render/video/video_render_interface.h"
+#include "render/video/native_window_render.h"
 #include "utils/log.h"
 
 #ifdef __cplusplus
@@ -9,6 +11,7 @@ extern "C" {
 #endif
 FFmpegPipeline *ffmpeg_pipeline_ptr;
 SLBase *audio_render;
+NativeWindowRender *native_window_render;
 JNIEXPORT jstring JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetFFmpegVersion
         (JNIEnv *env, jobject obj) {
 //  TRACE_FUNC();
@@ -20,14 +23,11 @@ JNIEXPORT jstring JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetFFmpeg
 }
 
 void PlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
-    TRACE_FUNC();
     if (audio_render == nullptr) return;
     if (!audio_render->IsQueueSelf(bq)) return;
     if (audio_render->IsQueueLooping()) {
-        LOGE("=============================1");
         AudioFrame *frame = ffmpeg_pipeline_ptr->GetAudioFrame();
         if (frame) {
-            LOGE("=============================2 %d",frame->data_size_);
             audio_render->SendQueueLoop(frame->data_, frame->data_size_);
         }
     }
@@ -47,8 +47,10 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Init
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Play
         (JNIEnv *env, jobject obj) {
     TRACE_FUNC();
+    ffmpeg_pipeline_ptr->Start();
     audio_render->Start();
     audio_render->SendQueueLoop("", 1);    // 开启轮询
+
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_SeekToPosition
@@ -64,10 +66,23 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_UnInit
         (JNIEnv *env, jobject obj) {}
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceCreated
-        (JNIEnv *env, jobject obj, jobject surface) {}
+        (JNIEnv *env, jobject obj, jobject surface) {
+    TRACE_FUNC();
+    native_window_render = new NativeWindowRender(env, surface);
+    int w, h;
+    ffmpeg_pipeline_ptr->GetVideoWidthAndHeight(&w, &h);
+    int dstSize[2] = {0};
+    native_window_render->Init(w, h, dstSize);
+    ffmpeg_pipeline_ptr->InitSwscale(0, 0, AV_PIX_FMT_RGBA, dstSize[0], dstSize[1],
+                                     AV_PIX_FMT_RGBA);
+    ffmpeg_pipeline_ptr->SetVideoRander(native_window_render);
+}
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceChanged
-        (JNIEnv *env, jobject obj, jint width, jint height) {}
+        (JNIEnv *env, jobject obj, jint width, jint height) {
+    TRACE_FUNC();
+    LOGI("width %d, height %d",width,height);
+}
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnDrawFrame
         (JNIEnv *env, jobject obj) {}
