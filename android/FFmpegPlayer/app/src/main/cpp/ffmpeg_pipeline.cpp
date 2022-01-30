@@ -154,7 +154,7 @@ bool FFmpegPipeline::OpenCodecContext(int *stream_idx,
     return true;
 }
 
-AudioFrame *FFmpegPipeline::GetAudioFrame() {
+AudioFrame1 *FFmpegPipeline::GetAudioFrame() {
     while (audio_frame_queue_.Empty()) {
         std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
@@ -162,7 +162,17 @@ AudioFrame *FFmpegPipeline::GetAudioFrame() {
 }
 
 int FFmpegPipeline::OutputAudioFrame(AVFrame *frame) {
-    AudioFrame *audio_frame = new AudioFrame(dst_frame_data_size_);
+
+    LOGE("=========================1");
+    LOGI("frame->linesize %d",frame->linesize);
+    LOGI("frame->channel_layout %lu",frame->channel_layout);
+    LOGI("frame->nb_samples %d",frame->nb_samples);
+    LOGI("frame->channels %d",frame->channels);
+    LOGI("frame->pts %ld",frame->pts);
+    LOGI("frame->pkt_dts %ld",frame->pkt_dts);
+    LOGI("frame->sample_rate %d",frame->sample_rate);
+    LOGE("=========================2");
+    AudioFrame1 *audio_frame = new AudioFrame1(dst_frame_data_size_);
     int ret = swr_convert(swr_ctx_, &(audio_frame->data_), dst_frame_data_size_ / 2,
                           (const uint8_t **) frame->data, frame->nb_samples);
     if (ret <= 0) {
@@ -313,6 +323,7 @@ void FFmpegPipeline::DecodeThread() {
             ret = DecodePacket(video_dec_ctx_, packet_);
         } else if (packet_->stream_index == audio_stream_idx_) {
             ret = DecodePacket(audio_dec_ctx_, packet_);
+            LOGI("%ll,%ld", packet_->dts,packet_->pts);
         }
         av_packet_unref(packet_);
         if (ret < 0) {

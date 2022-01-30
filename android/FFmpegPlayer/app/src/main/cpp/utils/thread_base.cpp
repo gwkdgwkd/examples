@@ -63,7 +63,7 @@ void ThreadBase::Resume() {
 
 void ThreadBase::Run() {
     TRACE_FUNC();
-    LOGI("enter thread: %d",std::this_thread::get_id());
+    LOGI("enter thread: %u",std::this_thread::get_id());
 
     while (!stop_flag_) {
         Process();

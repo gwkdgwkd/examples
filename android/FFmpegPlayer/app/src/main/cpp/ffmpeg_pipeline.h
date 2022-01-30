@@ -29,14 +29,14 @@ extern "C" {
 #include <libswscale/version.h>
 };
 
-class AudioFrame {
+class AudioFrame1 {
 public:
-    AudioFrame(int dataSize) {
+    AudioFrame1(int dataSize) {
         data_size_ = dataSize;
         data_ = static_cast<uint8_t *>(malloc(data_size_));
     }
 
-    ~AudioFrame() {
+    ~AudioFrame1() {
         if (data_)
             free(data_);
         data_ = nullptr;
@@ -55,7 +55,7 @@ public:
     bool Init();
     void Start();
 
-    AudioFrame* GetAudioFrame();
+    AudioFrame1* GetAudioFrame();
 
     bool InitSwscale(int src_width, int src_height, enum AVPixelFormat srcFormat,
                      int dst_width, int dst_height, enum AVPixelFormat dstFormat);
@@ -90,7 +90,7 @@ private:
     SwrContext *swr_ctx_;
     int dst_nb_samples_;
     int dst_frame_data_size_;
-    ThreadSafeQueue<AudioFrame *> audio_frame_queue_;
+    ThreadSafeQueue<AudioFrame1 *> audio_frame_queue_;
 
     AVFrame *rgb_frame_ = nullptr;
     uint8_t *frame_buffer_ = nullptr;

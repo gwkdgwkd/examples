@@ -5,7 +5,6 @@
 
 #include "thread_base.h"
 #include "thread_safe_queue.h"
-#include "ffmpep_audio_decorder.h"
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -20,12 +19,14 @@ public:
 
     bool Init();
 
+    AVCodecContext *GetCodecContext(enum AVMediaType type);
+    AVPacket *GetPacket(enum AVMediaType type);
+
 private:
     bool OpenCodecContext(int *stream_idx,
                           AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx,
                           enum AVMediaType type);
     virtual void Process() override;
-    friend AVPacket * FFmpegAudioDecorder::GetAudioPacket();
 
     std::string url_;
     AVFormatContext *fmt_ctx_;
@@ -38,6 +39,7 @@ private:
 
     ThreadSafeQueue<AVPacket *> video_packet_queue_;
     ThreadSafeQueue<AVPacket *> audio_packet_queue_;
+    AVPacketList list;
 };
 
 #endif //FFMPEG_PLAYER_FFMPEG_DEMUXER_H

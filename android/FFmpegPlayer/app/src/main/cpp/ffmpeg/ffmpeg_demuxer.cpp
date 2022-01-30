@@ -55,6 +55,9 @@ bool FFmpegDemuxer::Init() {
         audio_stream_ = fmt_ctx_->streams[audio_stream_idx_];
     }
 
+    LOGE("audio_stream_idx_ : %d",audio_stream_idx_);
+    LOGE("video_stream_idx_ : %d",video_stream_idx_);
+
     if (!video_stream_ && !audio_stream_) {
         LOGE("Could not find audio or video stream in the input, aborting");
         return ret;
@@ -66,10 +69,25 @@ bool FFmpegDemuxer::Init() {
     return true;
 }
 
+AVCodecContext *FFmpegDemuxer::GetCodecContext(enum AVMediaType type) {
+    if (type == AVMEDIA_TYPE_VIDEO) {
+        return video_dec_ctx_;
+    } else {
+        return audio_dec_ctx_;
+    }
+}
+
+AVPacket *FFmpegDemuxer::GetPacket(enum AVMediaType type) {
+    if (type == AVMEDIA_TYPE_VIDEO) {
+        return video_packet_queue_.Pop();
+    } else {
+        return audio_packet_queue_.Pop();;
+    }
+}
 
 bool FFmpegDemuxer::OpenCodecContext(int *stream_idx,
-                                      AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx,
-                                      enum AVMediaType type) {
+                                     AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx,
+                                     enum AVMediaType type) {
     TRACE_FUNC();
     bool ret = false;
 
@@ -116,10 +134,23 @@ bool FFmpegDemuxer::OpenCodecContext(int *stream_idx,
 }
 
 void FFmpegDemuxer::Process() {
+    TRACE_FUNC();
     AVPacket *packet = av_packet_alloc();
     if (!packet) {
         LOGE("Could not allocate packet");
         return;
+    }
+
+    if(packet->data == nullptr) {
+        LOGE("packet->data===========1========== is null, size %d",packet->size);
+    } else {
+        LOGE("packet->data============1========= is not null %d,size %d",packet->data,packet->size);
+        LOGE("pkt->data===========1====pkt->stream_index : %d",packet->stream_index);
+    }
+    if(packet->buf == nullptr) {
+        LOGE("packet->buf===========1========== is null");
+    } else {
+        LOGE("packet->buf===========1========== is not null");
     }
 
     // read frames from the file
@@ -128,7 +159,19 @@ void FFmpegDemuxer::Process() {
         if (packet->stream_index == video_stream_idx_) {
             video_packet_queue_.Push(packet);
         } else if (packet->stream_index == audio_stream_idx_) {
+            if(packet->data == nullptr) {
+                LOGE("packet->data===========2========== is null");
+            } else {
+                LOGE("packet->data===========2========== is not null %d, %d",packet->data,packet->size);
+            }
+            if(packet->buf == nullptr) {
+                LOGE("packet->buf===========2========== is null");
+            } else {
+                LOGE("packet->buf===========2========== is not null");
+            }
+
             audio_packet_queue_.Push(packet);
+            LOGI("==========%d : %ld %ld",audio_packet_queue_.Size(),packet->pts,packet->dts);
         } else {
             av_packet_free(&packet);
         }

@@ -1,18 +1,20 @@
 #include "com_lwl_ffmpegplayer_NativeFFmpegPlayer.h"
 
 #include "ffmpeg_pipeline.h"
-#include "render/audio/openSlEs_pcm_render.h"
-#include "render/video/video_render_interface.h"
-#include "render/video/native_window_render.h"
-#include "ffmpeg/ffmpeg_demuxer.h"
+//#include "render/audio/openSlEs_pcm_render.h"
+//#include "render/video/video_render_interface.h"
+//#include "render/video/native_window_render.h"
+//#include "ffmpeg/ffmpeg_demuxer.h"
+#include "player.h"
 #include "utils/log.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 FFmpegPipeline *ffmpeg_pipeline_ptr;
-SLBase *audio_render;
-NativeWindowRender *native_window_render;
+//SLBase *audio_render;
+//NativeWindowRender *native_window_render;
+Player *ffmpeg_player;
 JNIEXPORT jstring JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetFFmpegVersion
         (JNIEnv *env, jobject obj) {
 //  TRACE_FUNC();
@@ -24,33 +26,37 @@ JNIEXPORT jstring JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetFFmpeg
 }
 
 void PlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
-    if (audio_render == nullptr) return;
-    if (!audio_render->IsQueueSelf(bq)) return;
-    if (audio_render->IsQueueLooping()) {
-        AudioFrame *frame = ffmpeg_pipeline_ptr->GetAudioFrame();
-        if (frame) {
-            audio_render->SendQueueLoop(frame->data_, frame->data_size_);
-        }
-    }
+//    if (audio_render == nullptr) return;
+//    if (!audio_render->IsQueueSelf(bq)) return;
+//    if (audio_render->IsQueueLooping()) {
+//        AudioFrame *frame = ffmpeg_pipeline_ptr->GetAudioFrame();
+//        if (frame) {
+//            audio_render->SendQueueLoop(frame->data_, frame->data_size_);
+//        }
+//    }
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Init
         (JNIEnv *env, jobject obj, jstring jurl, jint, jint) {
     TRACE_FUNC();
     const char *url = env->GetStringUTFChars(jurl, nullptr);
-    ffmpeg_pipeline_ptr = new FFmpegPipeline(url);
-    ffmpeg_pipeline_ptr->Init();
-
-    audio_render = new SLRender();
-    audio_render->SetQueueCallBack(PlayerCallback);
+//    ffmpeg_pipeline_ptr = new FFmpegPipeline(url);
+//    ffmpeg_pipeline_ptr->Init();
+//    ffmpeg_pipeline_ptr->Start();
+//
+//    audio_render = new SLRender();
+//    audio_render->SetQueueCallBack(PlayerCallback);
+    ffmpeg_player = new Player();
+    ffmpeg_player->Init(url);
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Play
         (JNIEnv *env, jobject obj) {
     TRACE_FUNC();
-    ffmpeg_pipeline_ptr->Start();
-    audio_render->Start();
-    audio_render->SendQueueLoop("", 1);    // 开启轮询
+//    ffmpeg_pipeline_ptr->Start();
+//    audio_render->Start();
+//    audio_render->SendQueueLoop("", 1);    // 开启轮询
+    ffmpeg_player->Start();
 
 }
 
@@ -69,14 +75,14 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_UnInit
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceCreated
         (JNIEnv *env, jobject obj, jobject surface) {
     TRACE_FUNC();
-    native_window_render = new NativeWindowRender(env, surface);
-    int w, h;
-    ffmpeg_pipeline_ptr->GetVideoWidthAndHeight(&w, &h);
-    int dstSize[2] = {0};
-    native_window_render->Init(w, h, dstSize);
-    ffmpeg_pipeline_ptr->InitSwscale(0, 0, AV_PIX_FMT_RGBA, dstSize[0], dstSize[1],
-                                     AV_PIX_FMT_RGBA);
-    ffmpeg_pipeline_ptr->SetVideoRander(native_window_render);
+//    native_window_render = new NativeWindowRender(env, surface);
+//    int w, h;
+//    ffmpeg_pipeline_ptr->GetVideoWidthAndHeight(&w, &h);
+//    int dstSize[2] = {0};
+//    native_window_render->Init(w, h, dstSize);
+//    ffmpeg_pipeline_ptr->InitSwscale(0, 0, AV_PIX_FMT_RGBA, dstSize[0], dstSize[1],
+//                                     AV_PIX_FMT_RGBA);
+//    ffmpeg_pipeline_ptr->SetVideoRander(native_window_render);
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceChanged

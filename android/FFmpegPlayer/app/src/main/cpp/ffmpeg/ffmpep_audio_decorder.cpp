@@ -7,13 +7,16 @@ static const uint64_t AUDIO_DST_CHANNEL_LAYOUT = AV_CH_LAYOUT_STEREO; // 音频�
 static const AVSampleFormat DST_SAMPLT_FORMAT = AV_SAMPLE_FMT_S16;
 static const int ACC_NB_SAMPLES = 1024; // ACC音频一帧采样数
 
-FFmpegAudioDecorder::FFmpegAudioDecorder(AVCodecContext *dec_ctx) : audio_dec_ctx_(dec_ctx) {
+FFmpegAudioDecorder::FFmpegAudioDecorder(FFmpegDemuxer *ffmpeg_demuxer) : ffmpeg_demuxer_(
+        ffmpeg_demuxer) {
     TRACE_FUNC();
     swr_ctx_ = nullptr;
+    type_ = AVMEDIA_TYPE_AUDIO;
 }
 
 FFmpegAudioDecorder::~FFmpegAudioDecorder() {
-    if(swr_ctx_) {
+    TRACE_FUNC();
+    if (swr_ctx_) {
         swr_free(&swr_ctx_);
         swr_ctx_ = nullptr;
     }
@@ -21,9 +24,10 @@ FFmpegAudioDecorder::~FFmpegAudioDecorder() {
 
 bool FFmpegAudioDecorder::Init() {
     TRACE_FUNC();
-    int64_t src_ch_layout = audio_dec_ctx_->channel_layout;
-    int src_rate = audio_dec_ctx_->sample_rate;
-    enum AVSampleFormat src_sample_fmt = audio_dec_ctx_->sample_fmt;
+    AVCodecContext *codec_ctx = ffmpeg_demuxer_->GetCodecContext(type_);
+    int64_t src_ch_layout = codec_ctx->channel_layout;
+    int src_rate = codec_ctx->sample_rate;
+    enum AVSampleFormat src_sample_fmt = codec_ctx->sample_fmt;
     int src_nb_samples = ACC_NB_SAMPLES;
     int64_t dst_ch_layout = AUDIO_DST_CHANNEL_LAYOUT;
     int dst_rate = AUDIO_DST_SAMPLE_RATE;
@@ -52,7 +56,7 @@ bool FFmpegAudioDecorder::Init() {
     av_opt_set_sample_fmt(swr_ctx_, "out_sample_fmt", dst_sample_fmt, 0);
 
     /* initialize the resampling context */
-    if ((ret = swr_init(swr_ctx_)) < 0) {
+    if (swr_init(swr_ctx_) < 0) {
         LOGE("Failed to initialize the resampling context");
         return ret;
     }
@@ -64,11 +68,38 @@ bool FFmpegAudioDecorder::Init() {
     return true;
 }
 
-AVPacket * FFmpegAudioDecorder::GetAudioPacket() {
-//    return audio_packet_queue_.Pop();
+void FFmpegAudioDecorder::Process() {
+    TRACE_FUNC();
+    if (DecodePacket(ffmpeg_demuxer_->GetCodecContext(type_), ffmpeg_demuxer_->GetPacket(type_)) == 0) {
+        LOGE("=========================1");
+        LOGI("frame->linesize %d",frame_->linesize);
+        LOGI("frame->channel_layout %lu",frame_->channel_layout);
+        LOGI("frame->nb_samples %d",frame_->nb_samples);
+        LOGI("frame->channels %d",frame_->channels);
+        LOGI("frame->pts %ld",frame_->pts);
+        LOGI("frame->pkt_dts %ld",frame_->pkt_dts);
+        LOGI("frame->sample_rate %d",frame_->sample_rate);
+        LOGE("=========================2");
+
+        AudioFrame *audio_frame = new AudioFrame(dst_frame_data_size_);
+        if (swr_convert(swr_ctx_, &(audio_frame->data_), dst_frame_data_size_ / 2,
+                        (const uint8_t **) frame_->data, frame_->nb_samples) > 0) {
+            audio_frame_queue_.Push(audio_frame);
+            av_frame_unref(frame_);
+        } else {
+            LOGE("swr_convert failed!");
+        }
+    } else {
+        LOGE("decode packet failed!");
+    }
+
+    return;
 }
 
-void FFmpegAudioDecorder::Process() {
-
+AudioFrame *FFmpegAudioDecorder::GetAudioFrame() {
+    while (audio_frame_queue_.Empty()) {
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
+    }
+    return audio_frame_queue_.Pop();
 }
 
