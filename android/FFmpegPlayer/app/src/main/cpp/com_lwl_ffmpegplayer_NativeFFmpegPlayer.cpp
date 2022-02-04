@@ -4,6 +4,7 @@
 //#include "render/audio/openSlEs_pcm_render.h"
 //#include "render/video/video_render_interface.h"
 #include "render/video/native_window_render.h"
+#include "render/video/opengles_render.h"
 //#include "ffmpeg/ffmpeg_demuxer.h"
 #include "player.h"
 #include "utils/log.h"
@@ -14,6 +15,7 @@ extern "C" {
 FFmpegPipeline *ffmpeg_pipeline_ptr;
 //SLBase *audio_render;
 NativeWindowRender *native_window_render;
+OpenGLESRender *opengles_render;
 Player *ffmpeg_player;
 char *url;
 JNIEXPORT jstring JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetFFmpegVersion
@@ -87,16 +89,19 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceCre
 //                                     AV_PIX_FMT_RGBA);
 //    ffmpeg_pipeline_ptr->SetVideoRander(native_window_render);
 
-    native_window_render = new NativeWindowRender(env, surface);
+//    native_window_render = new NativeWindowRender(env, surface);
+    opengles_render = new OpenGLESRender(env, surface);
     ffmpeg_player = new Player();
-    ffmpeg_player->Init(url, native_window_render);
-    native_window_render->SetAudioDecoder(ffmpeg_player->GetAudioDecoder());
+//    ffmpeg_player->Init(url, native_window_render);
+    ffmpeg_player->Init(url, opengles_render);
+//    native_window_render->SetAudioDecoder(ffmpeg_player->GetAudioDecoder());
+    opengles_render->SetAudioDecoder(ffmpeg_player->GetAudioDecoder());
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceChanged
         (JNIEnv *env, jobject obj, jint width, jint height) {
     TRACE_FUNC();
-    LOGI("width %d, height %d", width, height);
+    LOGI("===================++++width %d, height %d", width, height);
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnDrawFrame

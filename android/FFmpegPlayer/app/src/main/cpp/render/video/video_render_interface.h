@@ -25,8 +25,6 @@ public:
     int GetRenderType() {
         return m_RenderType;
     }
-//protected:
-//    virtual void Process() = 0;
 
     FFmpegVideoDecoder *video_decoder_;
 private:

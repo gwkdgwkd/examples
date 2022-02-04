@@ -2,7 +2,7 @@
 #define RENDER_AUDIO_OPENSLES_PCM_RENDER_H
 
 #include <SLES/OpenSLES.h>
-#include "openSlEs_base.h"
+#include "../../opensles/openSlEs_base.h"
 
 class SLRender : public SLBase {
 public:

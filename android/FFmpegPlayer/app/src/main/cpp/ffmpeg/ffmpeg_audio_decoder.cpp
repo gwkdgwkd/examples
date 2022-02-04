@@ -35,10 +35,10 @@ bool FFmpegAudioDecoder::Init() {
     int dst_rate = AUDIO_DST_SAMPLE_RATE;
     enum AVSampleFormat dst_sample_fmt = DST_SAMPLT_FORMAT;
 
-    LOGI("src: sample rate: %d, format: %d, layout: %lld", src_rate,
-         src_sample_fmt, src_ch_layout);
-    LOGI("dst: sample rate: %d, format: %d, layout: %lld", dst_rate,
-         dst_sample_fmt, dst_ch_layout);
+//    LOGI("src: sample rate: %d, format: %d, layout: %lld", src_rate,
+//         src_sample_fmt, src_ch_layout);
+//    LOGI("dst: sample rate: %d, format: %d, layout: %lld", dst_rate,
+//         dst_sample_fmt, dst_ch_layout);
 
     bool ret = false;
 
@@ -71,7 +71,7 @@ bool FFmpegAudioDecoder::Init() {
 }
 
 void FFmpegAudioDecoder::Process() {
-    TRACE_FUNC();
+//    TRACE_FUNC();
 
 //    AVPacket *pkt = av_packet_alloc();
 //    int count = ffmpeg_demuxer_->GetPacket(type_, pkt);
@@ -90,9 +90,9 @@ void FFmpegAudioDecoder::Process() {
         }
         return;
     }
-    LOGE("audio packet n:%d size:%d pts:%s\n",
-         audio_packet_count_++, pkt->size,
-         av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
+//    LOGE("audio packet n:%d size:%d pts:%s\n",
+//         audio_packet_count_++, pkt->size,
+//         av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
     if (!DecodePacket(ffmpeg_demuxer_->GetCodecContext(type_), pkt) == 0) {
         LOGE("decode packet failed!");
     }
@@ -102,9 +102,9 @@ void FFmpegAudioDecoder::Process() {
 }
 
 int FFmpegAudioDecoder::OutputFrame(AVFrame *frame) {
-    LOGE("audio frame n:%d nb_samples:%d pts:%s\n",
-         audio_frame_count_++, frame->nb_samples,
-         av_ts2timestr(frame->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
+//    LOGE("audio frame n:%d nb_samples:%d pts:%s\n",
+//         audio_frame_count_++, frame->nb_samples,
+//         av_ts2timestr(frame->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
 
     AudioFrame *audio_frame = new AudioFrame(dst_frame_data_size_);
     if (swr_convert(swr_ctx_, &(audio_frame->data_), dst_frame_data_size_ / 2,

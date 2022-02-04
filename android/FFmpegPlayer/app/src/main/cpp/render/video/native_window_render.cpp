@@ -12,7 +12,6 @@ NativeWindowRender::NativeWindowRender(JNIEnv *env, jobject surface) : VideoRend
 NativeWindowRender::~NativeWindowRender() {
     if (native_window_)
         ANativeWindow_release(native_window_);
-
 }
 
 void NativeWindowRender::Init(int videoWidth, int videoHeight, int *dstSize, FFmpegVideoDecoder *video_decoder) {

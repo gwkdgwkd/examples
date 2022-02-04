@@ -28,6 +28,8 @@ void ThreadBase::Start() {
         pause_flag_ = false;
         stop_flag_ = false;
         state_ = RUNNING;
+    } else {
+        Resume();
     }
 }
 

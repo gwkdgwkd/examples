@@ -56,21 +56,21 @@ bool FFmpegVideoDecoder::Init(VideoRenderInterface *video_render) {
 }
 
 void FFmpegVideoDecoder::Process() {
-    TRACE_FUNC();
+//    TRACE_FUNC();
 
     AVPacket *pkt = av_packet_alloc();
     pkt = ffmpeg_demuxer_->GetPacket(type_);
     if (pkt == nullptr) {
-        LOGE("pkt is null");
+//        LOGE("pkt is null");
         if (ffmpeg_demuxer_->GetDemuxerState()) {
             LOGE("thread puase");
             Pause();
         }
         return;
     }
-    LOGE("video packet n:%d size:%d pts:%s\n",
-         video_packet_count_++, pkt->size,
-         av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
+//    LOGE("video packet n:%d size:%d pts:%s\n",
+//         video_packet_count_++, pkt->size,
+//         av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
     if (!DecodePacket(ffmpeg_demuxer_->GetCodecContext(type_), pkt) == 0) {
         LOGE("decode packet failed!");
     }
@@ -79,9 +79,9 @@ void FFmpegVideoDecoder::Process() {
 }
 
 int FFmpegVideoDecoder::OutputFrame(AVFrame *frame) {
-    LOGE("audio frame n:%d nb_samples:%d pts:%s\n",
-         video_frame_count_++, frame->nb_samples,
-         av_ts2timestr(frame->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
+//    LOGE("video frame n:%d nb_samples:%d pts:%s\n",
+//         video_frame_count_++, frame->nb_samples,
+//         av_ts2timestr(frame->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
 
     sws_scale(sws_ctx_, frame->data, frame->linesize, 0,
               ffmpeg_demuxer_->GetCodecContext(type_)->height, rgb_frame_->data,
@@ -103,25 +103,25 @@ int FFmpegVideoDecoder::OutputFrame(AVFrame *frame) {
     image->pLineSize[0] = image->width * 4;
     int fps1 = ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate.num /
               ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate.den;
-    LOGE("A-V fps1 %d, stream time base: %lf, codec time base %lf", fps1,
-         av_q2d(ffmpeg_demuxer_->GetAVStream(type_)->time_base), av_q2d(ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
+//    LOGE("A-V fps1 %d, stream time base: %lf, codec time base %lf", fps1,
+//         av_q2d(ffmpeg_demuxer_->GetAVStream(type_)->time_base), av_q2d(ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
     double fps = av_q2d(ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate);
-    LOGE("A-V fps %lf",fps);
+//    LOGE("A-V fps %lf",fps);
     if (isnan(fps) || fps == 0) {
         fps = av_q2d(ffmpeg_demuxer_->GetAVStream(type_)->r_frame_rate);
     }
-    LOGE("A-V fps %lf",fps);
+//    LOGE("A-V fps %lf",fps);
 //    if(isnan(fps) || fps == 0) {
 //        fps = av_q2d(av_guess_frame_rate(avFormatContext, ffmpeg_demuxer_->GetAVStream(type_)));
 //    }
     double frame_delay = 1.0 / fps;
-    LOGE("A-V frame_delay %lf", frame_delay);
+//    LOGE("A-V frame_delay %lf", frame_delay);
     image->delay = frame_delay + frame->repeat_pict / (2 * fps);
-    LOGE("A-V image->delay %lf", image->delay);
+//    LOGE("A-V image->delay %lf", image->delay);
     image->clock = frame->best_effort_timestamp *
                    av_q2d(ffmpeg_demuxer_->GetAVStream(type_)->time_base);
-    LOGE("A-V image->clock %lf %lf", frame->best_effort_timestamp, image->clock);
-    LOGE("A-V++++++++++++fps %lf, delay %lf, clock %lf", fps, image->delay, image->clock);
+//    LOGE("A-V image->clock %lf %lf", frame->best_effort_timestamp, image->clock);
+//    LOGE("A-V++++++++++++fps %lf, delay %lf, clock %lf", fps, image->delay, image->clock);
     video_image_queue_.Push(image);
 
     return 0;

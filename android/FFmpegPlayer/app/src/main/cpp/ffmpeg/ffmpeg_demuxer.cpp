@@ -108,7 +108,7 @@ AVPacket *FFmpegDemuxer::GetPacket(enum AVMediaType type) {
 //return 0;
     } else {
 //        return packet_queue_get(&audio_packet_queue_, pkt, 1, nullptr);
-        LOGE("==================== size %d", audio_packet_queue_.Size());
+//        LOGE("==================== size %d", audio_packet_queue_.Size());
         return audio_packet_queue_.Pop();
     }
 }
@@ -179,8 +179,8 @@ void FFmpegDemuxer::Process() {
         } else if (packet->stream_index == audio_stream_idx_) {
 //            PrintPackInfo(packet);
             audio_packet_queue_.Push(packet);
-            LOGE("read audio packet n : %d, size %d, pts %s", audio_packet_count_++, packet->size,
-                 av_ts2timestr(packet->pts, &audio_dec_ctx_->time_base));
+//            LOGE("read audio packet n : %d, size %d, pts %s", audio_packet_count_++, packet->size,
+//                 av_ts2timestr(packet->pts, &audio_dec_ctx_->time_base));
 //            packet_queue_put(&audio_packet_queue_, packet);
 //            PrintQueueInfo();
         } else {

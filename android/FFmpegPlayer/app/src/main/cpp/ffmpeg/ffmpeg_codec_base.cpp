@@ -37,7 +37,7 @@ int CodecBase::DecodePacket(AVCodecContext *dec, AVPacket *pkt) {
             // those two return values are special and mean there is no output
             // frame available, but there were no errors during decoding
             if (ret == AVERROR_EOF || ret == AVERROR(EAGAIN)) {
-                LOGE("AVERROR_EOF(%d) or AVERROR(EAGAIN)(%d) : %d", AVERROR_EOF, AVERROR(EAGAIN), ret);
+//                LOGE("AVERROR_EOF(%d) or AVERROR(EAGAIN)(%d) : %d", AVERROR_EOF, AVERROR(EAGAIN), ret);
                 return 0;
             }
 
