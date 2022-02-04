@@ -40,6 +40,11 @@ public class FFmpegPlayerActivity extends AppCompatActivity implements SurfaceHo
         Log.i(TAG,mVideoPath);
         nativeFFmpegPlayer.Init(mVideoPath, 1, 1);
 
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(1080,606);
+        params.topMargin = 300;
+        params.leftMargin = 0;
+        surfaceView.setLayoutParams(params);
+
     }
 
     @Override

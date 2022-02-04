@@ -1,4 +1,4 @@
-#include "ffmpep_audio_decorder.h"
+#include "ffmpeg_audio_decoder.h"
 #include "log.h"
 
 static const int AUDIO_DST_SAMPLE_RATE = 44100; // 音频编码采样率
@@ -7,14 +7,16 @@ static const uint64_t AUDIO_DST_CHANNEL_LAYOUT = AV_CH_LAYOUT_STEREO; // 音频�
 static const AVSampleFormat DST_SAMPLT_FORMAT = AV_SAMPLE_FMT_S16;
 static const int ACC_NB_SAMPLES = 1024; // ACC音频一帧采样数
 
-FFmpegAudioDecorder::FFmpegAudioDecorder(FFmpegDemuxer *ffmpeg_demuxer) : ffmpeg_demuxer_(
+FFmpegAudioDecoder::FFmpegAudioDecoder(FFmpegDemuxer *ffmpeg_demuxer) : ffmpeg_demuxer_(
         ffmpeg_demuxer) {
     TRACE_FUNC();
     swr_ctx_ = nullptr;
     type_ = AVMEDIA_TYPE_AUDIO;
+    audio_frame_count_ = 0;
+    audio_packet_count_ = 0;
 }
 
-FFmpegAudioDecorder::~FFmpegAudioDecorder() {
+FFmpegAudioDecoder::~FFmpegAudioDecoder() {
     TRACE_FUNC();
     if (swr_ctx_) {
         swr_free(&swr_ctx_);
@@ -22,7 +24,7 @@ FFmpegAudioDecorder::~FFmpegAudioDecorder() {
     }
 }
 
-bool FFmpegAudioDecorder::Init() {
+bool FFmpegAudioDecoder::Init() {
     TRACE_FUNC();
     AVCodecContext *codec_ctx = ffmpeg_demuxer_->GetCodecContext(type_);
     int64_t src_ch_layout = codec_ctx->channel_layout;
@@ -68,38 +70,62 @@ bool FFmpegAudioDecorder::Init() {
     return true;
 }
 
-void FFmpegAudioDecorder::Process() {
+void FFmpegAudioDecoder::Process() {
     TRACE_FUNC();
-    if (DecodePacket(ffmpeg_demuxer_->GetCodecContext(type_), ffmpeg_demuxer_->GetPacket(type_)) == 0) {
-        LOGE("=========================1");
-        LOGI("frame->linesize %d",frame_->linesize);
-        LOGI("frame->channel_layout %lu",frame_->channel_layout);
-        LOGI("frame->nb_samples %d",frame_->nb_samples);
-        LOGI("frame->channels %d",frame_->channels);
-        LOGI("frame->pts %ld",frame_->pts);
-        LOGI("frame->pkt_dts %ld",frame_->pkt_dts);
-        LOGI("frame->sample_rate %d",frame_->sample_rate);
-        LOGE("=========================2");
 
-        AudioFrame *audio_frame = new AudioFrame(dst_frame_data_size_);
-        if (swr_convert(swr_ctx_, &(audio_frame->data_), dst_frame_data_size_ / 2,
-                        (const uint8_t **) frame_->data, frame_->nb_samples) > 0) {
-            audio_frame_queue_.Push(audio_frame);
-            av_frame_unref(frame_);
-        } else {
-            LOGE("swr_convert failed!");
+//    AVPacket *pkt = av_packet_alloc();
+//    int count = ffmpeg_demuxer_->GetPacket(type_, pkt);
+//    LOGE("audio packet count %d", count);
+//    if(!count  && ffmpeg_demuxer_->GetDemuxerState()) {
+//        LOGE("audio packet flush the decoders");
+//        DecodePacket(ffmpeg_demuxer_->GetCodecContext(type_), nullptr);
+//    }
+    AVPacket *pkt = av_packet_alloc();
+    pkt = ffmpeg_demuxer_->GetPacket(type_);
+    if (pkt == nullptr) {
+        LOGE("pkt is null");
+        if(ffmpeg_demuxer_->GetDemuxerState()) {
+            LOGE("thread puase");
+            Pause();
         }
-    } else {
+        return;
+    }
+    LOGE("audio packet n:%d size:%d pts:%s\n",
+         audio_packet_count_++, pkt->size,
+         av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
+    if (!DecodePacket(ffmpeg_demuxer_->GetCodecContext(type_), pkt) == 0) {
         LOGE("decode packet failed!");
     }
+
 
     return;
 }
 
-AudioFrame *FFmpegAudioDecorder::GetAudioFrame() {
+int FFmpegAudioDecoder::OutputFrame(AVFrame *frame) {
+    LOGE("audio frame n:%d nb_samples:%d pts:%s\n",
+         audio_frame_count_++, frame->nb_samples,
+         av_ts2timestr(frame->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
+
+    AudioFrame *audio_frame = new AudioFrame(dst_frame_data_size_);
+    if (swr_convert(swr_ctx_, &(audio_frame->data_), dst_frame_data_size_ / 2,
+                    (const uint8_t **) frame->data, frame->nb_samples) > 0) {
+        audio_frame->clock_ = frame->pts * av_q2d(ffmpeg_demuxer_->GetCodecContext(type_)->time_base);
+        audio_frame_queue_.Push(audio_frame);
+        av_frame_unref(frame_);
+    } else {
+        LOGE("swr_convert failed!");
+    }
+
+    return 0;
+}
+
+AudioFrame *FFmpegAudioDecoder::GetAudioFrame() {
     while (audio_frame_queue_.Empty()) {
         std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
-    return audio_frame_queue_.Pop();
+
+    AudioFrame *ret = audio_frame_queue_.Pop();
+    clock_ = ret->clock_;
+    return ret;
 }
 

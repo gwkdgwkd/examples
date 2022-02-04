@@ -67,6 +67,7 @@ void ThreadBase::Run() {
 
     while (!stop_flag_) {
         Process();
+        std::this_thread::sleep_for(std::chrono::nanoseconds(10));
         if (pause_flag_) {
             std::unique_lock <std::mutex> lck(mutex_);
             while (pause_flag_) {

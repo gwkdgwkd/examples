@@ -9,7 +9,7 @@
 
 #include "thread_safe_queue.h"
 #include "native_image.h"
-#include "render/video/video_render_interface.h"
+//#include "render/video/video_render_interface.h"
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -60,7 +60,7 @@ public:
     bool InitSwscale(int src_width, int src_height, enum AVPixelFormat srcFormat,
                      int dst_width, int dst_height, enum AVPixelFormat dstFormat);
     bool GetVideoWidthAndHeight(int *w, int *h);
-    void SetVideoRander(VideoRenderInterface *video_render);
+//    void SetVideoRander(VideoRenderInterface *video_render);
 
 private:
     bool OpenCodecContext(int *stream_idx,
@@ -99,7 +99,7 @@ private:
     int render_height_;
     int video_width_;
     int video_height_;
-    VideoRenderInterface *video_render_;
+//    VideoRenderInterface *video_render_;
 
     // thread
     std::mutex mutex_;

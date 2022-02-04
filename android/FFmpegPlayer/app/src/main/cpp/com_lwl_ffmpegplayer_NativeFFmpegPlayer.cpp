@@ -3,7 +3,7 @@
 #include "ffmpeg_pipeline.h"
 //#include "render/audio/openSlEs_pcm_render.h"
 //#include "render/video/video_render_interface.h"
-//#include "render/video/native_window_render.h"
+#include "render/video/native_window_render.h"
 //#include "ffmpeg/ffmpeg_demuxer.h"
 #include "player.h"
 #include "utils/log.h"
@@ -13,8 +13,9 @@ extern "C" {
 #endif
 FFmpegPipeline *ffmpeg_pipeline_ptr;
 //SLBase *audio_render;
-//NativeWindowRender *native_window_render;
+NativeWindowRender *native_window_render;
 Player *ffmpeg_player;
+char *url;
 JNIEXPORT jstring JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetFFmpegVersion
         (JNIEnv *env, jobject obj) {
 //  TRACE_FUNC();
@@ -39,15 +40,17 @@ void PlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Init
         (JNIEnv *env, jobject obj, jstring jurl, jint, jint) {
     TRACE_FUNC();
-    const char *url = env->GetStringUTFChars(jurl, nullptr);
+    const char *url1 = env->GetStringUTFChars(jurl, nullptr);
+    url = (char *)url1;
 //    ffmpeg_pipeline_ptr = new FFmpegPipeline(url);
 //    ffmpeg_pipeline_ptr->Init();
 //    ffmpeg_pipeline_ptr->Start();
 //
 //    audio_render = new SLRender();
 //    audio_render->SetQueueCallBack(PlayerCallback);
-    ffmpeg_player = new Player();
-    ffmpeg_player->Init(url);
+
+//    ffmpeg_player = new Player();
+//    ffmpeg_player->Init(url);
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Play
@@ -83,12 +86,17 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceCre
 //    ffmpeg_pipeline_ptr->InitSwscale(0, 0, AV_PIX_FMT_RGBA, dstSize[0], dstSize[1],
 //                                     AV_PIX_FMT_RGBA);
 //    ffmpeg_pipeline_ptr->SetVideoRander(native_window_render);
+
+    native_window_render = new NativeWindowRender(env, surface);
+    ffmpeg_player = new Player();
+    ffmpeg_player->Init(url, native_window_render);
+    native_window_render->SetAudioDecoder(ffmpeg_player->GetAudioDecoder());
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceChanged
         (JNIEnv *env, jobject obj, jint width, jint height) {
     TRACE_FUNC();
-    LOGI("width %d, height %d",width,height);
+    LOGI("width %d, height %d", width, height);
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnDrawFrame

@@ -36,6 +36,8 @@ typedef struct _tag_NativeImage
 	int width;
 	int height;
 	int format;
+	double delay;
+	double clock;
 	uint8_t *ppPlane[3];
 	int pLineSize[3];
 	_tag_NativeImage()
@@ -43,6 +45,8 @@ typedef struct _tag_NativeImage
 		width = 0;
 		height = 0;
 		format = 0;
+		delay = 0.0;
+		clock = 0.0;
 		ppPlane[0] = nullptr;
 		ppPlane[1] = nullptr;
 		ppPlane[2] = nullptr;

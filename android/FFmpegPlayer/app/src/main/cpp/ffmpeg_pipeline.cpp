@@ -162,16 +162,6 @@ AudioFrame1 *FFmpegPipeline::GetAudioFrame() {
 }
 
 int FFmpegPipeline::OutputAudioFrame(AVFrame *frame) {
-
-    LOGE("=========================1");
-    LOGI("frame->linesize %d",frame->linesize);
-    LOGI("frame->channel_layout %lu",frame->channel_layout);
-    LOGI("frame->nb_samples %d",frame->nb_samples);
-    LOGI("frame->channels %d",frame->channels);
-    LOGI("frame->pts %ld",frame->pts);
-    LOGI("frame->pkt_dts %ld",frame->pkt_dts);
-    LOGI("frame->sample_rate %d",frame->sample_rate);
-    LOGE("=========================2");
     AudioFrame1 *audio_frame = new AudioFrame1(dst_frame_data_size_);
     int ret = swr_convert(swr_ctx_, &(audio_frame->data_), dst_frame_data_size_ / 2,
                           (const uint8_t **) frame->data, frame->nb_samples);
@@ -184,10 +174,10 @@ int FFmpegPipeline::OutputAudioFrame(AVFrame *frame) {
     return ret;
 }
 
-void FFmpegPipeline::SetVideoRander(VideoRenderInterface *video_render) {
-    TRACE_FUNC();
-    video_render_ = video_render;
-}
+//void FFmpegPipeline::SetVideoRander(VideoRenderInterface *video_render) {
+//    TRACE_FUNC();
+//    video_render_ = video_render;
+//}
 
 int FFmpegPipeline::OutputVideoFrame(AVFrame *frame) {
     sws_scale(sws_ctx_, frame->data, frame->linesize, 0,
@@ -198,7 +188,7 @@ int FFmpegPipeline::OutputVideoFrame(AVFrame *frame) {
     image.height = render_height_;
     image.ppPlane[0] = rgb_frame_->data[0];
     image.pLineSize[0] = image.width * 4;
-    video_render_->RenderVideoFrame(&image);
+//    video_render_->RenderVideoFrame(&image);
 
     return 0;
 }
@@ -216,6 +206,10 @@ int FFmpegPipeline::DecodePacket(AVCodecContext *dec, const AVPacket *pkt) {
     // get all the available frames from the decoder
     while (ret >= 0) {
         ret = avcodec_receive_frame(dec, frame_);
+        if (dec->codec->type == AVMEDIA_TYPE_AUDIO){
+            LOGE("==========ret %d",ret);
+        }
+
         if (ret < 0) {
             // those two return values are special and mean there is no output
             // frame available, but there were no errors during decoding

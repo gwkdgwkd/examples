@@ -12,6 +12,7 @@ public:
 
 protected:
     int DecodePacket(AVCodecContext *dec, AVPacket *pkt);
+    virtual int OutputFrame(AVFrame *frame) = 0;
 
     AVFrame *frame_;
 };

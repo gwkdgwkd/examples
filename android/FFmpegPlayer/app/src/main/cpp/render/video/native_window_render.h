@@ -6,19 +6,28 @@
 #include <jni.h>
 
 #include "video_render_interface.h"
+#include "../ffmpeg/ffmpeg_audio_decoder.h"
 
-class NativeWindowRender : public VideoRenderInterface{
+class NativeWindowRender : public VideoRenderInterface {
 
 public:
     NativeWindowRender(JNIEnv *env, jobject surface);
     virtual ~NativeWindowRender();
-    virtual void Init(int videoWidth, int videoHeight, int *dstSize);
+
+    virtual void Init(int videoWidth, int videoHeight, int *dstSize, FFmpegVideoDecoder *video_decoder);
     virtual void RenderVideoFrame(NativeImage *pImage);
     virtual void UnInit();
 
+    void SetAudioDecoder(FFmpegAudioDecoder *audio_decoder) { audio_decoder_ = audio_decoder; }
+
 private:
+    virtual void Process() override;
+
     ANativeWindow_Buffer native_window_buffer_;
     ANativeWindow *native_window_ = nullptr;
+
+    FFmpegAudioDecoder *audio_decoder_;
+
     int real_width_;
     int real_height_;
 };

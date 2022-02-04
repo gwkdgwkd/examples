@@ -4,6 +4,7 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <chrono>
 #include <condition_variable>
 
 class ThreadBase {

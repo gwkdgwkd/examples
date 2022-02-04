@@ -1,5 +1,5 @@
-#ifndef FFMPEG_PLAYER_FFMPEP_AUDIO_DECORDER_H
-#define FFMPEG_PLAYER_FFMPEP_AUDIO_DECORDER_H
+#ifndef FFMPEG_PLAYER_FFMPEG_AUDIO_DECODER_H
+#define FFMPEG_PLAYER_FFMPEG_AUDIO_DECODER_H
 
 #include "thread_base.h"
 #include "thread_safe_queue.h"
@@ -10,6 +10,7 @@ extern "C" {
 #include <libavutil/opt.h>
 #include <libavutil/channel_layout.h>
 #include <libavutil/samplefmt.h>
+#include <libavutil/timestamp.h>
 #include <libswresample/swresample.h>
 };
 
@@ -28,17 +29,21 @@ public:
 
     uint8_t *data_ = nullptr;
     int data_size_ = 0;
+    double clock_ = 0.0;
 };
 
-class FFmpegAudioDecorder : public ThreadBase, CodecBase{
+class FFmpegAudioDecoder : public ThreadBase, CodecBase{
 public:
-    FFmpegAudioDecorder(FFmpegDemuxer *ffmpeg_demuxer);
-    ~FFmpegAudioDecorder();
+    FFmpegAudioDecoder(FFmpegDemuxer *ffmpeg_demuxer);
+    ~FFmpegAudioDecoder();
 
     bool Init();
     AudioFrame *GetAudioFrame();
+
+    double GetClock() {return clock_;}
 private:
     virtual void Process() override;
+    virtual int OutputFrame(AVFrame *frame) override;
 
     enum AVMediaType type_;
     SwrContext *swr_ctx_;
@@ -46,6 +51,10 @@ private:
     int dst_frame_data_size_;
     ThreadSafeQueue<AudioFrame *> audio_frame_queue_;
     FFmpegDemuxer *ffmpeg_demuxer_;
+
+    int audio_frame_count_;
+    int audio_packet_count_;
+    double clock_;
 };
 
-#endif // FFMPEG_PLAYER_FFMPEP_AUDIO_DECORDER_H
+#endif // FFMPEG_PLAYER_FFMPEG_AUDIO_DECODER_H
