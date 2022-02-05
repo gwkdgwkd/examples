@@ -9,6 +9,11 @@ public class NativeFFmpegPlayer {
     public void AddEventCallback(EventCallback callback) {
         eventCallback = callback;
     }
+    private void playerEventCallback(int msgType, float msgValue) {
+        if(eventCallback != null)
+            eventCallback.onPlayerEvent(msgType, msgValue);
+
+    }
 
     public native String GetFFmpegVersion();
     public native void Init(String url, int playerType, int renderType);

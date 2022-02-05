@@ -8,11 +8,13 @@
 
 OpenGLESRender::OpenGLESRender(JNIEnv *env, jobject surface) : VideoRenderInterface(
         VIDEO_RENDER_ANWINDOW) {
+    TRACE_FUNC();
     is_opengles_init_ = false;
     native_window_ = ANativeWindow_fromSurface(env, surface);
 }
 
 OpenGLESRender::~OpenGLESRender() {
+    TRACE_FUNC();
     if (native_window_)
         ANativeWindow_release(native_window_);
 }

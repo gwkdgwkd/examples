@@ -13,6 +13,7 @@ extern "C" {
 #include <libavutil/timestamp.h>
 };
 
+typedef void (*MessageCallback)(void*, int, float);
 
 class FFmpegDemuxer : public ThreadBase {
 public:
@@ -26,6 +27,13 @@ public:
     AVPacket * GetPacket(enum AVMediaType type);
     bool GetDemuxerState() { return is_demuxer_finish_; }
 
+    void SetMessageCallback(void* context, MessageCallback callback) {
+        m_MsgContext = context;
+        m_MsgCallback = callback;
+    }
+    void * m_MsgContext = nullptr;
+    MessageCallback m_MsgCallback = nullptr;
+
 private:
     bool OpenCodecContext(int *stream_idx,
                           AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx,
@@ -33,6 +41,8 @@ private:
     virtual void Process() override;
     void PrintPackInfo(AVPacket *pkt);
     void PrintQueueInfo();
+
+
 
     std::string url_;
     AVFormatContext *fmt_ctx_;

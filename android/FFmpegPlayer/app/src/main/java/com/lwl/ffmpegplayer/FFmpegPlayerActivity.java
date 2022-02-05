@@ -69,9 +69,10 @@ public class FFmpegPlayerActivity extends AppCompatActivity implements SurfaceHo
 
     @Override
     public void onPlayerEvent(int msgType, float msgValue) {
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(1080,606);
-        params.topMargin = 300;
-        params.leftMargin = 0;
-        surfaceView.setLayoutParams(params);
+        Log.d(TAG, "================----- msgType " + msgType + ", msgValue " + msgValue);
+//        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(1080,606);
+//        params.topMargin = 300;
+//        params.leftMargin = 0;
+//        surfaceView.setLayoutParams(params);
     }
 }

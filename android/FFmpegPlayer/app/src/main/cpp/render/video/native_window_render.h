@@ -18,15 +18,11 @@ public:
     virtual void RenderVideoFrame(NativeImage *pImage);
     virtual void UnInit();
 
-    void SetAudioDecoder(FFmpegAudioDecoder *audio_decoder) { audio_decoder_ = audio_decoder; }
-
 private:
     virtual void Process() override;
 
     ANativeWindow_Buffer native_window_buffer_;
     ANativeWindow *native_window_ = nullptr;
-
-    FFmpegAudioDecoder *audio_decoder_;
 
     int real_width_;
     int real_height_;

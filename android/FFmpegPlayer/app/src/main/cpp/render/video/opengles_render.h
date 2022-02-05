@@ -6,7 +6,6 @@
 #include <jni.h>
 
 #include "video_render_interface.h"
-#include "ffmpeg_audio_decoder.h"
 #include "egl_core.h"
 #include "wapped_shader_program.h"
 #include "wapped_texture.h"
@@ -21,8 +20,6 @@ public:
     virtual void RenderVideoFrame(NativeImage *pImage);
     virtual void UnInit();
 
-    void SetAudioDecoder(FFmpegAudioDecoder *audio_decoder) { audio_decoder_ = audio_decoder; }
-
 private:
     virtual void Process() override;
     bool OpenglesInit();
@@ -30,8 +27,6 @@ private:
     void Render();
 
     ANativeWindow *native_window_ = nullptr;
-
-    FFmpegAudioDecoder *audio_decoder_;
 
     EGLCore *egl_core_ptr_;
     WappedShaderProgram *wapped_shader_program_ptr_;

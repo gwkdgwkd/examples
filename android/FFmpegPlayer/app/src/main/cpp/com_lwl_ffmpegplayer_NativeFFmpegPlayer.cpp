@@ -14,8 +14,7 @@ extern "C" {
 #endif
 FFmpegPipeline *ffmpeg_pipeline_ptr;
 //SLBase *audio_render;
-NativeWindowRender *native_window_render;
-OpenGLESRender *opengles_render;
+
 Player *ffmpeg_player;
 char *url;
 JNIEXPORT jstring JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetFFmpegVersion
@@ -89,13 +88,10 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceCre
 //                                     AV_PIX_FMT_RGBA);
 //    ffmpeg_pipeline_ptr->SetVideoRander(native_window_render);
 
-//    native_window_render = new NativeWindowRender(env, surface);
-    opengles_render = new OpenGLESRender(env, surface);
-    ffmpeg_player = new Player();
+
 //    ffmpeg_player->Init(url, native_window_render);
-    ffmpeg_player->Init(url, opengles_render);
-//    native_window_render->SetAudioDecoder(ffmpeg_player->GetAudioDecoder());
-    opengles_render->SetAudioDecoder(ffmpeg_player->GetAudioDecoder());
+    ffmpeg_player = new Player();
+    ffmpeg_player->Init(env, obj, surface, url);
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceChanged
