@@ -1,8 +1,8 @@
 #ifndef FFMPEG_PLAYER_OPENGLES_WAPPED_TEXTURE_H
 #define FFMPEG_PLAYER_OPENGLES_WAPPED_TEXTURE_H
 
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
 
 class WappedTexture {
 

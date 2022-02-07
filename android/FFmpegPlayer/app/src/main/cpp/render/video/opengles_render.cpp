@@ -5,6 +5,60 @@
 #define AV_SYNC_THRESHOLD_MAX 0.1
 
 // https://blog.csdn.net/u010302327/article/details/77031445
+static const char *kVertexShader = R"(
+#version 300 es
+layout(location = 0) in vec4 a_position;
+layout(location = 1) in vec2 a_texcoord;
+out vec2 v_texcorrd;
+void main(void) {
+    gl_Position = a_position;
+    v_texcorrd = a_texcoord;
+})";
+
+static const char *kFragmentShader = R"(
+#version 300 es
+precision mediump float;
+in vec2 v_texcorrd;
+layout(location = 0) out vec4 outcolor;
+uniform sampler2D s_texturemap;
+void main() {
+    outcolor = texture(s_texturemap, v_texcorrd);
+})";
+
+static const char *kUniformName = "s_texturemap";
+
+
+/* 渲染坐标系或OpenGLES坐标系:
+    (-1.0, 1.0)             ( 1.0, 1.0)
+                ( 0.0, 0.0)
+    (-1.0,-1.0)             ( 1.0,-1.0)
+*/
+static GLfloat kVerticesCoords[] = {
+        -1.0f,  1.0f, 0.0f,  // Position 0 : left top
+        -1.0f, -1.0f, 0.0f,  // Position 1 : left bottom
+        1.0f, -1.0f, 0.0f,   // Position 2 : right bottom
+        1.0f,  1.0f, 0.0f,   // Position 3 : right top
+};
+
+/* 纹理坐标：
+    (0,0)       (1,0)
+
+    (0,1)       (1,1)
+*/
+static GLfloat kTextureCoords[] = {
+        0.0f,  0.0f,        // TexCoord 0 : left top
+        0.0f,  1.0f,        // TexCoord 1 : left bottom
+        1.0f,  1.0f,        // TexCoord 2 : right bottom
+        1.0f,  0.0f         // TexCoord 3 : right top
+
+// 旋转180度：
+//        1.0f,  1.0f,        // TexCoord 2 : right bottom
+//        1.0f,  0.0f,        // TexCoord 3 : right top
+//        0.0f,  0.0f,        // TexCoord 0 : left top
+//        0.0f,  1.0f         // TexCoord 1 : left bottom
+};
+
+GLushort kIndices[] = { 0, 1, 2, 0, 2, 3 };
 
 OpenGLESRender::OpenGLESRender(JNIEnv *env, jobject surface) : VideoRenderInterface(
         VIDEO_RENDER_ANWINDOW) {
@@ -68,7 +122,7 @@ bool OpenGLESRender::OpenglesInit() {
     }
 
     wapped_shader_program_ptr_ = new WappedShaderProgram();
-    if (!wapped_shader_program_ptr_->Init()) {
+    if (!wapped_shader_program_ptr_->Init(kVertexShader, kFragmentShader, kUniformName)) {
         LOGE("shader program init failed!");
         return ret;
     }
@@ -88,6 +142,7 @@ void OpenGLESRender::Process() {
 
     if (!is_opengles_init_) {
         OpenglesInit();
+        return;
     }
 
     NativeImage *pImage = video_decoder_->GetVideoImage();
@@ -114,7 +169,6 @@ void OpenGLESRender::Process() {
 
     wapped_texture_ptr_->UpdateTexImage((unsigned char *) pImage->ppPlane[0], pImage->width,
                                         pImage->height);
-
     DrawFrame();
 
     NativeImageUtil::FreeNativeImage(pImage);
@@ -123,31 +177,30 @@ void OpenGLESRender::Process() {
 
 void OpenGLESRender::DrawFrame() {
     TRACE_FUNC();
-    Render();
+    LOGI("left %d, right %d, width %d, height %d", 0, 0, real_width_,
+         real_height_);
+
+    glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+
+    glUseProgram(wapped_shader_program_ptr_->GetProgram());
+
+    // Load the vertex position
+    glVertexAttribPointer (0, 3, GL_FLOAT,
+                           GL_FALSE, 3 * sizeof (GLfloat), kVerticesCoords);
+    // Load the texture coordinate
+    glVertexAttribPointer (1, 2, GL_FLOAT,
+                           GL_FALSE, 2 * sizeof (GLfloat), kTextureCoords);
+    glEnableVertexAttribArray (0);
+    glEnableVertexAttribArray (1);
+
+    wapped_texture_ptr_->BindTexture(wapped_shader_program_ptr_->GetUniformSampler());
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, kIndices);
+
     if (!egl_core_ptr_->SwapBuffers()) {
         LOGE("eglSwapBuffers() returned error %d", eglGetError());
     }
-}
-
-void OpenGLESRender::Render() {
-    TRACE_FUNC();
-    LOGI("left %d, right %d, width %d, height %d", 0, 0, real_width_,
-         real_height_);
-    glViewport(0, 0, real_width_, real_height_);
-    glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glUseProgram(wapped_shader_program_ptr_->GetProgram());
-    static const GLfloat _vertices[] = {-1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f};
-    glVertexAttribPointer(WappedShaderProgram::ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, _vertices);
-    glEnableVertexAttribArray(WappedShaderProgram::ATTRIBUTE_VERTEX);
-    static const GLfloat texCoords[] = {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
-    glVertexAttribPointer(WappedShaderProgram::ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, 0, 0, texCoords);
-    glEnableVertexAttribArray(WappedShaderProgram::ATTRIBUTE_TEXCOORD);
-    wapped_texture_ptr_->BindTexture(wapped_shader_program_ptr_->GetUniformSampler());
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 

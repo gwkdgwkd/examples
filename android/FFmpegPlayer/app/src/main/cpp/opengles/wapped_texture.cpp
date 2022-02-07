@@ -24,6 +24,7 @@ void WappedTexture::UpdateTexImage(unsigned char *pixels, int frameWidth, int fr
         }
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frameWidth, frameHeight, 0, GL_RGBA,
                      GL_UNSIGNED_BYTE, pixels);
+        glBindTexture(GL_TEXTURE_2D, GL_NONE);
     }
 }
 
@@ -35,6 +36,7 @@ bool WappedTexture::BindTexture(GLint uniformSampler) {
         return false;
     }
     glUniform1i(uniformSampler, 0);
+
     return true;
 }
 
@@ -46,6 +48,8 @@ int WappedTexture::InitTexture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, GL_NONE);
+
     return 1;
 }
 

@@ -5,30 +5,14 @@
 #include "wapped_shader_program.h"
 #include "log.h"
 
-static const char *VERTEX_SHADER =
-        "attribute vec4 position;    \n"
-        "attribute vec2 texcoord;   \n"
-        "varying vec2 v_texcoord;     \n"
-        "void main(void)               \n"
-        "{                            \n"
-        "   gl_Position = position;  \n"
-        "   v_texcoord = texcoord;  \n"
-        "}                            \n";
-static const char *FRAGMENT_SHADER =
-        "varying highp vec2 v_texcoord;\n"
-        "uniform sampler2D yuvTexSampler;\n"
-        "void main() {\n"
-        "  gl_FragColor = texture2D(yuvTexSampler, v_texcoord);\n"
-        "}\n";
-
-const char* WappedShaderProgram::TAG_ = "WappedShaderProgram";
+const char *WappedShaderProgram::TAG_ = "WappedShaderProgram";
 
 WappedShaderProgram::WappedShaderProgram() {
     TRACE_FUNC();
     vertex_shader_ = 0;
     fragment_shader_ = 0;
     program_ = 0;
-    uniformSampler_ = 0;
+    uniform_sampler_ = 0;
 }
 
 WappedShaderProgram::~WappedShaderProgram() {
@@ -43,7 +27,7 @@ WappedShaderProgram::~WappedShaderProgram() {
     }
 }
 
-bool WappedShaderProgram::Init() {
+bool WappedShaderProgram::Init(const char *vs, const char *fs, const char* un) {
     TRACE_FUNC();
     int ret = false;
 
@@ -51,20 +35,16 @@ bool WappedShaderProgram::Init() {
     program_ = glCreateProgram();
 
     // attach vertex shader
-    if (!CompileShader(&vertex_shader_, GL_VERTEX_SHADER, VERTEX_SHADER)) {
+    if (!CompileShader(&vertex_shader_, GL_VERTEX_SHADER, vs)) {
         return ret;
     }
     glAttachShader(program_, vertex_shader_);
 
     // attach fragment shader
-    if (!CompileShader(&fragment_shader_, GL_FRAGMENT_SHADER, FRAGMENT_SHADER)) {
+    if (!CompileShader(&fragment_shader_, GL_FRAGMENT_SHADER, fs)) {
         return ret;
     }
     glAttachShader(program_, fragment_shader_);
-
-    // bind attribute
-    glBindAttribLocation(program_, ATTRIBUTE_VERTEX, "position");
-    glBindAttribLocation(program_, ATTRIBUTE_TEXCOORD, "texcoord");
 
     // link program
     glLinkProgram(program_);
@@ -74,10 +54,7 @@ bool WappedShaderProgram::Init() {
         return ret;
     }
 
-    // user program
-    glUseProgram(program_);
-
-    uniformSampler_ = glGetUniformLocation(program_, "yuvTexSampler");
+    uniform_sampler_ = glGetUniformLocation(program_, un);
 
     return true;
 }

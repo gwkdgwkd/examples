@@ -24,7 +24,6 @@ private:
     virtual void Process() override;
     bool OpenglesInit();
     void DrawFrame();
-    void Render();
 
     ANativeWindow *native_window_ = nullptr;
 
