@@ -30,6 +30,7 @@ public:
 protected:
     FFmpegVideoDecoder *video_decoder_;
     FFmpegAudioDecoder *audio_decoder_;
+    long frame_index_;
 private:
     int m_RenderType = VIDEO_RENDER_ANWINDOW;
 

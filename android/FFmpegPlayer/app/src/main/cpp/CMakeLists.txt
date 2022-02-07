@@ -6,6 +6,7 @@ set(jnilibs ${CMAKE_SOURCE_DIR}/lib)
 set(libname ffmpegplayer)
 include_directories(
         include
+        glm
         ${CMAKE_SOURCE_DIR}/utils
         ${CMAKE_SOURCE_DIR}/ffmpeg
         ${CMAKE_SOURCE_DIR}/opensles

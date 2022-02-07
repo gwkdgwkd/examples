@@ -13,6 +13,11 @@
 class OpenGLESRender : public VideoRenderInterface {
 
 public:
+    enum EffectType {
+        kNoEffect,
+        kDynimicMesh,
+        kGrayImage
+    };
     OpenGLESRender(JNIEnv *env, jobject surface);
     virtual ~OpenGLESRender();
 
@@ -23,14 +28,17 @@ public:
 private:
     virtual void Process() override;
     bool OpenglesInit();
+    bool VaoInit();
     void DrawFrame();
 
     ANativeWindow *native_window_ = nullptr;
-
     EGLCore *egl_core_ptr_;
     WappedShaderProgram *wapped_shader_program_ptr_;
     WappedTexture *wapped_texture_ptr_;
     std::atomic_bool is_opengles_init_;
+    GLuint vao_id_;
+    GLuint vbo_ids_[3];
+    EffectType effect_type_;
 
     int real_width_;
     int real_height_;
