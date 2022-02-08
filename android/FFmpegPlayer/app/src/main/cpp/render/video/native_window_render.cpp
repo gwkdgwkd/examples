@@ -4,8 +4,8 @@
 #define AV_SYNC_THRESHOLD_MIN 0.04
 #define AV_SYNC_THRESHOLD_MAX 0.1
 
-NativeWindowRender::NativeWindowRender(JNIEnv *env, jobject surface) : VideoRenderInterface(
-        VIDEO_RENDER_ANWINDOW) {
+NativeWindowRender::NativeWindowRender(JNIEnv *env, jobject surface, enum VideoRenderType type)
+        : VideoRenderInterface(type) {
     native_window_ = ANativeWindow_fromSurface(env, surface);
 }
 
@@ -14,7 +14,8 @@ NativeWindowRender::~NativeWindowRender() {
         ANativeWindow_release(native_window_);
 }
 
-void NativeWindowRender::Init(int videoWidth, int videoHeight, int *dstSize, FFmpegVideoDecoder *video_decoder) {
+void NativeWindowRender::Init(int videoWidth, int videoHeight, int *dstSize,
+                              FFmpegVideoDecoder *video_decoder) {
     LOGI("NativeRender::Init m_NativeWindow=%p, video[w,h]=[%d, %d]", native_window_, videoWidth,
          videoHeight);
     if (native_window_ == nullptr) return;
@@ -72,16 +73,17 @@ void NativeWindowRender::Process() {
     // delay > 0.1, 同步阀值为0.1
     // 0.04 < delay < 0.1, 同步阀值是delay
     double sync = FFMAX(AV_SYNC_THRESHOLD_MIN, FFMIN(AV_SYNC_THRESHOLD_MAX, pImage->delay));
-    if(diff <= -sync) { // 视频落后来，让delay时间减小
+    if (diff <= -sync) { // 视频落后来，让delay时间减小
         delay = FFMAX(0, delay + diff);
-    } else if(diff > sync) { // 视频快了，让delay久一些，等待音频赶上来
+    } else if (diff > sync) { // 视频快了，让delay久一些，等待音频赶上来
         delay = delay + diff;
     }
     long real_delay = delay * 1000000;
-    LOGE("Video:%lf Audio:%lf delay:%lf(%ld) A-V=%lf",pImage->clock, audio_clock, delay, real_delay, -diff);
+    LOGE("Video:%lf Audio:%lf delay:%lf(%ld) A-V=%lf", pImage->clock, audio_clock, delay,
+         real_delay, -diff);
 
     std::this_thread::sleep_for(std::chrono::microseconds(real_delay));
-    
+
 
     ANativeWindow_lock(native_window_, &native_window_buffer_, nullptr);
     uint8_t *dstBuffer = static_cast<uint8_t *>(native_window_buffer_.bits);

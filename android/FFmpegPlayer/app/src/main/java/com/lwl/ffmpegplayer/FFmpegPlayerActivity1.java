@@ -73,7 +73,7 @@ public class FFmpegPlayerActivity1 extends AppCompatActivity implements GLSurfac
         nativeFFmpegPlayer = new NativeFFmpegPlayer();
         nativeFFmpegPlayer.AddEventCallback(this);
         Log.i(TAG, mVideoPath);
-        nativeFFmpegPlayer.Init(mVideoPath, 1, 1);
+        nativeFFmpegPlayer.Init(mVideoPath, 1, 2);
 
         mScaleGestureDetector = new ScaleGestureDetector(this, this);
     }

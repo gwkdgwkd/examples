@@ -18,7 +18,8 @@ static void AudioRenderCallback(SLAndroidSimpleBufferQueueItf bq, void *context)
     }
 }
 
-Player::Player() {
+Player::Player(int type) {
+    video_render_type_ = static_cast<VideoRenderInterface::VideoRenderType>(type);
     demuxer_ = nullptr;
     audio_decoder_ = nullptr;
     audio_render_ = nullptr;
@@ -34,10 +35,13 @@ bool Player::Init(JNIEnv *env, jobject obj, jobject surface, const char *url) {
 
     int ret = false;
 
-    // video_render_ = new NativeWindowRender(env, surface);
-    OpenGLESRender1 *render = new OpenGLESRender1(env, surface);
-    video_render_ = render;
-    opengles_render_ = render;
+    if(video_render_type_ == VideoRenderInterface::VideoRenderType::kAnWindow) {
+        video_render_ = new NativeWindowRender(env, surface, video_render_type_);
+    } else {
+        OpenGLESRender *render = new OpenGLESRender(env, surface, video_render_type_);
+        video_render_ = render;
+        opengles_render_ = render;
+    }
 
     demuxer_ = new FFmpegDemuxer(url);
     if (!demuxer_->Init()) {
@@ -103,7 +107,7 @@ void Player::PostMessage(void *context, int msgType, float msgCode) {
         Player *player = static_cast<Player *>(context);
         bool is_attach = false;
         JNIEnv *env = player->GetJNIEnv(&is_attach);
-//        LOGE("Player::PostMessage env=%p", env);
+        // LOGE("Player::PostMessage env=%p", env);
         if (env == nullptr)
             return;
         jobject javaObj = player->GetJavaObj();

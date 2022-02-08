@@ -61,10 +61,10 @@ static const char *kUniformName = "s_texturemap";
     (-1.0,-1.0)             ( 1.0,-1.0)
 */
 static GLfloat kVerticesCoords[] = {
-        -1.0f,  1.0f, 0.0f,  // Position 0 : left top
+        -1.0f, 1.0f, 0.0f,  // Position 0 : left top
         -1.0f, -1.0f, 0.0f,  // Position 1 : left bottom
         1.0f, -1.0f, 0.0f,   // Position 2 : right bottom
-        1.0f,  1.0f, 0.0f,   // Position 3 : right top
+        1.0f, 1.0f, 0.0f,   // Position 3 : right top
 };
 
 /* 纹理坐标：
@@ -73,10 +73,10 @@ static GLfloat kVerticesCoords[] = {
     (0,1)       (1,1)
 */
 static GLfloat kTextureCoords[] = {
-        0.0f,  0.0f,        // TexCoord 0 : left top
-        0.0f,  1.0f,        // TexCoord 1 : left bottom
-        1.0f,  1.0f,        // TexCoord 2 : right bottom
-        1.0f,  0.0f         // TexCoord 3 : right top
+        0.0f, 0.0f,        // TexCoord 0 : left top
+        0.0f, 1.0f,        // TexCoord 1 : left bottom
+        1.0f, 1.0f,        // TexCoord 2 : right bottom
+        1.0f, 0.0f         // TexCoord 3 : right top
 
 // 旋转180度：
 //        1.0f,  1.0f,        // TexCoord 2 : right bottom
@@ -85,49 +85,67 @@ static GLfloat kTextureCoords[] = {
 //        0.0f,  1.0f         // TexCoord 1 : left bottom
 };
 
-GLushort kIndices[] = { 0, 1, 2, 0, 2, 3 };
+GLushort kIndices[] = {0, 1, 2, 0, 2, 3};
 
-OpenGLESRender::OpenGLESRender(JNIEnv *env, jobject surface) : VideoRenderInterface(
-        VIDEO_RENDER_ANWINDOW) {
+OpenGLESRender::OpenGLESRender(JNIEnv *env, jobject surface, enum VideoRenderType type)
+        : VideoRenderInterface(type) {
     TRACE_FUNC();
     is_opengles_init_ = false;
     effect_type_ = EffectType::kNoEffect;
     frame_index_ = 0;
-    native_window_ = ANativeWindow_fromSurface(env, surface);
+    if (render_type_ == VideoRenderType::kAnWindow ||
+        render_type_ == VideoRenderType::kOpenglesSurface) {
+        native_window_ = ANativeWindow_fromSurface(env, surface);
+    }
 }
 
 OpenGLESRender::~OpenGLESRender() {
     TRACE_FUNC();
-    if (native_window_)
-        ANativeWindow_release(native_window_);
+    if (render_type_ == VideoRenderType::kAnWindow ||
+        render_type_ == VideoRenderType::kOpenglesSurface) {
+        if (native_window_)
+            ANativeWindow_release(native_window_);
+    }
 }
 
 void OpenGLESRender::Init(int videoWidth, int videoHeight, int *dstSize,
                           FFmpegVideoDecoder *video_decoder) {
     TRACE_FUNC();
-    LOGI("NativeRender::Init OpenGLESRender=%p, video[w,h]=[%d, %d]", native_window_, videoWidth,
-         videoHeight);
-    if (native_window_ == nullptr) return;
+    if (render_type_ == VideoRenderType::kAnWindow ||
+        render_type_ == VideoRenderType::kOpenglesSurface) {
+        LOGI("OpenGLESRender::Init OpenGLESRender=%p, video[w,h]=[%d, %d]", native_window_,
+             videoWidth,
+             videoHeight);
+        if (native_window_ == nullptr) return;
 
-    video_decoder_ = video_decoder;
+        video_decoder_ = video_decoder;
 
-    int windowWidth = ANativeWindow_getWidth(native_window_);
-    int windowHeight = ANativeWindow_getHeight(native_window_);
+        int windowWidth = ANativeWindow_getWidth(native_window_);
+        int windowHeight = ANativeWindow_getHeight(native_window_);
 
-    if (windowWidth < windowHeight * videoWidth / videoHeight) {
-        real_width_ = windowWidth;
-        real_height_ = windowWidth * videoHeight / videoWidth;
+        if (windowWidth < windowHeight * videoWidth / videoHeight) {
+            real_width_ = windowWidth;
+            real_height_ = windowWidth * videoHeight / videoWidth;
+        } else {
+            real_width_ = windowHeight * videoWidth / videoHeight;
+            real_height_ = windowHeight;
+        }
+        LOGI("OpenGLESRender::Init window[w,h]=[%d, %d],DstSize[w, h]=[%d, %d]", windowWidth,
+             windowHeight, real_width_, real_height_);
     } else {
-        real_width_ = windowHeight * videoWidth / videoHeight;
-        real_height_ = windowHeight;
+        video_decoder_ = video_decoder;
+        real_width_ = 1080;
+        real_height_ = 606;
     }
-    LOGI("NativeRender::Init window[w,h]=[%d, %d],DstSize[w, h]=[%d, %d]", windowWidth,
-         windowHeight, real_width_, real_height_);
-
     dstSize[0] = real_width_;
     dstSize[1] = real_height_;
 
-    Start();
+    if (render_type_ == VideoRenderType::kAnWindow ||
+        render_type_ == VideoRenderType::kOpenglesSurface) {
+        Start();
+    } else {
+        OpenglesInit();
+    }
 }
 
 void OpenGLESRender::UnInit() {
@@ -154,12 +172,12 @@ bool OpenGLESRender::VaoInit() {
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo_ids_[0]);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (const void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (const void *) 0);
     glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo_ids_[1]);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (const void *)0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (const void *) 0);
     glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_ids_[2]);
@@ -173,10 +191,13 @@ bool OpenGLESRender::OpenglesInit() {
     TRACE_FUNC();
     bool ret = false;
 
-    egl_core_ptr_ = new EGLCore();
-    if ((ret = egl_core_ptr_->Init(native_window_)) == false) {
-        LOGE("egl core init failed!");
-        return ret;
+    if (render_type_ == VideoRenderType::kAnWindow ||
+        render_type_ == VideoRenderType::kOpenglesSurface) {
+        egl_core_ptr_ = new EGLCore();
+        if ((ret = egl_core_ptr_->Init(native_window_)) == false) {
+            LOGE("egl core init failed!");
+            return ret;
+        }
     }
 
     wapped_texture_ptr_ = new WappedTexture();
@@ -197,7 +218,10 @@ bool OpenGLESRender::OpenglesInit() {
 
     UpdateMVPMatrix(0, 0, 1.0f, 1.0f);
 
-    Pause();
+    if (render_type_ == VideoRenderType::kAnWindow ||
+        render_type_ == VideoRenderType::kOpenglesSurface) {
+        Pause();
+    }
 
     return true;
 }
@@ -209,13 +233,26 @@ void OpenGLESRender::RenderVideoFrame(NativeImage *pImage) {
 void OpenGLESRender::Process() {
     // TRACE_FUNC();
 
-    if (!is_opengles_init_) {
-        OpenglesInit();
-        return;
+    if (render_type_ == VideoRenderType::kAnWindow ||
+        render_type_ == VideoRenderType::kOpenglesSurface) {
+        if (!is_opengles_init_) {
+            OpenglesInit();
+            return;
+        }
+        OnDrawFrame();
+    } else {
+        if (m_MsgContext && m_MsgCallback)
+            m_MsgCallback(m_MsgContext, 5, 66);
+        Pause();
     }
+}
+
+void OpenGLESRender::OnDrawFrame() {
+    // TRACE_FUNC();
+    LOGI("left %d, right %d, width %d, height %d", 0, 0, real_width_, real_height_);
 
     NativeImage *pImage = video_decoder_->GetVideoImage();
-    if (native_window_ == nullptr || pImage == nullptr) return;
+    if (pImage == nullptr) return;
 
     double delay = pImage->delay;
     // 如果有音频的话
@@ -238,17 +275,11 @@ void OpenGLESRender::Process() {
 
     wapped_texture_ptr_->UpdateTexImage((unsigned char *) pImage->ppPlane[0], pImage->width,
                                         pImage->height);
-    DrawFrame();
 
     NativeImageUtil::FreeNativeImage(pImage);
     delete pImage;
 
     frame_index_++;
-}
-
-void OpenGLESRender::DrawFrame() {
-    // TRACE_FUNC();
-    LOGI("left %d, right %d, width %d, height %d", 0, 0, real_width_, real_height_);
 
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -261,16 +292,21 @@ void OpenGLESRender::DrawFrame() {
     wapped_texture_ptr_->BindTexture(wapped_shader_program_ptr_->GetUniformSampler());
 
     wapped_shader_program_ptr_->SetInt("effect_type", effect_type_);
-    if(effect_type_ == kDynimicMesh) {
+    if (effect_type_ == kDynimicMesh) {
         float offset = (sin(frame_index_ * MATH_PI / 40) + 1.0f) / 2.0f;
         wapped_shader_program_ptr_->SetFloat("offset", offset);
         wapped_shader_program_ptr_->SetVec2("tex_size", glm::vec2(real_width_, real_height_));
     }
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const void *)0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const void *) 0);
 
-    if (!egl_core_ptr_->SwapBuffers()) {
-        LOGE("eglSwapBuffers() returned error %d", eglGetError());
+    if (render_type_ == VideoRenderType::kAnWindow ||
+        render_type_ == VideoRenderType::kOpenglesSurface) {
+        if (!egl_core_ptr_->SwapBuffers()) {
+            LOGE("eglSwapBuffers() returned error %d", eglGetError());
+        }
+    } else {
+        Resume();
     }
 }
 

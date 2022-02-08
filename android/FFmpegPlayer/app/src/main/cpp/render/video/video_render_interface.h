@@ -8,25 +8,27 @@
 #include "ffmpeg_audio_decoder.h"
 #include "log.h"
 
-#define VIDEO_RENDER_OPENGL             0
-#define VIDEO_RENDER_ANWINDOW           1
-#define VIDEO_RENDER_3D_VR              2
-
 typedef void (*MessageCallback)(void*, int, float);
 
 class FFmpegVideoDecoder;
 class VideoRenderInterface : public ThreadBase{
 public:
-    VideoRenderInterface(int type){
-        m_RenderType = type;
+    enum VideoRenderType {
+        kAnWindow,
+        kOpenglesSurface,
+        kOpenglesGlSurface,
+        k3dVr
+    };
+    VideoRenderInterface(enum VideoRenderType type){
+        render_type_ = type;
     }
-    virtual ~VideoRenderInterface(){}
+    virtual ~VideoRenderInterface() {}
     virtual void Init(int video_width, int video_height, int *real_size, FFmpegVideoDecoder *video_decoder) = 0;
     virtual void RenderVideoFrame(NativeImage *imageptr) = 0;
     virtual void UnInit() = 0;
     virtual void SetAudioDecoder(FFmpegAudioDecoder *audio_decoder) { audio_decoder_ = audio_decoder; }
     int GetRenderType() {
-        return m_RenderType;
+        return render_type_;
     }
 
     void SetMessageCallback(void* context, MessageCallback callback) {
@@ -40,8 +42,7 @@ protected:
     FFmpegVideoDecoder *video_decoder_;
     FFmpegAudioDecoder *audio_decoder_;
     long frame_index_;
-private:
-    int m_RenderType = VIDEO_RENDER_ANWINDOW;
+    VideoRenderType render_type_;
 
 };
 

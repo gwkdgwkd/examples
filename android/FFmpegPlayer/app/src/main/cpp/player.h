@@ -9,11 +9,11 @@
 #include "render/audio/openSlEs_pcm_render.h"
 #include "render/video/video_render_interface.h"
 #include "render/video/native_window_render.h"
-#include "render/video/opengles_render1.h"
+#include "render/video/opengles_render.h"
 
 class Player {
 public:
-    Player();
+    Player(int type);
     ~Player();
 
     bool
@@ -24,6 +24,7 @@ public:
     SLBase *GetAudioRender() const;
     FFmpegAudioDecoder *GetAudioDecoder() { return audio_decoder_; }
     OpenglesRenderInterface *GetOpenglesRender() { return opengles_render_; }
+    int GetVideoRenderType() { return video_render_type_; }
     static void PostMessage(void *context, int msgType, float msgCode);
 
 private:
@@ -37,9 +38,7 @@ private:
     SLBase *audio_render_;
     VideoRenderInterface *video_render_;
     OpenglesRenderInterface *opengles_render_;
-
-//    JavaVM *java_vm_ = nullptr;
-//    jobject java_obj_ = nullptr;
+    VideoRenderInterface::VideoRenderType video_render_type_;
 };
 
 #endif // FFMPEG_PLAYER_PLAYER_H

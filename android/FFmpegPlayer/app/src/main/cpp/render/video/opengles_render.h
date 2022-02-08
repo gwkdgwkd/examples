@@ -19,7 +19,7 @@ public:
         kDynimicMesh,
         kGrayImage
     };
-    OpenGLESRender(JNIEnv *env, jobject surface);
+    OpenGLESRender(JNIEnv *env, jobject surface, enum VideoRenderType type);
     virtual ~OpenGLESRender();
 
     virtual void Init(int videoWidth, int videoHeight, int *dstSize, FFmpegVideoDecoder *video_decoder);
@@ -28,7 +28,7 @@ public:
 
     virtual void OnSurfaceCreated() {}
     virtual void OnSurfaceChanged(int w, int h);
-    virtual void OnDrawFrame() {}
+    virtual void OnDrawFrame();
     virtual void UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY);
     virtual void SetTouchLoc(float touchX, float touchY);
 
@@ -36,7 +36,6 @@ private:
     virtual void Process() override;
     bool OpenglesInit();
     bool VaoInit();
-    void DrawFrame();
 
     ANativeWindow *native_window_ = nullptr;
     EGLCore *egl_core_ptr_;
