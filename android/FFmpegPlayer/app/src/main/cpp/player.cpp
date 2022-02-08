@@ -2,6 +2,8 @@
 #include "log.h"
 
 static Player *player;
+static JavaVM *gl_jvm = NULL;
+static jobject gl_object = NULL;
 
 #define JAVA_PLAYER_EVENT_CALLBACK_API_NAME "playerEventCallback"
 
@@ -20,14 +22,10 @@ Player::Player() {
     demuxer_ = nullptr;
     audio_decoder_ = nullptr;
     audio_render_ = nullptr;
-//    java_vm_ = nullptr;
-//    java_obj_ = nullptr;
+    opengles_render_ = nullptr;
 }
 
 Player::~Player() {}
-
-static JavaVM *gl_jvm = NULL;
-static jobject gl_object = NULL;
 
 bool Player::Init(JNIEnv *env, jobject obj, jobject surface, const char *url) {
     TRACE_FUNC();
@@ -37,7 +35,9 @@ bool Player::Init(JNIEnv *env, jobject obj, jobject surface, const char *url) {
     int ret = false;
 
 //    video_render_ = new NativeWindowRender(env, surface);
-    video_render_ = new OpenGLESRender(env, surface);
+    OpenGLESRender *render = new OpenGLESRender(env, surface);
+    video_render_ = render;
+    opengles_render_ = render;
 
     demuxer_ = new FFmpegDemuxer(url);
     if (!demuxer_->Init()) {

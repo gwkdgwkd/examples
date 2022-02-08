@@ -28,6 +28,9 @@ public class NativeFFmpegPlayer {
     public native void OnSurfaceChanged(int width, int height);
     public native void OnDrawFrame();
 
+    public native void SetGesture(float xRotateAngle, float yRotateAngle, float scale);
+    public native void SetTouchLoc(float touchX, float touchY);
+
     public interface EventCallback {
         void onPlayerEvent(int msgType, float msgValue);
     }

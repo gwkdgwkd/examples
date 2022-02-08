@@ -23,6 +23,7 @@ public:
     FFmpegAudioDecoder *GetAudioDecoder() const;
     SLBase *GetAudioRender() const;
     FFmpegAudioDecoder *GetAudioDecoder() { return audio_decoder_; }
+    OpenglesRenderInterface *GetOpenglesRender() { return opengles_render_; }
     static void PostMessage(void *context, int msgType, float msgCode);
 
 private:
@@ -35,6 +36,7 @@ private:
     FFmpegVideoDecoder *video_decoder_;
     SLBase *audio_render_;
     VideoRenderInterface *video_render_;
+    OpenglesRenderInterface *opengles_render_;
 
 //    JavaVM *java_vm_ = nullptr;
 //    jobject java_obj_ = nullptr;

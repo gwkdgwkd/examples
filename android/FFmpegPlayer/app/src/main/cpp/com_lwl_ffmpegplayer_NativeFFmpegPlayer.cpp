@@ -42,7 +42,7 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Init
         (JNIEnv *env, jobject obj, jstring jurl, jint, jint) {
     TRACE_FUNC();
     const char *url1 = env->GetStringUTFChars(jurl, nullptr);
-    url = (char *)url1;
+    url = (char *) url1;
 //    ffmpeg_pipeline_ptr = new FFmpegPipeline(url);
 //    ffmpeg_pipeline_ptr->Init();
 //    ffmpeg_pipeline_ptr->Start();
@@ -97,11 +97,26 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceCre
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceChanged
         (JNIEnv *env, jobject obj, jint width, jint height) {
     TRACE_FUNC();
-    LOGI("===================++++width %d, height %d", width, height);
+    LOGI("width %d, height %d", width, height);
+    ffmpeg_player->GetOpenglesRender()->OnSurfaceChanged(width, height);
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnDrawFrame
         (JNIEnv *env, jobject obj) {}
+
+JNIEXPORT void JNICALL
+Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_SetGesture(JNIEnv *env, jobject thiz,
+                                                        jfloat x_rotate_angle,
+                                                        jfloat y_rotate_angle, jfloat scale) {
+    LOGE("SetGesture: %f %f %f", x_rotate_angle, y_rotate_angle, scale);
+    ffmpeg_player->GetOpenglesRender()->UpdateMVPMatrix(x_rotate_angle, y_rotate_angle, scale, scale);
+}
+JNIEXPORT void JNICALL
+Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_SetTouchLoc(JNIEnv *env, jobject thiz,
+                                                         jfloat touch_x, jfloat touch_y) {
+    LOGE("SetTouchLoc: %f %f", touch_x, touch_y);
+    ffmpeg_player->GetOpenglesRender()->SetTouchLoc(touch_x, touch_y);
+}
 
 #ifdef __cplusplus
 }

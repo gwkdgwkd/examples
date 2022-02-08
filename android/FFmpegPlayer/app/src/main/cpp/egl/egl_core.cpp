@@ -49,7 +49,7 @@ bool EGLCore::MakeCurrent() {
 }
 
 bool EGLCore::SwapBuffers() {
-    TRACE_FUNC();
+    // TRACE_FUNC();
     return eglSwapBuffers(display_, surface_);
 }
 

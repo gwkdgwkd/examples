@@ -15,7 +15,7 @@ bool WappedTexture::CreateTexture() {
 }
 
 void WappedTexture::UpdateTexImage(unsigned char *pixels, int frameWidth, int frameHeight) {
-    TRACE_FUNC();
+    // TRACE_FUNC();
     if (pixels) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture_);
@@ -29,7 +29,7 @@ void WappedTexture::UpdateTexImage(unsigned char *pixels, int frameWidth, int fr
 }
 
 bool WappedTexture::BindTexture(GLint uniformSampler) {
-    TRACE_FUNC();
+    // TRACE_FUNC();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_);
     if (CheckGlError("glBindTexture")) {
@@ -54,7 +54,7 @@ int WappedTexture::InitTexture() {
 }
 
 bool WappedTexture::CheckGlError(const char *op) {
-    TRACE_FUNC();
+    // TRACE_FUNC();
     GLint error;
     for (error = glGetError(); error; error = glGetError()) {
         LOGI("error::after %s() glError (0x%x)\n", op, error);

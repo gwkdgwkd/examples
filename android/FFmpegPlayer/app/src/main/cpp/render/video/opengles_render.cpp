@@ -1,4 +1,6 @@
 #include "opengles_render.h"
+
+#include <gtc/matrix_transform.hpp>
 #include "log.h"
 
 #define AV_SYNC_THRESHOLD_MIN 0.04
@@ -10,9 +12,10 @@ static const char *kVertexShader = R"(
 #version 300 es
 layout(location = 0) in vec4 a_position;
 layout(location = 1) in vec2 a_texcoord;
+uniform mat4 MVPMatrix;
 out vec2 v_texcorrd;
 void main(void) {
-    gl_Position = a_position;
+    gl_Position = MVPMatrix * a_position;
     v_texcorrd = a_texcoord;
 })";
 
@@ -192,6 +195,8 @@ bool OpenGLESRender::OpenglesInit() {
 
     VaoInit();
 
+    UpdateMVPMatrix(0, 0, 1.0f, 1.0f);
+
     Pause();
 
     return true;
@@ -202,7 +207,7 @@ void OpenGLESRender::RenderVideoFrame(NativeImage *pImage) {
 }
 
 void OpenGLESRender::Process() {
-    TRACE_FUNC();
+    // TRACE_FUNC();
 
     if (!is_opengles_init_) {
         OpenglesInit();
@@ -242,7 +247,7 @@ void OpenGLESRender::Process() {
 }
 
 void OpenGLESRender::DrawFrame() {
-    TRACE_FUNC();
+    // TRACE_FUNC();
     LOGI("left %d, right %d, width %d, height %d", 0, 0, real_width_, real_height_);
 
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -251,6 +256,7 @@ void OpenGLESRender::DrawFrame() {
     glUseProgram(wapped_shader_program_ptr_->GetProgram());
 
     glBindVertexArray(vao_id_);
+    wapped_shader_program_ptr_->SetMat4("MVPMatrix", MVPMatrix_);
 
     wapped_texture_ptr_->BindTexture(wapped_shader_program_ptr_->GetUniformSampler());
 
@@ -266,6 +272,45 @@ void OpenGLESRender::DrawFrame() {
     if (!egl_core_ptr_->SwapBuffers()) {
         LOGE("eglSwapBuffers() returned error %d", eglGetError());
     }
+}
+
+void OpenGLESRender::OnSurfaceChanged(int w, int h) {
+    real_width_ = w;
+    real_height_ = h;
+}
+
+void OpenGLESRender::UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY) {
+    angleX = angleX % 360;
+    angleY = angleY % 360;
+
+    //转化为弧度角
+    float radiansX = static_cast<float>(MATH_PI / 180.0f * angleX);
+    float radiansY = static_cast<float>(MATH_PI / 180.0f * angleY);
+    // Projection matrix
+    glm::mat4 Projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
+    //glm::mat4 Projection = glm::frustum(-ratio, ratio, -1.0f, 1.0f, 4.0f, 100.0f);
+    //glm::mat4 Projection = glm::perspective(45.0f,ratio, 0.1f,100.f);
+
+    // View matrix
+    glm::mat4 View = glm::lookAt(
+            glm::vec3(0, 0, 4), // Camera is at (0,0,1), in World Space
+            glm::vec3(0, 0, 0), // and looks at the origin
+            glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
+    );
+
+    // Model matrix
+    glm::mat4 Model = glm::mat4(1.0f);
+    Model = glm::scale(Model, glm::vec3(scaleX, scaleY, 1.0f));
+    Model = glm::rotate(Model, radiansX, glm::vec3(1.0f, 0.0f, 0.0f));
+    Model = glm::rotate(Model, radiansY, glm::vec3(0.0f, 1.0f, 0.0f));
+    Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, 0.0f));
+
+    MVPMatrix_ = Projection * View * Model;
+}
+
+void OpenGLESRender::SetTouchLoc(float touchX, float touchY) {
+    touchxy_.x = touchX / real_width_;
+    touchxy_.y = touchY / real_height_;
 }
 
 
