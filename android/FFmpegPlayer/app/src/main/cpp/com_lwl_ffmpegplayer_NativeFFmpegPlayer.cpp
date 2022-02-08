@@ -4,7 +4,7 @@
 //#include "render/audio/openSlEs_pcm_render.h"
 //#include "render/video/video_render_interface.h"
 #include "render/video/native_window_render.h"
-#include "render/video/opengles_render.h"
+#include "render/video/opengles_render.h.bak"
 //#include "ffmpeg/ffmpeg_demuxer.h"
 #include "player.h"
 #include "utils/log.h"
@@ -102,7 +102,10 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceCha
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnDrawFrame
-        (JNIEnv *env, jobject obj) {}
+        (JNIEnv *env, jobject obj) {
+    TRACE_FUNC();
+    ffmpeg_player->GetOpenglesRender()->OnDrawFrame();
+}
 
 JNIEXPORT void JNICALL
 Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_SetGesture(JNIEnv *env, jobject thiz,

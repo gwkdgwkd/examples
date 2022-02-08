@@ -83,7 +83,7 @@ void FFmpegAudioDecoder::Process() {
     AVPacket *pkt = av_packet_alloc();
     pkt = ffmpeg_demuxer_->GetPacket(type_);
     if (pkt == nullptr) {
-        LOGE("pkt is null");
+//        LOGE("pkt is null");
         if(ffmpeg_demuxer_->GetDemuxerState()) {
             LOGE("thread puase");
             Pause();

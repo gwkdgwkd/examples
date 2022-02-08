@@ -1,23 +1,25 @@
 package com.lwl.ffmpegplayer;
 
-import android.content.Context;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.view.SurfaceHolder;
-import com.lwl.ffmpegplayer.util.MySurfaceView;
 import android.widget.RelativeLayout;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class FFmpegPlayerActivity extends AppCompatActivity implements SurfaceHolder.Callback, NativeFFmpegPlayer.EventCallback, ScaleGestureDetector.OnScaleGestureListener {
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+public class FFmpegPlayerActivity1 extends AppCompatActivity implements GLSurfaceView.Renderer, NativeFFmpegPlayer.EventCallback, ScaleGestureDetector.OnScaleGestureListener {
     private static final String TAG = "FFmpegPlayerActivity";
     private RelativeLayout relativeLayout;
-    private MySurfaceView surfaceView = null;
     private NativeFFmpegPlayer nativeFFmpegPlayer = null;
+
+    private GLSurfaceView mVideoGLSurfaceView = null;
+    private GLSurfaceView mAudioGLSurfaceView = null;
 
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
     private float mPreviousY;
@@ -33,54 +35,52 @@ public class FFmpegPlayerActivity extends AppCompatActivity implements SurfaceHo
 
     private String mVideoPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/amedia/one_piece.mp4";
 
+    private GLSurfaceView.Renderer mAudioGLRender = new GLSurfaceView.Renderer() {
+        @Override
+        public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+            nativeFFmpegPlayer.OnSurfaceCreated(null);
+        }
+
+        @Override
+        public void onSurfaceChanged(GL10 gl10, int w, int h) {
+            nativeFFmpegPlayer.OnSurfaceChanged(w, h);
+        }
+
+        @Override
+        public void onDrawFrame(GL10 gl10) {
+            nativeFFmpegPlayer.OnDrawFrame();
+        }
+    };
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.ffmpeg_player);
-        relativeLayout = (RelativeLayout) findViewById(R.id.video_view_layout);
-        surfaceView = new MySurfaceView(FFmpegPlayerActivity.this);
-        surfaceView.getHolder().addCallback(this);
-        relativeLayout.addView(surfaceView, 0);
+        setContentView(R.layout.ffmpeg_player_with_visual_audio);
+        mVideoGLSurfaceView = findViewById(R.id.video_surface_view);
+        mVideoGLSurfaceView.setEGLContextClientVersion(3);
+        mVideoGLSurfaceView.setRenderer(this);
+        mVideoGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(1080, 606);
+        params.topMargin = 300;
+        params.leftMargin = 0;
+        mVideoGLSurfaceView.setLayoutParams(params);
+
+//        mAudioGLSurfaceView = findViewById(R.id.audio_surface_view);
+//        mAudioGLSurfaceView.setEGLContextClientVersion(3);
+//        mAudioGLSurfaceView.setRenderer(mAudioGLRender);
+//        mAudioGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
         nativeFFmpegPlayer = new NativeFFmpegPlayer();
         nativeFFmpegPlayer.AddEventCallback(this);
         Log.i(TAG, mVideoPath);
         nativeFFmpegPlayer.Init(mVideoPath, 1, 1);
 
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(1080, 606);
-        params.topMargin = 300;
-        params.leftMargin = 0;
-        surfaceView.setLayoutParams(params);
-
         mScaleGestureDetector = new ScaleGestureDetector(this, this);
     }
 
     @Override
-    public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
-        Log.d(TAG, "FFmpegPlayerActivity surfaceCreated");
-        nativeFFmpegPlayer.OnSurfaceCreated(surfaceHolder.getSurface());
-    }
-
-    @Override
-    public void surfaceChanged(@NonNull SurfaceHolder surfaceHolder, int format, int width, int height) {
-        Log.d(TAG, "FFmpegPlayerActivity surfaceChanged");
-        nativeFFmpegPlayer.OnSurfaceChanged(width, height);
-        nativeFFmpegPlayer.Play();
-    }
-
-    @Override
-    public void surfaceDestroyed(@NonNull SurfaceHolder surfaceHolder) {
-        Log.d(TAG, "FFmpegPlayerActivity surfaceDestroyed");
-        nativeFFmpegPlayer.Stop();
-        nativeFFmpegPlayer.UnInit();
-    }
-
-    @Override
     public void onPlayerEvent(int msgType, float msgValue) {
-        Log.d(TAG, "================----- msgType " + msgType + ", msgValue " + msgValue);
-//        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(1080,606);
-//        params.topMargin = 300;
-//        params.leftMargin = 0;
-//        surfaceView.setLayoutParams(params);
+        mVideoGLSurfaceView.requestRender();
     }
 
     @Override
@@ -147,5 +147,21 @@ public class FFmpegPlayerActivity extends AppCompatActivity implements SurfaceHo
             default:
                 break;
         }
+    }
+
+    @Override
+    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+        nativeFFmpegPlayer.OnSurfaceCreated(eglConfig.getClass());
+    }
+
+    @Override
+    public void onSurfaceChanged(GL10 gl10, int i, int i1) {
+        nativeFFmpegPlayer.OnSurfaceChanged(i, i1);
+        nativeFFmpegPlayer.Play();
+    }
+
+    @Override
+    public void onDrawFrame(GL10 gl10) {
+        nativeFFmpegPlayer.OnDrawFrame();
     }
 }

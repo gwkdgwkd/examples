@@ -12,6 +12,8 @@
 #define VIDEO_RENDER_ANWINDOW           1
 #define VIDEO_RENDER_3D_VR              2
 
+typedef void (*MessageCallback)(void*, int, float);
+
 class FFmpegVideoDecoder;
 class VideoRenderInterface : public ThreadBase{
 public:
@@ -26,6 +28,13 @@ public:
     int GetRenderType() {
         return m_RenderType;
     }
+
+    void SetMessageCallback(void* context, MessageCallback callback) {
+        m_MsgContext = context;
+        m_MsgCallback = callback;
+    }
+    void * m_MsgContext = nullptr;
+    MessageCallback m_MsgCallback = nullptr;
 
 protected:
     FFmpegVideoDecoder *video_decoder_;

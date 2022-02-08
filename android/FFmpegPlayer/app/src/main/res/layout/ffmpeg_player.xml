@@ -5,9 +5,8 @@
     android:layout_height="match_parent">
 
     <RelativeLayout
-        android:id="@+id/ffmpeg_player_layout"
+        android:id="@+id/video_view_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
     </RelativeLayout>
-
 </RelativeLayout>

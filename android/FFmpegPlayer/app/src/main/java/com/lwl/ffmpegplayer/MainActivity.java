@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.b_play:
-                Intent play = new Intent(MainActivity.this, FFmpegPlayerActivity.class);
+                Intent play = new Intent(MainActivity.this, FFmpegPlayerActivity1.class);
                 startActivity(play);
                 break;
         }

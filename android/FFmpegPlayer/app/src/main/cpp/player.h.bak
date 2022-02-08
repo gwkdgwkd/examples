@@ -9,7 +9,7 @@
 #include "render/audio/openSlEs_pcm_render.h"
 #include "render/video/video_render_interface.h"
 #include "render/video/native_window_render.h"
-#include "render/video/opengles_render1.h"
+#include "render/video/opengles_render.h"
 
 class Player {
 public:
