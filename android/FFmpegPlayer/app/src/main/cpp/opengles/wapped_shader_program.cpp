@@ -54,7 +54,9 @@ bool WappedShaderProgram::Init(const char *vs, const char *fs, const char* un) {
         return ret;
     }
 
-    uniform_sampler_ = glGetUniformLocation(program_, un);
+    if(un) {
+        uniform_sampler_ = glGetUniformLocation(program_, un);
+    }
 
     return true;
 }

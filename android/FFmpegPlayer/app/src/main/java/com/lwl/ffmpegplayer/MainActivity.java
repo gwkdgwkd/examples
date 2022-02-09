@@ -1,5 +1,6 @@
 package com.lwl.ffmpegplayer;
 
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -16,7 +17,7 @@ import android.widget.Toast;
 import com.lwl.ffmpegplayer.databinding.ActivityMainBinding;
 import com.lwl.ffmpegplayer.util.CommonUtils;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String[] REQUEST_PERMISSIONS = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ActivityCompat.requestPermissions(this, REQUEST_PERMISSIONS, PERMISSION_REQUEST_CODE);
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PERMISSION_REQUEST_CODE) {
@@ -69,7 +71,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.b_play:
-                Intent play = new Intent(MainActivity.this, FFmpegPlayerActivity1.class);
+                Intent play = new Intent(MainActivity.this, FFmpegPlayerActivity.class);
+                play.putExtra("video_render_type", ViedoRenderType.OPENGLESGLSURFACE.ordinal());
                 startActivity(play);
                 break;
         }

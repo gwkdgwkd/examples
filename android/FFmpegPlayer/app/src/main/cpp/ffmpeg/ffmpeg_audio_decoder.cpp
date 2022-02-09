@@ -126,6 +126,7 @@ AudioFrame *FFmpegAudioDecoder::GetAudioFrame() {
 
     AudioFrame *ret = audio_frame_queue_.Pop();
     clock_ = ret->clock_;
+
     return ret;
 }
 

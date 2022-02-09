@@ -10,10 +10,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-FFmpegPipeline *ffmpeg_pipeline_ptr;
+//FFmpegPipeline *ffmpeg_pipeline_ptr;
 //SLBase *audio_render;
 
-Player *ffmpeg_player;
+Player *ffmpeg_player = nullptr;
 char *url;
 JNIEXPORT jstring JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetFFmpegVersion
         (JNIEnv *env, jobject obj) {
@@ -51,26 +51,44 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Stop
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_UnInit
         (JNIEnv *env, jobject obj) {}
 
+VisualAudioRender *visual_audio_render;
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceCreated
-        (JNIEnv *env, jobject obj, jobject surface) {
+        (JNIEnv *env, jobject obj, jobject surface, jint type) {
     TRACE_FUNC();
-    ffmpeg_player->Init(env, obj, surface, url);
+    if (type == 0) {
+        ffmpeg_player->Init(env, obj, surface, url);
+    } else {
+        while (!(ffmpeg_player && ffmpeg_player->GetInitStatus())) {
+            usleep(10);
+        }
+        visual_audio_render = new VisualAudioRender();
+        visual_audio_render->OnSurfaceCreated();
+        ffmpeg_player->SetVisualAudioRender(visual_audio_render);
+    }
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnSurfaceChanged
-        (JNIEnv *env, jobject obj, jint width, jint height) {
+        (JNIEnv *env, jobject obj, jint width, jint height, jint type) {
     TRACE_FUNC();
-    LOGI("width %d, height %d", width, height);
-    if(ffmpeg_player->GetVideoRenderType() > 0) {
-        ffmpeg_player->GetOpenglesRender()->OnSurfaceChanged(width, height);
+    LOGI("width %d, height %d, type %d", width, height, type);
+    if (ffmpeg_player && ffmpeg_player->GetVideoRenderType() > 0) {
+        if (type == 1) {
+            visual_audio_render->OnSurfaceChanged(width, height);
+        } else {
+            ffmpeg_player->GetOpenglesRender()->OnSurfaceChanged(width, height);
+        }
     }
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_OnDrawFrame
-        (JNIEnv *env, jobject obj) {
-    TRACE_FUNC();
-    if(ffmpeg_player->GetVideoRenderType() > 0) {
-        ffmpeg_player->GetOpenglesRender()->OnDrawFrame();
+        (JNIEnv *env, jobject obj, jint type) {
+    // TRACE_FUNC();
+    if(ffmpeg_player && ffmpeg_player->GetVideoRenderType() > 0) {
+        if (type == 1) {
+            visual_audio_render->OnDrawFrame();
+        } else {
+            ffmpeg_player->GetOpenglesRender()->OnDrawFrame();
+        }
     }
 }
 

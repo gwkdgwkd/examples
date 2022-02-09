@@ -27,9 +27,6 @@
         <activity
             android:name=".FFmpegPlayerActivity"
             android:label="Player" ></activity>
-        <activity
-            android:name=".FFmpegPlayerActivity1"
-            android:label="Player" ></activity>
     </application>
 
 </manifest>

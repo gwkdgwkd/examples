@@ -163,8 +163,8 @@ bool FFmpegDemuxer::OpenCodecContext(int *stream_idx,
 
 void FFmpegDemuxer::Process() {
 //TRACE_FUNC();
-    if(m_MsgContext && m_MsgCallback)
-        m_MsgCallback(m_MsgContext, 5, 66);
+//    if(m_MsgContext && m_MsgCallback)
+//        m_MsgCallback(m_MsgContext, 5, 66);
     AVPacket *packet = av_packet_alloc();
     if (!packet) {
         LOGE("Could not allocate packet");

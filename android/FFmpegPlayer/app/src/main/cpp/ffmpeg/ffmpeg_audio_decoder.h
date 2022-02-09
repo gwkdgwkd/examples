@@ -5,6 +5,7 @@
 #include "thread_safe_queue.h"
 #include "ffmpeg_demuxer.h"
 #include "ffmpeg_codec_base.h"
+#include "audio_frame.h"
 
 extern "C" {
 #include <libavutil/opt.h>
@@ -12,24 +13,6 @@ extern "C" {
 #include <libavutil/samplefmt.h>
 #include <libavutil/timestamp.h>
 #include <libswresample/swresample.h>
-};
-
-class AudioFrame {
-public:
-    AudioFrame(int dataSize) {
-        data_size_ = dataSize;
-        data_ = static_cast<uint8_t *>(malloc(data_size_));
-    }
-
-    ~AudioFrame() {
-        if (data_)
-            free(data_);
-        data_ = nullptr;
-    }
-
-    uint8_t *data_ = nullptr;
-    int data_size_ = 0;
-    double clock_ = 0.0;
 };
 
 class FFmpegAudioDecoder : public ThreadBase, CodecBase{

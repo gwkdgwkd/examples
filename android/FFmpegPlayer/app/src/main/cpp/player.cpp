@@ -14,6 +14,9 @@ static void AudioRenderCallback(SLAndroidSimpleBufferQueueItf bq, void *context)
         AudioFrame *frame = player->GetAudioDecoder()->GetAudioFrame();
         if (frame) {
             player->GetAudioRender()->SendQueueLoop(frame->data_, frame->data_size_);
+            if(player->GetVideoRenderType() == 2) {
+                player->GetVisualAudioRender()->UpdateAudioFrame(frame);
+            }
         }
     }
 }
@@ -24,6 +27,8 @@ Player::Player(int type) {
     audio_decoder_ = nullptr;
     audio_render_ = nullptr;
     opengles_render_ = nullptr;
+    visual_audio_render_ = nullptr;
+    is_inited_ = false;
 }
 
 Player::~Player() {}
@@ -68,6 +73,8 @@ bool Player::Init(JNIEnv *env, jobject obj, jobject surface, const char *url) {
     audio_render_->SetQueueCallBack(AudioRenderCallback);
 
     player = this;
+
+    is_inited_ = true;
 
     return true;
 }

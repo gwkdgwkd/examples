@@ -24,9 +24,9 @@ public class NativeFFmpegPlayer {
     public native void UnInit();
 
     // for GL render
-    public native void OnSurfaceCreated(Object surface);
-    public native void OnSurfaceChanged(int width, int height);
-    public native void OnDrawFrame();
+    public native void OnSurfaceCreated(Object surface,int type);
+    public native void OnSurfaceChanged(int width, int height, int type);
+    public native void OnDrawFrame(int type);
 
     public native void SetGesture(float xRotateAngle, float yRotateAngle, float scale);
     public native void SetTouchLoc(float touchX, float touchY);

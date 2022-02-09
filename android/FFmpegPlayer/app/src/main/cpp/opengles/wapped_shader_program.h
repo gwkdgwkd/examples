@@ -1,6 +1,8 @@
 #ifndef FFMPEG_PLAYER_OPENGLES_WAPPED_SHADER_H
 #define FFMPEG_PLAYER_OPENGLES_WAPPED_SHADER_H
 
+#include <string>
+
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 #include <glm.hpp>
@@ -11,7 +13,7 @@ public:
     ~WappedShaderProgram();
 
 
-    bool Init(const char *vs, const char *fs, const char *un);
+    bool Init(const char *vs, const char *fs, const char *un = nullptr);
     GLuint GetProgram() { return program_; }
     GLint GetUniformSampler() { return uniform_sampler_; }
 
@@ -63,6 +65,9 @@ public:
         glUniformMatrix4fv(glGetUniformLocation(program_, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 
+    glm::vec3 TexCoordToVertexCoord(glm::vec2 texCoord) {
+        return glm::vec3(2 * texCoord.x - 1, 1 - 2 * texCoord.y, 0);
+    }
 
 private:
     bool CheckShaderErrors(GLuint shader);
