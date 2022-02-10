@@ -95,7 +95,7 @@ OpenGLESRender::OpenGLESRender(JNIEnv *env, jobject surface, enum VideoRenderTyp
         : VideoRenderInterface(type) {
     TRACE_FUNC();
     is_opengles_init_ = false;
-    effect_type_ = EffectType::k3DVR;
+    effect_type_ = EffectType::kNoEffect;
     frame_index_ = 0;
     if (IsSurface()) {
         native_window_ = ANativeWindow_fromSurface(env, surface);

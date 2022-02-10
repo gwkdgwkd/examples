@@ -45,6 +45,7 @@ set(third-party-libs
         swresample
         swscale
         avutil
+        yuv_static
         )
 set(native-libs
         android

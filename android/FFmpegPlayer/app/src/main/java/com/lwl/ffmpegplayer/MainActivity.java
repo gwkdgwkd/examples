@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (view.getId()) {
             case R.id.b_play:
                 Intent play = new Intent(MainActivity.this, FFmpegPlayerActivity.class);
-                play.putExtra("video_render_type", ViedoRenderType.OPENGLES3DVR.ordinal());
+                play.putExtra("video_render_type", ViedoRenderType.OPENGLESSURFACE.ordinal());
                 startActivity(play);
                 break;
         }

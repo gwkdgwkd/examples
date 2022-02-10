@@ -40,8 +40,8 @@ public class FFmpegPlayerActivity extends AppCompatActivity implements NativeFFm
     private long mLastMultiTouchTime;
     private ViedoRenderType mViedoRenderType;
 
-//    private String mVideoPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/amedia/one_piece.mp4";
-    private String mVideoPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/amedia/vr.mp4";
+    private String mVideoPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/amedia/one_piece.mp4";
+//    private String mVideoPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/amedia/vr.mp4";
 
     private SurfaceHolder.Callback mVideoRender = new SurfaceHolder.Callback() {
         @Override
