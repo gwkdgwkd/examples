@@ -40,7 +40,8 @@ public class FFmpegPlayerActivity extends AppCompatActivity implements NativeFFm
     private long mLastMultiTouchTime;
     private ViedoRenderType mViedoRenderType;
 
-    private String mVideoPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/amedia/one_piece.mp4";
+//    private String mVideoPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/amedia/one_piece.mp4";
+    private String mVideoPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/amedia/vr.mp4";
 
     private SurfaceHolder.Callback mVideoRender = new SurfaceHolder.Callback() {
         @Override
@@ -105,7 +106,8 @@ public class FFmpegPlayerActivity extends AppCompatActivity implements NativeFFm
         mViedoRenderType = ViedoRenderType.values()[intent.getIntExtra("video_render_type", 0)];
         Log.d(TAG, "video_render_type is " + mViedoRenderType.name());
 
-        if (mViedoRenderType == ViedoRenderType.ANWINDOW || mViedoRenderType == ViedoRenderType.OPENGLESSURFACE) {
+        if (mViedoRenderType == ViedoRenderType.ANWINDOW || mViedoRenderType == ViedoRenderType.OPENGLESSURFACE
+                 ) {
             setContentView(R.layout.ffmpeg_player);
             mVideoSurfaceView = findViewById(R.id.video_surface_view);
             mVideoSurfaceView.getHolder().addCallback(mVideoRender);
@@ -114,7 +116,7 @@ public class FFmpegPlayerActivity extends AppCompatActivity implements NativeFFm
             params.topMargin = 300;
             params.leftMargin = 0;
             mVideoSurfaceView.setLayoutParams(params);
-        } else if (mViedoRenderType == ViedoRenderType.OPENGLESGLSURFACE) {
+        } else if (mViedoRenderType == ViedoRenderType.OPENGLESGLSURFACE || mViedoRenderType == ViedoRenderType.OPENGLES3DVR) {
             setContentView(R.layout.ffmpeg_player_with_visual_audio);
             mVideoGLSurfaceView = findViewById(R.id.video_glsurface_view);
             mVideoGLSurfaceView.setEGLContextClientVersion(3);
@@ -142,8 +144,8 @@ public class FFmpegPlayerActivity extends AppCompatActivity implements NativeFFm
 
     @Override
     public void onPlayerEvent(int msgType, float msgValue) {
-        mVideoGLSurfaceView.requestRender();
-        if(mViedoRenderType == ViedoRenderType.OPENGLESGLSURFACE) {
+        if (mViedoRenderType == ViedoRenderType.OPENGLESGLSURFACE || mViedoRenderType == ViedoRenderType.OPENGLES3DVR) {
+            mVideoGLSurfaceView.requestRender();
             mAudioGLSurfaceView.requestRender();
         }
     }

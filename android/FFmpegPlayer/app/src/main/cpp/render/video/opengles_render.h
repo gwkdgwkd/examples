@@ -1,6 +1,7 @@
 #ifndef RENDER_VIDEO_OPENGL_RENDER_H
 #define RENDER_VIDEO_OPENGL_RENDER_H
 
+#include <vector>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <jni.h>
@@ -17,7 +18,8 @@ public:
     enum EffectType {
         kNoEffect,
         kDynimicMesh,
-        kGrayImage
+        kGrayImage,
+        k3DVR
     };
     OpenGLESRender(JNIEnv *env, jobject surface, enum VideoRenderType type);
     virtual ~OpenGLESRender();
@@ -36,14 +38,21 @@ private:
     virtual void Process() override;
     bool OpenglesInit();
     bool VaoInit();
+    void GenerateMesh();
+    bool IsSurface();
 
     ANativeWindow *native_window_ = nullptr;
     EGLCore *egl_core_ptr_;
     WappedShaderProgram *wapped_shader_program_ptr_;
     WappedTexture *wapped_texture_ptr_;
     std::atomic_bool is_opengles_init_;
+
+    std::vector<glm::vec3> vertex_coords_;
+    std::vector<glm::vec2> texture_coords_;
+
     GLuint vao_id_;
     GLuint vbo_ids_[3];
+    int vbo_nums_;
     EffectType effect_type_;
 
     glm::mat4 MVPMatrix_;

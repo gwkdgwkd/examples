@@ -14,7 +14,7 @@ static void AudioRenderCallback(SLAndroidSimpleBufferQueueItf bq, void *context)
         AudioFrame *frame = player->GetAudioDecoder()->GetAudioFrame();
         if (frame) {
             player->GetAudioRender()->SendQueueLoop(frame->data_, frame->data_size_);
-            if(player->GetVideoRenderType() == 2) {
+            if(player->GetVideoRenderType() == 2 || player->GetVideoRenderType() == 3) {
                 player->GetVisualAudioRender()->UpdateAudioFrame(frame);
             }
         }

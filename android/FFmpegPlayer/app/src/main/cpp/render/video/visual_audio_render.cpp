@@ -175,7 +175,7 @@ void VisualAudioRender::UpdateMesh() {
 }
 
 void VisualAudioRender::UpdateAudioFrame(AudioFrame *audioFrame) {
-    TRACE_FUNC();
+    // TRACE_FUNC();
     if(audioFrame != nullptr) {
         // LOGE("VisualAudioRender::UpdateAudioFrame audioFrame->dataSize=%d", audioFrame->data_size_);
         std::unique_lock<std::mutex> lock(m_Mutex);
