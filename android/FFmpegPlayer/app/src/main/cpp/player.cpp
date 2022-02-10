@@ -63,7 +63,9 @@ bool Player::Init(JNIEnv *env, jobject obj, jobject surface, const char *url) {
     }
     video_render_->SetAudioDecoder(audio_decoder_);
 
-    video_decoder_ = new FFmpegVideoDecoder(demuxer_);
+    ScaleFactory * scale_factory = new FFmpegScaleFactory();
+    ScaleFactory * scale_factory1 =new LibyuvScaleFactory();
+    video_decoder_ = new FFmpegVideoDecoder(demuxer_, scale_factory);
     if (!video_decoder_->Init(video_render_)) {
         LOGE("FFmpegVideoDecoder init failed!");
         return ret;

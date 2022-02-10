@@ -1,10 +1,6 @@
 #include "ffmpeg_demuxer.h"
 #include "log.h"
 
-extern int packet_queue_put(PacketQueue *q, AVPacket *pkt);
-
-extern int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block, int *serial);
-
 static void log_callback(void *ptr, int level, const char *fmt, va_list vl) {
     va_list vl2;
     char *line = (char *) malloc(128 * sizeof(char));

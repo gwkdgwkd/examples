@@ -5,7 +5,6 @@
 
 #include "thread_base.h"
 #include "thread_safe_queue.h"
-#include "packet_queue.h"
 
 extern "C" {
 #include <libavformat/avformat.h>

@@ -15,6 +15,9 @@
 #include "render/video/visual_audio_render.h"
 #include "render/video/opengles_render.h"
 
+#include "scale/ffmpeg_scale.h"
+#include "scale/libyuv_scale.h"
+
 class Player {
 public:
     Player(int type);

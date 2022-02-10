@@ -1,7 +1,7 @@
 #include "ffmpeg_video_decoder.h"
 
-FFmpegVideoDecoder::FFmpegVideoDecoder(FFmpegDemuxer *ffmpeg_demuxer) : ffmpeg_demuxer_(
-        ffmpeg_demuxer) {
+FFmpegVideoDecoder::FFmpegVideoDecoder(FFmpegDemuxer *ffmpeg_demuxer, ScaleFactory *scale_factory)
+        : ffmpeg_demuxer_(ffmpeg_demuxer), scale_factory_(scale_factory) {
     TRACE_FUNC();
     type_ = AVMEDIA_TYPE_VIDEO;
 
@@ -11,6 +11,8 @@ FFmpegVideoDecoder::FFmpegVideoDecoder(FFmpegDemuxer *ffmpeg_demuxer) : ffmpeg_d
 
     video_frame_count_ = 0;
     video_packet_count_ = 0;
+
+    scale_base_ = scale_factory_->CreateScale();
 }
 
 FFmpegVideoDecoder::~FFmpegVideoDecoder() {
@@ -51,6 +53,9 @@ bool FFmpegVideoDecoder::Init(VideoRenderInterface *video_render) {
     sws_ctx_ = sws_getContext(src_width, src_height, src_format, render_width_, render_height_,
                               render_format,
                               SWS_FAST_BILINEAR, NULL, NULL, NULL);
+
+    scale_base_->Init(src_width, src_height, src_format, render_width_, render_height_,
+                      render_format);
 
     return true;
 }
@@ -102,7 +107,7 @@ int FFmpegVideoDecoder::OutputFrame(AVFrame *frame) {
     memcpy(image->ppPlane[0], rgb_frame_->data[0], image->width * image->height * 4);
     image->pLineSize[0] = image->width * 4;
     int fps1 = ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate.num /
-              ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate.den;
+               ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate.den;
 //    LOGE("A-V fps1 %d, stream time base: %lf, codec time base %lf", fps1,
 //         av_q2d(ffmpeg_demuxer_->GetAVStream(type_)->time_base), av_q2d(ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
     double fps = av_q2d(ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate);

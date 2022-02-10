@@ -7,6 +7,7 @@
 #include "ffmpeg_codec_base.h"
 #include "native_image.h"
 #include "../render/video/video_render_interface.h"
+#include "../scale/scale_factory.h"
 
 extern "C" {
 #include <libavutil/timestamp.h>
@@ -17,7 +18,7 @@ extern "C" {
 class VideoRenderInterface;
 class FFmpegVideoDecoder : public ThreadBase, CodecBase{
 public:
-    FFmpegVideoDecoder(FFmpegDemuxer *ffmpeg_demuxer);
+    FFmpegVideoDecoder(FFmpegDemuxer *ffmpeg_demuxer, ScaleFactory *scale_factory);
     ~FFmpegVideoDecoder();
 
     bool Init(VideoRenderInterface *video_render);
@@ -38,6 +39,8 @@ private:
     int video_height_;
     VideoRenderInterface *video_render_;
     ThreadSafeQueue<NativeImage *> video_image_queue_;
+    ScaleFactory *scale_factory_;
+    ScaleBase *scale_base_;
 
     int video_frame_count_;
     int video_packet_count_;

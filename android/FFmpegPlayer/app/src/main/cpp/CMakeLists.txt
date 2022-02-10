@@ -22,6 +22,7 @@ file(GLOB utils-files ${CMAKE_SOURCE_DIR}/utils/*.cpp)
 file(GLOB opensles-files ${CMAKE_SOURCE_DIR}/opensles/*.cpp)
 file(GLOB egl-files ${CMAKE_SOURCE_DIR}/egl/*.cpp)
 file(GLOB opengles-files ${CMAKE_SOURCE_DIR}/opengles/*.cpp)
+file(GLOB scale-files ${CMAKE_SOURCE_DIR}/scale/*.cpp)
 
 project("ffmpegplayer")
 add_library(${libname}
@@ -33,7 +34,8 @@ add_library(${libname}
         ${ffmpeg-files}
         ${opensles-files}
         ${opengles-files}
-        ${egl-files})
+        ${egl-files}
+        ${scale-files})
 
 find_library(
         log-lib
