@@ -70,8 +70,16 @@ NativeImage *FFmpegScale::Scale(AVFrame *src_frame) {
     image->width = dst_width_;
     image->height = dst_height_;
     NativeImageUtil::AllocNativeImage(image);
-    memcpy(image->ppPlane[0], dst_frame_->data[0], image->width * image->height * 4);
-    image->pLineSize[0] = image->width * 4;
+    if (dst_frame_->linesize[0] != image->pLineSize[0]) {
+        for (int i = 0; i < dst_height_; ++i) {
+            memcpy(image->ppPlane[0] + i * image->pLineSize[0],
+                   dst_frame_->data[0] + i * dst_frame_->linesize[0], image->width * 4);
+        }
+    } else {
+        // memcpy(image->ppPlane[0], dst_frame_->data[0], image->width * image->height * 4);
+        memcpy(image->ppPlane[0], dst_frame_->data[0],
+               dst_frame_->linesize[0] * dst_height_);
+    }
 
     return image;
 }

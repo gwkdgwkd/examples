@@ -17,6 +17,7 @@
 
 #include "scale/ffmpeg_scale.h"
 #include "scale/libyuv_scale.h"
+#include "scale/opengl_scale.h"
 
 class Player {
 public:

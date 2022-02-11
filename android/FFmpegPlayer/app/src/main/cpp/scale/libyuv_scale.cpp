@@ -46,7 +46,6 @@ NativeImage *LibyuvScale::Scale(AVFrame *src_frame) {
     image->width = dst_width_;
     image->height = dst_height_;
     NativeImageUtil::AllocNativeImage(image);
-    image->pLineSize[0] = image->width * 4;
 
     // libyuv的ARGB和android bitmap的ARGB_8888的存储顺序是不一样的。
     // ARGB_8888的存储顺序实际上是RGBA，对应的是libyuv的ABGR。

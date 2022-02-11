@@ -29,9 +29,51 @@ precision mediump float;
 in vec2 v_texcorrd;
 layout(location = 0) out vec4 out_color;
 uniform sampler2D s_texturemap;
-uniform int effect_type;// 0:no,1:DynimicMesh,2:GrayImage
+uniform sampler2D texture0;
+uniform sampler2D texture1;
+uniform sampler2D texture2;
+uniform int img_type; // 1:RGBA, 2:NV21, 3:NV12, 4:I420
+uniform int effect_type; // 0:no, 1:DynimicMesh, 2:GrayImage
 uniform float offset;
 uniform vec2 tex_size;
+
+vec4 sampleImage(vec2 texcoord) {
+    vec4 ret;
+    if(img_type == 1) { // RGBA
+        ret = texture(texture0, texcoord);
+    } else if (img_type == 2) { // NV21
+        vec3 yuv
+        yuv.x = texture(texture0, texcoord).r;
+        yuv.y = texture(texture1, texcoord).a - 0.5;
+        yuv.z = texture(texture1, texcoord).r - 0.5;
+        highp vec3 rgb = mat3(1.0,  1.0,     1.0,
+                              0.0,  -0.344,  1.770,
+                              1.403,-0.714, 0.0) * yuv;
+        ret = vec4(rgb, 1.0);
+    } else if(img_type == 3) { // NV12
+        vec3 yuv;
+        yuv.x = texture(texture0, texcoord).r;
+        yuv.y = texture(texture1, texcoord).r - 0.5;
+        yuv.z = texture(texture1, texcoord).a - 0.5;
+        highp vec3 rgb = mat3(1.0,  1.0,     1.0,
+                              0.0,  -0.344,  1.770,
+                              1.403,-0.714, 0.0) * yuv;
+        ret = vec4(rgb, 1.0);
+    } else if(img_type == 4) { // I420
+        vec3 yuv;
+        yuv.x = texture(texture0, texcoord).r;
+        yuv.y = texture(texture1, texcoord).r - 0.5;
+        yuv.z = texture(texture2, texcoord).r - 0.5;
+        highp vec3 rgb = mat3(1.0,  1.0,     1.0,
+                              0.0,  -0.344,  1.770,
+                              1.403,-0.714, 0.0) * yuv;
+       ret = vec4(rgb, 1.0);
+    } else {
+       ret = vec4(1.0);
+    }
+    return ret;
+}
+
 void main() {
     if(effect_type == 1) {
         vec2 img_texcoord = v_texcorrd * tex_size;
@@ -43,17 +85,17 @@ void main() {
         float final_offset = offset * max_offset;
 
         if(final_offset <= x && x <= side_length - final_offset && final_offset <= y && y <= side_length - final_offset) {
-            out_color = texture(s_texturemap, v_texcorrd);
+            out_color = sampleImage(v_texcorrd);
         }else{
             out_color = vec4(1.0, 1.0, 1.0, 1.0);
         }
     } else if(effect_type == 2) {
-        out_color = texture(s_texturemap, v_texcorrd);
+        out_color = sampleImage(v_texcorrd);
         if(v_texcorrd.x > 0.5) {
             out_color = vec4(vec3(out_color.r*0.299 + out_color.g*0.587 + out_color.b*0.114), out_color.a);
         }
     } else {
-        out_color = texture(s_texturemap, v_texcorrd);
+        out_color = sampleImage(v_texcorrd);
     }
 })";
 
@@ -216,7 +258,7 @@ bool OpenGLESRender::OpenglesInit() {
         }
     }
 
-    wapped_texture_ptr_ = new WappedTexture();
+    wapped_texture_ptr_ = new WappedTexture(3);
     if ((ret = wapped_texture_ptr_->CreateTexture()) == false) {
         LOGE("create texture failed!");
         return ret;
@@ -297,7 +339,7 @@ void OpenGLESRender::OnDrawFrame() {
 
     std::this_thread::sleep_for(std::chrono::microseconds(real_delay));
 
-    wapped_texture_ptr_->UpdateTexImage((unsigned char *) pImage->ppPlane[0], pImage->width,
+    wapped_texture_ptr_->UpdateTexImage(0,3, (unsigned char *) pImage->ppPlane[0], pImage->width,
                                         pImage->height);
 
     NativeImageUtil::FreeNativeImage(pImage);
