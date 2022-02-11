@@ -11,8 +11,6 @@
 
 extern "C" {
 #include <libavutil/timestamp.h>
-#include <libswscale/swscale.h>
-#include <libavutil/imgutils.h>
 };
 
 class VideoRenderInterface;
@@ -28,9 +26,6 @@ private:
     virtual int OutputFrame(AVFrame *frame) override;
 
     enum AVMediaType type_;
-    AVFrame *rgb_frame_;
-    uint8_t *frame_buffer_;
-    SwsContext *sws_ctx_;
     FFmpegDemuxer *ffmpeg_demuxer_;
 
     int render_width_;
@@ -39,7 +34,6 @@ private:
     int video_height_;
     VideoRenderInterface *video_render_;
     ThreadSafeQueue<NativeImage *> video_image_queue_;
-    ScaleFactory *scale_factory_;
     ScaleBase *scale_base_;
 
     int video_frame_count_;

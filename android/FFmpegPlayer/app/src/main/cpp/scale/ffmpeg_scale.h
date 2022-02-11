@@ -5,17 +5,23 @@
 
 extern "C" {
 #include <libswscale/swscale.h>
+#include <libavutil/imgutils.h>
 };
 
 class FFmpegScale : public ScaleBase {
 public:
+    FFmpegScale();
+    ~FFmpegScale();
+
     virtual bool Init(int src_width, int src_height, enum AVPixelFormat src_format, int dst_width,
                       int dst_height, enum AVPixelFormat dst_format) override;
-    virtual bool Scale() override;
+    virtual NativeImage *Scale(AVFrame *src_frame) override;
     virtual void UnInit() override;
 
 private:
     SwsContext *sws_ctx_;
+    AVFrame *dst_frame_;
+    uint8_t *frame_buffer_;
 };
 
 class FFmpegScaleFactory : public ScaleFactory {

@@ -1,8 +1,11 @@
 #ifndef FFMPEG_PLAYER_SCALE_FACTORY_H
 #define FFMPEG_PLAYER_SCALE_FACTORY_H
 
+#include "native_image.h"
+
 extern "C" {
 #include <libavutil/pixfmt.h>
+#include <libavformat/avformat.h>
 };
 
 class ScaleBase {
@@ -11,7 +14,7 @@ public:
 
     virtual bool Init(int src_width, int src_height, enum AVPixelFormat src_format, int dst_width,
                       int dst_height, enum AVPixelFormat dst_format) = 0;
-    virtual bool Scale() = 0;
+    virtual NativeImage *Scale(AVFrame *src_frame) = 0;
     virtual void UnInit() = 0;
 
 protected:

@@ -1,26 +1,19 @@
 #include "ffmpeg_video_decoder.h"
 
 FFmpegVideoDecoder::FFmpegVideoDecoder(FFmpegDemuxer *ffmpeg_demuxer, ScaleFactory *scale_factory)
-        : ffmpeg_demuxer_(ffmpeg_demuxer), scale_factory_(scale_factory) {
+        : ffmpeg_demuxer_(ffmpeg_demuxer) {
     TRACE_FUNC();
     type_ = AVMEDIA_TYPE_VIDEO;
-
-    rgb_frame_ = nullptr;
-    frame_buffer_ = nullptr;
-    sws_ctx_ = nullptr;
 
     video_frame_count_ = 0;
     video_packet_count_ = 0;
 
-    scale_base_ = scale_factory_->CreateScale();
+    scale_base_ = scale_factory->CreateScale();
+    delete scale_factory;
 }
 
 FFmpegVideoDecoder::~FFmpegVideoDecoder() {
     TRACE_FUNC();
-    if (sws_ctx_) {
-        sws_freeContext(sws_ctx_);
-        sws_ctx_ = nullptr;
-    }
 }
 
 bool FFmpegVideoDecoder::Init(VideoRenderInterface *video_render) {
@@ -43,16 +36,6 @@ bool FFmpegVideoDecoder::Init(VideoRenderInterface *video_render) {
     LOGI("src: src_width: %d, src_height: %d, src_format: %d", src_width, src_height, src_format);
     LOGI("dst: dst_width: %d, dst_height: %d, dst_format: %d", render_width_, render_height_,
          render_format);
-
-    rgb_frame_ = av_frame_alloc();
-    int buffer_size = av_image_get_buffer_size(render_format, render_width_, render_height_, 1);
-    frame_buffer_ = (uint8_t *) av_malloc(buffer_size * sizeof(uint8_t));
-    av_image_fill_arrays(rgb_frame_->data, rgb_frame_->linesize,
-                         frame_buffer_, render_format, render_width_, render_height_, 1);
-
-    sws_ctx_ = sws_getContext(src_width, src_height, src_format, render_width_, render_height_,
-                              render_format,
-                              SWS_FAST_BILINEAR, NULL, NULL, NULL);
 
     scale_base_->Init(src_width, src_height, src_format, render_width_, render_height_,
                       render_format);
@@ -88,26 +71,10 @@ int FFmpegVideoDecoder::OutputFrame(AVFrame *frame) {
 //         video_frame_count_++, frame->nb_samples,
 //         av_ts2timestr(frame->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
 
-    sws_scale(sws_ctx_, frame->data, frame->linesize, 0,
-              ffmpeg_demuxer_->GetCodecContext(type_)->height, rgb_frame_->data,
-              rgb_frame_->linesize);
-//    NativeImage image;
-//    image.format = IMAGE_FORMAT_RGBA;
-//    image.width = render_width_;
-//    image.height = render_height_;
-//    image.ppPlane[0] = rgb_frame_->data[0];
-//    image.pLineSize[0] = image.width * 4;
-//    video_render_->RenderVideoFrame(&image);
+    NativeImage *image = scale_base_->Scale(frame);
 
-    NativeImage *image = new NativeImage();
-    image->format = IMAGE_FORMAT_RGBA;
-    image->width = render_width_;
-    image->height = render_height_;
-    NativeImageUtil::AllocNativeImage(image);
-    memcpy(image->ppPlane[0], rgb_frame_->data[0], image->width * image->height * 4);
-    image->pLineSize[0] = image->width * 4;
-    int fps1 = ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate.num /
-               ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate.den;
+//    int fps1 = ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate.num /
+//               ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate.den;
 //    LOGE("A-V fps1 %d, stream time base: %lf, codec time base %lf", fps1,
 //         av_q2d(ffmpeg_demuxer_->GetAVStream(type_)->time_base), av_q2d(ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
     double fps = av_q2d(ffmpeg_demuxer_->GetAVStream(type_)->avg_frame_rate);
