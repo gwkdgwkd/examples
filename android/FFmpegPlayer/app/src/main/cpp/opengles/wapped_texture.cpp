@@ -5,10 +5,6 @@ const char *WappedTexture::TAG_ = "WappedTexture";
 
 bool WappedTexture::CreateTexture() {
     TRACE_FUNC();
-//    for(int i = 0; i < texture_num_; ++i) {
-//        textures_[i] = i;
-//    }
-
     if (InitTexture() < 0) {
         LOGE("init texture failed...");
         Dealloc();
@@ -17,21 +13,27 @@ bool WappedTexture::CreateTexture() {
     return true;
 }
 
-void WappedTexture::UpdateTexImage(int id, int type, unsigned char *pixels, int width, int height) {
+void WappedTexture::UpdateTexImage(int id, UpdateTextureType type, unsigned char *pixels, int width,
+                                   int height) {
     // TRACE_FUNC();
+    if (id > texture_num_ - 1) {
+        LOGE("texture id error!");
+        return;
+    }
+
     if (pixels) {
         glActiveTexture(GL_TEXTURE0 + id);
         glBindTexture(GL_TEXTURE_2D, textures_[id]);
         if (CheckGlError("glBindTexture")) {
             return;
         }
-        if (type == 0) {
+        if (type == kTypeRGBA) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
                          GL_UNSIGNED_BYTE, pixels);
-        } else if (type == 1) {
+        } else if (type == kTypeLUMINANCE) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE,
                          GL_UNSIGNED_BYTE, pixels);
-        } else if (type == 2) {
+        } else if (type == kTypeLUMINANCEALPHA) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width, height, 0, GL_LUMINANCE_ALPHA,
                          GL_UNSIGNED_BYTE, pixels);
         }
@@ -40,8 +42,13 @@ void WappedTexture::UpdateTexImage(int id, int type, unsigned char *pixels, int 
     }
 }
 
-bool WappedTexture::BindTexture(GLint uniformSampler) {
+bool WappedTexture::BindTexture(const std::vector<std::string> &tex_names) {
     // TRACE_FUNC();
+
+    if (tex_names.size() != texture_num_) {
+        LOGE("texture name num error");
+        return false;
+    }
 
     for (int i = 0; i < texture_num_; ++i) {
         glActiveTexture(GL_TEXTURE0 + i);
@@ -49,7 +56,7 @@ bool WappedTexture::BindTexture(GLint uniformSampler) {
         if (CheckGlError("glBindTexture")) {
             return false;
         }
-        glUniform1i(uniformSampler, 0);
+        program_->SetInt(tex_names[i].c_str(), i);
     }
 
 //    glActiveTexture(GL_TEXTURE0 + i);
@@ -64,7 +71,7 @@ bool WappedTexture::BindTexture(GLint uniformSampler) {
 
 int WappedTexture::InitTexture() {
     TRACE_FUNC();
-    glGenTextures(texture_num_, &textures_[0]);
+    glGenTextures(texture_num_, textures_);
     for (int i = 0; i < texture_num_; ++i) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, textures_[i]);
@@ -90,7 +97,5 @@ bool WappedTexture::CheckGlError(const char *op) {
 
 void WappedTexture::Dealloc() {
     TRACE_FUNC();
-    if (textures_.size() > 0) {
-        glDeleteTextures(texture_num_, &textures_[0]);
-    }
+    glDeleteTextures(texture_num_, textures_);
 }

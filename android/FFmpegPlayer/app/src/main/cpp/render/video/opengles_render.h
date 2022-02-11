@@ -21,13 +21,14 @@ public:
         kGrayImage,
         k3DVR
     };
+
     OpenGLESRender(JNIEnv *env, jobject surface, enum VideoRenderType type);
     virtual ~OpenGLESRender();
 
-    virtual void Init(int videoWidth, int videoHeight, int *dstSize, FFmpegVideoDecoder *video_decoder);
+    virtual void
+    Init(int videoWidth, int videoHeight, int *dstSize, FFmpegVideoDecoder *video_decoder);
     virtual void RenderVideoFrame(NativeImage *pImage);
     virtual void UnInit();
-
     virtual void OnSurfaceCreated() {}
     virtual void OnSurfaceChanged(int w, int h);
     virtual void OnDrawFrame();

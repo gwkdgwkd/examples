@@ -42,7 +42,7 @@ vec4 sampleImage(vec2 texcoord) {
     if(img_type == 1) { // RGBA
         ret = texture(texture0, texcoord);
     } else if (img_type == 2) { // NV21
-        vec3 yuv
+        vec3 yuv;
         yuv.x = texture(texture0, texcoord).r;
         yuv.y = texture(texture1, texcoord).a - 0.5;
         yuv.z = texture(texture1, texcoord).r - 0.5;
@@ -98,8 +98,6 @@ void main() {
         out_color = sampleImage(v_texcorrd);
     }
 })";
-
-static const char *kUniformName = "s_texturemap";
 
 /* 渲染坐标系或OpenGLES坐标系:
     (-1.0, 1.0)             ( 1.0, 1.0)
@@ -213,12 +211,14 @@ bool OpenGLESRender::VaoInit() {
     // Generate VBO Ids and load the VBOs with data
     glGenBuffers(vbo_nums_, vbo_ids_);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_ids_[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertex_coords_.size(), &vertex_coords_[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertex_coords_.size(), &vertex_coords_[0],
+                 GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo_ids_[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * texture_coords_.size(), &texture_coords_[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * texture_coords_.size(), &texture_coords_[0],
+                 GL_STATIC_DRAW);
 
-    if(vbo_nums_ > 2) {
+    if (vbo_nums_ > 2) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_ids_[2]);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(kIndices), kIndices, GL_STATIC_DRAW);
     }
@@ -237,7 +237,7 @@ bool OpenGLESRender::VaoInit() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (const void *) 0);
     glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
 
-    if(vbo_nums_ > 2) {
+    if (vbo_nums_ > 2) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_ids_[2]);
     }
 
@@ -258,15 +258,15 @@ bool OpenGLESRender::OpenglesInit() {
         }
     }
 
-    wapped_texture_ptr_ = new WappedTexture(3);
-    if ((ret = wapped_texture_ptr_->CreateTexture()) == false) {
-        LOGE("create texture failed!");
+    wapped_shader_program_ptr_ = new WappedShaderProgram();
+    if (!wapped_shader_program_ptr_->Init(kVertexShader, kFragmentShader)) {
+        LOGE("shader program init failed!");
         return ret;
     }
 
-    wapped_shader_program_ptr_ = new WappedShaderProgram();
-    if (!wapped_shader_program_ptr_->Init(kVertexShader, kFragmentShader, kUniformName)) {
-        LOGE("shader program init failed!");
+    wapped_texture_ptr_ = new WappedTexture(3, wapped_shader_program_ptr_);
+    if ((ret = wapped_texture_ptr_->CreateTexture()) == false) {
+        LOGE("create texture failed!");
         return ret;
     }
 
@@ -339,8 +339,36 @@ void OpenGLESRender::OnDrawFrame() {
 
     std::this_thread::sleep_for(std::chrono::microseconds(real_delay));
 
-    wapped_texture_ptr_->UpdateTexImage(0,3, (unsigned char *) pImage->ppPlane[0], pImage->width,
-                                        pImage->height);
+    int img_type = pImage->format;
+    switch (pImage->format) {
+        case IMAGE_FORMAT_RGBA:
+            wapped_texture_ptr_->UpdateTexImage(0, WappedTexture::kTypeRGBA,
+                                                (unsigned char *) pImage->ppPlane[0], pImage->width,
+                                                pImage->height);
+            break;
+        case IMAGE_FORMAT_NV21:
+        case IMAGE_FORMAT_NV12:
+            wapped_texture_ptr_->UpdateTexImage(0, WappedTexture::kTypeLUMINANCE,
+                                                (unsigned char *) pImage->ppPlane[0], pImage->width,
+                                                pImage->height);
+            wapped_texture_ptr_->UpdateTexImage(1, WappedTexture::kTypeLUMINANCEALPHA,
+                                                (unsigned char *) pImage->ppPlane[1], pImage->width >> 1,
+                                                pImage->height >> 1);
+            break;
+        case IMAGE_FORMAT_I420:
+            wapped_texture_ptr_->UpdateTexImage(0, WappedTexture::kTypeLUMINANCE,
+                                                (unsigned char *) pImage->ppPlane[0], pImage->width,
+                                                pImage->height);
+            wapped_texture_ptr_->UpdateTexImage(1, WappedTexture::kTypeLUMINANCE,
+                                                (unsigned char *) pImage->ppPlane[1], pImage->width >> 1,
+                                                pImage->height >> 1);
+            wapped_texture_ptr_->UpdateTexImage(2, WappedTexture::kTypeLUMINANCE,
+                                                (unsigned char *) pImage->ppPlane[2], pImage->width >> 1,
+                                                pImage->height >> 1);
+            break;
+        default:
+            break;
+    }
 
     NativeImageUtil::FreeNativeImage(pImage);
     delete pImage;
@@ -359,12 +387,14 @@ void OpenGLESRender::OnDrawFrame() {
     glBindVertexArray(vao_id_);
     wapped_shader_program_ptr_->SetMat4("MVPMatrix", MVPMatrix_);
 
-    wapped_texture_ptr_->BindTexture(wapped_shader_program_ptr_->GetUniformSampler());
+    std::vector<std::string> names = {"texture0", "texture1" , "texture2"};
+    wapped_texture_ptr_->BindTexture(names);
 
+    wapped_shader_program_ptr_->SetInt("img_type", img_type);
     wapped_shader_program_ptr_->SetInt("effect_type", effect_type_);
     if (effect_type_ == kDynimicMesh || effect_type_ == k3DVR) {
         float offset;
-        if(effect_type_ == kDynimicMesh) {
+        if (effect_type_ == kDynimicMesh) {
             offset = (sin(frame_index_ * MATH_PI / 40) + 1.0f) / 2.0f;
         } else {
             offset = (sin(frame_index_ * MATH_PI / 25) + 1.0f) / 2.0f;
@@ -373,7 +403,7 @@ void OpenGLESRender::OnDrawFrame() {
         wapped_shader_program_ptr_->SetVec2("tex_size", glm::vec2(real_width_, real_height_));
     }
 
-    if(effect_type_ == k3DVR) {
+    if (effect_type_ == k3DVR) {
         glDrawArrays(GL_TRIANGLES, 0, vertex_coords_.size());
     } else {
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const void *) 0);

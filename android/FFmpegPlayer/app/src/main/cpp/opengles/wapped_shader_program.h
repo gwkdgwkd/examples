@@ -12,10 +12,8 @@ public:
     WappedShaderProgram();
     ~WappedShaderProgram();
 
-
-    bool Init(const char *vs, const char *fs, const char *un = nullptr);
+    bool Init(const char *vs, const char *fs);
     GLuint GetProgram() { return program_; }
-    GLint GetUniformSampler() { return uniform_sampler_; }
 
     void SetBool(const std::string &name, bool value) {
         glUniform1i(glGetUniformLocation(program_, name.c_str()), (int) value);
@@ -77,7 +75,6 @@ private:
     GLuint vertex_shader_;
     GLuint fragment_shader_;
     GLuint program_;
-    GLint uniform_sampler_;
     static const char *TAG_;
 };
 

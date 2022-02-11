@@ -12,7 +12,6 @@ WappedShaderProgram::WappedShaderProgram() {
     vertex_shader_ = 0;
     fragment_shader_ = 0;
     program_ = 0;
-    uniform_sampler_ = 0;
 }
 
 WappedShaderProgram::~WappedShaderProgram() {
@@ -27,7 +26,7 @@ WappedShaderProgram::~WappedShaderProgram() {
     }
 }
 
-bool WappedShaderProgram::Init(const char *vs, const char *fs, const char* un) {
+bool WappedShaderProgram::Init(const char *vs, const char *fs) {
     TRACE_FUNC();
     int ret = false;
 
@@ -52,10 +51,6 @@ bool WappedShaderProgram::Init(const char *vs, const char *fs, const char* un) {
     // check status
     if (!CheckProgramErrors(program_)) {
         return ret;
-    }
-
-    if(un) {
-        uniform_sampler_ = glGetUniformLocation(program_, un);
     }
 
     return true;
