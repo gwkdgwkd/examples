@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lwl.ffmpegplayer.databinding.ActivityMainBinding;
@@ -72,7 +71,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (view.getId()) {
             case R.id.b_play:
                 Intent play = new Intent(MainActivity.this, FFmpegPlayerActivity.class);
-                play.putExtra("video_render_type", ViedoRenderType.OPENGLESSURFACE.ordinal());
+                PlayerInfo playerInfo = new PlayerInfo(ViewType.SURFACEVIEW,
+                                                       AudioRenderType.OPENSLES,
+                                                       ViedoRenderType.OPENGLES,
+                                                       EffectType.DYNIMICMESH,
+                                                       ScaleType.OPENGLES);
+                play.putExtra("playerInfo", playerInfo);
                 startActivity(play);
                 break;
         }

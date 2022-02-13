@@ -61,9 +61,12 @@ NativeImage *FFmpegScale::Scale(AVFrame *src_frame) {
     sws_scale(sws_ctx_, src_frame->data, src_frame->linesize, 0,
               src_height_, dst_frame_->data, dst_frame_->linesize);
     auto afterTime = std::chrono::steady_clock::now();
-    double duration_microsecond = std::chrono::duration<double, std::micro>(afterTime - beforeTime).count();
-    double duration_millsecond = std::chrono::duration<double, std::milli>(afterTime - beforeTime).count();
-    LOGE("sws_scale used : %lf microsecond(%lf millsecond)", duration_microsecond, duration_millsecond);
+    double duration_microsecond = std::chrono::duration<double, std::micro>(
+            afterTime - beforeTime).count();
+    double duration_millsecond = std::chrono::duration<double, std::milli>(
+            afterTime - beforeTime).count();
+    LOGE("sws_scale used : %lf microsecond(%lf millsecond)", duration_microsecond,
+         duration_millsecond);
 
     NativeImage *image = new NativeImage();
     image->format = IMAGE_FORMAT_RGBA;
@@ -80,6 +83,18 @@ NativeImage *FFmpegScale::Scale(AVFrame *src_frame) {
         memcpy(image->ppPlane[0], dst_frame_->data[0],
                dst_frame_->linesize[0] * dst_height_);
     }
+
+    /* save to rgba file
+    static int i = 0;
+    if (i++ < 20) {
+        FILE *fp;
+        fp = fopen("/storage/emulated/0/amedia/2.rgba", "ab");
+        for (int j = 0; j < dst_height_; j++) {
+            fwrite(image->ppPlane[0] + j * image->pLineSize[0], dst_width_ * 4, 1, fp);
+        }
+        fclose(fp);
+    }
+    // */
 
     return image;
 }

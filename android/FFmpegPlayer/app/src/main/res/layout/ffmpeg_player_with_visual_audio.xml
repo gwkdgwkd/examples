@@ -27,7 +27,7 @@
             android:layout_weight="1">
 
             <android.opengl.GLSurfaceView
-                android:id="@+id/video_glsurface_view"
+                android:id="@+id/video_gl_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true" />

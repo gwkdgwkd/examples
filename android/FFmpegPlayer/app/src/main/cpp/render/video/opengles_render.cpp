@@ -131,11 +131,11 @@ static GLfloat kTextureCoords[] = {
 
 GLushort kIndices[] = {0, 1, 2, 0, 2, 3};
 
-OpenGLESRender::OpenGLESRender(JNIEnv *env, jobject surface, enum VideoRenderType type)
-        : VideoRenderInterface(type) {
+OpenGLESRender::OpenGLESRender(JNIEnv *env, jobject surface, enum ViewType view_type,
+                               enum VideoRenderType video_render_type, enum EffectType effect_type)
+        : VideoRenderInterface(view_type, video_render_type, effect_type) {
     TRACE_FUNC();
     is_opengles_init_ = false;
-    effect_type_ = EffectType::kNoEffect;
     frame_index_ = 0;
     if (IsSurface()) {
         native_window_ = ANativeWindow_fromSurface(env, surface);
@@ -154,25 +154,15 @@ OpenGLESRender::~OpenGLESRender() {
 }
 
 bool OpenGLESRender::IsSurface() {
-    if (render_type_ == VideoRenderType::kAnWindow ||
-        render_type_ == VideoRenderType::kOpenglesSurface
-        /* render_type_ == VideoRenderType::k3dVr*/) {
-        return true;
-    }
-
-    return false;
+    return view_type_ == ViewType::kSurfaceView;
 }
 
-void OpenGLESRender::Init(int videoWidth, int videoHeight, int *dstSize,
-                          FFmpegVideoDecoder *video_decoder) {
+void OpenGLESRender::Init(int videoWidth, int videoHeight, int *render_size) {
     TRACE_FUNC();
     if (IsSurface()) {
         LOGI("OpenGLESRender::Init OpenGLESRender=%p, video[w,h]=[%d, %d]", native_window_,
-             videoWidth,
-             videoHeight);
+             videoWidth, videoHeight);
         if (native_window_ == nullptr) return;
-
-        video_decoder_ = video_decoder;
 
         int windowWidth = ANativeWindow_getWidth(native_window_);
         int windowHeight = ANativeWindow_getHeight(native_window_);
@@ -187,12 +177,11 @@ void OpenGLESRender::Init(int videoWidth, int videoHeight, int *dstSize,
         LOGI("OpenGLESRender::Init window[w,h]=[%d, %d],DstSize[w, h]=[%d, %d]", windowWidth,
              windowHeight, real_width_, real_height_);
     } else {
-        video_decoder_ = video_decoder;
         real_width_ = 1080;
         real_height_ = 606;
     }
-    dstSize[0] = real_width_;
-    dstSize[1] = real_height_;
+    render_size[0] = real_width_;
+    render_size[1] = real_height_;
 
     if (IsSurface()) {
         Start();
@@ -272,7 +261,7 @@ bool OpenGLESRender::OpenglesInit() {
 
     GenerateMesh();
 
-    if (render_type_ != VideoRenderType::k3dVr) {
+    if (effect_type_ != EffectType::k3DVR) {
         vbo_nums_ = 3;
     } else {
         vbo_nums_ = 2;
@@ -280,7 +269,7 @@ bool OpenGLESRender::OpenglesInit() {
     LOGE("vbo_nums_ is %d", vbo_nums_);
     VaoInit();
 
-    if (render_type_ != VideoRenderType::k3dVr) {
+    if (effect_type_ != EffectType::k3DVR) {
         UpdateMVPMatrix(0, 0, 1.0f, 1.0f);
     }
 
@@ -310,6 +299,25 @@ void OpenGLESRender::Process() {
         if (m_MsgContext && m_MsgCallback)
             m_MsgCallback(m_MsgContext, 5, 66);
         Pause();
+    }
+}
+
+void OpenGLESRender::OnSurfaceCreated() {
+}
+
+void OpenGLESRender::OnSurfaceChanged(int w, int h) {
+    TRACE_FUNC();
+//    if (h > 1000) {
+//        return;
+//    }
+//    LOGE("OpenGLESRender==================222 %d %d", ANativeWindow_getWidth(native_window_),
+//         ANativeWindow_getHeight(native_window_));
+    real_width_ = w;
+    real_height_ = h;
+    glViewport(0, 0, w, h);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    if (effect_type_ == EffectType::k3DVR) {
+        UpdateMVPMatrix(0, 0, 1.0f, 1.0f);
     }
 }
 
@@ -352,7 +360,8 @@ void OpenGLESRender::OnDrawFrame() {
                                                 (unsigned char *) pImage->ppPlane[0], pImage->width,
                                                 pImage->height);
             wapped_texture_ptr_->UpdateTexImage(1, WappedTexture::kTypeLUMINANCEALPHA,
-                                                (unsigned char *) pImage->ppPlane[1], pImage->width >> 1,
+                                                (unsigned char *) pImage->ppPlane[1],
+                                                pImage->width >> 1,
                                                 pImage->height >> 1);
             break;
         case IMAGE_FORMAT_I420:
@@ -360,10 +369,12 @@ void OpenGLESRender::OnDrawFrame() {
                                                 (unsigned char *) pImage->ppPlane[0], pImage->width,
                                                 pImage->height);
             wapped_texture_ptr_->UpdateTexImage(1, WappedTexture::kTypeLUMINANCE,
-                                                (unsigned char *) pImage->ppPlane[1], pImage->width >> 1,
+                                                (unsigned char *) pImage->ppPlane[1],
+                                                pImage->width >> 1,
                                                 pImage->height >> 1);
             wapped_texture_ptr_->UpdateTexImage(2, WappedTexture::kTypeLUMINANCE,
-                                                (unsigned char *) pImage->ppPlane[2], pImage->width >> 1,
+                                                (unsigned char *) pImage->ppPlane[2],
+                                                pImage->width >> 1,
                                                 pImage->height >> 1);
             break;
         default:
@@ -378,7 +389,7 @@ void OpenGLESRender::OnDrawFrame() {
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
-    if (render_type_ == VideoRenderType::k3dVr) {
+    if (effect_type_ == EffectType::k3DVR) {
         glEnable(GL_DEPTH_TEST);
     }
 
@@ -387,7 +398,7 @@ void OpenGLESRender::OnDrawFrame() {
     glBindVertexArray(vao_id_);
     wapped_shader_program_ptr_->SetMat4("MVPMatrix", MVPMatrix_);
 
-    std::vector<std::string> names = {"texture0", "texture1" , "texture2"};
+    std::vector<std::string> names = {"texture0", "texture1", "texture2"};
     wapped_texture_ptr_->BindTexture(names);
 
     wapped_shader_program_ptr_->SetInt("img_type", img_type);
@@ -418,16 +429,6 @@ void OpenGLESRender::OnDrawFrame() {
     }
 }
 
-void OpenGLESRender::OnSurfaceChanged(int w, int h) {
-    real_width_ = w;
-    real_height_ = h;
-    glViewport(0, 0, w, h);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    if (render_type_ == VideoRenderType::k3dVr) {
-        UpdateMVPMatrix(0, 0, 1.0f, 1.0f);
-    }
-}
-
 void OpenGLESRender::UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY) {
     angleX = angleX % 360;
     angleY = angleY % 360;
@@ -440,7 +441,7 @@ void OpenGLESRender::UpdateMVPMatrix(int angleX, int angleY, float scaleX, float
 
     int camera_pos;
     glm::mat4 Projection;
-    if (render_type_ == VideoRenderType::k3dVr) {
+    if (effect_type_ == EffectType::k3DVR) {
         float ratio = real_width_ / real_height_;
         Projection = glm::frustum(-ratio, ratio, -1.0f, 1.0f, 4.0f, 100.0f);
         camera_pos = 3;
@@ -474,7 +475,7 @@ void OpenGLESRender::SetTouchLoc(float touchX, float touchY) {
 }
 
 void OpenGLESRender::GenerateMesh() {
-    if (render_type_ == VideoRenderType::k3dVr) {
+    if (effect_type_ == EffectType::k3DVR) {
         // 构建顶点坐标
         for (float vAngle = 90; vAngle > -90; vAngle = vAngle - ANGLE_SPAN) {//垂直方向ANGLE_SPAN度一份
             for (float hAngle = 360; hAngle > 0; hAngle = hAngle - ANGLE_SPAN) {//水平方向ANGLE_SPAN度一份

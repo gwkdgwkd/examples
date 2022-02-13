@@ -11,10 +11,10 @@
 class NativeWindowRender : public VideoRenderInterface {
 
 public:
-    NativeWindowRender(JNIEnv *env, jobject surface, enum VideoRenderType type);
+    NativeWindowRender(JNIEnv *env, jobject surface, enum ViewType view_type, enum VideoRenderType video_render_type, enum EffectType effect_type);
     virtual ~NativeWindowRender();
 
-    virtual void Init(int videoWidth, int videoHeight, int *dstSize, FFmpegVideoDecoder *video_decoder);
+    virtual void Init(int videoWidth, int videoHeight, int *render_size);
     virtual void RenderVideoFrame(NativeImage *pImage);
     virtual void UnInit();
 

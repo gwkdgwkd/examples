@@ -21,11 +21,21 @@
 
 class Player {
 public:
-    Player(int type);
+    enum AudioRenderType {
+        kOpensles,
+        kAudioTrack
+    };
+    enum ScaleType {
+        kFFmpeg,
+        kLibyuv,
+        kOpengles
+    };
+
+    Player(int view_type, int audio_render_type, int video_render_type ,int effect_type, int scale_type);
     ~Player();
 
-    bool
-    Init(JNIEnv *env, jobject obj, jobject surface, const char *url);
+    bool Init(const char *url);
+    void Init2(JNIEnv *env, jobject obj, jobject surface);
     void Uninit();
     void Start();
     FFmpegAudioDecoder *GetAudioDecoder() const;
@@ -33,11 +43,13 @@ public:
     FFmpegAudioDecoder *GetAudioDecoder() { return audio_decoder_; }
     OpenglesRenderInterface *GetOpenglesRender() { return opengles_render_; }
     VisualAudioRender *GetVisualAudioRender() { return visual_audio_render_; }
+    FFmpegDemuxer *GetDemuxer() { return demuxer_;}
     void SetVisualAudioRender(VisualAudioRender *render) { visual_audio_render_ = render; }
     bool GetInitStatus() { return is_inited_; }
     int GetVideoRenderType() { return video_render_type_; }
+    int GetEffectType() { return effect_type_; }
     static void PostMessage(void *context, int msgType, float msgCode);
-
+    MediaInfo media_info_;
 private:
     JNIEnv *GetJNIEnv(bool *is_attach);
     jobject GetJavaObj();
@@ -50,7 +62,12 @@ private:
     VideoRenderInterface *video_render_;
     OpenglesRenderInterface *opengles_render_;
     VisualAudioRender *visual_audio_render_;
+
+    VideoRenderInterface::ViewType view_type_;
+    AudioRenderType audio_render_type_;
     VideoRenderInterface::VideoRenderType video_render_type_;
+    VideoRenderInterface::EffectType effect_type_;
+    ScaleType scale_type_;
 
     std::atomic<bool> is_inited_;
 };

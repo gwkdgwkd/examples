@@ -1,5 +1,7 @@
 package com.lwl.ffmpegplayer;
 
+import com.lwl.ffmpegplayer.util.MediaInfo;
+
 public class NativeFFmpegPlayer {
     static {
         System.loadLibrary("ffmpegplayer");
@@ -16,7 +18,8 @@ public class NativeFFmpegPlayer {
     }
 
     public native String GetFFmpegVersion();
-    public native void Init(String url, int playerType, int renderType);
+    public native void Init(String url, int view_type, int audio_render_type,
+                            int video_render_type, int effect_type, int scale_type);
     public native void Play();
     public native void SeekToPosition(float position);
     public native void Pause();
@@ -27,6 +30,8 @@ public class NativeFFmpegPlayer {
     public native void OnSurfaceCreated(Object surface,int type);
     public native void OnSurfaceChanged(int width, int height, int type);
     public native void OnDrawFrame(int type);
+
+    public native void GetMediaInfo(MediaInfo mediaInfo);
 
     public native void SetGesture(float xRotateAngle, float yRotateAngle, float scale);
     public native void SetTouchLoc(float touchX, float touchY);

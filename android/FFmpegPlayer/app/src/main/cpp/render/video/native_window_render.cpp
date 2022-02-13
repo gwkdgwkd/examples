@@ -4,8 +4,10 @@
 #define AV_SYNC_THRESHOLD_MIN 0.04
 #define AV_SYNC_THRESHOLD_MAX 0.1
 
-NativeWindowRender::NativeWindowRender(JNIEnv *env, jobject surface, enum VideoRenderType type)
-        : VideoRenderInterface(type) {
+NativeWindowRender::NativeWindowRender(JNIEnv *env, jobject surface, enum ViewType view_type,
+                                       enum VideoRenderType video_render_type,
+                                       enum EffectType effect_type)
+        : VideoRenderInterface(view_type, video_render_type, effect_type) {
     native_window_ = ANativeWindow_fromSurface(env, surface);
 }
 
@@ -14,13 +16,10 @@ NativeWindowRender::~NativeWindowRender() {
         ANativeWindow_release(native_window_);
 }
 
-void NativeWindowRender::Init(int videoWidth, int videoHeight, int *dstSize,
-                              FFmpegVideoDecoder *video_decoder) {
+void NativeWindowRender::Init(int videoWidth, int videoHeight, int *render_size) {
     LOGI("NativeRender::Init m_NativeWindow=%p, video[w,h]=[%d, %d]", native_window_, videoWidth,
          videoHeight);
     if (native_window_ == nullptr) return;
-
-    video_decoder_ = video_decoder;
 
     int windowWidth = ANativeWindow_getWidth(native_window_);
     int windowHeight = ANativeWindow_getHeight(native_window_);
@@ -38,8 +37,8 @@ void NativeWindowRender::Init(int videoWidth, int videoHeight, int *dstSize,
     ANativeWindow_setBuffersGeometry(native_window_, real_width_,
                                      real_height_, WINDOW_FORMAT_RGBA_8888);
 
-    dstSize[0] = real_width_;
-    dstSize[1] = real_height_;
+    render_size[0] = real_width_;
+    render_size[1] = real_height_;
 }
 
 void NativeWindowRender::UnInit() {

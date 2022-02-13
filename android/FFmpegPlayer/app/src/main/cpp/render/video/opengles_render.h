@@ -15,21 +15,16 @@
 class OpenGLESRender : public VideoRenderInterface, public OpenglesRenderInterface {
 
 public:
-    enum EffectType {
-        kNoEffect,
-        kDynimicMesh,
-        kGrayImage,
-        k3DVR
-    };
+    OpenGLESRender(JNIEnv *env, jobject surface, enum ViewType view_type,
+                   enum VideoRenderType video_render_type, enum EffectType effect_type);
 
-    OpenGLESRender(JNIEnv *env, jobject surface, enum VideoRenderType type);
     virtual ~OpenGLESRender();
 
     virtual void
-    Init(int videoWidth, int videoHeight, int *dstSize, FFmpegVideoDecoder *video_decoder);
+    Init(int videoWidth, int videoHeight, int *render_size);
     virtual void RenderVideoFrame(NativeImage *pImage);
     virtual void UnInit();
-    virtual void OnSurfaceCreated() {}
+    virtual void OnSurfaceCreated();
     virtual void OnSurfaceChanged(int w, int h);
     virtual void OnDrawFrame();
     virtual void UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY);
@@ -54,7 +49,6 @@ private:
     GLuint vao_id_;
     GLuint vbo_ids_[3];
     int vbo_nums_;
-    EffectType effect_type_;
 
     glm::mat4 MVPMatrix_;
     glm::vec2 touchxy_;

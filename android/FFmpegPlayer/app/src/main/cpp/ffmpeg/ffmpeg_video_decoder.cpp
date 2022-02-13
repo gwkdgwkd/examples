@@ -16,31 +16,27 @@ FFmpegVideoDecoder::~FFmpegVideoDecoder() {
     TRACE_FUNC();
 }
 
-bool FFmpegVideoDecoder::Init(VideoRenderInterface *video_render) {
+bool FFmpegVideoDecoder::Init() {
     TRACE_FUNC();
-
-    video_render_ = video_render;
 
     video_width_ = ffmpeg_demuxer_->GetCodecContext(type_)->width;
     video_height_ = ffmpeg_demuxer_->GetCodecContext(type_)->height;
-    int src_width = ffmpeg_demuxer_->GetCodecContext(type_)->width;
-    int src_height = ffmpeg_demuxer_->GetCodecContext(type_)->height;
-    enum AVPixelFormat src_format = ffmpeg_demuxer_->GetCodecContext(type_)->pix_fmt;
-
-    int dstSize[2] = {0};
-    video_render_->Init(video_width_, video_height_, dstSize, this);
-    render_width_ = dstSize[0];
-    render_height_ = dstSize[1];
-    enum AVPixelFormat render_format = AV_PIX_FMT_RGBA;
-
-    LOGI("src: src_width: %d, src_height: %d, src_format: %d", src_width, src_height, src_format);
-    LOGI("dst: dst_width: %d, dst_height: %d, dst_format: %d", render_width_, render_height_,
-         render_format);
-
-    scale_base_->Init(src_width, src_height, src_format, render_width_, render_height_,
-                      render_format);
+    enum AVPixelFormat video_format_ = ffmpeg_demuxer_->GetCodecContext(type_)->pix_fmt;
 
     return true;
+}
+
+void FFmpegVideoDecoder::SetRenderSize(int width, int height) {
+    render_width_ = width;
+    render_height_ = height;
+    render_format_ = AV_PIX_FMT_RGBA;
+
+    LOGI("src: src_width: %d, src_height: %d, src_format: %d", video_width_, video_height_, video_format_);
+    LOGI("dst: dst_width: %d, dst_height: %d, dst_format: %d", render_width_, render_height_,
+         render_format_);
+
+    scale_base_->Init(video_width_, video_height_, video_format_, render_width_, render_height_,
+                      render_format_);
 }
 
 void FFmpegVideoDecoder::Process() {

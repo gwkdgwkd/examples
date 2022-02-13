@@ -69,14 +69,6 @@ bool FFmpegDemuxer::Init() {
     // dump input information to stderr
     av_dump_format(fmt_ctx_, 0, url_.c_str(), 0);
 
-//    if (packet_queue_init(&video_packet_queue_)) {
-//        LOGE("video_packet_queue init failed!");
-//        return ret;
-//    }
-//    if (packet_queue_init(&audio_packet_queue_)) {
-//        LOGE("audio_packet_queue init failed!");
-//        return ret;
-//    }
 
     return true;
 }
@@ -89,7 +81,7 @@ AVCodecContext *FFmpegDemuxer::GetCodecContext(enum AVMediaType type) {
     }
 }
 
-AVStream *FFmpegDemuxer::GetAVStream(enum AVMediaType type){
+AVStream *FFmpegDemuxer::GetAVStream(enum AVMediaType type) {
     if (type == AVMEDIA_TYPE_VIDEO) {
         return video_stream_;
     } else {
@@ -98,13 +90,9 @@ AVStream *FFmpegDemuxer::GetAVStream(enum AVMediaType type){
 }
 
 AVPacket *FFmpegDemuxer::GetPacket(enum AVMediaType type) {
-//int FFmpegDemuxer::GetPacket(enum AVMediaType type, AVPacket *pkt) {
     if (type == AVMEDIA_TYPE_VIDEO) {
         return video_packet_queue_.Pop();
-//return 0;
     } else {
-//        return packet_queue_get(&audio_packet_queue_, pkt, 1, nullptr);
-//        LOGE("==================== size %d", audio_packet_queue_.Size());
         return audio_packet_queue_.Pop();
     }
 }
@@ -159,8 +147,11 @@ bool FFmpegDemuxer::OpenCodecContext(int *stream_idx,
 
 void FFmpegDemuxer::Process() {
 //TRACE_FUNC();
-//    if(m_MsgContext && m_MsgCallback)
+
+//    if (m_MsgContext && m_MsgCallback)
 //        m_MsgCallback(m_MsgContext, 5, 66);
+
+
     AVPacket *packet = av_packet_alloc();
     if (!packet) {
         LOGE("Could not allocate packet");
@@ -175,12 +166,10 @@ void FFmpegDemuxer::Process() {
 //            packet_queue_put(&video_packet_queue_, packet);
             video_packet_queue_.Push(packet);
         } else if (packet->stream_index == audio_stream_idx_) {
-//            PrintPackInfo(packet);
             audio_packet_queue_.Push(packet);
 //            LOGE("read audio packet n : %d, size %d, pts %s", audio_packet_count_++, packet->size,
 //                 av_ts2timestr(packet->pts, &audio_dec_ctx_->time_base));
 //            packet_queue_put(&audio_packet_queue_, packet);
-//            PrintQueueInfo();
         } else {
             av_packet_free(&packet);
         }
@@ -193,19 +182,13 @@ void FFmpegDemuxer::Process() {
     return;
 }
 
-void FFmpegDemuxer::PrintPackInfo(AVPacket *pkt) {
-    TRACE_FUNC();
-    LOGE("size: %d", pkt->size);
-    LOGE("duration: %ld", pkt->duration);
-    LOGE("pts: %ld", pkt->pts);
-    LOGE("dts: %ld", pkt->dts);
-    LOGE("stream_index: %d", pkt->stream_index);
-    LOGE("pos: %ld", pkt->pos);
-}
+void FFmpegDemuxer::GetMediaInfo(MediaInfo *info) const {
+    info->sample_fmt = audio_dec_ctx_->sample_fmt;
+    info->channels = audio_dec_ctx_->channels;
+    info->sample_rate = audio_dec_ctx_->sample_rate;
+    info->width = video_dec_ctx_->width;
+    info->height = video_dec_ctx_->height;
+    info->duration = (fmt_ctx_->duration / AV_TIME_BASE * 1000) * 1.0f / 1000;
 
-void FFmpegDemuxer::PrintQueueInfo() {
-    TRACE_FUNC();
-//    LOGE("size: %d", audio_packet_queue_.size);
-//    LOGE("duration: %ld", audio_packet_queue_.duration);
-//    LOGE("nb_packets: %d", audio_packet_queue_.nb_packets);
+    return;
 }

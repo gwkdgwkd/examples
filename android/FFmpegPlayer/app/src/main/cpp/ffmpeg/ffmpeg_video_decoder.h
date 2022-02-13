@@ -19,7 +19,8 @@ public:
     FFmpegVideoDecoder(FFmpegDemuxer *ffmpeg_demuxer, ScaleFactory *scale_factory);
     ~FFmpegVideoDecoder();
 
-    bool Init(VideoRenderInterface *video_render);
+    bool Init();
+    void SetRenderSize(int width, int height);
     NativeImage *GetVideoImage();
 private:
     virtual void Process() override;
@@ -30,9 +31,11 @@ private:
 
     int render_width_;
     int render_height_;
+    enum AVPixelFormat render_format_;
     int video_width_;
     int video_height_;
-    VideoRenderInterface *video_render_;
+    enum AVPixelFormat video_format_;
+
     ThreadSafeQueue<NativeImage *> video_image_queue_;
     ScaleBase *scale_base_;
 

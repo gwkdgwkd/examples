@@ -14,15 +14,20 @@ static void AudioRenderCallback(SLAndroidSimpleBufferQueueItf bq, void *context)
         AudioFrame *frame = player->GetAudioDecoder()->GetAudioFrame();
         if (frame) {
             player->GetAudioRender()->SendQueueLoop(frame->data_, frame->data_size_);
-            if(player->GetVideoRenderType() == 2 || player->GetVideoRenderType() == 3) {
+            if (player->GetEffectType() == VideoRenderInterface::EffectType::kVisualAudio) {
                 player->GetVisualAudioRender()->UpdateAudioFrame(frame);
             }
         }
     }
 }
 
-Player::Player(int type) {
-    video_render_type_ = static_cast<VideoRenderInterface::VideoRenderType>(type);
+Player::Player(int view_type, int audio_render_type, int video_render_type, int effect_type,
+               int scale_type) {
+    view_type_ = static_cast<VideoRenderInterface::ViewType>(view_type);
+    audio_render_type_ = static_cast<AudioRenderType>(audio_render_type);
+    video_render_type_ = static_cast<VideoRenderInterface::VideoRenderType>(video_render_type);
+    effect_type_ = static_cast<VideoRenderInterface::EffectType>(effect_type);
+    scale_type_ = static_cast<ScaleType>(scale_type);
     demuxer_ = nullptr;
     audio_decoder_ = nullptr;
     audio_render_ = nullptr;
@@ -33,41 +38,33 @@ Player::Player(int type) {
 
 Player::~Player() {}
 
-bool Player::Init(JNIEnv *env, jobject obj, jobject surface, const char *url) {
+bool Player::Init(const char *url) {
     TRACE_FUNC();
-    env->GetJavaVM(&gl_jvm);
-    gl_object = env->NewGlobalRef(obj);
 
     int ret = false;
-
-    if(video_render_type_ == VideoRenderInterface::VideoRenderType::kAnWindow) {
-        video_render_ = new NativeWindowRender(env, surface, video_render_type_);
-    } else {
-        OpenGLESRender *render = new OpenGLESRender(env, surface, video_render_type_);
-        video_render_ = render;
-        opengles_render_ = render;
-    }
 
     demuxer_ = new FFmpegDemuxer(url);
     if (!demuxer_->Init()) {
         LOGE("FFmpegDemuxer init failed!");
         return ret;
     }
-    demuxer_->SetMessageCallback(this, PostMessage);
-    video_render_->SetMessageCallback(this, PostMessage);
 
     audio_decoder_ = new FFmpegAudioDecoder(demuxer_);
     if (!audio_decoder_->Init()) {
         LOGE("FFmpegAudioDecorder init failed!");
         return ret;
     }
-    video_render_->SetAudioDecoder(audio_decoder_);
 
-//    ScaleFactory * scale_factory = new FFmpegScaleFactory();
-//    ScaleFactory * scale_factory = new LibyuvScaleFactory();
-    ScaleFactory * scale_factory = new OpenglScaleFactory();
+    ScaleFactory * scale_factory;
+    if(scale_type_ == ScaleType::kFFmpeg) {
+        scale_factory = new FFmpegScaleFactory();
+    } else if(scale_type_ == ScaleType::kLibyuv) {
+        scale_factory = new LibyuvScaleFactory();
+    } else if(scale_type_ == ScaleType::kOpengles) {
+        scale_factory = new OpenglScaleFactory();
+    }
     video_decoder_ = new FFmpegVideoDecoder(demuxer_, scale_factory);
-    if (!video_decoder_->Init(video_render_)) {
+    if (!video_decoder_->Init()) {
         LOGE("FFmpegVideoDecoder init failed!");
         return ret;
     }
@@ -80,6 +77,33 @@ bool Player::Init(JNIEnv *env, jobject obj, jobject surface, const char *url) {
     is_inited_ = true;
 
     return true;
+}
+
+void Player::Init2(JNIEnv *env, jobject obj, jobject surface) {
+    env->GetJavaVM(&gl_jvm);
+    gl_object = env->NewGlobalRef(obj);
+
+    demuxer_->SetMessageCallback(this, PostMessage);
+
+
+    if (video_render_type_ == VideoRenderInterface::VideoRenderType::kAnWindow) {
+        video_render_ = new NativeWindowRender(env, surface, view_type_, video_render_type_,
+                                               effect_type_);
+    } else {
+        OpenGLESRender *render = new OpenGLESRender(env, surface, view_type_, video_render_type_,
+                                                    effect_type_);
+        video_render_ = render;
+        opengles_render_ = render;
+    }
+
+    int render_size[2] = {0};
+    video_render_->Init(media_info_.width, media_info_.height, render_size);
+    video_decoder_->SetRenderSize(render_size[0], render_size[1]);
+
+    video_render_->SetMessageCallback(this, PostMessage);
+
+    video_render_->SetAudioDecoder(audio_decoder_);
+    video_render_->SetVideoDecoder(video_decoder_);
 }
 
 void Player::Uninit() {
