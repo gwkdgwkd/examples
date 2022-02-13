@@ -59,7 +59,7 @@ void NativeWindowRender::RenderVideoFrame(NativeImage *pImage) {
 }
 
 void NativeWindowRender::Process() {
-    TRACE_FUNC();
+    // TRACE_FUNC();
 
     NativeImage *pImage = video_decoder_->GetVideoImage();
     if (native_window_ == nullptr || pImage == nullptr) return;

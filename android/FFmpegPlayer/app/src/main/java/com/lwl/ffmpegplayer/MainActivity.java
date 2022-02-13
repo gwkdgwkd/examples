@@ -74,8 +74,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 PlayerInfo playerInfo = new PlayerInfo(ViewType.SURFACEVIEW,
                                                        AudioRenderType.OPENSLES,
                                                        ViedoRenderType.OPENGLES,
-                                                       EffectType.DYNIMICMESH,
-                                                       ScaleType.OPENGLES);
+                                                       EffectType.VR,
+                                                       ScaleType.FFMPEG);
                 play.putExtra("playerInfo", playerInfo);
                 startActivity(play);
                 break;

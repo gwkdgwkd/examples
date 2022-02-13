@@ -6,6 +6,7 @@ static JavaVM *gl_jvm = NULL;
 static jobject gl_object = NULL;
 
 #define JAVA_PLAYER_EVENT_CALLBACK_API_NAME "playerEventCallback"
+#define JAVA_PLAYER_PCM_CALLBACK_API_NAME "writePcm"
 
 static void AudioRenderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     if (player->GetAudioRender() == nullptr) return;
@@ -31,6 +32,7 @@ Player::Player(int view_type, int audio_render_type, int video_render_type, int 
     demuxer_ = nullptr;
     audio_decoder_ = nullptr;
     audio_render_ = nullptr;
+    audio_track_render_ = nullptr;
     opengles_render_ = nullptr;
     visual_audio_render_ = nullptr;
     is_inited_ = false;
@@ -69,8 +71,13 @@ bool Player::Init(const char *url) {
         return ret;
     }
 
-    audio_render_ = new SLRender();
-    audio_render_->SetQueueCallBack(AudioRenderCallback);
+    if(AudioRenderType::kOpensles == audio_render_type_) {
+        audio_render_ = new SLRender();
+        audio_render_->SetQueueCallBack(AudioRenderCallback);
+    } else if(AudioRenderType::kAudioTrack == audio_render_type_) {
+        // audio_track_render_ = new AudioTrackRender(audio_decoder_);
+        // audio_track_render_->SetPcmCallback(this, WritePcm);
+    }
 
     player = this;
 
@@ -84,7 +91,6 @@ void Player::Init2(JNIEnv *env, jobject obj, jobject surface) {
     gl_object = env->NewGlobalRef(obj);
 
     demuxer_->SetMessageCallback(this, PostMessage);
-
 
     if (video_render_type_ == VideoRenderInterface::VideoRenderType::kAnWindow) {
         video_render_ = new NativeWindowRender(env, surface, view_type_, video_render_type_,
@@ -121,8 +127,12 @@ void Player::Start() {
     audio_decoder_->Start();
     video_decoder_->Start();
 
-    audio_render_->Start();
-    audio_render_->SendQueueLoop("", 1);    // 开启轮询
+    if(AudioRenderType::kOpensles == audio_render_type_) {
+        audio_render_->Start();
+        audio_render_->SendQueueLoop("", 1);    // 开启轮询
+    } else if(AudioRenderType::kAudioTrack == audio_render_type_) {
+        // audio_track_render_->Start();
+    }
 
     video_render_->Start();
 }
@@ -133,6 +143,26 @@ FFmpegAudioDecoder *Player::GetAudioDecoder() const {
 
 SLBase *Player::GetAudioRender() const {
     return audio_render_;
+}
+
+void Player::WritePcm(void *context, uint8_t *pcm, int len) {
+    TRACE_FUNC();
+    if (context != nullptr) {
+        Player *player = static_cast<Player *>(context);
+        bool is_attach = false;
+        JNIEnv *env = player->GetJNIEnv(&is_attach);
+        if (env == nullptr)
+            return;
+        jobject javaObj = player->GetJavaObj();
+        jmethodID mid = env->GetMethodID(env->GetObjectClass(javaObj),
+                                         JAVA_PLAYER_PCM_CALLBACK_API_NAME, "([BI)V");
+        jbyteArray array = env->NewByteArray(len);
+        env->SetByteArrayRegion(array, 0, len, reinterpret_cast<const jbyte *>(pcm));
+
+        env->CallVoidMethod(javaObj, mid, array, len);
+        if (is_attach)
+            player->GetJavaVM()->DetachCurrentThread();
+    }
 }
 
 void Player::PostMessage(void *context, int msgType, float msgCode) {
@@ -150,7 +180,6 @@ void Player::PostMessage(void *context, int msgType, float msgCode) {
         env->CallVoidMethod(javaObj, mid, msgType, msgCode);
         if (is_attach)
             player->GetJavaVM()->DetachCurrentThread();
-
     }
 }
 

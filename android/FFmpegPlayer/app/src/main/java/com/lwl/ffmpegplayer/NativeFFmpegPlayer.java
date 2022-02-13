@@ -17,6 +17,12 @@ public class NativeFFmpegPlayer {
 
     }
 
+    private void writePcm(byte[] pcm,int len) {
+        if(eventCallback != null)
+            eventCallback.onWritePcm(pcm, len);
+
+    }
+
     public native String GetFFmpegVersion();
     public native void Init(String url, int view_type, int audio_render_type,
                             int video_render_type, int effect_type, int scale_type);
@@ -25,6 +31,8 @@ public class NativeFFmpegPlayer {
     public native void Pause();
     public native void Stop();
     public native void UnInit();
+
+    public native int GetPcmBuffer(byte[] pcm,int len);
 
     // for GL render
     public native void OnSurfaceCreated(Object surface,int type);
@@ -38,5 +46,6 @@ public class NativeFFmpegPlayer {
 
     public interface EventCallback {
         void onPlayerEvent(int msgType, float msgValue);
+        void onWritePcm(byte[] pcm,int len);
     }
 }

@@ -3,6 +3,8 @@ package com.lwl.ffmpegplayer;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Point;
+import android.media.AudioFormat;
+import android.media.AudioTrack;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Environment;
@@ -32,6 +34,10 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
     private SurfaceView mVideoSurfaceView = null;
     private MediaInfo mMediaInfo = null;
 
+    private AudioTrack audioTrack;
+    private int minbufsize;
+    public volatile boolean mThreadState = true;
+
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
     private float mPreviousY;
     private float mPreviousX;
@@ -60,6 +66,10 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
             Log.d(TAG, "FFmpegPlayerActivity surfaceChanged " + width + " " + height);
             nativeFFmpegPlayer.OnSurfaceChanged(width, height, 0);
             nativeFFmpegPlayer.Play();
+            if(playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK) {
+                audioTrack.play();
+                audioUpdateThread.start();
+            }
         }
 
         @Override
@@ -80,6 +90,10 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         public void onSurfaceChanged(GL10 gl10, int i, int i1) {
             nativeFFmpegPlayer.OnSurfaceChanged(i, i1, 0);
             nativeFFmpegPlayer.Play();
+            if(playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK) {
+                audioTrack.play();
+                audioUpdateThread.start();
+            }
         }
 
         @Override
@@ -158,6 +172,10 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         mMediaInfo = new MediaInfo();
         nativeFFmpegPlayer.GetMediaInfo(mMediaInfo);
 
+        if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK) {
+            initAudioTrack();
+        }
+
         if (playerInfo.getViewType() == ViewType.SURFACEVIEW) {
             setViewPosition(mMediaInfo.width, mMediaInfo.height, mVideoSurfaceView);
         } else if (playerInfo.getViewType() == ViewType.GLSURFACEVIEW) {
@@ -167,13 +185,43 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         mScaleGestureDetector = new ScaleGestureDetector(this, this);
     }
 
+    private void initAudioTrack() {
+        Log.d(TAG, "sample_rate is " + mMediaInfo.sample_rate);
+        Log.d(TAG, "channels is " + mMediaInfo.channels);
+        Log.d(TAG, "sampleformat is " + mMediaInfo.sample_fmt);
+        int samplerate = mMediaInfo.sample_rate;
+        int channeltype;
+        if (mMediaInfo.channels == 2) { // AV_CH_LAYOUT_STEREO
+            channeltype = AudioFormat.CHANNEL_OUT_STEREO;
+        } else { // AV_CH_LAYOUT_MONO and other
+            channeltype = AudioFormat.CHANNEL_OUT_MONO;
+        }
+        int sampleformat = AudioFormat.ENCODING_PCM_16BIT;
+        minbufsize = AudioTrack.getMinBufferSize(samplerate, channeltype, sampleformat);
+        Log.d(TAG, "minbufsize is " + minbufsize);
+        audioTrack = new AudioTrack(android.media.AudioManager.STREAM_MUSIC, samplerate, channeltype,
+                sampleformat, minbufsize * 2, AudioTrack.MODE_STREAM);
+    }
+
+    private Thread audioUpdateThread = new Thread(){
+        public void run() {
+            while(mThreadState) {
+                byte[] pcm = new byte[minbufsize];
+                int dsize = nativeFFmpegPlayer.GetPcmBuffer(pcm, minbufsize);
+                if (audioTrack.write(pcm, 0, dsize) < dsize) {
+                    Log.w(null, "Data not written completely");
+                }
+            }
+        }
+    };
+
     private void setViewPosition(int width, int height, View view) {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
-        if(playerInfo.getEffectType() != EffectType.VISUALAUDIO) {
+        if (playerInfo.getEffectType() != EffectType.VISUALAUDIO) {
             params.topMargin = (size.y - height) / 2;
             params.leftMargin = 0;
         }
@@ -188,6 +236,14 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         if (playerInfo.getEffectType() == EffectType.VISUALAUDIO) {
             mAudioGLSurfaceView.requestRender();
         }
+    }
+
+    @Override
+    public void onWritePcm(byte[] pcm, int len) {
+        if (audioTrack.write(pcm, 0, len) < len) {
+            Log.w(null, "Data not written completely");
+        }
+        return;
     }
 
     @Override

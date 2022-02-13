@@ -144,6 +144,26 @@ Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetMediaInfo(JNIEnv *env, jobject o
     return;
 }
 
+JNIEXPORT jint JNICALL
+Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetPcmBuffer(JNIEnv *env, jobject thiz, jbyteArray pcm,
+                                                          jint len) {
+
+    jbyte *pcmbuf = env->GetByteArrayElements(pcm, NULL);
+    jsize pcmsize = env->GetArrayLength(pcm);
+    jbyte *pcmindex = pcmbuf;
+    AudioFrame *frame = ffmpeg_player->GetAudioDecoder()->GetAudioFrame();
+    if (frame) {
+        memcpy(pcmbuf, frame->data_, frame->data_size_);
+        if (ffmpeg_player->GetEffectType() == VideoRenderInterface::EffectType::kVisualAudio) {
+            ffmpeg_player->GetVisualAudioRender()->UpdateAudioFrame(frame);
+        }
+    }
+
+
+    env->ReleaseByteArrayElements(pcm, pcmbuf, 0);
+    return frame->data_size_;
+}
+
 #ifdef __cplusplus
 }
 #endif

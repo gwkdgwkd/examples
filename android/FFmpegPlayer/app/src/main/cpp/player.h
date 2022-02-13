@@ -9,6 +9,7 @@
 #include "ffmpeg/ffmpeg_video_decoder.h"
 
 #include "render/audio/openSlEs_pcm_render.h"
+#include "render/audio/audio_track_render.h"
 #include "render/video/video_render_interface.h"
 
 #include "render/video/native_window_render.h"
@@ -48,6 +49,7 @@ public:
     bool GetInitStatus() { return is_inited_; }
     int GetVideoRenderType() { return video_render_type_; }
     int GetEffectType() { return effect_type_; }
+    static void WritePcm(void *context, uint8_t *pcm, int len);
     static void PostMessage(void *context, int msgType, float msgCode);
     MediaInfo media_info_;
 private:
@@ -59,6 +61,7 @@ private:
     FFmpegAudioDecoder *audio_decoder_;
     FFmpegVideoDecoder *video_decoder_;
     SLBase *audio_render_;
+    AudioTrackRender* audio_track_render_;
     VideoRenderInterface *video_render_;
     OpenglesRenderInterface *opengles_render_;
     VisualAudioRender *visual_audio_render_;
