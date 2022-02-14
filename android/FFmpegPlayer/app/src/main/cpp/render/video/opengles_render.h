@@ -54,6 +54,7 @@ private:
 
     int real_width_;
     int real_height_;
+    int last_process_;
 };
 
 #endif // RENDER_VIDEO_OPENGL_RENDER_H

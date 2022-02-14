@@ -179,17 +179,27 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         Log.d(TAG, "scale_type is " + playerInfo.getScaleType().name());
 
         mySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            double pos;
-            public void seek(SeekBar seekBar) {}
+            float pos;
+            public void seek(SeekBar seekBar) {
+                pos = seekBar.getProgress();
+                Log.d(TAG, "seek to " + pos);
+                nativeFFmpegPlayer.SeekToPosition(pos);
+            }
+
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) { }
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+            }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 seek(seekBar);
+                Log.d(TAG, "seek start");
             }
+
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 seek(seekBar);
+                Log.d(TAG, "seek stop");
             }
         });
 
@@ -198,7 +208,7 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
             public void onClick(View v) {
                 myButton.changeIsPlay();
                 myButton.invalidate();
-                if(isPlaying) {
+                if (isPlaying) {
                     isPlaying = false;
                     nativeFFmpegPlayer.Pause();
                     if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1 ||
@@ -228,6 +238,13 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
                 playerInfo.getEffectType().ordinal(), playerInfo.getScaleType().ordinal());
         mMediaInfo = new MediaInfo();
         nativeFFmpegPlayer.GetMediaInfo(mMediaInfo);
+        Log.d(TAG, "sample_fmt is " + mMediaInfo.sample_fmt);
+        Log.d(TAG, "channels is " + mMediaInfo.channels);
+        Log.d(TAG, "sample_rate is " + mMediaInfo.sample_rate);
+        Log.d(TAG, "width is " + mMediaInfo.width);
+        Log.d(TAG, "height is " + mMediaInfo.height);
+        Log.d(TAG, "duration is " + mMediaInfo.duration);
+        mySeekBar.setMax((int) mMediaInfo.duration);
 
         if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1 ||
                 playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK2) {
@@ -265,7 +282,7 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         public void run() {
             while (true) {
                 if (!isPlaying) {
-                    try{
+                    try {
                         Thread.sleep(10);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -295,14 +312,21 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
 
     @Override
     public void onPlayerEvent(int msgType, float msgValue) {
-        if(isPlaying) {
-            if (playerInfo.getViewType() == ViewType.GLSURFACEVIEW) {
-                mVideoGLSurfaceView.requestRender();
-            }
-            if (playerInfo.getEffectType() == EffectType.VISUALAUDIO) {
-                mAudioGLSurfaceView.requestRender();
-            }
+        switch (msgType) {
+            case 0:
+                if (isPlaying) {
+                    if (playerInfo.getViewType() == ViewType.GLSURFACEVIEW) {
+                        mVideoGLSurfaceView.requestRender();
+                    }
+                    if (playerInfo.getEffectType() == EffectType.VISUALAUDIO) {
+                        mAudioGLSurfaceView.requestRender();
+                    }
+                }
+                break;
+            case 1:
+                mySeekBar.setProgress((int) msgValue);
         }
+
     }
 
     @Override

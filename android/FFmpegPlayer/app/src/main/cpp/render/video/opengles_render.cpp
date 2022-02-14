@@ -137,6 +137,7 @@ OpenGLESRender::OpenGLESRender(JNIEnv *env, jobject surface, enum ViewType view_
     TRACE_FUNC();
     is_opengles_init_ = false;
     frame_index_ = 0;
+    last_process_ = 0;
     if (IsSurface()) {
         native_window_ = ANativeWindow_fromSurface(env, surface);
     }
@@ -298,7 +299,7 @@ void OpenGLESRender::Process() {
         OnDrawFrame();
     } else {
         if (m_MsgContext && m_MsgCallback)
-            m_MsgCallback(m_MsgContext, 5, 66);
+            m_MsgCallback(m_MsgContext, 0, 0);
         Pause();
     }
 }
@@ -346,6 +347,7 @@ void OpenGLESRender::OnDrawFrame() {
     LOGE("Video:%lf Audio:%lf delay:%lf(%ld) A-V=%lf", pImage->clock, audio_clock, delay,
          real_delay, -diff);
 
+    int process = pImage->clock + delay;
     std::this_thread::sleep_for(std::chrono::microseconds(real_delay));
 
     int img_type = pImage->format;
@@ -428,6 +430,12 @@ void OpenGLESRender::OnDrawFrame() {
     } else {
         Resume();
     }
+
+    if (m_MsgContext && m_MsgCallback && last_process_ < process) {
+        m_MsgCallback(m_MsgContext, 1, process);
+        last_process_ = process;
+    }
+
 }
 
 void OpenGLESRender::UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY) {
