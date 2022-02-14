@@ -29,6 +29,7 @@ public class NativeFFmpegPlayer {
     public native void Play();
     public native void SeekToPosition(float position);
     public native void Pause();
+    public native void Resume();
     public native void Stop();
     public native void UnInit();
 

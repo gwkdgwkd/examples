@@ -40,6 +40,8 @@ public:
     void Init2(JNIEnv *env, jobject obj, jobject surface);
     void Uninit();
     void Start();
+    void Pause();
+    void Resume();
     FFmpegAudioDecoder *GetAudioDecoder() const;
     SLBase *GetAudioRender() const;
     FFmpegAudioDecoder *GetAudioDecoder() { return audio_decoder_; }
@@ -75,6 +77,7 @@ private:
     ScaleType scale_type_;
 
     std::atomic<bool> is_inited_;
+    std::atomic<bool> is_playing_;
 };
 
 #endif // FFMPEG_PLAYER_PLAYER_H

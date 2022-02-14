@@ -288,7 +288,7 @@ void OpenGLESRender::RenderVideoFrame(NativeImage *pImage) {
 }
 
 void OpenGLESRender::Process() {
-    // TRACE_FUNC();
+     TRACE_FUNC();
 
     if (IsSurface()) {
         if (!is_opengles_init_) {
@@ -323,7 +323,7 @@ void OpenGLESRender::OnSurfaceChanged(int w, int h) {
 }
 
 void OpenGLESRender::OnDrawFrame() {
-    // TRACE_FUNC();
+     TRACE_FUNC();
 //    LOGI("left %d, right %d, width %d, height %d", 0, 0, real_width_, real_height_);
 
     NativeImage *pImage = video_decoder_->GetVideoImage();

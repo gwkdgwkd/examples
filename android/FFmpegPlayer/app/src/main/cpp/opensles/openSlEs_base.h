@@ -14,6 +14,7 @@ public:
     void SetQueueCallBack(slAndroidSimpleBufferQueueCallback callback);
     bool SendQueueLoop(const void *pBuffer, SLuint32 size);
     bool IsQueueLooping() const { return isQueueLooping; };
+    void SetQueueState(bool isLoop);
     bool IsQueueSelf(SLAndroidSimpleBufferQueueItf queue);
 
 protected:
@@ -33,9 +34,6 @@ protected:
     virtual void ReleaseFeature() = 0;        // 释放XXX器
     virtual bool SetStateRuning() = 0;        // 设置XXX器运行状态
     virtual bool SetStateStoping() = 0;       // 设置XXX器停止状态
-
-    // 队列
-    void SetQueueState(bool isLoop);
 
     bool isQueueLooping = false;
     SLAndroidSimpleBufferQueueItf queueItf;

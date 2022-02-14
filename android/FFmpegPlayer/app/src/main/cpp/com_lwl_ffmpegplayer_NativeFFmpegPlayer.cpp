@@ -26,10 +26,11 @@ JNIEXPORT jstring JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetFFmpeg
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Init
         (JNIEnv *env, jobject obj, jstring jurl, jint view_type,
-         jint audio_render_type, jint video_render_type ,jint effect_type, jint scale_type) {
+         jint audio_render_type, jint video_render_type, jint effect_type, jint scale_type) {
     TRACE_FUNC();
     const char *url = env->GetStringUTFChars(jurl, nullptr);
-    ffmpeg_player = new Player(view_type, audio_render_type, video_render_type, effect_type, scale_type);
+    ffmpeg_player = new Player(view_type, audio_render_type, video_render_type, effect_type,
+                               scale_type);
     ffmpeg_player->Init(url);
 }
 
@@ -43,7 +44,14 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_SeekToPositi
         (JNIEnv *env, jobject obj, jfloat) {}
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Pause
-        (JNIEnv *env, jobject obj) {}
+        (JNIEnv *env, jobject obj) {
+    ffmpeg_player->Pause();
+}
+
+JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Resume
+        (JNIEnv *env, jobject obj) {
+    ffmpeg_player->Resume();
+}
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Stop
         (JNIEnv *env, jobject obj) {}

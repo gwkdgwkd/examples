@@ -16,5 +16,7 @@ void AudioTrackRender::Process() {
     if (visual_audio_render_) {
         visual_audio_render_->UpdateAudioFrame(frame);
     }
+
+    std::this_thread::sleep_for(std::chrono::nanoseconds(100));
 }
 

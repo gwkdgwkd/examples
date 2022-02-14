@@ -9,6 +9,7 @@ static jobject gl_object = NULL;
 #define JAVA_PLAYER_PCM_CALLBACK_API_NAME "writePcm"
 
 static void AudioRenderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
+    TRACE_FUNC();
     if (player->GetAudioRender() == nullptr) return;
     if (!player->GetAudioRender()->IsQueueSelf(bq)) return;
     if (player->GetAudioRender()->IsQueueLooping()) {
@@ -36,6 +37,7 @@ Player::Player(int view_type, int audio_render_type, int video_render_type, int 
     opengles_render_ = nullptr;
     visual_audio_render_ = nullptr;
     is_inited_ = false;
+    is_playing_ = false;
 }
 
 Player::~Player() {}
@@ -135,6 +137,44 @@ void Player::Start() {
     }
 
     video_render_->Start();
+    is_playing_ = true;
+}
+
+void Player::Pause() {
+    TRACE_FUNC();
+    demuxer_->Pause();
+
+    audio_decoder_->Pause();
+    video_decoder_->Pause();
+
+    if (AudioRenderType::kOpensles == audio_render_type_) {
+        audio_render_->SetQueueState(false);
+    } else if (AudioRenderType::kAudioTrack2 == audio_render_type_) {
+        audio_track_render_->Pause();
+    }
+
+    video_render_->Pause();
+
+    is_playing_ = false;
+
+}
+void Player::Resume() {
+    TRACE_FUNC();
+    demuxer_->Resume();
+
+    audio_decoder_->Resume();
+    video_decoder_->Resume();
+
+    if (AudioRenderType::kOpensles == audio_render_type_) {
+        audio_render_->SetQueueState(true);
+        audio_render_->SendQueueLoop("", 1);
+    }else if (AudioRenderType::kAudioTrack2 == audio_render_type_) {
+        audio_track_render_->Resume();
+    }
+
+    video_render_->Resume();
+
+    is_playing_ = true;
 }
 
 FFmpegAudioDecoder *Player::GetAudioDecoder() const {

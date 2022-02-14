@@ -16,10 +16,13 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
 
 import com.lwl.ffmpegplayer.util.MediaInfo;
+import com.lwl.ffmpegplayer.util.MyButton;
+import com.lwl.ffmpegplayer.util.MySeekBar;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -32,11 +35,14 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
     private GLSurfaceView mVideoGLSurfaceView = null;
     private GLSurfaceView mAudioGLSurfaceView = null;
     private SurfaceView mVideoSurfaceView = null;
+    private MySeekBar mySeekBar;
+    private MyButton myButton;
+    private volatile boolean isPlaying = true;
+
     private MediaInfo mMediaInfo = null;
 
     private AudioTrack audioTrack;
     private int minbufsize;
-    public volatile boolean mThreadState = true;
 
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
     private float mPreviousY;
@@ -148,16 +154,22 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
             mVideoGLSurfaceView.setEGLContextClientVersion(3);
             mVideoGLSurfaceView.setRenderer(mVideoGLRender);
             mVideoGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+            mySeekBar = (MySeekBar) findViewById(R.id.surface_view_seekbar1);
+            myButton = (MyButton) findViewById(R.id.surface_view_button1);
         } else if (playerInfo.getViewType() == ViewType.SURFACEVIEW) {
             setContentView(R.layout.ffmpeg_player_surfaceview);
             mVideoSurfaceView = findViewById(R.id.video_surface_view);
             mVideoSurfaceView.getHolder().addCallback(mVideoRender);
+            mySeekBar = (MySeekBar) findViewById(R.id.surface_view_seekbar);
+            myButton = (MyButton) findViewById(R.id.surface_view_button);
         } else if (playerInfo.getViewType() == ViewType.GLSURFACEVIEW) {
             setContentView(R.layout.ffmpeg_player_glsurfaceview);
             mVideoGLSurfaceView = findViewById(R.id.video_glsurface_view);
             mVideoGLSurfaceView.setEGLContextClientVersion(3);
             mVideoGLSurfaceView.setRenderer(mVideoGLRender);
             mVideoGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+            mySeekBar = (MySeekBar) findViewById(R.id.glsurface_view_seekbar);
+            myButton = (MyButton) findViewById(R.id.glsurface_view_button);
         }
 
         Log.d(TAG, "view_type is " + playerInfo.getViewType().name());
@@ -165,6 +177,45 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         Log.d(TAG, "video_render_type is " + playerInfo.getViedoRenderType().name());
         Log.d(TAG, "effect_type is " + playerInfo.getEffectType().name());
         Log.d(TAG, "scale_type is " + playerInfo.getScaleType().name());
+
+        mySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            double pos;
+            public void seek(SeekBar seekBar) {}
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) { }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                seek(seekBar);
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                seek(seekBar);
+            }
+        });
+
+        myButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myButton.changeIsPlay();
+                myButton.invalidate();
+                if(isPlaying) {
+                    isPlaying = false;
+                    nativeFFmpegPlayer.Pause();
+                    if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1 ||
+                            playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK2) {
+                        audioTrack.pause();
+                    }
+                } else {
+                    isPlaying = true;
+                    nativeFFmpegPlayer.Resume();
+                    if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1 ||
+                            playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK2) {
+                        audioTrack.play();
+                    }
+                }
+                Log.d(TAG, " isPlaying is " + isPlaying);
+            }
+        });
 
         nativeFFmpegPlayer = new NativeFFmpegPlayer();
         nativeFFmpegPlayer.AddEventCallback(this);
@@ -210,9 +261,16 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
                 sampleformat, minbufsize * 2, AudioTrack.MODE_STREAM);
     }
 
-    private Thread audioUpdateThread = new Thread() {
+    private final Thread audioUpdateThread = new Thread() {
         public void run() {
-            while (mThreadState) {
+            while (true) {
+                if (!isPlaying) {
+                    try{
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
                 byte[] pcm = new byte[minbufsize];
                 int dsize = nativeFFmpegPlayer.GetPcmBuffer(pcm, minbufsize);
                 if (audioTrack.write(pcm, 0, dsize) < dsize) {
@@ -237,11 +295,13 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
 
     @Override
     public void onPlayerEvent(int msgType, float msgValue) {
-        if (playerInfo.getViewType() == ViewType.GLSURFACEVIEW) {
-            mVideoGLSurfaceView.requestRender();
-        }
-        if (playerInfo.getEffectType() == EffectType.VISUALAUDIO) {
-            mAudioGLSurfaceView.requestRender();
+        if(isPlaying) {
+            if (playerInfo.getViewType() == ViewType.GLSURFACEVIEW) {
+                mVideoGLSurfaceView.requestRender();
+            }
+            if (playerInfo.getEffectType() == EffectType.VISUALAUDIO) {
+                mAudioGLSurfaceView.requestRender();
+            }
         }
     }
 
