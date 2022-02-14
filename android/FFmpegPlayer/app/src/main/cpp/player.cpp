@@ -57,12 +57,12 @@ bool Player::Init(const char *url) {
         return ret;
     }
 
-    ScaleFactory * scale_factory;
-    if(scale_type_ == ScaleType::kFFmpeg) {
+    ScaleFactory *scale_factory;
+    if (scale_type_ == ScaleType::kFFmpeg) {
         scale_factory = new FFmpegScaleFactory();
-    } else if(scale_type_ == ScaleType::kLibyuv) {
+    } else if (scale_type_ == ScaleType::kLibyuv) {
         scale_factory = new LibyuvScaleFactory();
-    } else if(scale_type_ == ScaleType::kOpengles) {
+    } else if (scale_type_ == ScaleType::kOpengles) {
         scale_factory = new OpenglScaleFactory();
     }
     video_decoder_ = new FFmpegVideoDecoder(demuxer_, scale_factory);
@@ -71,12 +71,12 @@ bool Player::Init(const char *url) {
         return ret;
     }
 
-    if(AudioRenderType::kOpensles == audio_render_type_) {
+    if (AudioRenderType::kOpensles == audio_render_type_) {
         audio_render_ = new SLRender();
         audio_render_->SetQueueCallBack(AudioRenderCallback);
-    } else if(AudioRenderType::kAudioTrack == audio_render_type_) {
-        // audio_track_render_ = new AudioTrackRender(audio_decoder_);
-        // audio_track_render_->SetPcmCallback(this, WritePcm);
+    } else if (AudioRenderType::kAudioTrack2 == audio_render_type_) {
+        audio_track_render_ = new AudioTrackRender(audio_decoder_);
+        audio_track_render_->SetPcmCallback(this, WritePcm);
     }
 
     player = this;
@@ -127,11 +127,11 @@ void Player::Start() {
     audio_decoder_->Start();
     video_decoder_->Start();
 
-    if(AudioRenderType::kOpensles == audio_render_type_) {
+    if (AudioRenderType::kOpensles == audio_render_type_) {
         audio_render_->Start();
         audio_render_->SendQueueLoop("", 1);    // 开启轮询
-    } else if(AudioRenderType::kAudioTrack == audio_render_type_) {
-        // audio_track_render_->Start();
+    } else if (AudioRenderType::kAudioTrack2 == audio_render_type_) {
+        audio_track_render_->Start();
     }
 
     video_render_->Start();
@@ -143,6 +143,13 @@ FFmpegAudioDecoder *Player::GetAudioDecoder() const {
 
 SLBase *Player::GetAudioRender() const {
     return audio_render_;
+}
+
+void Player::SetVisualAudioRender(VisualAudioRender *render) {
+    visual_audio_render_ = render;
+    if (audio_render_type_ == AudioRenderType::kAudioTrack2) {
+        audio_track_render_->SetVisualAudioRender(visual_audio_render_);
+    }
 }
 
 void Player::WritePcm(void *context, uint8_t *pcm, int len) {

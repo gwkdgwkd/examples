@@ -2,5 +2,6 @@ package com.lwl.ffmpegplayer;
 
 public enum AudioRenderType {
     OPENSLES,
-    AUDIOTRACK
+    AUDIOTRACK1,
+    AUDIOTRACK2
 }

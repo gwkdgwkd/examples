@@ -24,7 +24,8 @@ class Player {
 public:
     enum AudioRenderType {
         kOpensles,
-        kAudioTrack
+        kAudioTrack1,
+        kAudioTrack2
     };
     enum ScaleType {
         kFFmpeg,
@@ -44,8 +45,9 @@ public:
     FFmpegAudioDecoder *GetAudioDecoder() { return audio_decoder_; }
     OpenglesRenderInterface *GetOpenglesRender() { return opengles_render_; }
     VisualAudioRender *GetVisualAudioRender() { return visual_audio_render_; }
+    AudioTrackRender *GetAudioTrackRender() { return audio_track_render_; }
     FFmpegDemuxer *GetDemuxer() { return demuxer_;}
-    void SetVisualAudioRender(VisualAudioRender *render) { visual_audio_render_ = render; }
+    void SetVisualAudioRender(VisualAudioRender *render);
     bool GetInitStatus() { return is_inited_; }
     int GetVideoRenderType() { return video_render_type_; }
     int GetEffectType() { return effect_type_; }

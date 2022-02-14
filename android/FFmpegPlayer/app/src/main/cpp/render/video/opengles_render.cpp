@@ -289,7 +289,6 @@ void OpenGLESRender::RenderVideoFrame(NativeImage *pImage) {
 
 void OpenGLESRender::Process() {
     // TRACE_FUNC();
-    LOGI("======================Process: %u",std::this_thread::get_id());
 
     if (IsSurface()) {
         if (!is_opengles_init_) {

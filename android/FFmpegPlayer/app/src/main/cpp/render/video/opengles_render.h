@@ -20,15 +20,14 @@ public:
 
     virtual ~OpenGLESRender();
 
-    virtual void
-    Init(int videoWidth, int videoHeight, int *render_size);
-    virtual void RenderVideoFrame(NativeImage *pImage);
-    virtual void UnInit();
-    virtual void OnSurfaceCreated();
-    virtual void OnSurfaceChanged(int w, int h);
-    virtual void OnDrawFrame();
-    virtual void UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY);
-    virtual void SetTouchLoc(float touchX, float touchY);
+    virtual void Init(int videoWidth, int videoHeight, int *render_size) override;
+    virtual void RenderVideoFrame(NativeImage *pImage) override;
+    virtual void UnInit() override;
+    virtual void OnSurfaceCreated() override;
+    virtual void OnSurfaceChanged(int w, int h) override;
+    virtual void OnDrawFrame() override;
+    virtual void UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY) override;
+    virtual void SetTouchLoc(float touchX, float touchY) override;
 
 private:
     virtual void Process() override;

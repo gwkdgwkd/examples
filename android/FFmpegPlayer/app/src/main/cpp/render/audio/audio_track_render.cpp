@@ -13,5 +13,8 @@ void AudioTrackRender::Process() {
     if (frame && context_ && callback_) {
         callback_(context_, frame->data_, frame->data_size_);
     }
+    if (visual_audio_render_) {
+        visual_audio_render_->UpdateAudioFrame(frame);
+    }
 }
 

@@ -66,8 +66,11 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
             Log.d(TAG, "FFmpegPlayerActivity surfaceChanged " + width + " " + height);
             nativeFFmpegPlayer.OnSurfaceChanged(width, height, 0);
             nativeFFmpegPlayer.Play();
-            if(playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK) {
+            if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1 ||
+                    playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK2) {
                 audioTrack.play();
+            }
+            if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1) {
                 audioUpdateThread.start();
             }
         }
@@ -90,8 +93,11 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         public void onSurfaceChanged(GL10 gl10, int i, int i1) {
             nativeFFmpegPlayer.OnSurfaceChanged(i, i1, 0);
             nativeFFmpegPlayer.Play();
-            if(playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK) {
+            if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1 ||
+                    playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK2) {
                 audioTrack.play();
+            }
+            if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1) {
                 audioUpdateThread.start();
             }
         }
@@ -172,7 +178,8 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         mMediaInfo = new MediaInfo();
         nativeFFmpegPlayer.GetMediaInfo(mMediaInfo);
 
-        if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK) {
+        if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1 ||
+                playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK2) {
             initAudioTrack();
         }
 
@@ -203,9 +210,9 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
                 sampleformat, minbufsize * 2, AudioTrack.MODE_STREAM);
     }
 
-    private Thread audioUpdateThread = new Thread(){
+    private Thread audioUpdateThread = new Thread() {
         public void run() {
-            while(mThreadState) {
+            while (mThreadState) {
                 byte[] pcm = new byte[minbufsize];
                 int dsize = nativeFFmpegPlayer.GetPcmBuffer(pcm, minbufsize);
                 if (audioTrack.write(pcm, 0, dsize) < dsize) {

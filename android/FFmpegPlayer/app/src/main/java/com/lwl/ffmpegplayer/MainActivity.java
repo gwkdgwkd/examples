@@ -72,9 +72,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.b_play:
                 Intent play = new Intent(MainActivity.this, FFmpegPlayerActivity.class);
                 PlayerInfo playerInfo = new PlayerInfo(ViewType.SURFACEVIEW,
-                                                       AudioRenderType.OPENSLES,
+                                                       AudioRenderType.AUDIOTRACK2,
                                                        ViedoRenderType.OPENGLES,
-                                                       EffectType.VR,
+                                                       EffectType.VISUALAUDIO,
                                                        ScaleType.FFMPEG);
                 play.putExtra("playerInfo", playerInfo);
                 startActivity(play);

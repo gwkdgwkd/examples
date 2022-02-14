@@ -97,7 +97,6 @@ void FFmpegAudioDecoder::Process() {
         LOGE("decode packet failed!");
     }
 
-
     return;
 }
 

@@ -1,4 +1,3 @@
-#include "ffmpeg_pipeline.h"
 //#include "render/audio/openSlEs_pcm_render.h"
 //#include "render/video/video_render_interface.h"
 #include "render/video/native_window_render.h"
@@ -158,7 +157,6 @@ Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_GetPcmBuffer(JNIEnv *env, jobject t
             ffmpeg_player->GetVisualAudioRender()->UpdateAudioFrame(frame);
         }
     }
-
 
     env->ReleaseByteArrayElements(pcm, pcmbuf, 0);
     return frame->data_size_;
