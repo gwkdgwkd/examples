@@ -65,7 +65,6 @@ protected:
     ViewType view_type_;
     VideoRenderType video_render_type_;
     EffectType effect_type_;
-
 };
 
 class VideoRenderFactoryInterface {

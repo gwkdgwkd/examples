@@ -1,6 +1,5 @@
 #include <cstdio>
 #include "openSlEs_pcm_render.h"
-#include "log.h"
 
 SLRender::SLRender() : SLBase(){
     TRACE_FUNC();
@@ -8,6 +7,30 @@ SLRender::SLRender() : SLBase(){
 SLRender::~SLRender() {
     TRACE_FUNC();
     ReleaseFeature();
+}
+
+void SLRender::OnPlay() {
+    TRACE_FUNC();
+    Start();
+    SendQueueLoop("", 1);    // 开启轮询
+}
+
+void SLRender::OnPause() {
+    TRACE_FUNC();
+    SetQueueState(false);
+}
+
+void SLRender::OnResume() {
+    TRACE_FUNC();
+    SetQueueState(true);
+    SendQueueLoop("", 1);
+}
+
+void SLRender::OnStop() {}
+
+void SLRender::OnSeekTo(float position) {
+    TRACE_FUNC();
+    LOGE("NativeWindowRender OnSeekTo %f", position);
 }
 
 bool SLRender::SetDataSource() {

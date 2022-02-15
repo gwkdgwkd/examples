@@ -3,9 +3,11 @@
 
 #include "thread_base.h"
 #include "thread_safe_queue.h"
+#include "play_control_observer_interface.h"
 #include "ffmpeg_demuxer.h"
 #include "ffmpeg_codec_base.h"
 #include "audio_frame.h"
+#include "log.h"
 
 extern "C" {
 #include <libavutil/opt.h>
@@ -15,7 +17,7 @@ extern "C" {
 #include <libswresample/swresample.h>
 };
 
-class FFmpegAudioDecoder : public ThreadBase, CodecBase{
+class FFmpegAudioDecoder : public ThreadBase, public CodecBase, public PlayControlObserverInterface{
 public:
     FFmpegAudioDecoder(FFmpegDemuxer *ffmpeg_demuxer);
     ~FFmpegAudioDecoder();
@@ -24,6 +26,12 @@ public:
     AudioFrame *GetAudioFrame();
 
     double GetClock() {return clock_;}
+
+    virtual void OnPlay() override;
+    virtual void OnPause() override;
+    virtual void OnResume() override;
+    virtual void OnStop() override;
+    virtual void OnSeekTo(float position) override;
 private:
     virtual void Process() override;
     virtual int OutputFrame(AVFrame *frame) override;

@@ -37,24 +37,32 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Init
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Play
         (JNIEnv *env, jobject obj) {
     TRACE_FUNC();
-    ffmpeg_player->Start();
+    ffmpeg_player->OnPlay();
 }
-
-JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_SeekToPosition
-        (JNIEnv *env, jobject obj, jfloat) {}
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Pause
         (JNIEnv *env, jobject obj) {
-    ffmpeg_player->Pause();
+    TRACE_FUNC();
+    ffmpeg_player->OnPause();
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Resume
         (JNIEnv *env, jobject obj) {
-    ffmpeg_player->Resume();
+    TRACE_FUNC();
+    ffmpeg_player->OnResume();
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Stop
-        (JNIEnv *env, jobject obj) {}
+        (JNIEnv *env, jobject obj) {
+    TRACE_FUNC();
+    ffmpeg_player->OnStop();
+}
+
+JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_SeekToPosition
+        (JNIEnv *env, jobject obj, jfloat position) {
+    TRACE_FUNC();
+    ffmpeg_player->OnSeekTo(position);
+}
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_UnInit
         (JNIEnv *env, jobject obj) {}

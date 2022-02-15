@@ -34,7 +34,6 @@ Player::Player(int view_type, int audio_render_type, int video_render_type, int 
     audio_decoder_ = nullptr;
     audio_render_ = nullptr;
     audio_track_render_ = nullptr;
-    opengles_render_ = nullptr;
     visual_audio_render_ = nullptr;
     is_inited_ = false;
     is_playing_ = false;
@@ -98,10 +97,8 @@ void Player::Init2(JNIEnv *env, jobject obj, jobject surface) {
         video_render_ = new NativeWindowRender(env, surface, view_type_, video_render_type_,
                                                effect_type_);
     } else {
-        OpenGLESRender *render = new OpenGLESRender(env, surface, view_type_, video_render_type_,
+        video_render_ = new OpenGLESRender(env, surface, view_type_, video_render_type_,
                                                     effect_type_);
-        video_render_ = render;
-        opengles_render_ = render;
     }
 
     int render_size[2] = {0};
@@ -112,6 +109,17 @@ void Player::Init2(JNIEnv *env, jobject obj, jobject surface) {
 
     video_render_->SetAudioDecoder(audio_decoder_);
     video_render_->SetVideoDecoder(video_decoder_);
+
+    list_observer_.emplace_back(demuxer_);
+    list_observer_.emplace_back(audio_decoder_);
+    list_observer_.emplace_back(video_decoder_);
+    list_observer_.emplace_back(dynamic_cast<PlayControlObserverInterface*>(video_render_));
+    if (AudioRenderType::kOpensles == audio_render_type_) {
+        list_observer_.emplace_back(dynamic_cast<PlayControlObserverInterface*>(audio_render_));
+    } else if (AudioRenderType::kAudioTrack2 == audio_render_type_) {
+        list_observer_.emplace_back(audio_track_render_);
+    }
+
 }
 
 void Player::Uninit() {
@@ -121,60 +129,53 @@ void Player::Uninit() {
         GetJavaVM()->DetachCurrentThread();
 }
 
-void Player::Start() {
+void Player::OnPlay() {
     TRACE_FUNC();
 
-    demuxer_->Start();
-
-    audio_decoder_->Start();
-    video_decoder_->Start();
-
-    if (AudioRenderType::kOpensles == audio_render_type_) {
-        audio_render_->Start();
-        audio_render_->SendQueueLoop("", 1);    // 开启轮询
-    } else if (AudioRenderType::kAudioTrack2 == audio_render_type_) {
-        audio_track_render_->Start();
+    auto iterator = list_observer_.begin();
+    while (iterator != list_observer_.end()) {
+        (*iterator)->OnPlay();
+        ++iterator;
     }
-
-    video_render_->Start();
     is_playing_ = true;
 }
 
-void Player::Pause() {
+void Player::OnPause() {
     TRACE_FUNC();
-    demuxer_->Pause();
 
-    audio_decoder_->Pause();
-    video_decoder_->Pause();
-
-    if (AudioRenderType::kOpensles == audio_render_type_) {
-        audio_render_->SetQueueState(false);
-    } else if (AudioRenderType::kAudioTrack2 == audio_render_type_) {
-        audio_track_render_->Pause();
+    auto iterator = list_observer_.begin();
+    while (iterator != list_observer_.end()) {
+        (*iterator)->OnPause();
+        ++iterator;
     }
-
-    video_render_->Pause();
 
     is_playing_ = false;
 
 }
-void Player::Resume() {
+void Player::OnResume() {
     TRACE_FUNC();
-    demuxer_->Resume();
 
-    audio_decoder_->Resume();
-    video_decoder_->Resume();
-
-    if (AudioRenderType::kOpensles == audio_render_type_) {
-        audio_render_->SetQueueState(true);
-        audio_render_->SendQueueLoop("", 1);
-    }else if (AudioRenderType::kAudioTrack2 == audio_render_type_) {
-        audio_track_render_->Resume();
+    auto iterator = list_observer_.begin();
+    while (iterator != list_observer_.end()) {
+        (*iterator)->OnResume();
+        ++iterator;
     }
 
-    video_render_->Resume();
-
     is_playing_ = true;
+}
+
+void Player::OnStop() {
+    TRACE_FUNC();
+
+}
+
+void Player::OnSeekTo(float position) {
+    TRACE_FUNC();
+    auto iterator = list_observer_.begin();
+    while (iterator != list_observer_.end()) {
+        (*iterator)->OnSeekTo(position);
+        ++iterator;
+    }
 }
 
 FFmpegAudioDecoder *Player::GetAudioDecoder() const {

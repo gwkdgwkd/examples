@@ -1,15 +1,23 @@
 #ifndef RENDER_AUDIO_OPENSLES_PCM_RENDER_H
 #define RENDER_AUDIO_OPENSLES_PCM_RENDER_H
 
+#include "log.h"
+#include "play_control_observer_interface.h"
+
 #include <SLES/OpenSLES.h>
 #include "../../opensles/openSlEs_base.h"
 
-class SLRender : public SLBase {
+class SLRender : public SLBase, public PlayControlObserverInterface{
 public:
     SLRender();
 
     virtual ~SLRender();
 
+    virtual void OnPlay() override;
+    virtual void OnPause() override;
+    virtual void OnResume() override;
+    virtual void OnStop() override;
+    virtual void OnSeekTo(float position) override;
 protected:
     // 输出混音器
     SLObjectItf outMixObject;

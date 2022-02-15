@@ -3,6 +3,7 @@
 
 #include "thread_base.h"
 #include "thread_safe_queue.h"
+#include "play_control_observer_interface.h"
 #include "ffmpeg_demuxer.h"
 #include "ffmpeg_codec_base.h"
 #include "native_image.h"
@@ -14,7 +15,7 @@ extern "C" {
 };
 
 class VideoRenderInterface;
-class FFmpegVideoDecoder : public ThreadBase, CodecBase{
+class FFmpegVideoDecoder : public ThreadBase, public CodecBase, public PlayControlObserverInterface {
 public:
     FFmpegVideoDecoder(FFmpegDemuxer *ffmpeg_demuxer, ScaleFactory *scale_factory);
     ~FFmpegVideoDecoder();
@@ -22,6 +23,12 @@ public:
     bool Init();
     void SetRenderSize(int width, int height);
     NativeImage *GetVideoImage();
+
+    virtual void OnPlay() override;
+    virtual void OnPause() override;
+    virtual void OnResume() override;
+    virtual void OnStop() override;
+    virtual void OnSeekTo(float position) override;
 private:
     virtual void Process() override;
     virtual int OutputFrame(AVFrame *frame) override;

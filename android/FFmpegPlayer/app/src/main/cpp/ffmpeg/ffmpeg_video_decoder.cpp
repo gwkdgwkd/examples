@@ -39,6 +39,28 @@ void FFmpegVideoDecoder::SetRenderSize(int width, int height) {
                       render_format_);
 }
 
+void FFmpegVideoDecoder::OnPlay() {
+    TRACE_FUNC();
+    Start();
+}
+
+void FFmpegVideoDecoder::OnPause() {
+    TRACE_FUNC();
+    Pause();
+}
+
+void FFmpegVideoDecoder::OnResume() {
+    TRACE_FUNC();
+    Resume();
+}
+
+void FFmpegVideoDecoder::OnStop() {}
+
+void FFmpegVideoDecoder::OnSeekTo(float position) {
+    TRACE_FUNC();
+    LOGE("FFmpegVideoDecoder OnSeekTo %f", position);
+}
+
 void FFmpegVideoDecoder::Process() {
 //    TRACE_FUNC();
 

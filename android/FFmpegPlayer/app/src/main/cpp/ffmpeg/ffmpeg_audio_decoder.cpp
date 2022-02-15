@@ -1,5 +1,4 @@
 #include "ffmpeg_audio_decoder.h"
-#include "log.h"
 
 static const int AUDIO_DST_SAMPLE_RATE = 44100; // 音频编码采样率
 static const int AUDIO_DST_CHANNEL_COUNTS = 2; // 音频编码通道数
@@ -68,6 +67,28 @@ bool FFmpegAudioDecoder::Init() {
             dst_ch_layout), dst_nb_samples_, dst_sample_fmt, 1);
 
     return true;
+}
+
+void FFmpegAudioDecoder::OnPlay() {
+    TRACE_FUNC();
+    Start();
+}
+
+void FFmpegAudioDecoder::OnPause() {
+    TRACE_FUNC();
+    Pause();
+}
+
+void FFmpegAudioDecoder::OnResume() {
+    TRACE_FUNC();
+    Resume();
+}
+
+void FFmpegAudioDecoder::OnStop() {}
+
+void FFmpegAudioDecoder::OnSeekTo(float position) {
+    TRACE_FUNC();
+    LOGE("FFmpegAudioDecoder OnSeekTo %f", position);
 }
 
 void FFmpegAudioDecoder::Process() {

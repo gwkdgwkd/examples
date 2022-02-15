@@ -8,7 +8,30 @@ void AudioTrackRender::SetPcmCallback(void *context, PcmCallback callback) {
     callback_ = callback;
 }
 
+void AudioTrackRender::OnPlay() {
+    TRACE_FUNC();
+    Start();
+}
+
+void AudioTrackRender::OnPause() {
+    TRACE_FUNC();
+    Pause();
+}
+
+void AudioTrackRender::OnResume() {
+    TRACE_FUNC();
+    Resume();
+}
+
+void AudioTrackRender::OnStop() {}
+
+void AudioTrackRender::OnSeekTo(float position) {
+    TRACE_FUNC();
+    LOGE("AudioTrackRender OnSeekTo %f", position);
+}
+
 void AudioTrackRender::Process() {
+    TRACE_FUNC();
     AudioFrame *frame = audio_decoder_->GetAudioFrame();
     if (frame && context_ && callback_) {
         callback_(context_, frame->data_, frame->data_size_);

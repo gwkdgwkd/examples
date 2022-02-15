@@ -9,6 +9,7 @@ NativeWindowRender::NativeWindowRender(JNIEnv *env, jobject surface, enum ViewTy
                                        enum EffectType effect_type)
         : VideoRenderInterface(view_type, video_render_type, effect_type) {
     native_window_ = ANativeWindow_fromSurface(env, surface);
+    last_process_ = 0;
 }
 
 NativeWindowRender::~NativeWindowRender() {
@@ -58,6 +59,28 @@ void NativeWindowRender::RenderVideoFrame(NativeImage *pImage) {
     ANativeWindow_unlockAndPost(native_window_);
 }
 
+void NativeWindowRender::OnPlay() {
+    TRACE_FUNC();
+    Start();
+}
+
+void NativeWindowRender::OnPause() {
+    TRACE_FUNC();
+    Pause();
+}
+
+void NativeWindowRender::OnResume() {
+    TRACE_FUNC();
+    Resume();
+}
+
+void NativeWindowRender::OnStop() {}
+
+void NativeWindowRender::OnSeekTo(float position) {
+    TRACE_FUNC();
+    LOGE("NativeWindowRender OnSeekTo %f", position);
+}
+
 void NativeWindowRender::Process() {
     // TRACE_FUNC();
 
@@ -81,6 +104,7 @@ void NativeWindowRender::Process() {
     LOGE("Video:%lf Audio:%lf delay:%lf(%ld) A-V=%lf", pImage->clock, audio_clock, delay,
          real_delay, -diff);
 
+    int process = pImage->clock + delay;
     std::this_thread::sleep_for(std::chrono::microseconds(real_delay));
 
 
@@ -95,6 +119,11 @@ void NativeWindowRender::Process() {
     ANativeWindow_unlockAndPost(native_window_);
     NativeImageUtil::FreeNativeImage(pImage);
     delete pImage;
+
+    if (m_MsgContext && m_MsgCallback && last_process_ < process) {
+        m_MsgCallback(m_MsgContext, 1, process);
+        last_process_ = process;
+    }
 }
 
 

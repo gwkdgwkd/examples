@@ -1,5 +1,4 @@
 #include "ffmpeg_demuxer.h"
-#include "log.h"
 
 static void log_callback(void *ptr, int level, const char *fmt, va_list vl) {
     va_list vl2;
@@ -143,6 +142,28 @@ bool FFmpegDemuxer::OpenCodecContext(int *stream_idx,
     *stream_idx = stream_index;
 
     return true;
+}
+
+void FFmpegDemuxer::OnPlay() {
+    TRACE_FUNC();
+    Start();
+}
+
+void FFmpegDemuxer::OnPause() {
+    TRACE_FUNC();
+    Pause();
+}
+
+void FFmpegDemuxer::OnResume() {
+    TRACE_FUNC();
+    Resume();
+}
+
+void FFmpegDemuxer::OnStop() {}
+
+void FFmpegDemuxer::OnSeekTo(float position) {
+    TRACE_FUNC();
+    LOGE("FFmpegDemuxer OnSeekTo %f", position);
 }
 
 void FFmpegDemuxer::Process() {

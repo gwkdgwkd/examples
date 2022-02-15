@@ -6,18 +6,21 @@
 #include <android/native_window_jni.h>
 #include <jni.h>
 
+#include "play_control_observer_interface.h"
 #include "video_render_interface.h"
 #include "egl_core.h"
 #include "wapped_shader_program.h"
 #include "wapped_texture.h"
 #include "opengles_render_interface.h"
 
-class OpenGLESRender : public VideoRenderInterface, public OpenglesRenderInterface {
+class OpenGLESRender
+        : public VideoRenderInterface,
+          public OpenglesRenderInterface,
+          public PlayControlObserverInterface {
 
 public:
     OpenGLESRender(JNIEnv *env, jobject surface, enum ViewType view_type,
                    enum VideoRenderType video_render_type, enum EffectType effect_type);
-
     virtual ~OpenGLESRender();
 
     virtual void Init(int videoWidth, int videoHeight, int *render_size) override;
@@ -28,6 +31,12 @@ public:
     virtual void OnDrawFrame() override;
     virtual void UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY) override;
     virtual void SetTouchLoc(float touchX, float touchY) override;
+
+    virtual void OnPlay() override;
+    virtual void OnPause() override;
+    virtual void OnResume() override;
+    virtual void OnStop() override;
+    virtual void OnSeekTo(float position) override;
 
 private:
     virtual void Process() override;

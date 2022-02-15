@@ -238,7 +238,7 @@ bool OpenGLESRender::VaoInit() {
 
 bool OpenGLESRender::OpenglesInit() {
     TRACE_FUNC();
-    LOGI("======================OpenglesInit: %u",std::this_thread::get_id());
+    LOGI("======================OpenglesInit: %u", std::this_thread::get_id());
     bool ret = false;
 
     if (IsSurface()) {
@@ -288,8 +288,30 @@ void OpenGLESRender::RenderVideoFrame(NativeImage *pImage) {
     TRACE_FUNC();
 }
 
+void OpenGLESRender::OnPlay() {
+    TRACE_FUNC();
+    Start();
+}
+
+void OpenGLESRender::OnPause() {
+    TRACE_FUNC();
+    Pause();
+}
+
+void OpenGLESRender::OnResume() {
+    TRACE_FUNC();
+    Resume();
+}
+
+void OpenGLESRender::OnStop() {}
+
+void OpenGLESRender::OnSeekTo(float position) {
+    TRACE_FUNC();
+    LOGE("OpenGLESRender OnSeekTo %f", position);
+}
+
 void OpenGLESRender::Process() {
-     TRACE_FUNC();
+    TRACE_FUNC();
 
     if (IsSurface()) {
         if (!is_opengles_init_) {
@@ -311,7 +333,7 @@ void OpenGLESRender::OnSurfaceChanged(int w, int h) {
     TRACE_FUNC();
 
     // for surface view. maybe before init
-    while(!is_opengles_init_) {
+    while (!is_opengles_init_) {
         std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
     real_width_ = w;
@@ -324,7 +346,7 @@ void OpenGLESRender::OnSurfaceChanged(int w, int h) {
 }
 
 void OpenGLESRender::OnDrawFrame() {
-     TRACE_FUNC();
+    TRACE_FUNC();
 //    LOGI("left %d, right %d, width %d, height %d", 0, 0, real_width_, real_height_);
 
     NativeImage *pImage = video_decoder_->GetVideoImage();
