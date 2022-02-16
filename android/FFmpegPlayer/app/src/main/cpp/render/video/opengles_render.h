@@ -8,6 +8,7 @@
 
 #include "video_render_interface.h"
 #include "play_control_observer_interface.h"
+#include "seek_observer_interface.h"
 #include "egl_core.h"
 #include "wapped_shader_program.h"
 #include "wapped_texture.h"
@@ -16,8 +17,8 @@
 class OpenGLESRender
         : public VideoRenderInterface,
           public OpenglesRenderInterface,
-          public PlayControlObserverInterface {
-
+          public PlayControlObserverInterface,
+          public SeekObserverInterface {
 public:
     OpenGLESRender(JNIEnv *env, jobject surface, enum ViewType view_type,
                    enum VideoRenderType video_render_type, enum EffectType effect_type);
@@ -33,6 +34,7 @@ public:
     virtual void SetTouchLoc(float touchX, float touchY) override;
 
     virtual void OnControlEvent(ControlType type) override;
+    virtual void OnSeekTo(float position) override;
 private:
     virtual void Process() override;
     bool OpenglesInit();

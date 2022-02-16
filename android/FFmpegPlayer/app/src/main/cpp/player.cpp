@@ -123,6 +123,7 @@ void Player::Init2(JNIEnv *env, jobject obj, jobject surface) {
     seek_observer_.emplace_back(demuxer_);
     seek_observer_.emplace_back(audio_decoder_);
     seek_observer_.emplace_back(video_decoder_);
+    seek_observer_.emplace_back(dynamic_cast<SeekObserverInterface*>(video_render_));
 }
 
 void Player::Uninit() {

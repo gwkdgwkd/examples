@@ -6,10 +6,13 @@
 #include <jni.h>
 
 #include "play_control_observer_interface.h"
+#include "seek_observer_interface.h"
 #include "video_render_interface.h"
 #include "../ffmpeg/ffmpeg_audio_decoder.h"
 
-class NativeWindowRender : public VideoRenderInterface, public PlayControlObserverInterface {
+class NativeWindowRender : public VideoRenderInterface,
+                           public PlayControlObserverInterface,
+                           public SeekObserverInterface {
 
 public:
     NativeWindowRender(JNIEnv *env, jobject surface, enum ViewType view_type,
@@ -21,6 +24,7 @@ public:
     virtual void UnInit();
 
     virtual void OnControlEvent(ControlType type) override;
+    virtual void OnSeekTo(float position) override;
 private:
     virtual void Process() override;
 

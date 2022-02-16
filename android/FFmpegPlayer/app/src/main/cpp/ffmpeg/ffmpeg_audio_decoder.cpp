@@ -94,21 +94,15 @@ void FFmpegAudioDecoder::OnSeekTo(float position) {
     LOGE("FFmpegAudioDecoder OnSeekTo %f", position);
 
     LOGE("audio_frame_queue_ before flush count %d", audio_frame_queue_.Size());
+    avcodec_flush_buffers(ffmpeg_demuxer_->GetCodecContext(type_));
     audio_frame_queue_.flush([](AudioFrame *frame) { delete frame; });
     LOGE("audio_frame_queue_ after flush count %d", audio_frame_queue_.Size());
-    avcodec_flush_buffers(ffmpeg_demuxer_->GetCodecContext(type_));
+    clock_ = position;
 }
 
 void FFmpegAudioDecoder::Process() {
-//    TRACE_FUNC();
+    // TRACE_FUNC();
 
-//    AVPacket *pkt = av_packet_alloc();
-//    int count = ffmpeg_demuxer_->GetPacket(type_, pkt);
-//    LOGE("audio packet count %d", count);
-//    if(!count  && ffmpeg_demuxer_->GetDemuxerState()) {
-//        LOGE("audio packet flush the decoders");
-//        DecodePacket(ffmpeg_demuxer_->GetCodecContext(type_), nullptr);
-//    }
     AVPacket *pkt = av_packet_alloc();
     pkt = ffmpeg_demuxer_->GetPacket(type_);
     if (pkt == nullptr) {

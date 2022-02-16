@@ -238,7 +238,6 @@ bool OpenGLESRender::VaoInit() {
 
 bool OpenGLESRender::OpenglesInit() {
     TRACE_FUNC();
-    LOGI("======================OpenglesInit: %u", std::this_thread::get_id());
     bool ret = false;
 
     if (IsSurface()) {
@@ -308,6 +307,11 @@ void OpenGLESRender::OnControlEvent(ControlType type) {
     }
 }
 
+void OpenGLESRender::OnSeekTo(float position) {
+    TRACE_FUNC();
+    last_process_ = -1;
+}
+
 void OpenGLESRender::Process() {
     TRACE_FUNC();
 
@@ -345,12 +349,10 @@ void OpenGLESRender::OnSurfaceChanged(int w, int h) {
 
 void OpenGLESRender::OnDrawFrame() {
     TRACE_FUNC();
-//    LOGI("left %d, right %d, width %d, height %d", 0, 0, real_width_, real_height_);
+    // LOGI("left %d, right %d, width %d, height %d", 0, 0, real_width_, real_height_);
 
-LOGE("=============================1");
     NativeImage *pImage = video_decoder_->GetVideoImage();
     if (pImage == nullptr) return;
-    LOGE("=============================2");
     double delay = pImage->delay;
     // 如果有音频的话
     double audio_clock = audio_decoder_->GetClock();
@@ -453,10 +455,13 @@ LOGE("=============================1");
     }
 
     if (m_MsgContext && m_MsgCallback && last_process_ < process) {
-        m_MsgCallback(m_MsgContext, 1, process);
-        last_process_ = process;
+        if(last_process_ < 0) { // for seek
+            last_process_++;
+        } else {
+            m_MsgCallback(m_MsgContext, 1, process);
+            last_process_ = process;
+        }
     }
-
 }
 
 void OpenGLESRender::UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY) {

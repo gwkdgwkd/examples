@@ -68,8 +68,6 @@ void ThreadBase::Run() {
     LOGI("enter thread: %u",std::this_thread::get_id());
 
     while (!stop_flag_) {
-        Process();
-        std::this_thread::sleep_for(std::chrono::nanoseconds(10));
         if (pause_flag_) {
             std::unique_lock <std::mutex> lck(mutex_);
             while (pause_flag_) {
@@ -77,6 +75,8 @@ void ThreadBase::Run() {
             }
             lck.unlock();
         }
+        Process();
+        std::this_thread::sleep_for(std::chrono::nanoseconds(10));
     }
     pause_flag_ = false;
     stop_flag_ = false;

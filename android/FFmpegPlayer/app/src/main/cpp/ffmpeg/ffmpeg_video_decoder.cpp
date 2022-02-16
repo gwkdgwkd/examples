@@ -65,11 +65,11 @@ void FFmpegVideoDecoder::OnSeekTo(float position) {
     LOGE("FFmpegVideoDecoder OnSeekTo %f", position);
 
     LOGE("video_image_queue_ before flush count %d", video_image_queue_.Size());
+    avcodec_flush_buffers(ffmpeg_demuxer_->GetCodecContext(type_));
     video_image_queue_.flush([](NativeImage *image) {
         NativeImageUtil::FreeNativeImage(image);
         delete image;
     });
-    avcodec_flush_buffers(ffmpeg_demuxer_->GetCodecContext(type_));
     LOGE("video_image_queue_ after flush count %d", video_image_queue_.Size());
 }
 
@@ -126,11 +126,8 @@ int FFmpegVideoDecoder::OutputFrame(AVFrame *frame) {
 }
 
 NativeImage *FFmpegVideoDecoder::GetVideoImage() {
-    LOGE("===================GetVideoImage==========1");
     while (video_image_queue_.Empty()) {
-        LOGE("===================GetVideoImage==========2");
         std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
-    LOGE("===================GetVideoImage==========3");
     return video_image_queue_.Pop();
 }

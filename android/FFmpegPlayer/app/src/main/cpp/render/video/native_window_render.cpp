@@ -79,6 +79,12 @@ void NativeWindowRender::OnControlEvent(ControlType type) {
     }
 }
 
+void NativeWindowRender::OnSeekTo(float position) {
+    TRACE_FUNC();
+    LOGE("NativeWindowRender OnSeekTo %f", position);
+    last_process_ = -1;
+}
+
 void NativeWindowRender::Process() {
     // TRACE_FUNC();
 
@@ -105,7 +111,6 @@ void NativeWindowRender::Process() {
     int process = pImage->clock + delay;
     std::this_thread::sleep_for(std::chrono::microseconds(real_delay));
 
-
     ANativeWindow_lock(native_window_, &native_window_buffer_, nullptr);
     uint8_t *dstBuffer = static_cast<uint8_t *>(native_window_buffer_.bits);
     int srcLineSize = pImage->width * 4; // RGBA
@@ -118,9 +123,14 @@ void NativeWindowRender::Process() {
     NativeImageUtil::FreeNativeImage(pImage);
     delete pImage;
 
+    LOGE("last_process_ %d %d", last_process_, process);
     if (m_MsgContext && m_MsgCallback && last_process_ < process) {
-        m_MsgCallback(m_MsgContext, 1, process);
-        last_process_ = process;
+        if(last_process_ < 0) { // for seek
+            last_process_++;
+        } else {
+            m_MsgCallback(m_MsgContext, 1, process);
+            last_process_ = process;
+        }
     }
 }
 
