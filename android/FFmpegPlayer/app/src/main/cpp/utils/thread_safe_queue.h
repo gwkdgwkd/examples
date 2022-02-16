@@ -5,6 +5,7 @@
 #include <memory>
 #include <mutex>
 #include <condition_variable>
+#include <functional>
 
 template<typename T>
 class ThreadSafeQueue {
@@ -29,6 +30,17 @@ public:
         T res = data_queue_.front();
         data_queue_.pop();
         return res;
+    }
+
+    void flush(std::function<void(T)> func) {
+        std::unique_lock <std::mutex> lk(mutex_);
+        while (!data_queue_.empty()) {
+            T res = data_queue_.front();
+            data_queue_.pop();
+            if(func) {
+                func(res);
+            }
+        }
     }
 
     bool Empty() const {

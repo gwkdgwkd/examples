@@ -110,16 +110,19 @@ void Player::Init2(JNIEnv *env, jobject obj, jobject surface) {
     video_render_->SetAudioDecoder(audio_decoder_);
     video_render_->SetVideoDecoder(video_decoder_);
 
-    list_observer_.emplace_back(demuxer_);
-    list_observer_.emplace_back(audio_decoder_);
-    list_observer_.emplace_back(video_decoder_);
-    list_observer_.emplace_back(dynamic_cast<PlayControlObserverInterface*>(video_render_));
+    player_control_observer_.emplace_back(demuxer_);
+    player_control_observer_.emplace_back(audio_decoder_);
+    player_control_observer_.emplace_back(video_decoder_);
     if (AudioRenderType::kOpensles == audio_render_type_) {
-        list_observer_.emplace_back(dynamic_cast<PlayControlObserverInterface*>(audio_render_));
+        player_control_observer_.emplace_back(dynamic_cast<PlayControlObserverInterface*>(audio_render_));
     } else if (AudioRenderType::kAudioTrack2 == audio_render_type_) {
-        list_observer_.emplace_back(audio_track_render_);
+        player_control_observer_.emplace_back(audio_track_render_);
     }
+    player_control_observer_.emplace_back(dynamic_cast<PlayControlObserverInterface*>(video_render_));
 
+    seek_observer_.emplace_back(demuxer_);
+    seek_observer_.emplace_back(audio_decoder_);
+    seek_observer_.emplace_back(video_decoder_);
 }
 
 void Player::Uninit() {
@@ -129,53 +132,26 @@ void Player::Uninit() {
         GetJavaVM()->DetachCurrentThread();
 }
 
-void Player::OnPlay() {
-    TRACE_FUNC();
-
-    auto iterator = list_observer_.begin();
-    while (iterator != list_observer_.end()) {
-        (*iterator)->OnPlay();
-        ++iterator;
-    }
-    is_playing_ = true;
-}
-
-void Player::OnPause() {
-    TRACE_FUNC();
-
-    auto iterator = list_observer_.begin();
-    while (iterator != list_observer_.end()) {
-        (*iterator)->OnPause();
-        ++iterator;
-    }
-
-    is_playing_ = false;
-
-}
-void Player::OnResume() {
-    TRACE_FUNC();
-
-    auto iterator = list_observer_.begin();
-    while (iterator != list_observer_.end()) {
-        (*iterator)->OnResume();
+void Player::OnControlEvent(ControlType type) {
+    auto iterator = player_control_observer_.begin();
+    while (iterator != player_control_observer_.end()) {
+        (*iterator)->OnControlEvent(type);
         ++iterator;
     }
 
     is_playing_ = true;
-}
-
-void Player::OnStop() {
-    TRACE_FUNC();
 
 }
 
 void Player::OnSeekTo(float position) {
     TRACE_FUNC();
-    auto iterator = list_observer_.begin();
-    while (iterator != list_observer_.end()) {
+    OnControlEvent(ControlType::kPause);
+    auto iterator = seek_observer_.begin();
+    while (iterator != seek_observer_.end()) {
         (*iterator)->OnSeekTo(position);
         ++iterator;
     }
+    OnControlEvent(ControlType::kResume);
 }
 
 FFmpegAudioDecoder *Player::GetAudioDecoder() const {

@@ -9,28 +9,26 @@ SLRender::~SLRender() {
     ReleaseFeature();
 }
 
-void SLRender::OnPlay() {
-    TRACE_FUNC();
-    Start();
-    SendQueueLoop("", 1);    // 开启轮询
-}
-
-void SLRender::OnPause() {
-    TRACE_FUNC();
-    SetQueueState(false);
-}
-
-void SLRender::OnResume() {
-    TRACE_FUNC();
-    SetQueueState(true);
-    SendQueueLoop("", 1);
-}
-
-void SLRender::OnStop() {}
-
-void SLRender::OnSeekTo(float position) {
-    TRACE_FUNC();
-    LOGE("NativeWindowRender OnSeekTo %f", position);
+void SLRender::OnControlEvent(ControlType type) {
+    LOGE("play control type %d", type);
+    switch(type) {
+        case ControlType::kPlay:
+            Start();
+            SendQueueLoop("", 1);
+            break;
+        case ControlType::kStop:
+            break;
+        case ControlType::kPause:
+            SetQueueState(false);
+            break;
+        case ControlType::kResume:
+            SetQueueState(true);
+            SendQueueLoop("", 1);
+            break;
+        default:
+            LOGE("unknown control type");
+            break;
+    }
 }
 
 bool SLRender::SetDataSource() {

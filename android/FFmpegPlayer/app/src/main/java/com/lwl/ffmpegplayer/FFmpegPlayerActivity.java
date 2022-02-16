@@ -192,7 +192,7 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                seek(seekBar);
+//                seek(seekBar);
                 Log.d(TAG, "seek start");
             }
 

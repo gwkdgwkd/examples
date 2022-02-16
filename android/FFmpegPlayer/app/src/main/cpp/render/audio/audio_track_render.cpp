@@ -8,26 +8,24 @@ void AudioTrackRender::SetPcmCallback(void *context, PcmCallback callback) {
     callback_ = callback;
 }
 
-void AudioTrackRender::OnPlay() {
-    TRACE_FUNC();
-    Start();
-}
-
-void AudioTrackRender::OnPause() {
-    TRACE_FUNC();
-    Pause();
-}
-
-void AudioTrackRender::OnResume() {
-    TRACE_FUNC();
-    Resume();
-}
-
-void AudioTrackRender::OnStop() {}
-
-void AudioTrackRender::OnSeekTo(float position) {
-    TRACE_FUNC();
-    LOGE("AudioTrackRender OnSeekTo %f", position);
+void AudioTrackRender::OnControlEvent(ControlType type) {
+    LOGE("play control type %d", type);
+    switch(type) {
+        case ControlType::kPlay:
+            Start();
+            break;
+        case ControlType::kStop:
+            break;
+        case ControlType::kPause:
+            Pause();
+            break;
+        case ControlType::kResume:
+            Resume();
+            break;
+        default:
+            LOGE("unknown control type");
+            break;
+    }
 }
 
 void AudioTrackRender::Process() {

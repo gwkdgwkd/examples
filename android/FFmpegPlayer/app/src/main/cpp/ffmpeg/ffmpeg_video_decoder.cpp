@@ -31,7 +31,8 @@ void FFmpegVideoDecoder::SetRenderSize(int width, int height) {
     render_height_ = height;
     render_format_ = AV_PIX_FMT_RGBA;
 
-    LOGI("src: src_width: %d, src_height: %d, src_format: %d", video_width_, video_height_, video_format_);
+    LOGI("src: src_width: %d, src_height: %d, src_format: %d", video_width_, video_height_,
+         video_format_);
     LOGI("dst: dst_width: %d, dst_height: %d, dst_format: %d", render_width_, render_height_,
          render_format_);
 
@@ -39,26 +40,37 @@ void FFmpegVideoDecoder::SetRenderSize(int width, int height) {
                       render_format_);
 }
 
-void FFmpegVideoDecoder::OnPlay() {
-    TRACE_FUNC();
-    Start();
+void FFmpegVideoDecoder::OnControlEvent(ControlType type) {
+    LOGE("play control type %d", type);
+    switch (type) {
+        case ControlType::kPlay:
+            Start();
+            break;
+        case ControlType::kStop:
+            break;
+        case ControlType::kPause:
+            Pause();
+            break;
+        case ControlType::kResume:
+            Resume();
+            break;
+        default:
+            LOGE("unknown control type");
+            break;
+    }
 }
-
-void FFmpegVideoDecoder::OnPause() {
-    TRACE_FUNC();
-    Pause();
-}
-
-void FFmpegVideoDecoder::OnResume() {
-    TRACE_FUNC();
-    Resume();
-}
-
-void FFmpegVideoDecoder::OnStop() {}
 
 void FFmpegVideoDecoder::OnSeekTo(float position) {
     TRACE_FUNC();
     LOGE("FFmpegVideoDecoder OnSeekTo %f", position);
+
+    LOGE("video_image_queue_ before flush count %d", video_image_queue_.Size());
+    video_image_queue_.flush([](NativeImage *image) {
+        NativeImageUtil::FreeNativeImage(image);
+        delete image;
+    });
+    avcodec_flush_buffers(ffmpeg_demuxer_->GetCodecContext(type_));
+    LOGE("video_image_queue_ after flush count %d", video_image_queue_.Size());
 }
 
 void FFmpegVideoDecoder::Process() {
@@ -67,16 +79,12 @@ void FFmpegVideoDecoder::Process() {
     AVPacket *pkt = av_packet_alloc();
     pkt = ffmpeg_demuxer_->GetPacket(type_);
     if (pkt == nullptr) {
-//        LOGE("pkt is null");
-        if (ffmpeg_demuxer_->GetDemuxerState()) {
-            LOGE("thread puase");
-            Pause();
-        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         return;
     }
-//    LOGE("video packet n:%d size:%d pts:%s\n",
-//         video_packet_count_++, pkt->size,
-//         av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
+    LOGE("video packet n:%d size:%d pts:%s\n",
+         video_packet_count_++, pkt->size,
+         av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
     if (!DecodePacket(ffmpeg_demuxer_->GetCodecContext(type_), pkt) == 0) {
         LOGE("decode packet failed!");
     }
@@ -118,8 +126,11 @@ int FFmpegVideoDecoder::OutputFrame(AVFrame *frame) {
 }
 
 NativeImage *FFmpegVideoDecoder::GetVideoImage() {
+    LOGE("===================GetVideoImage==========1");
     while (video_image_queue_.Empty()) {
+        LOGE("===================GetVideoImage==========2");
         std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
+    LOGE("===================GetVideoImage==========3");
     return video_image_queue_.Pop();
 }

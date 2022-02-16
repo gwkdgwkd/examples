@@ -13,11 +13,7 @@ public:
 
     virtual ~SLRender();
 
-    virtual void OnPlay() override;
-    virtual void OnPause() override;
-    virtual void OnResume() override;
-    virtual void OnStop() override;
-    virtual void OnSeekTo(float position) override;
+    virtual void OnControlEvent(ControlType type) override;
 protected:
     // 输出混音器
     SLObjectItf outMixObject;

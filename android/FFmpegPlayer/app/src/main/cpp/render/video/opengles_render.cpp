@@ -288,26 +288,24 @@ void OpenGLESRender::RenderVideoFrame(NativeImage *pImage) {
     TRACE_FUNC();
 }
 
-void OpenGLESRender::OnPlay() {
-    TRACE_FUNC();
-    Start();
-}
-
-void OpenGLESRender::OnPause() {
-    TRACE_FUNC();
-    Pause();
-}
-
-void OpenGLESRender::OnResume() {
-    TRACE_FUNC();
-    Resume();
-}
-
-void OpenGLESRender::OnStop() {}
-
-void OpenGLESRender::OnSeekTo(float position) {
-    TRACE_FUNC();
-    LOGE("OpenGLESRender OnSeekTo %f", position);
+void OpenGLESRender::OnControlEvent(ControlType type) {
+    LOGE("play control type %d", type);
+    switch(type) {
+        case ControlType::kPlay:
+            Start();
+            break;
+        case ControlType::kStop:
+            break;
+        case ControlType::kPause:
+            Pause();
+            break;
+        case ControlType::kResume:
+            Resume();
+            break;
+        default:
+            LOGE("unknown control type");
+            break;
+    }
 }
 
 void OpenGLESRender::Process() {
@@ -349,9 +347,10 @@ void OpenGLESRender::OnDrawFrame() {
     TRACE_FUNC();
 //    LOGI("left %d, right %d, width %d, height %d", 0, 0, real_width_, real_height_);
 
+LOGE("=============================1");
     NativeImage *pImage = video_decoder_->GetVideoImage();
     if (pImage == nullptr) return;
-
+    LOGE("=============================2");
     double delay = pImage->delay;
     // 如果有音频的话
     double audio_clock = audio_decoder_->GetClock();

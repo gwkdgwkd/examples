@@ -17,11 +17,7 @@ public:
         visual_audio_render_ = visual_audio_render;
     }
 
-    virtual void OnPlay() override;
-    virtual void OnPause() override;
-    virtual void OnResume() override;
-    virtual void OnStop() override;
-    virtual void OnSeekTo(float position) override;
+    virtual void OnControlEvent(ControlType type) override;
 private:
     virtual void Process() override;
 

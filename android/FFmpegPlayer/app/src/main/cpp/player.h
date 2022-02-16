@@ -7,6 +7,7 @@
 #include <iterator>
 
 #include "play_control_observer_interface.h"
+#include "seek_observer_interface.h"
 
 #include "ffmpeg/ffmpeg_demuxer.h"
 #include "ffmpeg/ffmpeg_audio_decoder.h"
@@ -24,7 +25,8 @@
 #include "scale/libyuv_scale.h"
 #include "scale/opengl_scale.h"
 
-class Player : public PlayControlObserverInterface {
+class Player : public PlayControlObserverInterface,
+               public SeekObserverInterface {
 public:
     enum AudioRenderType {
         kOpensles,
@@ -44,10 +46,7 @@ public:
     void Init2(JNIEnv *env, jobject obj, jobject surface);
     void Uninit();
 
-    virtual void OnPlay() override;
-    virtual void OnPause() override;
-    virtual void OnResume() override;
-    virtual void OnStop() override;
+    virtual void OnControlEvent(ControlType type) override;
     virtual void OnSeekTo(float position) override;
 
     FFmpegAudioDecoder *GetAudioDecoder() const;
@@ -83,7 +82,8 @@ private:
     VideoRenderInterface::EffectType effect_type_;
     ScaleType scale_type_;
 
-    std::list<PlayControlObserverInterface*> list_observer_;
+    std::list<PlayControlObserverInterface*> player_control_observer_;
+    std::list<SeekObserverInterface*> seek_observer_;
 
     std::atomic<bool> is_inited_;
     std::atomic<bool> is_playing_;

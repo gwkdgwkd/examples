@@ -6,6 +6,7 @@
 #include "thread_base.h"
 #include "thread_safe_queue.h"
 #include "play_control_observer_interface.h"
+#include "seek_observer_interface.h"
 #include "log.h"
 
 extern "C" {
@@ -25,7 +26,9 @@ typedef struct MediaInfo {
     double duration;
 } MediaInfo;
 
-class FFmpegDemuxer : public ThreadBase, public PlayControlObserverInterface {
+class FFmpegDemuxer : public ThreadBase,
+                      public PlayControlObserverInterface,
+                      public SeekObserverInterface {
 public:
     FFmpegDemuxer(const char *url);
     ~FFmpegDemuxer();
@@ -44,10 +47,7 @@ public:
     void *m_MsgContext = nullptr;
     MessageCallback m_MsgCallback = nullptr;
 
-    virtual void OnPlay() override;
-    virtual void OnPause() override;
-    virtual void OnResume() override;
-    virtual void OnStop() override;
+    virtual void OnControlEvent(ControlType type) override;
     virtual void OnSeekTo(float position) override;
 
 private:

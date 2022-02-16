@@ -7,7 +7,7 @@ set(libname ffmpegplayer)
 include_directories(
         include
         glm
-        .
+        interface
         ${CMAKE_SOURCE_DIR}/utils
         ${CMAKE_SOURCE_DIR}/ffmpeg
         ${CMAKE_SOURCE_DIR}/opensles

@@ -59,26 +59,24 @@ void NativeWindowRender::RenderVideoFrame(NativeImage *pImage) {
     ANativeWindow_unlockAndPost(native_window_);
 }
 
-void NativeWindowRender::OnPlay() {
-    TRACE_FUNC();
-    Start();
-}
-
-void NativeWindowRender::OnPause() {
-    TRACE_FUNC();
-    Pause();
-}
-
-void NativeWindowRender::OnResume() {
-    TRACE_FUNC();
-    Resume();
-}
-
-void NativeWindowRender::OnStop() {}
-
-void NativeWindowRender::OnSeekTo(float position) {
-    TRACE_FUNC();
-    LOGE("NativeWindowRender OnSeekTo %f", position);
+void NativeWindowRender::OnControlEvent(ControlType type) {
+    LOGE("play control type %d", type);
+    switch(type) {
+        case ControlType::kPlay:
+            Start();
+            break;
+        case ControlType::kStop:
+            break;
+        case ControlType::kPause:
+            Pause();
+            break;
+        case ControlType::kResume:
+            Resume();
+            break;
+        default:
+            LOGE("unknown control type");
+            break;
+    }
 }
 
 void NativeWindowRender::Process() {

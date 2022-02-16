@@ -37,25 +37,25 @@ JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Init
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Play
         (JNIEnv *env, jobject obj) {
     TRACE_FUNC();
-    ffmpeg_player->OnPlay();
+    ffmpeg_player->OnControlEvent(PlayControlObserverInterface::kPlay);
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Pause
         (JNIEnv *env, jobject obj) {
     TRACE_FUNC();
-    ffmpeg_player->OnPause();
+    ffmpeg_player->OnControlEvent(PlayControlObserverInterface::kPause);
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Resume
         (JNIEnv *env, jobject obj) {
     TRACE_FUNC();
-    ffmpeg_player->OnResume();
+    ffmpeg_player->OnControlEvent(PlayControlObserverInterface::kResume);
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_Stop
         (JNIEnv *env, jobject obj) {
     TRACE_FUNC();
-    ffmpeg_player->OnStop();
+    ffmpeg_player->OnControlEvent(PlayControlObserverInterface::kStop);
 }
 
 JNIEXPORT void JNICALL Java_com_lwl_ffmpegplayer_NativeFFmpegPlayer_SeekToPosition

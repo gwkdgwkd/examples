@@ -6,8 +6,8 @@
 #include <android/native_window_jni.h>
 #include <jni.h>
 
-#include "play_control_observer_interface.h"
 #include "video_render_interface.h"
+#include "play_control_observer_interface.h"
 #include "egl_core.h"
 #include "wapped_shader_program.h"
 #include "wapped_texture.h"
@@ -32,12 +32,7 @@ public:
     virtual void UpdateMVPMatrix(int angleX, int angleY, float scaleX, float scaleY) override;
     virtual void SetTouchLoc(float touchX, float touchY) override;
 
-    virtual void OnPlay() override;
-    virtual void OnPause() override;
-    virtual void OnResume() override;
-    virtual void OnStop() override;
-    virtual void OnSeekTo(float position) override;
-
+    virtual void OnControlEvent(ControlType type) override;
 private:
     virtual void Process() override;
     bool OpenglesInit();

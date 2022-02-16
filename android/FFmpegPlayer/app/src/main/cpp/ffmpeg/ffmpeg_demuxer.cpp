@@ -1,5 +1,7 @@
 #include "ffmpeg_demuxer.h"
 
+#include <functional>
+
 static void log_callback(void *ptr, int level, const char *fmt, va_list vl) {
     va_list vl2;
     char *line = (char *) malloc(128 * sizeof(char));
@@ -144,26 +146,63 @@ bool FFmpegDemuxer::OpenCodecContext(int *stream_idx,
     return true;
 }
 
-void FFmpegDemuxer::OnPlay() {
-    TRACE_FUNC();
-    Start();
+void FFmpegDemuxer::OnControlEvent(ControlType type) {
+    LOGE("play control type %d", type);
+    switch (type) {
+        case ControlType::kPlay:
+            Start();
+            break;
+        case ControlType::kStop:
+            break;
+        case ControlType::kPause:
+            Pause();
+            break;
+        case ControlType::kResume:
+            Resume();
+            break;
+        default:
+            LOGE("unknown control type");
+            break;
+    }
 }
-
-void FFmpegDemuxer::OnPause() {
-    TRACE_FUNC();
-    Pause();
-}
-
-void FFmpegDemuxer::OnResume() {
-    TRACE_FUNC();
-    Resume();
-}
-
-void FFmpegDemuxer::OnStop() {}
 
 void FFmpegDemuxer::OnSeekTo(float position) {
     TRACE_FUNC();
     LOGE("FFmpegDemuxer OnSeekTo %f", position);
+
+    std::function<void(AVPacket *)> func = [](AVPacket *pkt) {
+        av_packet_free(&pkt);
+    };
+    int64_t position_b = position * AV_TIME_BASE;
+
+    if (video_stream_idx_ >= 0) {
+        LOGE("video_stream_ time_base %lf, {%d,%d}", av_q2d(video_stream_->time_base),
+             video_stream_->time_base.num, video_stream_->time_base.den);
+        // position_b * AV_TIME_BASE_Q / video_stream_->time_base
+        int64_t seek_target = av_rescale_q(position_b, AV_TIME_BASE_Q, video_stream_->time_base);
+        LOGE("video seek target is %ld", seek_target);
+        if (av_seek_frame(fmt_ctx_, video_stream_idx_, seek_target, AVSEEK_FLAG_BACKWARD) >= 0) {
+            LOGE("video_packet_queue_ before flush count %d", video_packet_queue_.Size());
+            video_packet_queue_.flush(func);
+            LOGE("video_packet_queue_ after flush count %d", video_packet_queue_.Size());
+        } else {
+            LOGE("error while video seeking");
+        }
+    }
+    
+    if (audio_stream_idx_ >= 0) {
+        LOGE("audio_stream_ time_base %lf, {%d,%d}", av_q2d(audio_stream_->time_base),
+             audio_stream_->time_base.num, audio_stream_->time_base.den);
+        int64_t seek_target = av_rescale_q(position_b, AV_TIME_BASE_Q, audio_stream_->time_base);
+        LOGE("audio seek target is %ld", seek_target);
+        if (av_seek_frame(fmt_ctx_, audio_stream_idx_, seek_target, AVSEEK_FLAG_BACKWARD) >= 0) {
+            LOGE("audio_packet_queue_ before flush count %d", audio_packet_queue_.Size());
+            audio_packet_queue_.flush(func);
+            LOGE("audio_packet_queue_ after flush count %d", audio_packet_queue_.Size());
+        } else {
+            LOGE("error while audio seeking");
+        }
+    }
 }
 
 void FFmpegDemuxer::Process() {
@@ -180,13 +219,13 @@ void FFmpegDemuxer::Process() {
     if (ret >= 0) {
         // check if the packet belongs to a stream we are interested in, otherwise skip it
         if (packet->stream_index == video_stream_idx_) {
-//            packet_queue_put(&video_packet_queue_, packet);
             video_packet_queue_.Push(packet);
+            LOGE("read video packet n : %d, size %d, pts %d time %s", video_packet_count_++, packet->size,
+                 packet->pts, av_ts2timestr(packet->pts, &video_dec_ctx_->time_base));
         } else if (packet->stream_index == audio_stream_idx_) {
             audio_packet_queue_.Push(packet);
-//            LOGE("read audio packet n : %d, size %d, pts %s", audio_packet_count_++, packet->size,
-//                 av_ts2timestr(packet->pts, &audio_dec_ctx_->time_base));
-//            packet_queue_put(&audio_packet_queue_, packet);
+            LOGE("read audio packet n : %d, size %d, pts %d time %s", audio_packet_count_++, packet->size,
+                 packet->pts, av_ts2timestr(packet->pts, &audio_dec_ctx_->time_base));
         } else {
             av_packet_free(&packet);
         }

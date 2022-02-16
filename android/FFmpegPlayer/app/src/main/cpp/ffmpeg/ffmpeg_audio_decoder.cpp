@@ -69,26 +69,34 @@ bool FFmpegAudioDecoder::Init() {
     return true;
 }
 
-void FFmpegAudioDecoder::OnPlay() {
-    TRACE_FUNC();
-    Start();
+void FFmpegAudioDecoder::OnControlEvent(ControlType type) {
+    LOGE("play control type %d", type);
+    switch (type) {
+        case ControlType::kPlay:
+            Start();
+            break;
+        case ControlType::kStop:
+            break;
+        case ControlType::kPause:
+            Pause();
+            break;
+        case ControlType::kResume:
+            Resume();
+            break;
+        default:
+            LOGE("unknown control type");
+            break;
+    }
 }
-
-void FFmpegAudioDecoder::OnPause() {
-    TRACE_FUNC();
-    Pause();
-}
-
-void FFmpegAudioDecoder::OnResume() {
-    TRACE_FUNC();
-    Resume();
-}
-
-void FFmpegAudioDecoder::OnStop() {}
 
 void FFmpegAudioDecoder::OnSeekTo(float position) {
     TRACE_FUNC();
     LOGE("FFmpegAudioDecoder OnSeekTo %f", position);
+
+    LOGE("audio_frame_queue_ before flush count %d", audio_frame_queue_.Size());
+    audio_frame_queue_.flush([](AudioFrame *frame) { delete frame; });
+    LOGE("audio_frame_queue_ after flush count %d", audio_frame_queue_.Size());
+    avcodec_flush_buffers(ffmpeg_demuxer_->GetCodecContext(type_));
 }
 
 void FFmpegAudioDecoder::Process() {
@@ -104,16 +112,12 @@ void FFmpegAudioDecoder::Process() {
     AVPacket *pkt = av_packet_alloc();
     pkt = ffmpeg_demuxer_->GetPacket(type_);
     if (pkt == nullptr) {
-//        LOGE("pkt is null");
-        if(ffmpeg_demuxer_->GetDemuxerState()) {
-            LOGE("thread puase");
-            Pause();
-        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         return;
     }
-//    LOGE("audio packet n:%d size:%d pts:%s\n",
-//         audio_packet_count_++, pkt->size,
-//         av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
+    LOGE("audio packet n:%d size:%d pts:%s\n",
+         audio_packet_count_++, pkt->size,
+         av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
     if (!DecodePacket(ffmpeg_demuxer_->GetCodecContext(type_), pkt) == 0) {
         LOGE("decode packet failed!");
     }
@@ -129,7 +133,8 @@ int FFmpegAudioDecoder::OutputFrame(AVFrame *frame) {
     AudioFrame *audio_frame = new AudioFrame(dst_frame_data_size_);
     if (swr_convert(swr_ctx_, &(audio_frame->data_), dst_frame_data_size_ / 2,
                     (const uint8_t **) frame->data, frame->nb_samples) > 0) {
-        audio_frame->clock_ = frame->pts * av_q2d(ffmpeg_demuxer_->GetCodecContext(type_)->time_base);
+        audio_frame->clock_ =
+                frame->pts * av_q2d(ffmpeg_demuxer_->GetCodecContext(type_)->time_base);
         audio_frame_queue_.Push(audio_frame);
         av_frame_unref(frame_);
     } else {
