@@ -171,7 +171,7 @@ void Player::SetVisualAudioRender(VisualAudioRender *render) {
 }
 
 void Player::WritePcm(void *context, uint8_t *pcm, int len) {
-    TRACE_FUNC();
+//    TRACE_FUNC();
     if (context != nullptr) {
         Player *player = static_cast<Player *>(context);
         bool is_attach = false;

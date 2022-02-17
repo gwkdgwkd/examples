@@ -7,6 +7,7 @@ CodecBase::CodecBase() {
     if (!frame_) {
         LOGE("Could not allocate frame");
     }
+    need_flush_ = false;
 }
 
 CodecBase::~CodecBase() {
@@ -18,10 +19,12 @@ int CodecBase::DecodePacket(AVCodecContext *dec, AVPacket *pkt) {
 //    TRACE_FUNC();
     int ret = 0;
 
-//    if(!pkt) {
-//        LOGE("get null packet!");
-//        return -1;
-//    }
+    if(need_flush_) {
+        LOGE("%s flush codec", dec->codec_descriptor->name);
+        avcodec_flush_buffers(dec);
+        FlushFrameQueue();
+        need_flush_ = false;
+    }
 
     // submit the packet to the decoder
     ret = avcodec_send_packet(dec, pkt);
@@ -44,7 +47,6 @@ int CodecBase::DecodePacket(AVCodecContext *dec, AVPacket *pkt) {
             LOGE("Error during decoding (%s)", av_err2str(ret));
             return ret;
         }
-
         ret = OutputFrame(frame_);
         av_frame_unref(frame_);
         if (ret < 0)

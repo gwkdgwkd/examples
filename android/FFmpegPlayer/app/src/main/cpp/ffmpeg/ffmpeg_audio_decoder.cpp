@@ -93,11 +93,12 @@ void FFmpegAudioDecoder::OnSeekTo(float position) {
     TRACE_FUNC();
     LOGE("FFmpegAudioDecoder OnSeekTo %f", position);
 
-    LOGE("audio_frame_queue_ before flush count %d", audio_frame_queue_.Size());
-    avcodec_flush_buffers(ffmpeg_demuxer_->GetCodecContext(type_));
-    audio_frame_queue_.flush([](AudioFrame *frame) { delete frame; });
-    LOGE("audio_frame_queue_ after flush count %d", audio_frame_queue_.Size());
+    need_flush_ = true;
     clock_ = position;
+}
+
+void FFmpegAudioDecoder::FlushFrameQueue() {
+    audio_frame_queue_.flush([](AudioFrame *frame) { delete frame; });
 }
 
 void FFmpegAudioDecoder::Process() {
@@ -109,9 +110,8 @@ void FFmpegAudioDecoder::Process() {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         return;
     }
-    LOGE("audio packet n:%d size:%d pts:%s\n",
-         audio_packet_count_++, pkt->size,
-         av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
+//    LOGE("audio packet n:%d, pts:%ld time %s", audio_packet_count_++, pkt->pts,
+//         av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
     if (!DecodePacket(ffmpeg_demuxer_->GetCodecContext(type_), pkt) == 0) {
         LOGE("decode packet failed!");
     }
@@ -120,10 +120,6 @@ void FFmpegAudioDecoder::Process() {
 }
 
 int FFmpegAudioDecoder::OutputFrame(AVFrame *frame) {
-//    LOGE("audio frame n:%d nb_samples:%d pts:%s\n",
-//         audio_frame_count_++, frame->nb_samples,
-//         av_ts2timestr(frame->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
-
     AudioFrame *audio_frame = new AudioFrame(dst_frame_data_size_);
     if (swr_convert(swr_ctx_, &(audio_frame->data_), dst_frame_data_size_ / 2,
                     (const uint8_t **) frame->data, frame->nb_samples) > 0) {
@@ -134,6 +130,10 @@ int FFmpegAudioDecoder::OutputFrame(AVFrame *frame) {
     } else {
         LOGE("swr_convert failed!");
     }
+
+//    LOGE("audio frame n:%d pts:%ld, time %s, clock %lf", audio_frame_count_++, frame->pts,
+//         av_ts2timestr(frame->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base),
+//         audio_frame->clock_);
 
     return 0;
 }

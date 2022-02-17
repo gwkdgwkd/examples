@@ -33,6 +33,7 @@ public:
 private:
     virtual void Process() override;
     virtual int OutputFrame(AVFrame *frame) override;
+    virtual void FlushFrameQueue() override;
 
     enum AVMediaType type_;
     FFmpegDemuxer *ffmpeg_demuxer_;

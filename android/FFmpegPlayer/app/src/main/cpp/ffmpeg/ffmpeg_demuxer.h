@@ -37,6 +37,7 @@ public:
     AVCodecContext *GetCodecContext(enum AVMediaType type);
     AVStream *GetAVStream(enum AVMediaType type);
     AVPacket *GetPacket(enum AVMediaType type);
+    void SeekTo();
     void GetMediaInfo(MediaInfo *info) const;
     bool GetDemuxerState() { return is_demuxer_finish_; }
     void SetMessageCallback(void *context, MessageCallback callback) {
@@ -71,6 +72,7 @@ private:
     ThreadSafeQueue<AVPacket *> audio_packet_queue_;
 
     std::atomic_bool is_demuxer_finish_;
+    std::atomic<int64_t> seek_position_;
 };
 
 #endif //FFMPEG_PLAYER_FFMPEG_DEMUXER_H

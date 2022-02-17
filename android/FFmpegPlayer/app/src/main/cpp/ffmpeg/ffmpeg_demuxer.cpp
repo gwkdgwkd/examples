@@ -26,6 +26,7 @@ FFmpegDemuxer::FFmpegDemuxer(const char *url) : url_(url) {
     video_packet_count_ = 0;
     audio_packet_count_ = 0;
     is_demuxer_finish_ = false;
+    seek_position_ = -1;
     //  av_log_set_callback(log_callback);
 }
 
@@ -69,7 +70,6 @@ bool FFmpegDemuxer::Init() {
 
     // dump input information to stderr
     av_dump_format(fmt_ctx_, 0, url_.c_str(), 0);
-
 
     return true;
 }
@@ -176,16 +176,19 @@ void FFmpegDemuxer::OnSeekTo(float position) {
     TRACE_FUNC();
     LOGE("FFmpegDemuxer OnSeekTo %f", position);
 
+    seek_position_ = position * AV_TIME_BASE;
+}
+
+void FFmpegDemuxer::SeekTo() {
     std::function<void(AVPacket *)> func = [](AVPacket *pkt) {
         av_packet_free(&pkt);
     };
-    int64_t position_b = position * AV_TIME_BASE;
 
     if (video_stream_idx_ >= 0) {
         LOGE("video_stream_ time_base %lf, {%d,%d}", av_q2d(video_stream_->time_base),
              video_stream_->time_base.num, video_stream_->time_base.den);
         // position_b * AV_TIME_BASE_Q / video_stream_->time_base
-        int64_t seek_target = av_rescale_q(position_b, AV_TIME_BASE_Q, video_stream_->time_base);
+        int64_t seek_target = av_rescale_q(seek_position_, AV_TIME_BASE_Q, video_stream_->time_base);
         LOGE("video seek target is %ld", seek_target);
         if (av_seek_frame(fmt_ctx_, video_stream_idx_, seek_target, AVSEEK_FLAG_BACKWARD) >= 0) {
             LOGE("video_packet_queue_ before flush count %d", video_packet_queue_.Size());
@@ -199,7 +202,7 @@ void FFmpegDemuxer::OnSeekTo(float position) {
     if (audio_stream_idx_ >= 0) {
         LOGE("audio_stream_ time_base %lf, {%d,%d}", av_q2d(audio_stream_->time_base),
              audio_stream_->time_base.num, audio_stream_->time_base.den);
-        int64_t seek_target = av_rescale_q(position_b, AV_TIME_BASE_Q, audio_stream_->time_base);
+        int64_t seek_target = av_rescale_q(seek_position_, AV_TIME_BASE_Q, audio_stream_->time_base);
         LOGE("audio seek target is %ld", seek_target);
         if (av_seek_frame(fmt_ctx_, audio_stream_idx_, seek_target, AVSEEK_FLAG_BACKWARD) >= 0) {
             LOGE("audio_packet_queue_ before flush count %d", audio_packet_queue_.Size());
@@ -213,6 +216,11 @@ void FFmpegDemuxer::OnSeekTo(float position) {
 
 void FFmpegDemuxer::Process() {
     // TRACE_FUNC();
+
+    if(seek_position_ >= 0) {
+        SeekTo();
+        seek_position_ = -1;
+    }
 
     AVPacket *packet = av_packet_alloc();
     if (!packet) {

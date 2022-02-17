@@ -65,8 +65,8 @@ NativeImage *FFmpegScale::Scale(AVFrame *src_frame) {
             afterTime - beforeTime).count();
     double duration_millsecond = std::chrono::duration<double, std::milli>(
             afterTime - beforeTime).count();
-    LOGE("sws_scale used : %lf microsecond(%lf millsecond)", duration_microsecond,
-         duration_millsecond);
+//    LOGE("sws_scale used : %lf microsecond(%lf millsecond)", duration_microsecond,
+//         duration_millsecond);
 
     NativeImage *image = new NativeImage();
     image->format = IMAGE_FORMAT_RGBA;

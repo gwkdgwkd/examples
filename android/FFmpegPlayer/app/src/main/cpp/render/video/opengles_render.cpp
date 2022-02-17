@@ -136,7 +136,6 @@ OpenGLESRender::OpenGLESRender(JNIEnv *env, jobject surface, enum ViewType view_
         : VideoRenderInterface(view_type, video_render_type, effect_type) {
     TRACE_FUNC();
     is_opengles_init_ = false;
-    is_render_finished_ = false;
     frame_index_ = 0;
     last_process_ = 0;
     if (IsSurface()) {
@@ -290,7 +289,7 @@ void OpenGLESRender::RenderVideoFrame(NativeImage *pImage) {
 
 void OpenGLESRender::OnControlEvent(ControlType type) {
     LOGE("play control type %d", type);
-    switch(type) {
+    switch (type) {
         case ControlType::kPlay:
             Start();
             break;
@@ -314,7 +313,7 @@ void OpenGLESRender::OnSeekTo(float position) {
 }
 
 void OpenGLESRender::Process() {
-    TRACE_FUNC();
+//    TRACE_FUNC();
 
     if (IsSurface()) {
         if (!is_opengles_init_) {
@@ -323,15 +322,9 @@ void OpenGLESRender::Process() {
         }
         OnDrawFrame();
     } else {
-        while(true) {
-            if(is_render_finished_) {
-                if (m_MsgContext && m_MsgCallback)
-                    m_MsgCallback(m_MsgContext, 0, 0);
-                is_render_finished_ = false;
-                break;
-            }
-            std::this_thread::sleep_for(std::chrono::nanoseconds(100));
-        }
+        if (m_MsgContext && m_MsgCallback)
+            m_MsgCallback(m_MsgContext, 0, 0);
+        Pause();
     }
 }
 
@@ -355,19 +348,15 @@ void OpenGLESRender::OnSurfaceChanged(int w, int h) {
 }
 
 void OpenGLESRender::OnDrawFrame() {
-    TRACE_FUNC();
+//    TRACE_FUNC();
     // LOGI("left %d, right %d, width %d, height %d", 0, 0, real_width_, real_height_);
 
-    LOGE("OnDrawFrame =================1");
     NativeImage *pImage = video_decoder_->GetVideoImage();
-    LOGE("OnDrawFrame =================1 1");
     if (pImage == nullptr) return;
     double delay = pImage->delay;
     // 如果有音频的话
     double audio_clock = audio_decoder_->GetClock();
-    LOGE("OnDrawFrame =================1 2");
     double diff = pImage->clock - audio_clock;
-    LOGE("OnDrawFrame =================1 3");
     // delay < 0.04, 同步阀值为0.04
     // delay > 0.1, 同步阀值为0.1
     // 0.04 < delay < 0.1, 同步阀值是delay
@@ -383,7 +372,6 @@ void OpenGLESRender::OnDrawFrame() {
 
     int process = pImage->clock + delay;
     std::this_thread::sleep_for(std::chrono::microseconds(real_delay));
-    LOGE("OnDrawFrame =================2");
     int img_type = pImage->format;
     switch (pImage->format) {
         case IMAGE_FORMAT_RGBA:
@@ -417,12 +405,10 @@ void OpenGLESRender::OnDrawFrame() {
         default:
             break;
     }
-    LOGE("OnDrawFrame =================3");
     NativeImageUtil::FreeNativeImage(pImage);
     delete pImage;
 
     frame_index_++;
-    LOGE("OnDrawFrame =================4");
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
@@ -437,7 +423,6 @@ void OpenGLESRender::OnDrawFrame() {
 
     std::vector<std::string> names = {"texture0", "texture1", "texture2"};
     wapped_texture_ptr_->BindTexture(names);
-    LOGE("OnDrawFrame =================5");
     wapped_shader_program_ptr_->SetInt("img_type", img_type);
     wapped_shader_program_ptr_->SetInt("effect_type", effect_type_);
     if (effect_type_ == kDynimicMesh || effect_type_ == k3DVR) {
@@ -462,12 +447,11 @@ void OpenGLESRender::OnDrawFrame() {
             LOGE("eglSwapBuffers() returned error %d", eglGetError());
         }
     } else {
-        is_render_finished_ = true;
+        Resume();
     }
 
-    LOGE("OnDrawFrame =================6");
     if (m_MsgContext && m_MsgCallback && last_process_ < process) {
-        if(last_process_ < 0) { // for seek
+        if (last_process_ < 0) { // for seek
             last_process_++;
         } else {
             m_MsgCallback(m_MsgContext, 1, process);

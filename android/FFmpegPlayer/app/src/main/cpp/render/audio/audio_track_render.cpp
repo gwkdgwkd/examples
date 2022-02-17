@@ -29,7 +29,7 @@ void AudioTrackRender::OnControlEvent(ControlType type) {
 }
 
 void AudioTrackRender::Process() {
-    TRACE_FUNC();
+//    TRACE_FUNC();
     AudioFrame *frame = audio_decoder_->GetAudioFrame();
     if (frame && context_ && callback_) {
         callback_(context_, frame->data_, frame->data_size_);

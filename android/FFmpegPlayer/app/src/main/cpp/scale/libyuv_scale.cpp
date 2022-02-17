@@ -62,7 +62,7 @@ NativeImage *LibyuvScale::Scale(AVFrame *src_frame) {
     auto afterTime = std::chrono::steady_clock::now();
     double duration_microsecond = std::chrono::duration<double, std::micro>(afterTime - beforeTime).count();
     double duration_millsecond = std::chrono::duration<double, std::milli>(afterTime - beforeTime).count();
-    LOGE("libyuv used : %lf microsecond(%lf millsecond)", duration_microsecond, duration_millsecond);
+//    LOGE("libyuv used : %lf microsecond(%lf millsecond)", duration_microsecond, duration_millsecond);
 
      /* save to rgba file
      static int i = 0;

@@ -1,7 +1,6 @@
 #ifndef RENDER_VIDEO_OPENGL_RENDER_H
 #define RENDER_VIDEO_OPENGL_RENDER_H
 
-#include <atomic>
 #include <vector>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
@@ -62,7 +61,6 @@ private:
     int real_width_;
     int real_height_;
     int last_process_;
-    std::atomic<bool> is_render_finished_;
 };
 
 #endif // RENDER_VIDEO_OPENGL_RENDER_H
