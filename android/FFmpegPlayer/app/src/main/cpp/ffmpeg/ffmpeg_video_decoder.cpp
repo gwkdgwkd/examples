@@ -21,7 +21,7 @@ bool FFmpegVideoDecoder::Init() {
 
     video_width_ = ffmpeg_demuxer_->GetCodecContext(type_)->width;
     video_height_ = ffmpeg_demuxer_->GetCodecContext(type_)->height;
-    enum AVPixelFormat video_format_ = ffmpeg_demuxer_->GetCodecContext(type_)->pix_fmt;
+    video_format_ = ffmpeg_demuxer_->GetCodecContext(type_)->pix_fmt;
 
     return true;
 }
@@ -74,14 +74,11 @@ void FFmpegVideoDecoder::OnSeekTo(float position) {
 }
 
 void FFmpegVideoDecoder::Process() {
-//    TRACE_FUNC();
+    // TRACE_FUNC();
 
     AVPacket *pkt = av_packet_alloc();
     pkt = ffmpeg_demuxer_->GetPacket(type_);
-    if (pkt == nullptr) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        return;
-    }
+
     LOGE("video packet n:%d size:%d pts:%s\n",
          video_packet_count_++, pkt->size,
          av_ts2timestr(pkt->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
@@ -93,9 +90,9 @@ void FFmpegVideoDecoder::Process() {
 }
 
 int FFmpegVideoDecoder::OutputFrame(AVFrame *frame) {
-//    LOGE("video frame n:%d nb_samples:%d pts:%s\n",
-//         video_frame_count_++, frame->nb_samples,
-//         av_ts2timestr(frame->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
+    LOGE("A-V video frame n:%d nb_samples:%d pts:%s\n",
+         video_frame_count_++, frame->nb_samples,
+         av_ts2timestr(frame->pts, &ffmpeg_demuxer_->GetCodecContext(type_)->time_base));
 
     NativeImage *image = scale_base_->Scale(frame);
 
@@ -119,7 +116,7 @@ int FFmpegVideoDecoder::OutputFrame(AVFrame *frame) {
     image->clock = frame->best_effort_timestamp *
                    av_q2d(ffmpeg_demuxer_->GetAVStream(type_)->time_base);
 //    LOGE("A-V image->clock %lf %lf", frame->best_effort_timestamp, image->clock);
-//    LOGE("A-V++++++++++++fps %lf, delay %lf, clock %lf", fps, image->delay, image->clock);
+    LOGE("A-V++++++++++++fps %lf, delay %lf, clock %lf", fps, image->delay, image->clock);
     video_image_queue_.Push(image);
 
     return 0;
@@ -127,6 +124,7 @@ int FFmpegVideoDecoder::OutputFrame(AVFrame *frame) {
 
 NativeImage *FFmpegVideoDecoder::GetVideoImage() {
     while (video_image_queue_.Empty()) {
+        LOGE("OnDrawFrame ======GetVideoImage===========sss");
         std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
     return video_image_queue_.Pop();

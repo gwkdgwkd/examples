@@ -92,8 +92,14 @@ AVStream *FFmpegDemuxer::GetAVStream(enum AVMediaType type) {
 
 AVPacket *FFmpegDemuxer::GetPacket(enum AVMediaType type) {
     if (type == AVMEDIA_TYPE_VIDEO) {
+        while (video_packet_queue_.Empty()) {
+            std::this_thread::sleep_for(std::chrono::microseconds(10));
+        }
         return video_packet_queue_.Pop();
     } else {
+        while (audio_packet_queue_.Empty()) {
+            std::this_thread::sleep_for(std::chrono::microseconds(10));
+        }
         return audio_packet_queue_.Pop();
     }
 }
@@ -189,7 +195,7 @@ void FFmpegDemuxer::OnSeekTo(float position) {
             LOGE("error while video seeking");
         }
     }
-    
+
     if (audio_stream_idx_ >= 0) {
         LOGE("audio_stream_ time_base %lf, {%d,%d}", av_q2d(audio_stream_->time_base),
              audio_stream_->time_base.num, audio_stream_->time_base.den);

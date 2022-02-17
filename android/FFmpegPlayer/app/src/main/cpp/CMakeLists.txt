@@ -26,6 +26,7 @@ file(GLOB opengles-files ${CMAKE_SOURCE_DIR}/opengles/*.cpp)
 file(GLOB scale-files ${CMAKE_SOURCE_DIR}/scale/*.cpp)
 
 project("ffmpegplayer")
+add_definitions("-Wall -lpthread -g")
 add_library(${libname}
         SHARED
         ${src-files}

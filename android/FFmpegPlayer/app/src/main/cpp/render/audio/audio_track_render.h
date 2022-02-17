@@ -25,7 +25,7 @@ private:
 
     void *context_ = nullptr;
     PcmCallback callback_ = nullptr;
-    VisualAudioRender *visual_audio_render_;
+    VisualAudioRender *visual_audio_render_ = nullptr;
 };
 
 #endif // FFMPEG_PLAYER_AUDIO_TRACK_RENDER_H
