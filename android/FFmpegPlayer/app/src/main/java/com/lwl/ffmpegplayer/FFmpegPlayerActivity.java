@@ -1,11 +1,16 @@
 package com.lwl.ffmpegplayer;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -15,6 +20,8 @@ import android.view.ScaleGestureDetector;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
@@ -142,6 +149,15 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
                 playerInfo.setScaleType(ScaleType.FFMPEG);
             }
         }
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (playerInfo.getEffectType() == EffectType.VISUALAUDIO) {
             setContentView(R.layout.ffmpeg_player_with_visual_audio);
             mAudioGLSurfaceView = findViewById(R.id.audio_glsurface_view);
@@ -172,6 +188,7 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
             myButton = (MyButton) findViewById(R.id.glsurface_view_button);
         }
 
+
         Log.d(TAG, "view_type is " + playerInfo.getViewType().name());
         Log.d(TAG, "audio_render_type is " + playerInfo.getAudioRenderType().name());
         Log.d(TAG, "video_render_type is " + playerInfo.getViedoRenderType().name());
@@ -180,6 +197,7 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
 
         mySeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             float pos;
+
             public void seek(SeekBar seekBar) {
                 pos = seekBar.getProgress();
                 Log.d(TAG, "seek to " + pos);
@@ -260,6 +278,17 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         mScaleGestureDetector = new ScaleGestureDetector(this, this);
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.d(TAG, "onConfigurationChanged");
+        if (playerInfo.getViewType() == ViewType.SURFACEVIEW) {
+            setViewPosition(mMediaInfo.width, mMediaInfo.height, mVideoSurfaceView);
+        } else if (playerInfo.getViewType() == ViewType.GLSURFACEVIEW) {
+            setViewPosition(mMediaInfo.width, mMediaInfo.height, mVideoGLSurfaceView);
+        }
+    }
+
     private void initAudioTrack() {
         Log.d(TAG, "sample_rate is " + mMediaInfo.sample_rate);
         Log.d(TAG, "channels is " + mMediaInfo.channels);
@@ -297,15 +326,68 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         }
     };
 
-    private void setViewPosition(int width, int height, View view) {
+
+    private int getNavigationBarHeight() {
+        int navigationBarHeight = -1;
+        Resources resources = this.getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            navigationBarHeight = resources.getDimensionPixelSize(resourceId);
+        }
+        return navigationBarHeight;
+    }
+
+    private void setViewPosition(int videoWidth, int videoHeight, View view) {
+        Log.d(TAG, "video size: " + videoWidth + ", " + videoHeight);
+
+//        if (this.getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT) {
+//            navigationBarHeight = getNavigationBarHeight();
+//            getWindow().getDecorView().setSystemUiVisibility(
+//                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+//                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+//            Log.d(TAG, "heng ping");
+//    } else    {
+//            Log.d(TAG, "shu ping");
+//            getWindow().getDecorView().setSystemUiVisibility(0);
+//    }
+
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
+        int screenWidth = size.x;
+        int screenHeight = size.y;
+        if (this.getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT) {
+            screenWidth += getNavigationBarHeight();
+        }
+        Log.d(TAG, "window size: " + screenWidth + ", " + screenHeight);
 
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
+        int finalWidth, finalHeight, finalTop, finalLeft;
+        float widthScaledRatio = screenWidth * 1.0f / videoWidth;
+        float heightScaledRatio = screenHeight * 1.0f / videoHeight;
+        float Ratio = (float) videoWidth / (float) videoHeight;
+        if (widthScaledRatio > heightScaledRatio) {
+            // use heightScaledRatio
+            finalWidth = (int) (videoWidth * heightScaledRatio);
+            finalHeight = screenHeight;
+            finalTop = 0;
+            finalLeft = (screenWidth - finalWidth) / 2;
+        } else {
+            // use widthScaledRatio
+            finalWidth = screenWidth;
+            finalHeight = (int) (videoHeight * widthScaledRatio);
+            finalTop = (screenHeight - finalHeight) / 2;
+            finalLeft = 0;
+        }
+        Log.d(TAG, "final size: " + finalLeft + ", " + finalTop + ", " + finalWidth + ", " + finalHeight);
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(finalWidth, finalHeight);
         if (playerInfo.getEffectType() != EffectType.VISUALAUDIO) {
-            params.topMargin = (size.y - height) / 2;
-            params.leftMargin = 0;
+            params.topMargin = finalTop;
+            params.leftMargin = finalLeft;
         }
         view.setLayoutParams(params);
     }
