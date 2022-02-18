@@ -45,6 +45,7 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
     private MySeekBar mySeekBar;
     private MyButton myButton;
     private volatile boolean isPlaying = true;
+    private boolean isStarted = false;
 
     private MediaInfo mMediaInfo = null;
 
@@ -78,13 +79,15 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
         public void surfaceChanged(@NonNull SurfaceHolder surfaceHolder, int format, int width, int height) {
             Log.d(TAG, "FFmpegPlayerActivity surfaceChanged " + width + " " + height);
             nativeFFmpegPlayer.OnSurfaceChanged(width, height, 0);
-            nativeFFmpegPlayer.Play();
-            if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1 ||
-                    playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK2) {
-                audioTrack.play();
-            }
-            if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1) {
-                audioUpdateThread.start();
+            if(!isStarted) {
+                nativeFFmpegPlayer.Play();
+                if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1 ||
+                        playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK2) {
+                    audioTrack.play();
+                }
+                if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1) {
+                    audioUpdateThread.start();
+                }
             }
         }
 
@@ -99,19 +102,23 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
     private GLSurfaceView.Renderer mVideoGLRender = new GLSurfaceView.Renderer() {
         @Override
         public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+            Log.d(TAG, "FFmpegPlayerActivity onSurfaceCreated ");
             nativeFFmpegPlayer.OnSurfaceCreated(null, 0);
         }
 
         @Override
         public void onSurfaceChanged(GL10 gl10, int i, int i1) {
+            Log.d(TAG, "FFmpegPlayerActivity surfaceChanged " + i + " " + i1);
             nativeFFmpegPlayer.OnSurfaceChanged(i, i1, 0);
-            nativeFFmpegPlayer.Play();
-            if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1 ||
-                    playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK2) {
-                audioTrack.play();
-            }
-            if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1) {
-                audioUpdateThread.start();
+            if(!isStarted) {
+                nativeFFmpegPlayer.Play();
+                if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1 ||
+                        playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK2) {
+                    audioTrack.play();
+                }
+                if (playerInfo.getAudioRenderType() == AudioRenderType.AUDIOTRACK1) {
+                    audioUpdateThread.start();
+                }
             }
         }
 
@@ -150,13 +157,6 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
             }
         }
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (playerInfo.getEffectType() == EffectType.VISUALAUDIO) {
             setContentView(R.layout.ffmpeg_player_with_visual_audio);
@@ -340,20 +340,17 @@ public class FFmpegPlayerActivity extends Activity implements NativeFFmpegPlayer
     private void setViewPosition(int videoWidth, int videoHeight, View view) {
         Log.d(TAG, "video size: " + videoWidth + ", " + videoHeight);
 
-//        if (this.getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT) {
-//            navigationBarHeight = getNavigationBarHeight();
-//            getWindow().getDecorView().setSystemUiVisibility(
-//                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-//                            | View.SYSTEM_UI_FLAG_FULLSCREEN
-//                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-//            Log.d(TAG, "heng ping");
-//    } else    {
-//            Log.d(TAG, "shu ping");
-//            getWindow().getDecorView().setSystemUiVisibility(0);
-//    }
+        if (this.getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(0);
+        }
 
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
