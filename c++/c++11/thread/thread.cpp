@@ -12,6 +12,40 @@
 
 using namespace std;
 
+namespace create {
+void func1() { std::cout << __FUNCTION__ << " running" << std::endl; }
+
+void func1() { std::cout << __FUNCTION__ << " running" << std::endl; }
+
+void testCreate() {
+  // 默认构造函数，创建一个空的std::thread执行对象
+  std::thread t1;
+  std::thread threads[2];  // 空的thread数组
+
+  // 初始化构造函数，创建一个std::thread对象，该std::thread对象可被joinable
+  std::thread t2(func1);
+  t2.join();
+
+  // 拷贝构造函数(被禁用)，意味着std::thread对象不可拷贝构造
+  // std::thread t3 = t2;
+  // std::thread t4(t2);
+
+  // 赋值操作符
+  t1 = std::thread(func1);
+  t1.join();
+  for (int i = 0; i < 2; i++) {
+    threads[i] = std::thread(func1);
+  }
+  for (auto &t : threads) {
+    t.join();
+  }
+
+  // 移动拷贝构造函数
+}
+}  // namespace create
+
+int main() { create::testCreate(); }
+
 // std::thread构造函数:
 // 默认构造函数，创建一个空的std::thread执行对象。
 // 初始化构造函数，创建一个std::thread对象，该std::thread对象可被joinable，新产生的线程会调用fn函数，该函数的参数由args给出。
@@ -203,6 +237,7 @@ void proc(int &x) {
   x *= 10;
 }
 
+/*
 int main() {
   // 构造函数
   int n = 0;
@@ -430,7 +465,7 @@ int main() {
 
   return 0;
 }
-
+*/
 // GCC默认没有加载pthread库，据说在后续的版本中可以不用在编译时添加-pthread选项。
 // g++ -std=c++11 thread.cpp -lpthread
 
