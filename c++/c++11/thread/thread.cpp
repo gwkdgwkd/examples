@@ -13,9 +13,10 @@
 using namespace std;
 
 namespace create {
-void func1() { std::cout << __FUNCTION__ << " running" << std::endl; }
+// 只要创建了线程对象，线程就开始执行。并没有一个类似start的函数来显式启动。
+// 使用C++线程库启动线程，可以归结为构造std::thread对象。
 
-void func1() { std::cout << __FUNCTION__ << " running" << std::endl; }
+void func() { std::cout << __FUNCTION__ << " running" << std::endl; }
 
 void testCreate() {
   // 默认构造函数，创建一个空的std::thread执行对象
@@ -23,7 +24,7 @@ void testCreate() {
   std::thread threads[2];  // 空的thread数组
 
   // 初始化构造函数，创建一个std::thread对象，该std::thread对象可被joinable
-  std::thread t2(func1);
+  std::thread t2(func);
   t2.join();
 
   // 拷贝构造函数(被禁用)，意味着std::thread对象不可拷贝构造
@@ -31,33 +32,153 @@ void testCreate() {
   // std::thread t4(t2);
 
   // 赋值操作符
-  t1 = std::thread(func1);
+  t1 = std::thread(func);
   t1.join();
   for (int i = 0; i < 2; i++) {
-    threads[i] = std::thread(func1);
+    threads[i] = std::thread(func);
   }
   for (auto &t : threads) {
     t.join();
   }
 
   // 移动拷贝构造函数
+  std::thread t5(func);
+  cout << "t5 id is " << t5.get_id() << endl;  // 139858793432832
+  std::thread t6 = move(t5);  // t6获t5的全部属性，t5被消耗了
+  cout << "t6 id is " << t6.get_id() << endl;  // 139858793432832
+  // t5.join();  // terminate called after throwing an instance of 'std::system_error'
+  t6.join();
+
+  std::thread t7(func);                                     // 栈上
+  std::thread t8[2]{std::thread(func), std::thread(func)};  // 线程数组
+  std::thread *t9(new std::thread(func));                   // 堆上
+  std::thread *t10(new std::thread[2]{std::thread(func),
+                                      std::thread(func)});  // 线程指针数组
+  t7.join();
+  t8[0].join();
+  t8[1].join();
+  t9->join();
+  t10[0].join();
+  t10[1].join();
 }
 }  // namespace create
 
-int main() { create::testCreate(); }
+namespace joinable {
+// 一旦线程开始运行， 就需要显式的决定是要等待它完成(join)，或者分离它让它自行运行(detach)。
+// 当线程启动后，一定要在和线程相关联的std::thread对象销毁前，对线程运用join()或者detach()方法。
+// join()与detach()都是std::thread类的成员函数，是两种线程阻塞方法，两者的区别是是否等待子线程执行结束。
+// join线程，调用该函数会阻塞当前线程，直到由*this所标示的线程执行完毕join才返回。
+// detach线程,将当前线程对象所代表的执行实例与该线程对象分离，使得线程的执行可以单独进行。线程执行完毕，资源将会被释放。
 
-// std::thread构造函数:
-// 默认构造函数，创建一个空的std::thread执行对象。
-// 初始化构造函数，创建一个std::thread对象，该std::thread对象可被joinable，新产生的线程会调用fn函数，该函数的参数由args给出。
-// 拷贝构造函数(被禁用)，意味着std::thread对象不可拷贝构造。
-// move构造函数，调用成功之后x不代表任何std::thread执行对象。
-// 注：可被joinable的std::thread对象必须在他们销毁之前被主线程join或者将其设置为detached。
-void f1(int n) {  // 初始化构造函数
-  for (int i = 0; i < 5; ++i) {
-    std::cout << "Thread " << n << " executing\n";
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+// join()函数的另一个任务是回收该线程中使用的资源，会清理线程相关的存储部分，这代表了join()只能调用一次。
+// detach()也只能调用一次，一旦detach()后就无法join()了。
+// 使用joinable检查线程是否可被join，检查当前的线程对象是否表示了一个活动的执行线程。
+// 有趣的是，detach()可否调用也是使用joinable()来判断。
+
+// 如果使用detach()，就必须保证线程结束之前可访问数据的有效性，使用指针和引用需要格外谨慎。
+// 线程对象和对象内部管理的线程的生命周期并不一样，如果线程执行的快，可能内部的线程已经结束了，但是线程对象还活着，
+// 也有可能线程对象已经被析构了，内部的线程还在运行。
+// 主线程并不想等待子线程结束就想结束整个任务，直接删掉t1.join()是不行的，
+// 程序会被终止（析构t1的时候会调用std::terminate，程序会打印terminate called without an active exception）。
+// 调用t1.detach()，从而将线程放在后台运行，所有权和控制权被转交给C++运行时库，以确保与线程相关联的资源在线程退出后能被正确的回收。
+// 参考UNIX的守护进程(daemon process)的概念，这种被分离的线程被称为守护线程(daemon threads)。
+// 线程被分离之后，即使该线程对象被析构了，线程还是能够在后台运行，只是由于对象被析构了，主线程不能够通过对象名与这个线程进行通信。
+
+void func1() { std::cout << __FUNCTION__ << " running" << std::endl; }
+void func2() {
+  std::cout << "func2 start" << std::endl;
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+  std::cout << "func2 end" << std::endl;
+}
+
+void testJoinable() {
+  // 由默认构造函数创建的线程是不能被join的
+  std::thread t1;
+  // t1.join();  // terminate called after throwing an instance of 'std::system_error'
+
+  // 线程已经执行完任务，但是没有被join的话，该线程依然会被认为是一个活动的执行线程，因此也是可以被join的
+  std::thread t2(func1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  t2.join();
+
+  // join后，joinable为false；没有执行join或detach，joinable为true
+  std::thread t3(func2);
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  std::cout << "before join : " << std::boolalpha << t3.joinable()
+            << std::endl;  // true
+  t3.join();
+  std::cout << "after join:" << std::boolalpha << t3.joinable()
+            << std::endl;  // false
+
+  // detach后，joinable为false，线程中的打印也看不到了
+  // 脱离主线程的绑定，主线程挂了，子线程不报错，子线程执行完自动退出
+  // detach以后，子线程会成为孤儿线程，线程之间将无法通信
+  std::thread t4(func2);
+  t4.detach();
+  std::cout << "after detach:" << std::boolalpha << t4.joinable()
+            << std::endl;  // false
+  // 线程被分离了，就不能够再被join了。如果调用，会崩溃
+  // t4.join();  // terminate called after throwing an instance of 'std::system_error'
+}
+}  // namespace joinable
+
+namespace parameter {
+// 创建线程时需要传递函数名作为参数，提供的函数对象会复制到新的线程的内存空间中执行与调用。
+// 如果用于创建线程的函数为含参函数，那么在创建线程时，要一并将函数的参数传入。
+// 常见的，传入的参数的形式有基本数据类型(int，char,string等)、引用、指针、对象。
+// 总体来说，std::thread的构造函数会拷贝传入的参数:
+// 1 当传入参数为基本数据类型(int，char,string等)时，会拷贝一份给创建的线程；
+// 2 当传入参数为指针时，会浅拷贝一份给创建的线程，也就是说，只会拷贝对象的指针，不会拷贝指针指向的对象本身;
+// 3 当传入的参数为引用时，实参必须用ref()函数处理后传递给形参，否则编译不通过，此时不存在“拷贝”行为。
+//   引用只是变量的别名，在线程中传递对象的引用，那么该对象始终只有一份，只是存在多个别名罢了。
+
+void func1(int i) { std::cout << "func1, i: " << ++i << std::endl; }
+void func2(int &i) { std::cout << "func2, i: " << ++i << std::endl; }
+void func3(int *i) { std::cout << "func3, i: " << ++(*i) << std::endl; }
+int func4(const char *fun, ...) {
+  va_list ap;         // 指针
+  va_start(ap, fun);  // 开始
+  vprintf(fun, ap);   // 调用
+  va_end(ap);
+  return 0;
+}
+
+void testParameter() {
+  int i = 1;
+  std::cout << "before, i: " << i << std::endl;  // 1
+  std::thread t1(func1, i);                      // 2
+  t1.join();
+  std::cout << "after func1, i: " << i << std::endl;  // 1
+
+  std::thread t2(func2, std::ref(i));  // 2
+  t2.join();
+  std::cout << "after func2, i: " << i << std::endl;  // 2
+
+  std::thread t3(func3, &i);  // 3
+  t3.join();
+  std::cout << "after func3, i: " << i << std::endl;  // 3
+
+  // hello world! 100 A 3.141590
+  std::thread t4(func4, "%s %d %c %f", "hello world!", 100, 'A', 3.14159);
+  t4.join();
+}
+}  // namespace parameter
+
+int main() {
+  int type = 1;
+  switch (type) {
+    case 0:
+      create::testCreate();
+      break;
+    case 1:
+      joinable::testJoinable();
+      break;
+    case 2:
+      parameter::testParameter();
+      break;
   }
 }
+
 void f2(int &n) {  // 拷贝构造函数
   for (int i = 0; i < 5; ++i) {
     std::cout << "Thread 2 executing\n";
@@ -66,9 +187,6 @@ void f2(int &n) {  // 拷贝构造函数
   }
 }
 
-// std::thread赋值操作:
-// Move赋值操作(1)，如果当前对象不可joinable，需要传递一个右值引用(rhs)给move赋值操作；如果当前对象可被joinable，则会调用terminate()报错。
-// 拷贝赋值操作(2)，被禁用，因此std::thread对象不可拷贝赋值。
 void thread_task(int n) {
   std::this_thread::sleep_for(std::chrono::seconds(n));
   std::cout << "hello thread " << std::this_thread::get_id() << " paused " << n
@@ -77,18 +195,6 @@ void thread_task(int n) {
 
 // 其他成员函数:
 // get_id:获取线程ID，返回一个类型为std::thread::id的对象。
-
-// joinable:检查线程是否可被join。检查当前的线程对象是否表示了一个活动的执行线程，由默认构造函数创建的线程是不能被join的。另外，如果某个线程已
-// 经执行完任务，但是没有被join的话，该线程依然会被认为是一个活动的执行线程，因此也是可以被join的。
-
-// join: Join线程，调用该函数会阻塞当前线程，直到由*this所标示的线程执行完毕join才返回。
-
-// detach:Detach线程。将当前线程对象所代表的执行实例与该线程对象分离，使得线程的执行可以单独进行。一旦线程执行完毕，它所分配的资源将会被释放。
-// 调用detach 函数之后：
-//   *this 不再代表任何的线程执行实例。
-//   joinable() == false
-//   get_id() == std::thread::id()
-// 另外，如果出错或者joinable()==false，则会抛出std::system_error。
 
 // swap:Swap线程，交换两个线程对象所代表的底层句柄(underlying handles)。
 
@@ -137,27 +243,6 @@ void little_sleep(std::chrono::microseconds us) {
   } while (std::chrono::high_resolution_clock::now() < end);
 }
 
-// 创建线程:
-// 语句"std::thread th1(proc1);"创建了一个名为th1的线程，并且线程th1开始执行。
-// 实例化std::thread类对象时，至少需要传递函数名作为参数(这个函数就是这个线程的入口函数，函数执行完了，整个线程也就执行完了)。如果函数为有参函
-// 数,如"void proc2(int a,int b)",那么实例化std::thread类对象时，则需要传递更多参数，参数顺序依次为函数名、该函数的第一个参数、该函数的第
-// 二个参数，···，如"std::thread th2(proc2,a,b);"。
-// 只要创建了线程对象（前提是，实例化std::thread对象时传递了“函数名/可调用对象”作为参数），线程就开始执行。并没有一个类似start的函数来显式启动。
-// 总之，使用C++线程库启动线程，可以归结为构造std::thread对象。
-// 一旦线程开始运行， 就需要显式的决定是要等待它完成(join)，或者分离它让它自行运行(detach)。注意：只需要在std::thread对象被销毁之前做出这个决定。
-// 当线程启动后，一定要在和线程相关联的std::thread对象销毁前，对线程运用join()或者detach()方法。
-// join()与detach()都是std::thread类的成员函数，是两种线程阻塞方法，两者的区别是是否等待子线程执行结束。
-// join()函数的另一个任务是回收该线程中使用的资源,会清理线程相关的存储部分，这代表了join()只能调用一次。使用joinable()来判断join()可否调用。
-// 同样，detach()也只能调用一次，一旦detach()后就无法join()了，有趣的是，detach()可否调用也是使用joinable()来判断。
-// 如果使用detach()，就必须保证线程结束之前可访问数据的有效性，使用指针和引用需要格外谨慎。
-// 线程对象和对象内部管理的线程的生命周期并不一样，如果线程执行的快，可能内部的线程已经结束了，但是线程对象还活着，也有可能线程对象已经被析构了，内部
-// 的线程还在运行。
-// 主线程并不想等待子线程结束就想结束整个任务，直接删掉t1.join()是不行的，程序会被终止（析构t1的时候会调用std::terminate，
-// 程序会打印terminate called without an active exception）。
-// 调用t1.detach()，从而将线程放在后台运行，所有权和控制权被转交给C++运行时库，以确保与线程相关联的资源在线程退出后能被正确的回收。参考UNIX的守护
-// 进程(daemon process)的概念，这种被分离的线程被称为守护线程(daemon threads)。线程被分离之后，即使该线程对象被析构了，线程还是能够在后台运行，
-// 只是由于对象被析构了，主线程不能够通过对象名与这个线程进行通信。
-
 void function_1() {
   // 延时500ms为了保证test()运行结束之后才打印
   std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -170,7 +255,7 @@ void test() {
   std::cout << "test() finished" << std::endl;
 }
 
-// 一旦一个线程被分离了，就不能够再被join了。如果非要调用，程序就会崩溃，可以使用joinable()函数判断一个线程对象能否调用join()。
+// 。
 void test1() {
   std::thread t1(function_1);
   t1.detach();  // 脱离主线程的绑定，主线程挂了，子线程不报错，子线程执行完自动退出。detach以后，子线程会成为孤儿线程，线程之间将无法通信。
@@ -224,14 +309,6 @@ class HelloWorld {
   void hello(int year) { cout << "I am " << year << " years old" << endl; }
 };
 
-// 创建线程时的传参问题分析
-// 如“std::thread th1(proc1)”,创建线程时需要传递函数名作为参数，提供的函数对象会复制到新的线程的内存空间中执行与调用。
-// 如果用于创建线程的函数为含参函数，那么在创建线程时，要一并将函数的参数传入。常见的，传入的参数的形式有基本数据类型(int，char,string等)、引用、指针、对象这些
-// 总体来说，std::thread的构造函数会拷贝传入的参数:
-// 1 当传入参数为基本数据类型(int，char,string等)时，会拷贝一份给创建的线程；
-// 2 当传入参数为指针时，会浅拷贝一份给创建的线程，也就是说，只会拷贝对象的指针，不会拷贝指针指向的对象本身;
-// 3 当传入的参数为引用时，实参必须用ref()函数处理后传递给形参，否则编译不通过，此时不存在“拷贝”行为。引用只是变量的别名，在线程中传递对象的引用，
-//   那么该对象始终只有一份，只是存在多个别名罢了
 void proc(int &x) {
   cout << x << "," << &x << endl;
   x *= 10;
