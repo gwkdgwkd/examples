@@ -4,7 +4,7 @@
 #include <thread>
 
 // 原子操作是在多线程程序中“最小的且不可并行化的”操作，意味着多个线程访问同一个资源时，有且仅有一个线程能对资源进行操作。
-// 原子操作是一个不可分割的操作，这种操作有个特点，要么做完，要么没做完，在其他线程访问的时候，不能够访问到这种过程的中间态
+// 原子操作是一个不可分割的操作，这种操作有个特点，要么做完，要么没做完，在其他线程访问的时候，不能够访问到这种过程的中间态。
 // 通常情况下原子操作可以通过互斥的访问方式来保证，例如Linux下的互斥锁（mutex），Windows下的临界区（Critical Section）等。
 // 原子类型，是c++11中提供的一类数据类型，这种数据类型，不需要显式使用互斥锁。但是，编译器却可以保证原子类型在线程间被互斥地访问。
 // 可以理解为：c++11将原子类型的互斥锁、临界区给抽象化了，而不需要再去进行相关操作（平台相关）。
@@ -68,6 +68,7 @@ namespace operation {
 // C++11标准将原子操作定义为atomic模板类的成员函数，包括读（load）、写（store）、交换（exchange）等。
 // 对于内置类型而言，主要是通过重载一些全局操作符来完成的。
 // 对于原子操作并非只有成员函数，当然也存在非成员函数，对于大多数非成员函数只是在原来函数基础上添加atomic_前缀。
+// 他们有两个变种：一个是没有标签的，一个是添加_explict后缀和额外的参数作为内存顺序的标签。
 
 //                                                   原子类型的可用操作
 // 操作 	                atomic_flag 	atomic<bool> 	atomic<T*> 	atomic<integral-type> 	atomic<othre-type>
@@ -109,6 +110,11 @@ void testOperation() {
   std::atomic_store<int>(&ai1, 50);
   std::atomic_exchange<int>(&ai3, ai1);
   std::cout << std::atomic_load<int>(&ai3) << std::endl;  // 50
+
+  std::atomic<int64_t> ai4;
+  std::cout << std::boolalpha << ai4.is_lock_free() << std::endl;  // true
+  std::atomic<bool> ab;
+  std::cout << std::boolalpha << ab.is_lock_free() << std::endl;  // true
 }
 }  // namespace operation
 
@@ -243,9 +249,69 @@ void testAtoicflag() {
 }
 }  // namespace atomicflag
 
+namespace memoryorder {
+// 内存模型通常是硬件上的概念，表示的是机器指令是以什么样的顺序被处理器执行的，现代的处理器并不是逐条处理机器指令的。
+// 现实中，x86_64以及SPARC（TSO模式）都是采用强顺序内存模型的平台。
+// 在多线程程序中，强顺序类型意味着对于各个线程看到的指令执行顺序是一致的。
+// 对于处理器而言，内存中的数据被改变的顺序与机器指令中的一致。
+// 相反的，弱顺序就是各个线程看到的内存数据被改变的顺序与机器指令中声明的不一致，弱顺序内存模型可能会导致程序问题。
+// 为什么有些平台，诸如Alpha、PowerPC、Itanlium、ArmV7等平台会使用这种模型？
+// 简单地说，这种模型能让处理器有更好的并行性，提高指令执行的效率。
+// 并且，为了保证指令执行的顺序，通常需要在汇编指令中加入一条内存栅栏（memory barrier）指令，但是会影响处理器性能。
+// 比如在PowerPC上，就有一条名为sync的内存栅栏指令。该指令迫使已经进入流水线中的指令都完成后处理器才会执行sync以后的指令。
+// C++11中的原子操作还可以包含一个参数：内存顺序（memory_order），是C++11为原子类型定义的内存模型，
+// 让程序员根据实际情况灵活地控制原子类型的执行顺序。通常情况下，使用该参数将有利于编译器进一步提高并行性。
+
+// 在C++11中一共有7种memory_order枚举值，默认按照memory_order_seq_cst执行：
+// typedef enum memory_order {
+//   memory_order_relaxed,  // 不对执行顺序做保证
+//   memory_order_acquire,  // 本线程中,所有后续的读操作必须在本条原子操作完成后执行
+//   memory_order_release,  // 本线程中,所有之前的写操作完成后才能执行本条原子操作
+//   memory_order_acq_rel,  // 同时包含memory_order_acquire和memory_order_release
+//   memory_order_consume,  // 本线程中,所有后续的有关本原子类型的操作,必须在本条原子操作完成之后执行
+//   memory_order_seq_cst   // 全部存取都按顺序执行
+// } memory_order;
+
+// 需要注意的是，不是所有的memory_order都能被atomic成员使用：
+// store函数可以使用memory_order_seq_cst、memory_order_release、memory_order_relaxed。
+// load函数可以使用memory_order_seq_cst、memory_order_acquire、memory_order_consume、memory_order_relaxed。
+// 需要同时读写的操作，例如test_and_flag、exchange等操作，
+// 可以使用memory_order_seq_cst、memory_order_release、memory_order_acquire、memory_order_consume、memory_order_relaxed。
+
+// 原子类型提供的一些操作符，比如operator=、operator+=等函数，
+// 都是以memory_order_seq_cst为memory_order的实参的原子操作封装，所以他们都是顺序一致性的。
+// 如果要指定内存顺序的话，则应该采用store、load、atomic_fetch_add这样的版本。
+// 最后说明一下，std::atomic和std::memory_order只有在多线程无锁编程时才会用到。
+// 在x86_64平台，由于是强顺序内存模型的，为了保险起见，不要使用std::memory_order，
+// 使用std::atmoic默认形式即可，因为std::atmoic默认是强顺序内存模型。
+
+std::atomic<int> a{0};
+std::atomic<int> b{0};
+void valueSet() {
+  int t = 1;
+  a.store(t);
+  b.store(2);
+}
+// 如果原子类型变量a和b并没有要求执行的顺序性，那么可以采用一种松散的内存模型来放松对原子操作的执行顺序的要求:
+void valueSet1() {
+  int t = 1;
+  a.store(t, std::memory_order_relaxed);
+  b.store(2, std::memory_order_relaxed);
+}
+void Observer() { std::cout << a << " " << b << std::endl; }
+
+void testMemoryorder() {
+  std::thread t1(valueSet1);
+  std::thread t2(Observer);
+  // 可能会打印出0 2这样的结果
+  t1.join();
+  t2.join();
+}
+}  // namespace memoryorder
+
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 5]" << std::endl;
+    std::cout << argv[0] << " i [0 - 4]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
@@ -263,8 +329,7 @@ int main(int argc, char* argv[]) {
       atomicflag::testAtoicflag();
       break;
     case 4:
-      break;
-    case 5:
+      memoryorder::testMemoryorder();
       break;
     default:
       std::cout << "invalid type" << std::endl;
