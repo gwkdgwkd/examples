@@ -1,43 +1,544 @@
-#include <limits.h>
-#include <algorithm>
-#include <deque>
+#include <ctime>
+#include <iomanip>
 #include <iostream>
-#include <list>
 #include <mutex>
 #include <stack>
 #include <thread>
-
-using namespace std;
+#include <vector>
 
 // 保护共享数据结构的最基本的方式，是使用C++标准库提供的互斥量。
+// mutex（互斥量）的种类:
+//  std::mutex，最基本的mutex类，提供了独占所有权的特性，即不支持递归地对std::mutex对象上锁。
+//  std::recursive_mutex，递归mutex类。
+//  std::time_mutex，定时mutex类。
+//  std::recursive_timed_mutex，定时递归mutex类。
 
-// 当访问共享数据前，将数据锁住，在访问结束后，再将数据解锁。线程库需要保证，当一个线程使用特定互斥量锁住共享数据时，其他的线程想要访问锁住的数据，
-// 都必须等到之前那个线程对数据进行解锁后，才能进行访问。这就保证了所有线程都能看到共享数据，并而不破坏不变量。
-// 互斥量一种数据保护通用机制，但它不是什么“银弹”；需要编排代码来保护数据的正确性，并避免接口间的竞争条件也非常重要。不过，互斥量自身也有问题，也会造成死锁，
-// 或对数据保护的太多(或太少)。
+namespace mutex {
+// std::mutex的成员函数：
+// lock()，调用线程将锁住该互斥量。线程调用该函数会发生下面3种情况：
+//  1.如果该互斥量当前没有被锁住，则调用线程将该互斥量锁住，直到调用unlock之前，该线程一直拥有该锁。
+//  2.如果当前互斥量被其他线程锁住，则当前的调用线程被阻塞住。
+//  3.如果当前互斥量被当前调用线程锁住，则会产生死锁(deadlock)。
+// unlock()，解锁，释放对互斥量的所有权。
+// try_lock()，尝试锁住互斥量，如果互斥量被其他线程占有，则当前线程也不会被阻塞。线程调用该函数也会出现下面3种情况：
+//  1.如果当前互斥量没有被其他线程占有，则该线程锁住互斥量，直到该线程调用unlock释放互斥量。
+//  2.如果当前互斥量被其他线程锁住，则当前调用线程返回false，而并不会被阻塞掉。
+//  3.如果当前互斥量被当前调用线程锁住，则会产生死锁(deadlock)。
 
-// C++中使用互斥量:
-// C++中通过实例化std::mutex创建互斥量实例，通过成员函数lock()对互斥量上锁，unlock()进行解锁。不过，实践中不推荐直接去调用成员函数，调用成员函数就意味着，
-// 必须在每个函数出口都要去调用unlock()，也包括异常的情况。C++标准库为互斥量提供了一个RAII语法的模板类std::lock_guard，在构造时就能提供已锁的互斥量，并在
-// 析构的时候进行解锁，从而保证了一个已锁互斥量能被正确解锁。
-std::list<int> some_list;
-std::mutex some_mutex;
-void add_to_list(int new_value) {
-  std::lock_guard<std::mutex> guard(some_mutex);
-  some_list.push_back(new_value);
+volatile int counter(0);  // non-atomic counter
+std::mutex mtx;
+void attempt_10k_increases() {
+  for (int i = 0; i < 10000; ++i) {
+    if (mtx.try_lock()) {  // only increase if currently not locked:
+      ++counter;
+      mtx.unlock();
+    }
+  }
 }
-bool list_contains(int value_to_find) {
-  std::lock_guard<std::mutex> guard(some_mutex);
-  return std::find(some_list.begin(), some_list.end(), value_to_find) !=
-         some_list.end();
-}
-// 某些情况下使用全局变量没问题，但在大多数情况下，互斥量通常会与需要保护的数据放在同一类中，而不是定义成全局变量。这是面向对象设计的准则：将其放在一个类中，
-// 就可让他们联系在一起，也可对类的功能进行封装，并进行数据保护。这种情况下，函数add_to_list和list_contains可以作为这个类的成员函数。互斥量和需要保护的数
-// 据，在类中都定义为private成员，这会让访问数据的代码更清晰，并且容易看出在什么时候对互斥量上锁。当所有成员函数都会在调用时对数据上锁，结束时对数据解锁，这
-// 就保证了访问时数据不变量不被破坏
 
-// 当其中一个成员函数返回的是保护数据的指针或引用时，会破坏数据。具有访问能力的指针或引用可以访问(并可能修改)被保护的数据，而不会被互斥锁限制。这就需要对接口有
-// 相当谨慎的设计，要确保互斥量能锁住数据的访问，并且不留后门。
+// 在为一段程序加锁时要格外小心，否则很容易因为这种调用关系而造成死锁。
+// 不要存在侥幸心理，觉得这种情况是很少出现的。当代码复杂到一定程度，被多个人维护，
+// 用关系错综复杂时，程序中很容易犯这样的错误。庆幸的是，这种原因造成的死锁很容易被排除。
+// 但是这并不意味着应该用递归锁去代替非递归锁。递归锁用起来固然简单，但往往会隐藏某些代码问题。
+// 比如调用函数和被调用函数以为自己拿到了锁，都在修改同一个对象，这时就很容易出现问题。
+// 因此在能使用非递归锁的情况下，应该尽量使用非递归锁，因为死锁相对来说，更容易通过调试发现。
+// 程序设计如果有问题，应该暴露的越早越好。
+
+// func1函数和func2函数都获取了同一个锁，而bar函数又会调用func1函数。如果锁是个非递归锁，则这个程序会立即死锁。
+std::mutex mu;
+void func1() {
+  mu.lock();
+  mu.unlock();
+}
+void func2() {
+  mu.lock();
+  func1();
+  mu.unlock();
+}
+
+void testMutex() {
+  std::mutex m1;  // 默认构造函数，处于unlocked状态
+  // std::mutex m2(m1);  // 不允许拷贝构造
+  // std::mutex m3 = std::move(m1);  // 不允许move拷贝
+
+  std::thread threads[10];
+  for (int i = 0; i < 10; ++i) {
+    threads[i] = std::thread(attempt_10k_increases);
+  }
+
+  for (auto& th : threads) {
+    th.join();
+  }
+  std::cout << counter << " successful increases of the counter.\n";
+  // 每次结果都不一样：
+  // 15068 successful increases of the counter.
+  // 16166 successful increases of the counter.
+
+  // 死锁了
+  std::thread t1(func1);
+  std::thread t2(func2);
+  t1.join();
+  t2.join();
+}
+
+}  // namespace mutex
+
+namespace recursivemutex {
+// std::recursive_mutex与std::mutex一样，也是一种可以被上锁的对象，但是和std::mutex不同的是，
+// std::recursive_mutex允许同一个线程对互斥量多次上锁（即递归上锁）， 来获得对互斥量对象的多层所有权，
+// std::recursive_mutex释放互斥量时需要调用与该锁层次深度相同次数的unlock()，
+// 可理解为lock()次数和unlock()次数相同，除此之外，std::recursive_mutex的特性和std::mutex大致相同。
+std::recursive_mutex rm;
+std::string shared;
+void func1() {
+  rm.lock();
+  shared = "fun1";
+  std::cout << "in fun1, shared variable is now " << shared << '\n';
+  rm.unlock();
+}
+void func2() {
+  rm.lock();
+  shared = "fun2";
+  std::cout << "in fun2, shared variable is now " << shared << '\n';
+  func1();  // 递归锁的作用
+  std::cout << "back in fun2, shared variable is " << shared << '\n';
+  rm.unlock();
+};
+
+class RecursiveMutex {  // 实现递归锁
+ public:
+  RecursiveMutex() { num_of_locks = 0; }
+  ~RecursiveMutex() {}
+  void lock() {
+    if (num_of_locks == 0) {
+      my_mutex.lock();
+      owner_thread_id = std::this_thread::get_id();
+    } else if (std::this_thread::get_id() == owner_thread_id) {
+      num_of_locks++;
+    }
+  }
+  void unlock() {
+    if (num_of_locks > 0) num_of_locks--;
+    if (num_of_locks == 0) my_mutex.unlock();
+  }
+
+ private:
+  int num_of_locks;
+  std::mutex my_mutex;
+  std::thread::id owner_thread_id;
+};
+
+int g_num = 0;
+RecursiveMutex myRecursiveMutex;
+void slow_increment(int id) {
+  for (int i = 0; i < 3; ++i) {
+    myRecursiveMutex.lock();
+    ++g_num;
+    std::cout << id << " => " << g_num << '\n';
+    myRecursiveMutex.unlock();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+}
+
+std::recursive_mutex g_num_mutex;
+void slow_increment_stl(int id) {
+  for (int i = 0; i < 3; ++i) {
+    g_num_mutex.lock();
+    ++g_num;
+    std::cout << id << " => " << g_num << '\n';
+    g_num_mutex.unlock();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+}
+
+void testRecursivemutex() {
+  std::thread t1(func1);
+  std::thread t2(func2);
+  t1.join();
+  t2.join();
+  // in fun1, shared variable is now fun1
+  // in fun2, shared variable is now fun2
+  // in fun1, shared variable is now fun1
+  // back in fun2, shared variable is fun1
+
+  std::cout << "使用stl中的recursive_mutex:" << std::endl;
+  std::thread t3(slow_increment_stl, 0);
+  std::thread t4(slow_increment_stl, 1);
+  t3.join();
+  t4.join();
+  std::cout << "使用自写类RecursiveMutex:" << std::endl;
+  std::thread t5(slow_increment, 0);
+  std::thread t6(slow_increment, 1);
+  t5.join();
+  t6.join();
+  // 使用stl中的recursive_mutex:
+  // 0 => 1
+  // 1 => 2
+  // 1 => 3
+  // 0 => 4
+  // 0 => 5
+  // 1 => 6
+  // 使用自写类RecursiveMutex:
+  // 1 => 7
+  // 0 => 8
+  // 1 => 9
+  // 0 => 10
+  // 1 => 11
+  // 0 => 12
+}
+}  // namespace recursivemutex
+
+namespace timemutex {
+// std::time_mutex比std::mutex多了两个成员函数，try_lock_for()，try_lock_until()。
+// try_lock_for函数接受一个时间范围，表示在这一段时间范围之内线程如果没有获得锁则被阻塞住，
+// 如果在此期间其他线程释放了锁，则该线程可以获得对互斥量的锁，如果超时，则返回false。
+// try_lock_until函数则接受一个时间点作为参数，在指定时间点未到来之前线程如果没有获得锁则被阻塞住，
+// 如果在此期间其他线程释放了锁，则该线程可以获得对互斥量的锁，如果超时，则返回false。
+
+std::timed_mutex mtx;
+void func1() {
+  // waiting to get a lock: each thread prints "-" every 200ms:
+  while (!mtx.try_lock_for(std::chrono::milliseconds(200))) {
+    std::cout << "-" << std::flush;
+  }
+  // got a lock! - wait for 1s, then this thread prints "*"
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  std::cout << "*" << std::endl;
+  mtx.unlock();
+}
+
+void func2() {
+  using std::chrono::system_clock;
+  std::time_t tt = system_clock::to_time_t(system_clock::now());
+  struct std::tm* ptm = std::localtime(&tt);
+  std::cout << "Current time: " << std::put_time(ptm, "%X") << std::endl;
+  std::cout << "Waiting for the next minute to begin..." << std::endl;
+  ++ptm->tm_min;
+  ptm->tm_sec = 0;
+
+  bool ret = mtx.try_lock_until(system_clock::from_time_t(mktime(ptm)));
+  std::cout << std::put_time(ptm, "%X") << " reached! " << std::boolalpha << ret
+            << std::endl;
+  mtx.unlock();
+}
+
+namespace recursicetimemutex {
+// 和std:recursive_mutex与std::mutex的关系一样，
+// std::recursive_timed_mutex的特性也可以从std::timed_mutex推导出来。
+// 递归定时互斥锁将recursive_timed和timed_mutex的功能结合到一个类中：
+// 它既支持通过单个线程获取多个锁定级别又支持定时的try_lock请求。
+// 成员函数与timed_mutex相同。
+}  // namespace recursicetimemutex
+
+void testTimemutex() {
+  std::thread threads[10];
+  for (int i = 0; i < 10; ++i) threads[i] = std::thread(func1);
+  for (auto& th : threads) th.join();
+
+  mtx.lock();
+  std::thread t1(func2);
+  t1.join();
+  // Current time: 12:28:52
+  // Waiting for the next minute to begin...
+  // 12:29:00 reached!false
+
+  std::cout << std::flush;
+  std::thread t2(func2);
+  t2.join();
+  // Current time: 12:29:00
+  // Waiting for the next minute to begin...
+  // 12:30:00 reached!true
+}
+}  // namespace timemutex
+
+namespace mutexraii {
+// C++中通过实例化std::mutex创建互斥量实例，通过成员函数lock()对互斥量上锁，unlock()进行解锁。
+// 实践中不推荐直接去调用成员函数，那意味着必须在每个函数出口都要去调用unlock()，也包括异常的情况。
+// C++标准库为互斥量提供了一个RAII语法的模板类std::lock_guard，在构造时就能提供已锁的互斥量，
+// 并在析构的时候进行解锁，从而保证了一个已锁互斥量能被正确解锁。
+// 互斥锁保证了线程间的同步，但是却将并行操作变成了串行操作，这对性能有很大的影响，
+// 所以我们要尽可能的减小锁定的区域，也就是使用细粒度锁。
+// 这一点lock_guard做的不好，不够灵活，lock_guard只能保证在析构的时候执行解锁操作，
+// lock_guard本身并没有提供加锁和解锁的接口，但是有些时候会有这种需求。
+volatile int counter(0);  // non-atomic counter
+std::mutex mtx;           // locks access to counter
+void attempt_10k_increases() {
+  for (int i = 0; i < 100; ++i) {
+    try {
+      std::lock_guard<std::mutex> lck(mtx);  // RAII方式使用mutex
+      counter++;
+    } catch (std::logic_error&) {
+      std::cout << "[exception caught]\n";
+    }
+  }
+}
+
+// lock_guard最大的特点就是安全易于使用，在异常抛出的时候通过lock_guard对象管理的mutex可以得到正确地解锁。
+void print_even(int x) {
+  if (x % 2 == 0)
+    std::cout << x << " is even\n";
+  else
+    throw(std::logic_error("not even"));
+}
+void print_thread_id(int id) {
+  try {
+    std::lock_guard<std::mutex> lck(mtx);
+    print_even(id);
+  } catch (std::logic_error&) {
+    std::cout << "[exception caught]\n";
+  }
+}
+
+// unique_lock是mutex的RAII相关实现，方便线程的互斥量的使用，但提供了更好的上锁和解锁控制。
+// unique_lock和lock_guard用法很相似，但是实际上unique_lock更加灵活，可以在任意的时候加锁或者解锁，
+// 因此其资源消耗也更大，效率比lock_guard低。
+void print_block(int n, char c) {
+  std::unique_lock<std::mutex> lck(mtx);
+  for (int i = 0; i < n; ++i) {
+    std::cout << c;
+  }
+  std::cout << '\n';
+}
+
+// 一个函数内部有两段代码需要进行保护，这个时候使用lock_guard就需要创建两个局部对象来管理同一个互斥锁。
+// 其实也可以只创建一个，但是锁的力度太大，效率不行，较好方法是使用unique_lock，它提供了lock()和unlock()接口，
+// 能记录现在上锁还是没上锁状态，析构时根据当前状态决定是否解锁（lock_guard就一定会解锁）。
+// 在无需加锁的操作时，unlock，需要保护的时候，lock，这样就无需重复的实例化lock_guard对象，还能减少锁的区域。
+// 同样，可以使用std::defer_lock设置初始化的时候不进行默认的上锁操作。
+void shared_print(std::string msg, int id) {
+  std::unique_lock<std::mutex> guard(mtx, std::defer_lock);  // unlock状态
+  // do something 1
+  guard.lock();
+  // do something protected
+  guard.unlock();  // 临时解锁
+  // do something 2
+  guard.lock();  // 继续上锁
+  // do something protected
+  std::cout << msg << id << std::endl;
+  std::cout << msg << id << std::endl;
+  // 结束时析构guard会解锁
+}
+
+void testMutexraii() {
+  // unique_lock和lock_guard都不能复制，lock_guard不能移动，但是unique_lock可以：
+  std::mutex mu1;
+  std::unique_lock<std::mutex> guard1(mu1);  // unique_lock可以移动，不能复制
+  // std::unique_lock<std::mutex> guard2 = guard1;             // error
+  std::unique_lock<std::mutex> guard3 = std::move(guard1);  // ok
+  std::mutex mu2;
+  std::lock_guard<std::mutex> guard4(mu2);  // lock_guard不能移动，不能复制
+  // std::lock_guard<std::mutex> guard5 = guard4;             // error
+  // std::lock_guard<std::mutex> guard6 = std::move(guard4);  // error
+
+  std::thread threads[6];
+  for (int i = 0; i < 6; ++i) {
+    threads[i] = std::thread(attempt_10k_increases);
+  }
+  for (auto& th : threads) {
+    th.join();
+  }
+  std::cout << counter << " successful increases of the counter.\n";
+
+  std::thread threads1[10];
+  for (int i = 0; i < 10; ++i)
+    threads1[i] = std::thread(print_thread_id, i + 1);
+  for (auto& th : threads1) th.join();
+  // [exception caught]
+  // 2 is even
+  // [exception caught]
+  // 6 is even
+  // [exception caught]
+  // 10 is even
+  // 8 is even
+  // [exception caught]
+  // [exception caught]
+  // 4 is even
+
+  std::thread t1(print_block, 50, '*');
+  std::thread t2(print_block, 50, '$');
+  t1.join();
+  t2.join();
+  // **************************************************
+  // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+}
+}  // namespace mutexraii
+
+namespace other {
+// std::adopt_lock_t是一个空类，作为adopt_lock的类型。
+std::mutex mtx;
+void func1(int id) {
+  mtx.lock();  // 先对mtx进行上锁，再用mtx对象构造一个lock_guard对象
+  // 将adopt_lock作为参数传递，表明当前线程已经获得了锁，
+  // 此后mtx对象的解锁操作交由lock_guard对象lck来管理。
+  std::lock_guard<std::mutex> lck(mtx, std::adopt_lock);
+  // std::unique_lock<std::mutex> lck(mtx, std::adopt_lock);
+  std::cout << "thread #" << id << '\n';
+  // 在lck的生命周期结束之后，mtx对象会自动解锁。
+}
+
+// std::defer_lock_t是一个空类，作为defer_lock的类型。
+// 对unique_lock的构造函数传递defer_lock，使它不要在构建阶段自动的锁定
+std::mutex mtx1, mtx2;
+void func2() {
+  std::lock(mtx1, mtx2);  // simultaneous lock (prevents deadlock)
+  std::unique_lock<std::mutex> lck1(mtx1, std::adopt_lock);
+  std::unique_lock<std::mutex> lck2(mtx2, std::adopt_lock);
+  std::cout << "func2" << std::endl;
+  // (unlocked automatically on destruction of lck1 and lck2)
+}
+void func3() {
+  // mtx1.lock(); mtx2.lock(); // replaced by:
+  std::unique_lock<std::mutex> lck1, lck2;
+  lck1 = std::unique_lock<std::mutex>(mtx1, std::defer_lock);
+  lck2 = std::unique_lock<std::mutex>(mtx2, std::defer_lock);
+  std::lock(lck1, lck2);  // simultaneous lock (prevents deadlock)
+  std::cout << "func3\n";
+  // (unlocked automatically on destruction of lck1 and lck2)
+}
+
+// std::try_to_lock_t是一个空类，作为try_to_lock的类型。
+void func4() {
+  std::unique_lock<std::mutex> lck(mtx, std::try_to_lock);
+  // print '*' if successfully locked, 'x' otherwise:
+  if (lck.owns_lock())
+    std::cout << '*' << std::flush;
+  else
+    std::cout << 'x' << std::flush;
+}
+
+// 为了保证在多线程环境下，某个代码段仅仅被调用一次，比如，初始化某个对象，而这个对象只能初始化一次，
+// 就可以用std::call_once来保证代码段在多线程环境下只被调用一次。
+// 使用std::call_once时候，需要一个once_flag作为call_once的参数。
+// 实际上once_flag相当于一个锁，使用它的线程都会在上面等待。仅仅有一个线程同意运行。
+// 假设该线程抛出异常，那么从等待中的线程中选择一个。
+// 要注意的地方是once_flag的生命周期。它必需要比使用它的线程的生命周期要长。所以通常定义成全局变量比较好。
+std::once_flag falg;
+void func5() {
+  std::cout << "Call Before!" << std::endl;
+  std::call_once(falg, []() { std::cout << "Calling...!" << std::endl; });
+  std::cout << "Call After!" << std::endl;
+}
+
+class Singleton {
+ public:
+  static Singleton* getInstance() {
+    std::cout << "getInstance" << std::endl;
+    call_once(onceFlag, createInstance);
+    return instance;
+  }
+
+  Singleton(const Singleton&) = delete;
+  Singleton& operator=(const Singleton&) = delete;
+
+ private:
+  Singleton() = default;
+
+  static void createInstance() {
+    std::cout << "createInstance" << std::endl;
+    instance = new Singleton();
+  }
+
+  static Singleton* instance;
+  static std::once_flag onceFlag;
+};
+Singleton* Singleton::instance = nullptr;
+std::once_flag Singleton::onceFlag;
+void func6() { Singleton* p = Singleton::getInstance(); }
+
+// 一个给定操作需要两个或两个以上的互斥量时，另一个潜在的问题将出现：死锁。
+// 与条件竞争完全相反——不同的两个线程会互相等待，从而什么都没做。
+// 避免死锁的一般建议，就是让两个互斥量总以相同的顺序上锁：总在互斥量B之前锁住互斥量A，就永远不会死锁。
+// 某些情况下是可以这样用，因为不同的互斥量用于不同的地方。不过，事情没那么简单，
+// 比如：当有多个互斥量保护同一个类的独立实例时，一个操作对同一个类的两个不同实例进行数据的交换操作，
+// 为了保证数据交换操作的正确性，就要避免数据被并发修改，并确保每个实例上的互斥量都能锁住自己要保护的区域。
+// 不过，选择一个固定的顺序(例如，实例提供的第一互斥量作为第一个参数，提供的第二个互斥量为第二个参数)，
+// 可能会适得其反：在参数交换了之后，两个线程试图在相同的两个实例间进行数据交换时，程序又死锁了！
+// 很幸运，C++标准库有办法解决这个问题，std::lock可以一次性锁住多个(两个以上)的互斥量，并且没有副作用(死锁风险)。
+class some_big_object {};
+void swap(some_big_object& lhs, some_big_object& rhs);
+class X {
+ private:
+  some_big_object some_detail;
+  std::mutex m;
+
+ public:
+  X(some_big_object const& sd) : some_detail(sd) {}
+  friend void swap(X& lhs, X& rhs) {
+    if (&lhs == &rhs) return;
+    std::lock(lhs.m, rhs.m);
+    std::lock_guard<std::mutex> lock_a(lhs.m, std::adopt_lock);
+    std::lock_guard<std::mutex> lock_b(rhs.m, std::adopt_lock);
+    swap(lhs.some_detail, rhs.some_detail);
+  }
+};
+// 虽然std::lock(和std::scoped_lock<>)可以在这情况下(获取两个以上的锁)避免死锁，但它没办法帮助你获取其中一个锁。
+// 这时，依赖于开发者的纪律性(也就是经验)，来确保你的程序不会死锁。
+// 这并不简单：死锁是多线程编程中一个令人相当头痛的问题，并且死锁经常是不可预见的，因为在大多数时间里，所有工作都能很好的完成。
+// 不过，一些相对简单的规则能帮助写出“无死锁”的代码。
+// 1 避免嵌套锁
+// 第一个建议往往是最简单的：一个线程已获得一个锁时，再别去获取第二个。因为每个线程只持有一个锁，锁上就不会产生死锁。
+// 即使互斥锁造成死锁的最常见原因，也可能会在其他方面受到死锁的困扰(比如：线程间的互相等待)。
+// 当你需要获取多个锁，使用一个std::lock来做这件事(对获取锁的操作上锁)，避免产生死锁。
+// 2 避免在持有锁时调用用户提供的代码
+// 第二个建议是次简单的：因为代码是用户提供的，你没有办法确定用户要做什么；用户程序可能做任何事情，包括获取锁。
+// 你在持有锁的情况下，调用用户提供的代码，如果用户代码要获取一个锁，就会违反第一个指导意见，并造成死锁(有时，这是无法避免的)。
+// 3 使用固定顺序获取锁
+// 当硬性条件要求你获取两个或两个以上的锁，并且不能使用std::lock单独操作来获取它们；那么最好在每个线程上，用固定的顺序获取它们(锁)。
+// 当需要获取两个互斥量时，避免死锁的方法，关键是如何在线程之间，以一定的顺序获取锁。一些情况下，这种方式相对简单。
+// 其他情况下，这就没那么简单了，例如交换操作，这种情况下你可能同时锁住多个互斥量(有时不会发生)。
+// 4 使用锁的层次结构
+// 虽然，定义锁的顺序是一种特殊情况，但锁的层次的意义在于提供对运行时约定是否被坚持的检查。
+// 这个建议需要对你的应用进行分层，并且识别在给定层上所有可上锁的互斥量。
+// 当代码试图对一个互斥量上锁，在该层锁已被低层持有时，上锁是不允许的。
+// 你可以在运行时对其进行检查，通过分配层数到每个互斥量上，以及记录被每个线程上锁的互斥量。
+
+void testOther() {
+  std::thread threads[10];
+  // spawn 10 threads:
+  for (int i = 0; i < 10; ++i) threads[i] = std::thread(func1, i + 1);
+  for (auto& th : threads) th.join();
+
+  std::thread t1(func2);
+  std::thread t2(func3);
+  t1.join();
+  t2.join();
+  // func3
+  // func2
+
+  std::vector<std::thread> threads1;
+  for (int i = 0; i < 500; ++i) threads1.emplace_back(func4);
+  for (auto& x : threads1) x.join();
+
+  std::thread t3(func5);
+  std::thread t4(func5);
+  std::thread t5(func5);
+  t3.join();
+  t4.join();
+  t5.join();
+  // Call Before!
+  // Calling...!
+  // Call After!
+  // Call Before!
+  // Call After!
+  // Call Before!
+  // Call After!
+
+  std::thread t6(func6);
+  std::thread t7(func6);
+  t6.join();
+  t7.join();
+  // getInstance
+  // createInstance
+  // getInstance
+}
+}  // namespace other
+
+namespace badcase {
+// 当其中一个成员函数返回的是保护数据的指针或引用时，会破坏数据。
+// 具有访问能力的指针或引用可以访问(并可能修改)被保护的数据，而不会被互斥锁限制。
+// 这就需要对接口有相当谨慎的设计，要确保互斥量能锁住数据的访问，并且不留后门。
+// 切勿将受保护数据的指针或引用传递到互斥锁作用域之外，无论是函数返回值，还是存储在外部可见内存，
+// 亦或是以参数的形式传递到用户提供的函数中去，这是常犯的错误，绝不仅仅是一个潜在的陷阱而已。
 class some_data {
   int a;
   std::string b;
@@ -47,7 +548,7 @@ class some_data {
     a = 5;
     b = "llll";
   }
-  void display() { cout << a << " " << b << endl; }
+  void display() { std::cout << a << " " << b << std::endl; }
 };
 class data_wrapper {
  private:
@@ -70,47 +571,8 @@ void malicious_function(some_data& protected_data) {
   unprotected = &protected_data;
 }
 data_wrapper x;
-void foo() {
-  x.display();                         // 0
-  x.process_data(malicious_function);  // 2 传递一个恶意函数
-  unprotected->do_something();  // 3 在无保护的情况下访问保护数据
-  unprotected->display();       // 5 llll
-  x.display();                  // 5 llll
-}
-// 切勿将受保护数据的指针或引用传递到互斥锁作用域之外，无论是函数返回值，还是存储在外部可见内存，亦或是以参数的形式传递到用户提供的函数中去。
-// 这是在使用互斥量保护共享数据时常犯的错误，但绝不仅仅是一个潜在的陷阱而已。
 
-// 假设有一个stack<vector<int>>，vector是一个动态容器，当你拷贝一个vetcor，标准库会从堆上分配很多内存来完成这次拷贝。当这个系统处在重度负荷，
-// 或有严重的资源限制的情况下，这种内存分配就会失败，所以vector的拷贝构造函数可能会抛出一个std::bad_alloc异常。当vector中存有大量元素时，这种情
-// 况发生的可能性更大。当pop()函数返回“弹出值”时(也就是从栈中将这个值移除)，会有一个潜在的问题：这个值被返回到调用函数的时候，栈才被改变；但当拷贝
-// 数据的时候，调用函数抛出一个异常会怎么样？ 如果事情真的发生了，要弹出的数据将会丢失；它的确从栈上移出了，但是拷贝失败了！std::stack的设计人员将
-// 这个操作分为两部分：先获取顶部元素(top())，然后从栈中移除(pop())。这样，在不能安全的将元素拷贝出去的情况下，栈中的这个数据还依旧存在，没有丢失。
-// 当问题是堆空间不足，应用可能会释放一些内存，然后再进行尝试。
-// 不幸的是，这样的分割却制造了本想避免或消除的条件竞争。幸运的是，我们还有的别的选项，但是使用这些选项是要付出代价的:
-// 1 传入一个引用
-// 将变量的引用作为参数，传入pop()函数中获取想要的“弹出值”：
-// std::vector<int> result;
-// some_stack.pop(result);
-// 大多数情况下，这种方式还不错，但缺点很明显：需要构造出一个栈中类型的实例，用于接收目标值。对于一些类型，这样做是不现实的，因为临时构造一个实例，
-// 从时间和资源的角度上来看，都是不划算。对于其他的类型，这样也不总能行得通，因为构造函数需要的一些参数，在这个阶段的代码不一定可用。最后，需要可赋
-// 值的存储类型，这是一个重大限制：即使支持移动构造，甚至是拷贝构造(从而允许返回一个值)，很多用户自定义类型可能都不支持赋值操作。
-// 2 无异常抛出的拷贝构造函数或移动构造函数
-// 对于有返回值的pop()函数来说，只有“异常安全”方面的担忧(当返回值时可以抛出一个异常)。很多类型都有拷贝构造函数，它们不会抛出异常，并且随着新标准中
-// 对“右值引用”的支持，很多类型都将会有一个移动构造函数，即使他们和拷贝构造函数做着相同的事情，它也不会抛出异常。一个有用的选项可以限制对线程安全的
-// 栈的使用，并且能让栈安全的返回所需的值，而不会抛出异常。
-// 虽然安全，但非可靠。尽管能在编译时可使用std::is_nothrow_copy_constructible和std::is_nothrow_move_constructible类型特征，让拷贝或移动
-// 构造函数不抛出异常，但是这种方式的局限性太强。用户自定义的类型中，会有不抛出异常的拷贝构造函数或移动构造函数的类型， 那些有抛出异常的拷贝构造函数，
-// 但没有移动构造函数的类型往往更多（这种情况会随着人们习惯于C++11中的右值引用而有所改变)。如果这些类型不能被存储在线程安全的栈中，那将是多么的不幸。
-// 3 返回指向弹出值的指针
-// 返回一个指向弹出元素的指针，而不是直接返回值。指针的优势是自由拷贝，并且不会产生异常，这样你就能避免Cargill提到的异常问题了。缺点就是返回一个指针
-// 需要对对象的内存分配进行管理，对于简单数据类型(比如：int)，内存管理的开销要远大于直接返回值。对于选择这个方案的接口，使用std::shared_ptr是个不
-// 错的选择；不仅能避免内存泄露(因为当对象中指针销毁时，对象也会被销毁)，而且标准库能够完全控制内存分配方案，也就不需要new和delete操作。这种优化是很
-// 重要的：因为堆栈中的每个对象，都需要用new进行独立的内存分配，相较于非线程安全版本，这个方案的开销相当大。
-// 4 1 + 2 或 1 + 3
-// 对于通用的代码来说，灵活性不应忽视。当选择了选项2或3时，再去选择1也是很容易的。这些选项提供给用户，让用户选择对于他们自己来说最合适，最经济的方案。
-
-// 定义线程安全的堆栈
-// 实现了选项1和选项3：重载了pop()，使用一个局部引用去存储弹出值，并返回一个std::shared_ptr<>对象。
+// 线程安全堆栈
 struct empty_stack : std::exception {
   const char* what() const throw() { return "empty stack!"; };
 };
@@ -151,98 +613,42 @@ class threadsafe_stack {
   }
 };
 
-// 一个给定操作需要两个或两个以上的互斥量时，另一个潜在的问题将出现：死锁。与条件竞争完全相反——不同的两个线程会互相等待，从而什么都没做。
-// 避免死锁的一般建议，就是让两个互斥量总以相同的顺序上锁：总在互斥量B之前锁住互斥量A，就永远不会死锁。
-// 某些情况下是可以这样用，因为不同的互斥量用于不同的地方。不过，事情没那么简单，比如：当有多个互斥量保护同一个类的独立实例时，一个操作对同一个类的两个不同实
-// 例进行数据的交换操作，为了保证数据交换操作的正确性，就要避免数据被并发修改，并确保每个实例上的互斥量都能锁住自己要保护的区域。不过，选择一个固定的顺序(例如，
-// 实例提供的第一互斥量作为第一个参数，提供的第二个互斥量为第二个参数)，可能会适得其反：在参数交换了之后，两个线程试图在相同的两个实例间进行数据交换时，程序又死锁了！
-// 很幸运，C++标准库有办法解决这个问题，std::lock可以一次性锁住多个(两个以上)的互斥量，并且没有副作用(死锁风险)。
-class some_big_object {};
-void swap(some_big_object& lhs, some_big_object& rhs);
-class X {
- private:
-  some_big_object some_detail;
-  std::mutex m;
+void testBadcase() {
+  x.display();                         // 0
+  x.process_data(malicious_function);  // 2传递一个恶意函数
+  unprotected->do_something();  // 3在无保护的情况下访问保护数据
+  unprotected->display();       // 5 llll
+  x.display();                  // 5 llll
+}
+}  // namespace badcase
 
- public:
-  X(some_big_object const& sd) : some_detail(sd) {}
-  friend void swap(X& lhs, X& rhs) {
-    if (&lhs == &rhs) return;
-    std::lock(lhs.m, rhs.m);
-    std::lock_guard<std::mutex> lock_a(lhs.m, std::adopt_lock);
-    std::lock_guard<std::mutex> lock_b(rhs.m, std::adopt_lock);
-    swap(lhs.some_detail, rhs.some_detail);
+int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    std::cout << argv[0] << " i [0 - 5]" << std::endl;
+    return 0;
   }
-};
-
-// 虽然std::lock(和std::scoped_lock<>)可以在这情况下(获取两个以上的锁)避免死锁，但它没办法帮助你获取其中一个锁。这时，依赖于开发者的纪律性(也就是经验)，来确
-// 保你的程序不会死锁。这并不简单：死锁是多线程编程中一个令人相当头痛的问题，并且死锁经常是不可预见的，因为在大多数时间里，所有工作都能很好的完成。不过，一些相对简
-// 单的规则能帮助写出“无死锁”的代码。
-// 1 避免嵌套锁
-// 第一个建议往往是最简单的：一个线程已获得一个锁时，再别去获取第二个。因为每个线程只持有一个锁，锁上就不会产生死锁。即使互斥锁造成死锁的最常见原因，也可能会在其他
-// 方面受到死锁的困扰(比如：线程间的互相等待)。当你需要获取多个锁，使用一个std::lock来做这件事(对获取锁的操作上锁)，避免产生死锁。
-// 2 避免在持有锁时调用用户提供的代码
-// 第二个建议是次简单的：因为代码是用户提供的，你没有办法确定用户要做什么；用户程序可能做任何事情，包括获取锁。你在持有锁的情况下，调用用户提供的代码；如果用户代码
-// 要获取一个锁，就会违反第一个指导意见，并造成死锁(有时，这是无法避免的)。当你正在写一份通用代码，每一个操作的参数类型，都在用户提供的代码中定义，就需要其他指导意
-// 见来帮助你。
-// 3 使用固定顺序获取锁
-// 当硬性条件要求你获取两个或两个以上的锁，并且不能使用std::lock单独操作来获取它们；那么最好在每个线程上，用固定的顺序获取它们(锁)。
-// 当需要获取两个互斥量时，避免死锁的方法，关键是如何在线程之间，以一定的顺序获取锁。一些情况下，这种方式相对简单。
-// 其他情况下，这就没那么简单了，例如交换操作，这种情况下你可能同时锁住多个互斥量(有时不会发生)。
-// 4 使用锁的层次结构
-// 虽然，定义锁的顺序是一种特殊情况，但锁的层次的意义在于提供对运行时约定是否被坚持的检查。这个建议需要对你的应用进行分层，并且识别在给定层上所有可上锁的互斥量。当
-// 代码试图对一个互斥量上锁，在该层锁已被低层持有时，上锁是不允许的。你可以在运行时对其进行检查，通过分配层数到每个互斥量上，以及记录被每个线程上锁的互斥量。
-class hierarchical_mutex {
-  std::mutex internal_mutex;
-  unsigned long const hierarchy_value;
-  unsigned long previous_hierarchy_value;
-  static thread_local unsigned long this_thread_hierarchy_value;  // 1
-  void check_for_hierarchy_violation() {
-    if (this_thread_hierarchy_value <= hierarchy_value)  // 2
-    {
-      throw std::logic_error("mutex hierarchy violated");
-    }
+  int type = argv[1][0] - '0';
+  switch (type) {
+    case 0:
+      mutex::testMutex();
+      break;
+    case 1:
+      recursivemutex::testRecursivemutex();
+      break;
+    case 2:
+      timemutex::testTimemutex();
+      break;
+    case 3:
+      mutexraii::testMutexraii();
+      break;
+    case 4:
+      other::testOther();
+      break;
+    case 5:
+      badcase::testBadcase();
+      break;
+    default:
+      std::cout << "invalid type" << std::endl;
+      break;
   }
-  void update_hierarchy_value() {
-    previous_hierarchy_value = this_thread_hierarchy_value;  // 3
-    this_thread_hierarchy_value = hierarchy_value;
-  }
-
- public:
-  explicit hierarchical_mutex(unsigned long value)
-      : hierarchy_value(value), previous_hierarchy_value(0) {}
-  void lock() {
-    check_for_hierarchy_violation();
-    internal_mutex.lock();     // 4
-    update_hierarchy_value();  // 5
-  }
-  void unlock() {
-    if (this_thread_hierarchy_value != hierarchy_value)
-      throw std::logic_error("mutex hierarchy violated");    // 9
-    this_thread_hierarchy_value = previous_hierarchy_value;  // 6
-    internal_mutex.unlock();
-  }
-  bool try_lock() {
-    check_for_hierarchy_violation();
-    if (!internal_mutex.try_lock())  // 7
-      return false;
-    update_hierarchy_value();
-    return true;
-  }
-};
-thread_local unsigned long hierarchical_mutex::this_thread_hierarchy_value(
-    ULONG_MAX);  // 8
-// 5 超越锁的延伸扩展
-// std::lock()和std::lock_guard可组成简单的锁，并覆盖大多数情况，但是有时需要更多的灵活性。在这种情况下，可以使用标准库提供的std::unique_lock模板。
-// 如std::lock_guard，这是一个参数化的互斥量模板类，并且它提供很多RAII类型锁用来管理std::lock_guard类型，可以让代码更加灵活。
-
-// unique_lock是个类模板，工作中，一般lock_guard(推荐使用)；lock_guard取代了mutex的lock()和unlock();
-// unique_lock比lock_guard灵活很多，效率上差一点，内存占用多一点。
-// lock_guard可以带第二个参数：
-// std::lock_guard<std::mutex> sbguard1(my_mutex1, std::adopt_lock);  // std::adopt_lock标记作用；
-
-int main() {
-  foo();
-
-  return 0;
 }

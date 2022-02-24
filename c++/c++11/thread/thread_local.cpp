@@ -214,7 +214,7 @@ void testMember() {
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 5]" << std::endl;
+    std::cout << argv[0] << " i [0 - 3]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
@@ -230,10 +230,6 @@ int main(int argc, char* argv[]) {
       break;
     case 3:
       member::testMember();
-      break;
-    case 4:
-      break;
-    case 5:
       break;
     default:
       std::cout << "invalid type" << std::endl;
