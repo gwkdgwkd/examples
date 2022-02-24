@@ -14,6 +14,12 @@ namespace create {
 
 void func() { std::cout << __FUNCTION__ << " running" << std::endl; }
 
+// std::thread支持移动，意味着std::thread可以当作函数的返回值和参数:
+void func1(std::thread t) {}
+std::thread func2() {
+  return std::thread([]() {});
+}
+
 void testCreate() {
   // 默认构造函数，创建一个空的std::thread执行对象
   std::thread t1;
@@ -62,6 +68,7 @@ void testCreate() {
 namespace joinable {
 // 一旦线程开始运行， 就需要显式的决定是要等待它完成(join)，或者分离它让它自行运行(detach)。
 // 当线程启动后，一定要在和线程相关联的std::thread对象销毁前，对线程运用join()或者detach()方法。
+// 否则程序将会终止，因为std::thread的析构函数会调用std::terminate()，这时再去决定会触发相应异常。
 // join()与detach()都是std::thread类的成员函数，是两种线程阻塞方法，两者的区别是是否等待子线程执行结束。
 // join线程，调用该函数会阻塞当前线程，直到由*this所标示的线程执行完毕join才返回。
 // detach线程,将当前线程对象所代表的执行实例与该线程对象分离，使得线程的执行可以单独进行。线程执行完毕，资源将会被释放。
@@ -100,6 +107,66 @@ void func5() {
   t.detach();
   std::cout << "func5 detach finished" << std::endl;
 }
+
+// 如果想要分离一个线程，可以在线程启动后，直接使用detach()进行分离。
+// 如果打算等待对应线程，则需要细心挑选调用join()的位置。
+// 当在线程运行之后产生的异常在join()调用之前抛出，意味着这次调用会被跳过。所以在异常处理中也要调用join()。
+void func6() {
+  int some_local_state = 0;
+  std::thread t([]() {});
+  try {
+    // do_something_in_current_thread();
+  } catch (...) {
+    t.join();
+    throw;
+  }
+  t.join();
+}
+
+// 如需确保线程在函数之前结束:
+// 使用“资源获取即初始化方式”(RAII，Resource Acquisition Is Initialization)，并且提供一个类，在析构函数中使用join()
+// std::thread支持移动的好处是可以创建thread_guard类的实例，并且拥有其线程所有权。
+// 当thread_guard对象所持有的线程被引用时，移动操作就可以避免很多不必要的麻烦；
+// 这意味着，当某个对象转移了线程的所有权后，它就不能对线程进行加入或分离。
+class thread_guard {
+  std::thread &t;
+
+ public:
+  explicit thread_guard(std::thread &t_) : t(t_) {}
+  ~thread_guard() {
+    if (t.joinable()) {
+      t.join();
+    }
+  }
+  // 拷贝构造函数和拷贝赋值操作被标记为=delete，是为了不让编译器自动生成它们。
+  // 直接对一个对象进行拷贝或赋值是危险的，因为这可能会弄丢已经加入的线程。
+  thread_guard(thread_guard const &) = delete;
+  thread_guard &operator=(thread_guard const &) = delete;
+};
+void func7() {
+  int some_local_state = 0;
+  std::thread t([]() { std::cout << "thread_guard" << std::endl; });
+  thread_guard g(t);
+  // do_something_in_current_thread();
+
+  // func7退出时局部对象就要被逆序销毁了。
+  // 因此，thread_guard对象g是第一个被销毁的，这时线程在析构函数中被加入到原始线程中。
+  // 即使do_something_in_current_thread抛出一个异常，这个销毁依旧会发生。
+}
+
+class scoped_thread {
+  std::thread t;
+
+ public:
+  // thread_guard类，需要在析构中检查线程是否”可加入”。这里把检查放在了构造函数中，并且当线程不可加入时，抛出异常。
+  explicit scoped_thread(std::thread t_) : t(std::move(t_)) {
+    if (!t.joinable()) throw std::logic_error("No thread");
+  }
+  // 当主线程到达函数末尾时，scoped_thread对象就会销毁，然后加入到的构造函数创建的线程对象中去。
+  ~scoped_thread() { t.join(); }
+  scoped_thread(scoped_thread const &) = delete;
+  scoped_thread &operator=(scoped_thread const &) = delete;
+};
 
 void testJoinable() {
   // 由默认构造函数创建的线程是不能被join的
@@ -143,6 +210,11 @@ void testJoinable() {
   // I'm func3
   func5();  // 没有func3的打印，因为主线程执行的太快，整个程序已经结束了，那个后台线程被C++运行时库回收了
   // func5 detach finished
+
+  // 不用写join
+  func7();  // thread_guard
+  scoped_thread t6(std::thread(
+      []() { std::cout << "scoped_thread" << std::endl; }));  // scoped_thread
 }
 }  // namespace joinable
 
@@ -199,6 +271,12 @@ class ClassFunc {
   }
 };
 
+class ClassOperator {
+ public:
+  ClassOperator() { std::cout << "constructor" << std::endl; }
+  void operator()() const { std::cout << "operator() " << std::endl; }
+};
+
 void testFuncType() {
   std::thread t1(globleFunc);  // 全局函数
   t1.join();
@@ -223,6 +301,25 @@ void testFuncType() {
   FF f2 = globleFunc;
   std::thread t7(f2);  // 函数指针
   t7.join();
+
+  // 当把函数对象传入到线程构造函数中时，需要避免“最令人头痛的语法解析”(C++’s most vexing parse)。
+  // 如果你传递了一个临时变量，而不是一个命名的变量；C++编译器会将其解析为函数声明，而不是类型对象的定义。
+  // 声明一个名为t8的函数，带有一个参数，返回std::thread1对象的函数，而非启动了一个线程。
+  std::thread t8(ClassOperator());
+  // 下面方式可以避免上面的问题
+  // 将带有函数调用符类型的实例传入std::thread类中，替换默认的构造函数。
+  std::thread t9((ClassOperator()));  // 使用多组括号
+  std::thread t10{ClassOperator()};   // 使用新统一的初始化语法
+  t9.join();
+  t10.join();
+  // 使用lambda表达式也能避免这个问题
+  std::thread t11([] { std::cout << "lamda " << std::endl; });
+  t11.join();
+  // constructor
+  // constructor
+  // operator()
+  // operator()
+  // lamda
 }
 }  // namespace functype
 
@@ -267,6 +364,21 @@ void testClassext() {
 }  // namespace classext
 
 namespace otherfunc {
+// 线程标识类型为std::thread::id，并可以通过两种方式进行检索:
+// 第一种，可以通过调用std::thread对象的成员函数get_id()来直接获取。
+// 如果std::thread对象没有与任何执行线程相关联，get_id()将返回std::thread::type默认构造值，这个值表示“无线程”。
+// 第二种，当前线程中调用std::this_thread::get_id()也可以获得线程标识。
+// std::thread::id对象可以自由的拷贝和对比,因为标识符就可以复用。
+// 如果两个对象的std::thread::id相等，那它们就是同一个线程，或者都“无线程”。
+// 如果不等，那么就代表了两个不同线程，或者一个有线程，另一没有线程。
+// C++线程库不会限制你去检查线程标识是否一样，std::thread::id类型对象提供相当丰富的对比操作；
+// 比如，提供为不同的值进行排序。这意味着允许程序员将其当做为容器的键值，做排序，或做其他方式的比较。
+// 按默认顺序比较不同值的std::thread::id，所以这个行为可预见的：当a<b，b<c时，得a<c，等等。
+// 标准库也提供std::hash<std::thread::id>容器，所以std::thread::id也可以作为无序容器的键值。
+// std::thread::id可以作为一个线程的通用标识符，当标识符只与语义相关(比如，数组的索引)时，就需要这个方案了。
+// 也可以使用输出流(std::cout)来记录一个std::thread::id对象的值。
+// 具体的输出结果是严格依赖于具体实现的，C++标准的唯一要求就是要保证ID比较结果相等的线程，必须有相同的输出。
+
 void func1() {
   // sleep_for：线程休眠某个指定的时间片(time span)，该线程才被重新唤醒
   // 不过由于线程调度等原因，实际休眠时间可能比sleep_duration所表示的时间片更长
@@ -330,8 +442,11 @@ void testOtherfunc() {
   // Thread 2 is executing at priority 0
   // Thread 1 is executing at priority 20
 
-  // hardware_concurrency [static]:
-  // 检测硬件并发特性，返回当前平台的线程实现所支持的线程并发数目，但返回值仅仅只作为系统提示(hint)。
+  // std::thread::hardware_concurrency()在新版C++标准库中是一个很有用的函数。
+  // 这个函数会返回能并发在一个程序中的线程数量。多核系统中，返回值可以是CPU核芯的数量。
+  // 返回值也仅仅是一个提示，当系统信息无法获取时，函数也会返回0。但是，这也无法掩盖这个函数对启动线程数量的帮助。
+  // 因为上下文频繁的切换会降低线程的性能，所以你肯定不想启动的线程数多于硬件支持的线程数量。
+  // 当std::thread::hardware_concurrency()返回0，自己设置一个。
   unsigned int n1 = std::thread::hardware_concurrency();
   std::cout << n1 << " concurrent threads are supported.\n";  // 8
 
