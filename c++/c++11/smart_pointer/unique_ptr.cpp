@@ -49,6 +49,12 @@ void testCreate() {
   std::cout << std::boolalpha << p7.operator bool() << std::endl;  // true
   std::cout << std::boolalpha << p8.operator bool() << std::endl;  // false
 
+  int *ip = new int(9);
+  std::unique_ptr<int> p9(ip);  // 不能两个unique_ptr引用同一个内存地址
+  // std::unique_ptr<int> p10(ip);  // free(): double free detected in tcache 2
+  // std::unique_ptr<int> p11(ip);
+  // p11.release();  // 虽然不会崩溃，但是不应该这样用
+
   // delete A
 }
 }  // namespace create
@@ -140,16 +146,42 @@ struct myDel {
   void operator()(A *p) { delete[] p; }
 };
 
+void myDelFunc(A *p) { delete[] p; }
+
 void testDeletor() {
   // 默认情况下，unique_ptr指针采用std::default_delete<T>方法释放堆内存。
   // 当然，也可以自定义符合实际场景的释放规则。
   // 值得一提的是，和shared_ptr指针不同，为unique_ptr自定义释放规则，只能采用函数对象的方式。
-  std::unique_ptr<A, myDel> p1(new A[2], myDel());
+  std::unique_ptr<A[], myDel> p1(new A[2], myDel());  // 和下面有啥不一样？
+  std::unique_ptr<A, myDel> p2(new A[2], p1.get_deleter());  // 为啥不能用[]
   std::unique_ptr<A, std::default_delete<A[]>> p3(new A[2]);
+  std::unique_ptr<A[], void (*)(A *)> p4(new A[2], [](A *p) { delete[] p; });
+  std::unique_ptr<A[], void (*)(A *)> p5(new A[2], myDelFunc);
 
-  // std::cout << p3[1] << std::endl;
+  // create A
+  // create A
+  // create A
+  // create A
+  // create A
+  // create A
+  // create A
+  // create A
+  // create A
+  // create A
+  p4.get_deleter()(p4.release());  // 不等函数退出时，手动删除
+  // delete A
+  // delete A
+  std::cout << p1[1].GetI() << std::endl;  // 0
+  // std::cout << p2[1].GetI() << std::endl;
+  // delete A
+  // delete A
+  // delete A
+  // delete A
+  // delete A
+  // delete A
+  // delete A
+  // delete A
 }
-
 }  // namespace deletor
 
 int main(int argc, char *argv[]) {
@@ -173,31 +205,3 @@ int main(int argc, char *argv[]) {
       break;
   }
 }
-
-#if 0
-
-
-int main() {
-
-
-
-
-  std::unique_ptr<int> pp(new int);
-  *pp = 10;
-  // q接收pp释放的堆内存
-  int *q = pp.release();
-  cout << *q << endl;  // 10
-  // 判断pp是否为空指针
-  if (pp) {
-    cout << "pp is not nullptr" << endl;
-  } else {
-    cout << "pp is nullptr" << endl;  // pp is nullptr
-  }
-  std::unique_ptr<int> pq;
-  // pq获取q的所有权
-  pq.reset(q);
-  cout << *pq << endl;  // 10
-
-  return 0;
-}
-#endif
