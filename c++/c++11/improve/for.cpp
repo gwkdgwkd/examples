@@ -20,7 +20,7 @@ char *retStr1() { return str1; }
 int main() {
   // C++11标准之前（C++98/03标准），如果要用for循环语句遍历一个数组或者容器，只能套用如下结构：
   // for(表达式 1; 表达式 2; 表达式 3){
-  //   //循环体
+  //   // 循环体
   // }
 
   char arc[] = "http://c.biancheng.net/cplus/11/";
@@ -40,7 +40,7 @@ int main() {
 
   // 而C++11标准中，除了可以沿用前面介绍的用法外，还为for循环添加了一种全新的语法格式，如下所示：
   // for (declaration : expression){
-  //   //循环体
+  //   // 循环体
   // }
   // 其中，两个参数各自的含义如下：
   // declaration：表示此处要定义一个变量，该变量的类型为要遍历序列中存储元素的类型。
@@ -70,25 +70,25 @@ int main() {
 
   // 新语法格式的for循环还支持遍历用{}大括号初始化的列表:
   for (int num : {1, 2, 3, 4, 5}) {
-    cout << num << " "; // 1 2 3 4 5
+    cout << num << " ";  // 1 2 3 4 5
   }
   cout << endl;
 
   // 在使用新语法格式的for循环遍历某个序列时，如果需要遍历的同时修改序列中元素的值，实现方案是在declaration参数处定义引用形式的变量:
   char a[] = "abcde";
   vector<char> m(a, a + 5);
-  for (auto ch : m) { // for循环遍历并修改容器中各个字符的值
+  for (auto ch : m) {  // for循环遍历并修改容器中各个字符的值
     ch++;
   }
-  for (auto ch : m) { // for循环遍历输出容器中各个字符
-    cout << ch;       // abcde,没有修改成功
+  for (auto ch : m) {  // for循环遍历输出容器中各个字符
+    cout << ch;        // abcde,没有修改成功
   }
   cout << endl;
-  for (auto &ch : m) { // for循环遍历并修改容器中各个字符的值
+  for (auto &ch : m) {  // for循环遍历并修改容器中各个字符的值
     ch++;
   }
-  for (auto ch : m) { // for循环遍历输出容器中各个字符
-    cout << ch;       // bcdef,修改成功
+  for (auto ch : m) {  // for循环遍历输出容器中各个字符
+    cout << ch;        // bcdef,修改成功
   }
   cout << endl;
 
@@ -117,11 +117,11 @@ int main() {
   cout << endl;
 
   // 2)总的来说，基于范围的for循环可以遍历普通数组、string字符串、容器以及初始化列表。除此之外，for循环冒号后还可以放置返回string字符串以及容器对象的函数，比如：
-  for (char ch : retStr()) { //遍历函数返回的string字符串
+  for (char ch : retStr()) {  //遍历函数返回的string字符串
     cout << ch;
   }
   cout << endl;
-  for (int num : retVector()) { //遍历函数返回的vector容器
+  for (int num : retVector()) {  //遍历函数返回的vector容器
     cout << num << " ";
   }
   cout << endl;
@@ -132,8 +132,8 @@ int main() {
   // 原因很简单，此格式的for循环只能遍历有明确范围的一组数据，上面程序中retStr1()函数返回的是指针变量，遍历范围并未明确指明，所以编译失败。
 
   // 3)值得一提的是，当基于范围的for循环遍历的是某函数返回的string对象或者容器时，整个遍历过程中，函数只会执行一次。
-  for (char ch : retStr()) { // 遍历函数返回的string字符串
-    cout << ch;              // retStr:http://c.biancheng.net/cplus/11/
+  for (char ch : retStr()) {  // 遍历函数返回的string字符串
+    cout << ch;               // retStr:http://c.biancheng.net/cplus/11/
   }
   cout << endl;
 
@@ -144,8 +144,8 @@ int main() {
   // 另外，基于范围的for循环完成对容器的遍历，其底层也是借助容器的迭代器实现的。举个例子：
   std::vector<int> arr = {1, 2, 3, 4, 5};
   for (auto val : arr) {
-    std::cout << val << ' '; // 结果不唯一：1 0 3 4 5
-    arr.push_back(10);       // 向容器中添加元素
+    std::cout << val << ' ';  // 结果不唯一：1 0 3 4 5
+    arr.push_back(10);        // 向容器中添加元素
   }
   cout << endl;
   // 执行结果并不是我们想要的。因为在for循环遍历arr容器的同时向该容器尾部添加了新的元素（对arr容器进行了扩增），致使遍历容器所使用的迭代器失效，整个遍历过程出现错误。
