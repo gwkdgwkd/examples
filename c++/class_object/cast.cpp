@@ -440,9 +440,32 @@ void testN6() {
 }
 }  // namespace n6
 
+namespace n7 {
+// dynamic_cast用于不同接口之间的转换
+struct interfaceA {
+  virtual void funcA() = 0;
+};
+struct interfaceB {
+  virtual void funcB() = 0;
+};
+class C : public interfaceA, public interfaceB {
+  virtual void funcA() override { std::cout << "funcA" << std::endl; }
+  virtual void funcB() override { std::cout << "funcB" << std::endl; }
+};
+
+void testN7() {
+  C *c = new C();
+  interfaceA *a = dynamic_cast<interfaceA *>(c);
+  a->funcA();  // funcA
+  interfaceB *b = dynamic_cast<interfaceB *>(c);
+  b->funcB();  // funcB
+}
+
+}  // namespace n7
+
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 4]" << std::endl;
+    std::cout << argv[0] << " i [0 - 6]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
@@ -464,6 +487,9 @@ int main(int argc, char *argv[]) {
       break;
     case 5:
       n6::testN6();
+      break;
+    case 6:
+      n7::testN7();
       break;
     default:
       std::cout << "invalid type" << std::endl;
