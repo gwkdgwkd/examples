@@ -7,10 +7,10 @@ class Student {
  public:
   void display();
 };
-}
+}  // namespace Li
 
 namespace demo {
 void display();
 extern int num;
-}
+}  // namespace demo
 #endif
