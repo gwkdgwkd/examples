@@ -210,6 +210,9 @@ void testN3() {
 }  // namespace n3
 
 namespace n4 {
+// vbptr指的是虚基类表指针（virtual base table pointer），该指针指向了一个虚表（virtual table），
+// 虚表中记录了vbptr与本类的偏移地址；第二项是vbptr到共有基类元素之间的偏移量。
+
 // 简单的面向对象，只有单继承或多继承的情况下，内存模型很好理解，编译器实现起来也容易，C++的效率和C的效率不相上下。
 // 一旦和virtual关键字扯上关系，使用到虚继承或虚函数，内存模型就变得混乱起来，各种编译器的实现也不一致，让人抓狂。
 // 这是因为C++标准仅对C++的实现做了框架性的概述，并没有规定细节如何实现，所以不同厂商的编译器在具体实现方案上会有所差异。
@@ -306,19 +309,19 @@ void func4() {
 namespace test2 {
 class A {
  public:
-  int a;
+  int a = 1;
 };
 class B : virtual public A {
  public:
-  int b;
+  int b = 2;
 };
 class C : public B {
  public:
-  int c;
+  int c = 3;
 };
 class D : public C {
  public:
-  int d;
+  int d = 4;
 };
 
 void func1() {
@@ -329,19 +332,20 @@ void func1() {
   std::cout.setf(std::ios::hex);
   std::cout.setf(std::ios_base::showbase);
 
-  std::cout << &obj << std::endl;      // 0x7ffdf43a2bf4
-  std::cout << &(obj.a) << std::endl;  // 0x7ffdf43a2bf4
+  std::cout << &obj << std::endl;                              // 0x7ffdf43a2bf4
+  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;  // 0x7ffdf43a2be8
 }
 void func2() {
   B obj;  // 内存布局： b A(a)
   std::cout.setf(std::ios::dec);
-  std::cout << sizeof(obj) << std::endl;  // 16
+  std::cout << sizeof(obj) << " " << alignof(B) << std::endl;  // 16
 
   std::cout.setf(std::ios::hex);
   std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;      // 0x7ffdf43a2be0
-  std::cout << &(obj.b) << std::endl;  // 0x7ffdf43a2be8
-  std::cout << &(obj.a) << std::endl;  // 0x7ffdf43a2bec
+  std::cout << &obj << std::endl;  // 0x7ffdf43a2be0
+  std::cout << (int*)&obj << ": " << *(long*)(*(long*)&obj) << std::endl;
+  std::cout << &(obj.b) << " (" << obj.b << ")" << std::endl;  // 0x7ffdf43a2be8
+  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;  // 0x7ffdf43a2be8
 }
 void func3() {
   C obj;  // 内存布局： B(b) c B(A(a))
@@ -350,10 +354,10 @@ void func3() {
 
   std::cout.setf(std::ios::hex);
   std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;      // 0x7ffdf43a2be0
-  std::cout << &(obj.b) << std::endl;  // 0x7ffdf43a2be8
-  std::cout << &(obj.c) << std::endl;  // 0x7ffdf43a2bec
-  std::cout << &(obj.a) << std::endl;  // 0x7ffdf43a2bf0
+  std::cout << &obj << std::endl;                              // 0x7ffdf43a2be0
+  std::cout << &(obj.b) << " (" << obj.b << ")" << std::endl;  // 0x7ffdf43a2be8
+  std::cout << &(obj.c) << " (" << obj.c << ")" << std::endl;  // 0x7ffdf43a2be8
+  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;  // 0x7ffdf43a2be8
 }
 void func4() {
   D obj;  // 内存布局： B(b) c d B(A(a))
@@ -362,14 +366,68 @@ void func4() {
 
   std::cout.setf(std::ios::hex);
   std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;      // 0x7ffdf43a2be0
-  std::cout << &(obj.b) << std::endl;  // 0x7ffdf43a2be8
-  std::cout << &(obj.c) << std::endl;  // 0x7ffdf43a2bec
-  std::cout << &(obj.d) << std::endl;  // 0x7ffdf43a2bf0
-  std::cout << &(obj.a) << std::endl;  // 0x7ffdf43a2bf4
+  std::cout << &obj << std::endl;                              // 0x7ffdf43a2be0
+  std::cout << &(obj.b) << " (" << obj.b << ")" << std::endl;  // 0x7ffdf43a2be8
+  std::cout << &(obj.c) << " (" << obj.c << ")" << std::endl;  // 0x7ffdf43a2be8
+  std::cout << &(obj.d) << " (" << obj.d << ")" << std::endl;  // 0x7ffdf43a2be8
+  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;  // 0x7ffdf43a2be8
 }
-
 }  // namespace test2
+
+namespace test3 {
+class A {
+ public:
+  int dataA;
+};
+
+class B : virtual public A {
+ public:
+  int dataB;
+};
+
+class C : virtual public A {
+ public:
+  int dataC;
+};
+
+class D : public B, public C {
+ public:
+  int dataD;
+};
+
+void func() {
+  D* d = new D;
+  d->dataA = 10;
+  d->dataB = 100;
+  d->dataC = 1000;
+  d->dataD = 10000;
+
+  B* b = d;  // 转化为基类B
+  C* c = d;  // 转化为基类C
+  A* fromB = (B*)d;
+  A* fromC = (C*)d;
+
+  std::cout << "d address    : " << d << std::endl;
+  std::cout << "b address    : " << b << std::endl;
+  std::cout << "c address    : " << c << std::endl;
+  std::cout << "fromB address: " << fromB << std::endl;
+  std::cout << "fromC address: " << fromC << std::endl;
+  std::cout << std::endl;
+
+  std::cout << "vbptr address: " << (long*)d << std::endl;
+  std::cout << "    [0] => " << *(long*)(*(long*)d) << std::endl;
+  std::cout << "    [1] => " << *(((long*)(*(long*)d)) + 1)
+            << std::endl;  // 偏移量20
+  // std::cout << "dataB value  : " << *((int*)d + 1) << std::endl;
+  std::cout << "vbptr address: " << ((long*)d + 2) << std::endl;
+  std::cout << "    [0] => " << *(long*)(*((long*)d + 2)) << std::endl;
+  std::cout << "    [1] => " << *((long*)(*((long*)d + 2)) + 1)
+            << std::endl;  // 偏移量12
+  // std::cout << "dataC value  : " << *((int*)d + 3) << std::endl;
+  // std::cout << "dataD value  : " << *((int*)d + 4) << std::endl;
+  // std::cout << "dataA value  : " << *((int*)d + 5) << std::endl;
+}
+}  // namespace test3
 
 void testN4() {
   test1::func1();
@@ -381,10 +439,12 @@ void testN4() {
   test2::func2();
   test2::func3();
   test2::func4();
+
+  test3::func();
 }
 }  // namespace n4
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   if (argc < 2) {
     std::cout << argv[0] << " i [0 - 4]" << std::endl;
     return 0;

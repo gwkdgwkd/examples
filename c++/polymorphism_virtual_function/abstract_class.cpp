@@ -78,17 +78,27 @@ namespace n2 {
 // 两个基类有同名的虚函数要实现, 怎么办?
 class B1 {
  public:
-  virtual int get() { return 1; }
+  virtual int get() { return i; }
+
+ protected:
+  int i = 1;
 };
 class B2 {
  public:
-  virtual int get() { return 2; }
+  virtual int get() { return i; }
+
+ protected:
+  int i = 2;
 };
 
 namespace test1 {
 class D : public B1, public B2 {
  public:
-  virtual int get() { return -1; }
+  virtual int get() {  // 只能实现一个get函数，算B1的，还是B2的？
+    // return B1::i;
+    // return B2::i;
+    return -1;
+  }
 };
 void func() {
   D d;
@@ -124,8 +134,8 @@ class I2 : public B2 {
 };
 class D : public I1, public I2 {
  private:
-  virtual int getFromB1() { return 3; }
-  virtual int getFromB2() { return 4; }
+  virtual int getFromB1() { return B1::i; }
+  virtual int getFromB2() { return B2::i; }
 };
 
 void func() {
@@ -133,15 +143,15 @@ void func() {
   B1& b1 = d;
   B2& b2 = d;
   // std::cout << d.get() << std::endl;   // 编译错误
-  std::cout << b1.get() << std::endl;  // 3
-  std::cout << b2.get() << std::endl;  // 4
+  std::cout << b1.get() << std::endl;  // 1
+  std::cout << b2.get() << std::endl;  // 2
 
   D* p = new D();
   B1* pb1 = p;
   B2* pb2 = p;
   // std::cout << p->get() << std::endl;    // 编译错误
-  std::cout << pb1->get() << std::endl;  // 3
-  std::cout << pb2->get() << std::endl;  // 4
+  std::cout << pb1->get() << std::endl;  // 1
+  std::cout << pb2->get() << std::endl;  // 2
 }
 }  // namespace test2
 

@@ -1,7 +1,5 @@
 #include <iostream>
 
-using namespace std;
-
 // 当通过指针访问类的成员函数时：
 // 1.如果该函数是非虚函数，那么编译器会根据指针的类型找到该函数；
 //   也就是说，指针是哪个类的类型就调用哪个类的函数。
@@ -13,274 +11,593 @@ using namespace std;
 // 编译器还要在对象中安插一个指针，指向数组的起始位置。
 // 这里的数组就是虚函数表（Virtual function table），简写为vtable。
 
-class People {
- public:
-  People(string name, int age);
+// 查看内存布局：
+// g++ -c -fdump-lang-class polymorphism.cpp
 
+using FunPtr = void (*)(void);
+
+using VFPTR = void (*)(void);  // typedef void (*VFPTR)();
+void PrintVTable(VFPTR vTable[]) {
+  std::cout << "虚表地址：" << vTable << std::endl;
+  for (int i = 0; vTable[i] != nullptr; ++i) {
+    // 多个虚函数表时，判断第一个表结束的标识有问题，怎么判断？
+    std::cout << "第" << i + 1 << "个虚函数地址" << (long *)vTable[i]
+              << std::endl;
+    VFPTR f = vTable[i];
+    f();
+  }
+  std::cout << std::endl;
+}
+
+namespace n1 {
+// 存在虚函数时，单继承的内存模型
+class A {
  public:
-  virtual void display();
-  virtual void eating();
+  virtual void func_a() { std::cout << "A::func_a" << std::endl; }
 
  protected:
-  string m_name;
-  int m_age;
+  virtual void func_b() { std::cout << "A::func_b" << std::endl; }
+  int i = 11;
+  int j = 12;
 };
-People::People(string name, int age) : m_name(name), m_age(age) {}
-void People::display() {
-  cout << "Class People：" << m_name << "今年" << m_age << "岁了。" << endl;
-}
-void People::eating() {
-  cout << "Class People：我正在吃饭，请不要跟我说话..." << endl;
-}
-
-class Student : public People {
+class B : public A {
  public:
-  Student(string name, int age, float score);
-
- public:
-  virtual void display();
-  virtual void examing();
+  virtual void func_a() { std::cout << "B::func_a" << std::endl; }
 
  protected:
-  float m_score;
-};
-Student::Student(string name, int age, float score)
-    : People(name, age), m_score(score) {}
-void Student::display() {
-  cout << "Class Student：" << m_name << "今年" << m_age << "岁了，考了"
-       << m_score << "分。" << endl;
-}
-void Student::examing() {
-  cout << "Class Student：" << m_name << "正在考试，请不要打扰T啊！" << endl;
-}
-
-class Senior : public Student {
- public:
-  Senior(string name, int age, float score, bool hasJob);
-
- public:
-  virtual void display();
-  virtual void partying();
+  int k = 21;
 
  private:
-  bool m_hasJob;
+  virtual void func_c() { std::cout << "B::func_c" << std::endl; }
 };
-Senior::Senior(string name, int age, float score, bool hasJob)
-    : Student(name, age, score), m_hasJob(hasJob) {}
-void Senior::display() {
-  if (m_hasJob) {
-    cout << "Class Senior：" << m_name << "以" << m_score
-         << "的成绩从大学毕业了，并且顺利找到了工作，Ta今年" << m_age << "岁。"
-         << endl;
+class C : public B {
+ public:
+  virtual void func_a() { std::cout << "C::func_a" << std::endl; }
+  virtual void func_d() { std::cout << "C::func_d" << std::endl; }
+
+ protected:
+  int m = 31;
+};
+
+void func1() {
+  // 64位计算机，计算虚函数相关地址时，使用long *
+  // 32位计算机，计算虚函数相关地址时，使用int *
+  A obj;
+
+  // 对象的大小 = 虚函数表的指针(long *，8字节) + i(4字节) + j(4字节)
+  std::cout << "obj begin addr: " << &obj << " (" << sizeof(A) << ","
+            << sizeof(obj) << ")" << std::endl;
+
+  long *vt_ptr = (long *)&obj;  // 虚函数表的指针放到对象的开头，与对象地址相同
+  long *f_vt_addr = (long *)*((long *)&obj + 0);  // 虚函数表的指针指向虚函数表
+  std::cout << "#1 v_table ptr: " << vt_ptr
+            << "     --> first v_table addr: " << f_vt_addr << std::endl;
+
+  // 第一个成员变量的地址 = 对象的地址 + 虚函数表的指针大小
+  int *mem1_ptr = (int *)((long *)&obj + 1);
+  // 第一个虚函数的地址 = 虚函数表的地址 + 偏移量
+  long *func_a_addr = f_vt_addr + 0;  // 第一个函数偏移量为0
+  std::cout << "#2 mem1 i addr: " << mem1_ptr << "(" << *mem1_ptr
+            << ")      func_a in v_table: " << (long *)*(func_a_addr)
+            << std::endl;
+
+  // 第一个成员的地址加上偏移量1，是第二个成员的地址
+  int *mem2_ptr = mem1_ptr + 1;
+  long *func_b_addr = f_vt_addr + 1;  // 第二个函数偏移量为1
+  std::cout << "#3 mem2 j addr: " << mem2_ptr << "(" << *mem2_ptr
+            << ")      func_b in v_table: " << (long *)*(func_b_addr)
+            << std::endl;
+
+  // 内存模型：
+  // obj begin addr: 0x7ffe9e89d6e0 (16,16)
+  // #1 v_table ptr: 0x7ffe9e89d6e0     --> first v_table addr: 0x56186b3ccd38
+  // #2 mem1 i addr: 0x7ffe9e89d6e8(11)      func_a in v_table: 0x56186b3caa84
+  // #3 mem2 j addr: 0x7ffe9e89d6ec(12)      func_b in v_table: 0x56186b3caac0
+
+  FunPtr func_a = (FunPtr) * ((long *)*((long *)&obj + 0) + 0);
+  FunPtr func_b = (FunPtr) * ((long *)*((long *)&obj + 0) + 1);
+  std::cout << (long *)func_a << std::endl;  // 0x56186b3caa84
+  std::cout << (long *)func_b << std::endl;  // 0x56186b3caac0
+  func_a();                                  // A::func_a
+  func_b();                                  // A::func_b
+
+  long **pVtab = (long **)&obj;
+  ((FunPtr)pVtab[0][0])();  // A::func_a
+  ((FunPtr)pVtab[0][1])();  // A::func_b
+
+  // 虚函数表的最后一个位置，不是nullptr么？
+  if ((void *)pVtab[0][2] == nullptr) {
+    std::cout << "nullptr" << std::endl;
   } else {
-    cout << "Class Senior：" << m_name << "以" << m_score
-         << "的成绩从大学毕业了，不过找工作不顺利，Ta今年" << m_age << "岁。"
-         << endl;
+    std::cout << "not nullptr" << std::endl;
   }
-}
-void Senior::partying() {
-  cout << "Class Senior：快毕业了，大家都在吃散伙饭..." << endl;
+  // not nullptr
+
+  // 使用下面的函数，但是怎么判断虚函数表结束了？
+  // VFPTR *vTableb = (VFPTR *)(*(long *)&obj);
+  // PrintVTable(vTableb);
 }
 
-// 各个类的对象内存模型如下所示：
-// People对象         vtable             Student对象         vtable                Senior对象          vtable
-// XXX *vfptr     0  &People::display    XXX *vfptr      0  &Student::display     XXX *vfptr      0  &Senior::display
-// m_name         1  &People::eating     m_name          1  &People::eating       m_name          1  &People::eating
-// m_age                                 m_age           2  &Student::examing     m_age           2  &Student::examing
-//                                       m_score                                  m_score         3  &Senior::partying
-//                                                                                m_hasJob
+void func2() {
+  B obj;
+
+  std::cout << "obj begin addr: " << &obj << " (" << sizeof(B) << ","
+            << sizeof(obj) << ")" << std::endl;
+
+  long *vt_ptr = (long *)&obj;
+  long *f_vt_addr = (long *)*((long *)&obj + 0);
+  std::cout << "#1 v_table ptr: " << vt_ptr
+            << "     --> first v_table addr: " << f_vt_addr << std::endl;
+
+  int *mem1_ptr = (int *)((long *)&obj + 1);
+  long *func_a_addr = f_vt_addr + 0;
+  std::cout << "#2 mem1 i addr: " << mem1_ptr << "(" << *mem1_ptr
+            << ")      func_a in v_table: " << (long *)*func_a_addr
+            << std::endl;
+
+  int *mem2_ptr = mem1_ptr + 1;
+  long *func_b_addr = f_vt_addr + 1;
+  std::cout << "#3 mem2 j addr: " << mem2_ptr << "(" << *mem2_ptr
+            << ")      func_b in v_table: " << (long *)*func_b_addr
+            << std::endl;
+
+  int *mem3_ptr = mem2_ptr + 1;
+  long *func_c_addr = f_vt_addr + 2;
+  std::cout << "#4 mem3 k addr: " << mem3_ptr << "(" << *mem3_ptr
+            << ")      func_c in v_table: " << (long *)*func_c_addr
+            << std::endl;
+
+  // 内存模型：
+  // obj begin addr: 0x7ffe5a394ad0 (24,24)
+  // #1 v_table ptr: 0x7ffe5a394ad0     --> first v_table addr: 0x55a629ae1d10
+  // #2 mem1 i addr: 0x7ffe5a394ad8(11)      func_a in v_table: 0x55a629adfb34
+  // #3 mem2 j addr: 0x7ffe5a394adc(12)      func_b in v_table: 0x55a629adfaf8
+  // #4 mem3 k addr: 0x7ffe5a394ae0(21)      func_c in v_table: 0x55a629adfb70
+
+  FunPtr func_a = (FunPtr) * ((long *)*((long *)&obj + 0) + 0);
+  FunPtr func_b = (FunPtr) * ((long *)*((long *)&obj + 0) + 1);
+  FunPtr func_c = (FunPtr) * ((long *)*((long *)&obj + 0) + 2);
+  std::cout << (long *)func_a << std::endl;  // 0x55a629adfb34
+  std::cout << (long *)func_b << std::endl;  // 0x55a629adfaf8
+  std::cout << (long *)func_c << std::endl;  // 0x55a629adfb70
+  func_a();                                  // B::func_a
+  func_b();                                  // A::func_b
+  func_c();                                  // B::func_c
+
+  long **pVtab = (long **)&obj;
+  ((FunPtr)pVtab[0][0])();  // B::func_a
+  ((FunPtr)pVtab[0][1])();  // A::func_b
+  ((FunPtr)pVtab[0][2])();  // B::func_c
+}
+
+void func3() {
+  C obj;
+
+  std::cout << "obj begin addr: " << &obj << " (" << sizeof(C) << ","
+            << sizeof(obj) << ")" << std::endl;
+
+  long *vt_ptr = (long *)&obj;
+  long *f_vt_addr = (long *)*((long *)&obj + 0);
+  std::cout << "#1 v_table ptr: " << vt_ptr
+            << "     --> first v_table addr: " << f_vt_addr << std::endl;
+
+  int *mem1_ptr = (int *)((long *)&obj + 1);
+  long *func_a_addr = f_vt_addr + 0;
+  std::cout << "#2 mem1 i addr: " << mem1_ptr << "(" << *mem1_ptr
+            << ")      func_a in v_table: " << (long *)*func_a_addr
+            << std::endl;
+
+  int *mem2_ptr = mem1_ptr + 1;
+  long *func_b_addr = f_vt_addr + 1;
+  std::cout << "#3 mem2 j addr: " << mem2_ptr << "(" << *mem2_ptr
+            << ")      func_b in v_table: " << (long *)*func_b_addr
+            << std::endl;
+
+  int *mem3_ptr = mem2_ptr + 1;
+  long *func_c_addr = f_vt_addr + 2;
+  std::cout << "#4 mem3 k addr: " << mem3_ptr << "(" << *mem3_ptr
+            << ")      func_c in v_table: " << (long *)*func_c_addr
+            << std::endl;
+
+  int *mem4_ptr = mem3_ptr + 1;
+  long *func_d_addr = f_vt_addr + 3;
+  std::cout << "#5 mem3 m addr: " << mem4_ptr << "(" << *mem4_ptr
+            << ")      func_c in v_table: " << (long *)*func_d_addr
+            << std::endl;
+
+  // 内存模型：
+  // obj begin addr: 0x7ffc240fbd20 (24,24)
+  // #1 v_table ptr: 0x7ffc240fbd20     --> first v_table addr: 0x5637d95f5cc8
+  // #2 mem1 i addr: 0x7ffc240fbd28(11)      func_a in v_table: 0x5637d95f30bc
+  // #3 mem2 j addr: 0x7ffc240fbd2c(12)      func_b in v_table: 0x5637d95f3008
+  // #4 mem3 k addr: 0x7ffc240fbd30(21)      func_c in v_table: 0x5637d95f3080
+  // #4 mem3 m addr: 0x7ffc240fbd34(31)      func_c in v_table: 0x5637d95f30f8
+
+  FunPtr func_a = (FunPtr) * ((long *)*((long *)&obj + 0) + 0);
+  FunPtr func_b = (FunPtr) * ((long *)*((long *)&obj + 0) + 1);
+  FunPtr func_c = (FunPtr) * ((long *)*((long *)&obj + 0) + 2);
+  FunPtr func_d = (FunPtr) * ((long *)*((long *)&obj + 0) + 3);
+  std::cout << (long *)func_a << std::endl;  // 0x5637d95f30bc
+  std::cout << (long *)func_b << std::endl;  // 0x5637d95f3008
+  std::cout << (long *)func_c << std::endl;  // 0x5637d95f3080
+  std::cout << (long *)func_d << std::endl;  // 0x5637d95f30f8
+  func_a();                                  // C::func_a
+  func_b();                                  // A::func_b
+  func_c();                                  // B::func_c
+  func_d();                                  // C::func_d
+
+  long **pVtab = (long **)&obj;
+  ((FunPtr)pVtab[0][0])();  // C::func_a
+  ((FunPtr)pVtab[0][1])();  // A::func_b
+  ((FunPtr)pVtab[0][2])();  // B::func_c
+  ((FunPtr)pVtab[0][3])();  // C::func_d
+}
+
 // 仔细观察虚函数表，可以发现:
-// 基类的虚函数在vtable中的索引（下标）是固定的，不会随着继承层次的增加而改变，派生类新增的虚函数放在vtable的最后。
-// 如果派生类有同名的虚函数遮蔽（覆盖）了基类的虚函数，那么将使用派生类的虚函数替换基类的虚函数，
+// 基类的虚函数在vtable中的索引是固定的，不会随着继承层次的增加而改变，派生类新增的虚函数放在vtable的最后。
+// 如果派生类有同名的虚函数覆盖了基类的虚函数，那么将使用派生类的虚函数替换基类的虚函数，
 // 这样具有遮蔽关系的虚函数在vtable中只会出现一次。
 // 当通过指针调用虚函数时，先根据指针找到vfptr，再根据vfptr找到虚函数的入口地址。
-// 以虚函数display()为例，它在vtable中的索引为0，通过p调用时：
-// p->display();
+// 以虚函数func_a()为例，它在vtable中的索引为0，通过p调用时：
+// p->func_a();
 // 编译器会转换为:
 // (*(*(p+0)+0))(p);
 // 这个表达式的具体分析：
 //  0是vfptr在对象中的偏移，p+0是vfptr的地址；
 //  *(p+0)是vfptr的值，而vfptr是指向vtable的指针，所以*(p+0)也就是vtable的地址；
-//  display()在vtable中的索引（下标）是0，所以(*(p+0)+0)也就是display()的地址；
-//  知道了display()的地址，(*(*(p+0)+0))(p)也就是对display()的调用了，这里的p就是传递的实参，它会赋值给this指针。
-// 转换后的表达式是固定的，只要调用display()函数，不管它是哪个类的，都会使用这个表达式。
+//  func_a()在vtable中的索引是0，所以(*(p+0)+0)也就是display()的地址；
+//  知道了func_a()的地址，(*(*(p+0)+0))(p)也就是对func_a()的调用了，这里的p就是传递的实参，它会赋值给this指针。
+// 转换后的表达式是固定的，只要调用func_a()函数，不管它是哪个类的，都会使用这个表达式。
 // 换句话说，编译器不管p指向哪里，一律转换为相同的表达式。
 // 转换后的表达式没有用到与p的类型有关的信息，只要知道p的指向就可以调用函数，
-// 这跟名字编码（Name Mangling）算法有着本质上的区别。
-// eating()函数，它在vtable中的索引为1，通过p调用时会把p->eating();
-// 转换为(*(*(p+0)+1))(p);对于不同的虚函数，仅仅改变索引（下标）即可。
-// 以上是针对单继承进行的讲解。当
-// 存在多继承时，虚函数表的结构就会变得复杂，尤其是有虚继承时，还会增加虚基类表，更加让人抓狂。
+// 因为在基类和派生类中，p指向地址所代表的对象，虚函数表中相同偏移量保存的函数的地址不一样，从而实现了多态。
 
-typedef void (*Fun)(void);
-class Base {
- public:
-  virtual void f() { cout << "Base::f" << endl; }
-  virtual void g() { cout << "Base::g" << endl; }
-  virtual void h() { cout << "Base::h" << endl; }
-};
-class Derive : public Base {
- public:
-  virtual void g() { cout << "Derive::g" << endl; }
-  virtual void i() { cout << "Derive::i" << endl; }
-};
+void testN1() {
+  func1();
+  func2();
+  func3();
+}
+}  // namespace n1
 
-// 多继承的虚函数表：
-//  在多继承情况下，有多少个有虚函数的基类就有多少个虚函数表指针。
-//  当子类有多出来的虚函数时，添加在第一个虚函数表中，父类指针不能调用
-//  当有多个虚函数表时，虚函数表的结果是0代表没有下一个虚函数表。
-//  不同操作系统中代表有下一个虚函数表的标识不同。
+namespace n2 {
+// 当存在多继承时，虚函数表的结构就会变得复杂
+// 在多继承情况下，有多少个有虚函数的基类就有多少个虚函数表指针。
+// 当子类有多出来的虚函数时，添加在第一个虚函数表中，父类指针不能调用。
+// 当有多个虚函数表时，虚函数表的结果是0代表没有下一个虚函数表，不同操作系统中代表有下一个虚函数表的标识不同。
+
+namespace test1 {  // 基类无虚函数，派生类也没有虚函数
 class BaseA {
-  // int i;
-
  public:
-  virtual void A() { cout << "BaseA::A" << endl; }
-  virtual void B() { cout << "BaseA::B" << endl; }
-  virtual void C() { cout << "BaseA::C" << endl; }
+  int a = 1;
 };
 class BaseB {
-  // double d;
-
  public:
-  virtual void D() { cout << "BaseB::D" << endl; }
-  virtual void E() { cout << "BaseB::E" << endl; }
-  virtual void F() { cout << "BaseB::F" << endl; }
+  int b = 2;
 };
-class DeriveAB : public BaseA, BaseB {
-  // char a;
-
+class Derived : public BaseA, public BaseB {
  public:
-  virtual void B() { cout << "DeriveAB::B" << endl; }
-  virtual void F() { cout << "DeriveAB::F" << endl; }
-  virtual void G() { cout << "DeriveAB::G" << endl; }
+  int c = 3;
 };
+void func() {
+  Derived obj;
+  int *mem1_addr = (int *)&obj + 0;
+  int *mem2_addr = (int *)mem1_addr + 1;
+  int *mem3_addr = (int *)mem1_addr + 2;
 
-typedef void (*VFPTR)();
-void PrintVTable(VFPTR vTable[]) {
-  cout << "虚表地址>" << vTable << endl;
-  // for (int i = 0; vTable[i] != nullptr; ++i) {
-  // 多个虚函数表时，判断第一个表结束的标识有问题，怎么判断？
-  for (int i = 0; vTable[i] != nullptr && i < 5; ++i) {
-    printf("第%d个虚函数地址 :0X%x,->", i, vTable[i]);
-    VFPTR f = vTable[i];
-    f();
-  }
-  cout << endl;
+  std::cout << "obj begin addr: " << &obj << " (" << sizeof(Derived) << ","
+            << sizeof(obj) << ")" << std::endl;
+  std::cout << "mem1 a: " << mem1_addr << " (" << *mem1_addr << ")"
+            << std::endl;
+  std::cout << "mem2 b: " << mem2_addr << " (" << *mem2_addr << ")"
+            << std::endl;
+  std::cout << "mem3 c: " << mem3_addr << " (" << *mem3_addr << ")"
+            << std::endl;
+
+  // 内存模型
+  // obj begin addr: 0x7ffdde33155c (12,12)
+  // mem1 a: 0x7ffdde33155c (1)
+  // mem2 b: 0x7ffdde331560 (2)
+  // mem3 c: 0x7ffdde331564 (3)
+
+  // 基类成员变量存储顺序与声明顺序有关（从靠近派生类的基类开始，先基类baseA，然后是基类baseB）。
+  // 这个顺序与之前总结的规律一致：先基类再派生类，先声明，先存储。
+}
+}  // namespace test1
+
+namespace test2 {  // 基类均无虚函数，派生类有虚函数
+class BaseA {
+ public:
+  int a = 1;
+};
+class BaseB {
+ public:
+  int b = 2;
+};
+class Derived : public BaseA, public BaseB {
+ public:
+  virtual void print() { std::cout << "derived::print()" << std::endl; }
+  int c = 3;
+};
+void func() {
+  Derived obj;
+  long *vt_ptr = (long *)&obj + 0;
+  int *mem1_addr = (int *)vt_ptr + 2;
+  int *mem2_addr = (int *)mem1_addr + 1;
+  int *mem3_addr = (int *)mem1_addr + 2;
+
+  std::cout << "obj begin addr: " << &obj << " (" << sizeof(Derived) << ","
+            << sizeof(obj) << ")" << std::endl;
+  std::cout << "vp_ptr: " << vt_ptr << std::endl;
+  std::cout << "mem1 a: " << mem1_addr << " (" << *mem1_addr << ")"
+            << std::endl;
+  std::cout << "mem2 b: " << mem2_addr << " (" << *mem2_addr << ")"
+            << std::endl;
+  std::cout << "mem3 c: " << mem3_addr << " (" << *mem3_addr << ")"
+            << std::endl;
+
+  // 内存模型
+  // obj begin addr: 0x7ffdde331550 (24,24)
+  // vp_ptr: 0x7ffdde331550
+  // mem1 a: 0x7ffdde331558 (1)
+  // mem2 b: 0x7ffdde33155c (2)
+  // mem3 c: 0x7ffdde331560 (3)
+
+  ((FunPtr) * (long *)(*vt_ptr + 0))();  // derived::print()
+
+  // 因为派生类存在虚函数，故排在最前的是虚函数表指针（此时，虚函数表指针属于派生类，而非基类），
+  // 接着在世基类成员变量，这里先是基类baseA,然后才是基类baseB,最后才是派生类成员变量。
+  // 由于只有派生类存在虚函数，故虚函数表中只有派生类的虚函数地址。
+}
+}  // namespace test2
+
+namespace test3 {  // 两个基类中只有一个类有虚函数，派生类有虚函数
+class BaseA {
+ public:
+  virtual void show() { std::cout << "virtual BaseA::show()" << std::endl; }
+  int a = 1;
+};
+class BaseB {
+ public:
+  int b = 2;
+};
+class Derived1 : public BaseA, public BaseB {
+ public:
+  virtual void print() { std::cout << "virtual Derived::print()" << std::endl; }
+  int c = 3;
+};
+void func1() {
+  Derived1 obj;
+  long *vt_ptr = (long *)&obj + 0;
+  int *mem1_addr = (int *)vt_ptr + 2;
+  int *mem2_addr = (int *)mem1_addr + 1;
+  int *mem3_addr = (int *)mem1_addr + 2;
+
+  std::cout << "obj begin addr: " << &obj << " (" << sizeof(Derived1) << ","
+            << sizeof(obj) << ")" << std::endl;
+  std::cout << "vp_ptr: " << vt_ptr << std::endl;
+  std::cout << "mem1 a: " << mem1_addr << " (" << *mem1_addr << ")"
+            << std::endl;
+  std::cout << "mem2 b: " << mem2_addr << " (" << *mem2_addr << ")"
+            << std::endl;
+  std::cout << "mem3 c: " << mem3_addr << " (" << *mem3_addr << ")"
+            << std::endl;
+
+  // 内存模型
+  // obj begin addr: 0x7ffdde331550 (24,24)
+  // vp_ptr: 0x7ffdde331550
+  // mem1 a: 0x7ffdde331558 (1)
+  // mem2 b: 0x7ffdde33155c (2)
+  // mem3 c: 0x7ffdde331560 (3)
+
+  ((FunPtr) * (long *)((long *)(*vt_ptr) + 0))();  // virtual BaseA::show()
+  ((FunPtr) * (long *)((long *)(*vt_ptr) + 1))();  // virtual Derived::print()
+
+  // 虚函数表也按照先声明先存储的规则，依次为：&baseA::show，&deriveA::print
+}
+class Derived2 : public BaseB, public BaseA {  // 修改BaseB和BaseA的顺序
+ public:
+  virtual void print() { std::cout << "virtual Derived::print()" << std::endl; }
+  int c = 3;
+};
+void func2() {
+  Derived2 obj;
+  long *vt_ptr = (long *)&obj + 0;
+  int *mem1_addr = (int *)vt_ptr + 2;
+  int *mem2_addr = (int *)mem1_addr + 1;
+  int *mem3_addr = (int *)mem1_addr + 2;
+
+  std::cout << "obj begin addr: " << &obj << " (" << sizeof(Derived1) << ","
+            << sizeof(obj) << ")" << std::endl;
+  std::cout << "vp_ptr: " << vt_ptr << std::endl;
+  std::cout << "mem1 a: " << mem1_addr << " (" << *mem1_addr << ")"
+            << std::endl;
+  std::cout << "mem2 b: " << mem2_addr << " (" << *mem2_addr << ")"
+            << std::endl;
+  std::cout << "mem3 c: " << mem3_addr << " (" << *mem3_addr << ")"
+            << std::endl;
+
+  // 内存模型
+  // obj begin addr: 0x7ffdde331550 (24,24)
+  // vp_ptr: 0x7ffdde331550
+  // mem1 a: 0x7ffdde331558 (1)
+  // mem2 b: 0x7ffdde33155c (2)
+  // mem3 c: 0x7ffdde331560 (3)
+
+  long **pVtab = (long **)&obj;
+  ((FunPtr)pVtab[0][0])();  // virtual BaseA::show()
+  ((FunPtr)pVtab[0][1])();  // virtual Derived::print()
+
+  // 虽然改变了继承的顺序，但是内存布局是一样的，存储顺序：先基类，再派生，先声明，先存储。
+  // 尽管BaseB更靠近派生类，但是BaseA的优先级更高，因为基类BaseA存在虚函数而基类BaseB不存在。
+  // 虚表依然仅按照先声明先存储的顺序存储虚函数：基类优先级>派生类优先级。
 }
 
-int main() {
-  People *p = new People("赵红", 29);
-  p->display();
-  p = new Student("王刚", 16, 84.5);
-  p->display();
-  p = new Senior("李智", 22, 92.0, true);
-  p->display();
-  // Class People：赵红今年29岁了。
-  // Class Student：王刚今年16岁了，考了84.5分。
-  // Class Senior：李智以92的成绩从大学毕业了，并且顺利找到了工作，Ta今年22岁。
+// 两个基类中只有一个类有虚函数，派生类没有虚函数，内存布局和派生类有虚函数是一样的。
+// 交换派生类的顺序，结论也一样，内存布局不变。
+}  // namespace test3
 
-  Base b;  // ubuntu中，第二维步长为2，不然段错误。2要换成4，why？
-  cout << sizeof(b) << endl;  // 8
-  Fun fptr1 = (Fun) * ((int *)*(int *)((int *)&b + 0) + 0);
-  Fun fptr2 = (Fun) * ((int *)*(int *)((int *)&b + 0) + 2);
-  Fun fptr3 = (Fun) * ((int *)*(int *)((int *)&b + 0) + 4);
-  fptr1();  // Base::f
-  fptr2();  // Base::g
-  fptr3();  // Base::h
-  int **pVtab = (int **)&b;
-  Fun fptr4 = (Fun)pVtab[0][0];
-  Fun fptr5 = (Fun)pVtab[0][2];
-  Fun fptr6 = (Fun)pVtab[0][4];
-  fptr4();                      // Base::f
-  fptr5();                      // Base::g
-  fptr6();                      // Base::h
-  cout << pVtab[0][5] << endl;  // 0
-  VFPTR *vTableb = (VFPTR *)(*(int *)&b);
-  PrintVTable(vTableb);
-  // 虚表地址>0x402108
-  // 第0个虚函数地址 :0X401b66,->Base::f
-  // 第1个虚函数地址 :0X401b92,->Base::g
-  // 第2个虚函数地址 :0X401bbe,->Base::h
+namespace test4 {  // 两个基类中都含有虚函数，派生类没有虚函数
+class BaseA {
+ public:
+  virtual void show() { std::cout << "virtual BaseA::show()" << std::endl; }
+  int a = 1;
+};
+class BaseB {
+ public:
+  virtual void play() { std::cout << "virtual BaseB::play()" << std::endl; }
+  int b = 2;
+};
+class Derived : public BaseA, public BaseB {
+ public:
+  int c = 3;
+};
+void func() {
+  Derived obj;
+  long *vt_ptr1 = (long *)&obj + 0;
+  int *mem1_addr = (int *)vt_ptr1 + 2;
+  long *vt_ptr2 = (long *)((char *)&obj + sizeof(BaseA));
+  int *mem2_addr = (int *)vt_ptr2 + 2;
+  int *mem3_addr = (int *)mem2_addr + 1;
 
-  Derive d;
-  cout << sizeof(d) << endl;  // 8
-  Fun fptr11 = (Fun) * ((int *)*(int *)((int *)&d + 0) + 0);
-  Fun fptr12 = (Fun) * ((int *)*(int *)((int *)&d + 0) + 2);
-  Fun fptr13 = (Fun) * ((int *)*(int *)((int *)&d + 0) + 4);
-  Fun fptr14 = (Fun) * ((int *)*(int *)((int *)&d + 0) + 6);
-  fptr11();  // Base::f
-  fptr12();  // Derive::g
-  fptr13();  // Base::h
-  fptr14();  // Derive::i
-  int **pVtab1 = (int **)&d;
-  Fun fptr15 = (Fun)pVtab1[0][0];
-  Fun fptr16 = (Fun)pVtab1[0][2];
-  Fun fptr17 = (Fun)pVtab1[0][4];
-  Fun fptr18 = (Fun)pVtab1[0][6];
-  fptr15();                      // Base::f
-  fptr16();                      // Derive::g
-  fptr17();                      // Base::h
-  fptr18();                      // Derive::i
-  cout << pVtab1[0][8] << endl;  // 0
-  VFPTR *vTableb1 = (VFPTR *)(*(int *)&d);
-  PrintVTable(vTableb1);
-  // 虚表地址>0x4020f8
-  // 第0个虚函数地址 :0X401b88,->Base::f
-  // 第1个虚函数地址 :0X401c0c,->Derive::g
-  // 第2个虚函数地址 :0X401be0,->Base::h
-  // 第3个虚函数地址 :0X401c38,->Derive::i
+  std::cout << "obj begin addr: " << &obj << " (" << sizeof(Derived) << ","
+            << sizeof(obj) << ")"
+            << "," << alignof(Derived) << std::endl;
+  std::cout << "vp_ptr1: " << vt_ptr1 << std::endl;
+  std::cout << "mem1 a : " << mem1_addr << " (" << *mem1_addr << ")"
+            << std::endl;
+  std::cout << "vp_ptr2: " << vt_ptr2 << std::endl;
+  std::cout << "mem2 b : " << mem2_addr << " (" << *mem2_addr << ")"
+            << std::endl;
+  std::cout << "mem3 c : " << mem3_addr << " (" << *mem3_addr << ")"
+            << std::endl;
 
-  DeriveAB d1;
-  cout << sizeof(d1) << endl;  // 16　(两个指针么？)
-  // 第一维的偏移怎么算？类中有成员变量会段错误
-  Fun fptr21 = (Fun) * ((int *)*(int *)((int *)&d1 + 0) + 0);
-  Fun fptr22 = (Fun) * ((int *)*(int *)((int *)&d1 + 0) + 2);
-  Fun fptr23 = (Fun) * ((int *)*(int *)((int *)&d1 + 0) + 4);
-  Fun fptr24 = (Fun) * ((int *)*(int *)((int *)&d1 + 0) + 6);
-  Fun fptr25 = (Fun) * ((int *)*(int *)((int *)&d1 + 0) + 8);
-  Fun fptr26 = (Fun) * ((int *)*(int *)((int *)&d1 + 2) + 0);
-  Fun fptr27 = (Fun) * ((int *)*(int *)((int *)&d1 + 2) + 2);
-  Fun fptr28 = (Fun) * ((int *)*(int *)((int *)&d1 + 2) + 4);
-  fptr21();  // BaseA::A
-  fptr22();  // DeriveAB::B
-  fptr23();  // BaseA::C
-  fptr24();  // DeriveAB::F
-  fptr25();  // DeriveAB::G
-  fptr26();  // BaseB::D
-  fptr27();  // BaseB::E
-  fptr28();  // DeriveAB::F
-  int **pVtab2 = (int **)&d1;
-  Fun fptr31 = (Fun)pVtab2[0][0];
-  Fun fptr32 = (Fun)pVtab2[0][2];
-  Fun fptr33 = (Fun)pVtab2[0][4];
-  Fun fptr34 = (Fun)pVtab2[0][6];
-  Fun fptr35 = (Fun)pVtab2[0][8];
-  cout << pVtab2[0][10] << endl;  // -8
-  Fun fptr36 = (Fun)pVtab2[1][0];
-  Fun fptr37 = (Fun)pVtab2[1][2];
-  Fun fptr38 = (Fun)pVtab2[1][4];
-  fptr31();  // BaseA::A
-  fptr32();  // DeriveAB::B
-  fptr33();  // BaseA::C
-  fptr34();  // DeriveAB::F
-  fptr35();  // DeriveAB::G
-  fptr36();  // BaseB::D
-  fptr37();  // BaseB::E
-  fptr38();  // DeriveAB::F
-  VFPTR *vTableb21 = (VFPTR *)(*(int *)&d1);
-  PrintVTable(vTableb21);
-  // 虚表地址>0x402270
-  // 第0个虚函数地址 :0X401e32,->BaseA::A
-  // 第1个虚函数地址 :0X401ee2,->DeriveAB::B
-  // 第2个虚函数地址 :0X401e5e,->BaseA::C
-  // 第3个虚函数地址 :0X401f0e,->DeriveAB::F
-  // 第4个虚函数地址 :0X401f40,->DeriveAB::G
-  VFPTR *vTableb22 = (VFPTR *)(*(int *)((char *)&d1 + sizeof(BaseA)));
-  PrintVTable(vTableb22);
-  // 虚表地址>0x4022a8
-  // 第0个虚函数地址 :0X401e8a,->BaseB::D
-  // 第1个虚函数地址 :0X401eb6,->BaseB::E
-  // 第2个虚函数地址 :0X401f39,->DeriveAB::F
+  // 内存模型：
+  // obj begin addr: 0x7ffdb1e5c600 (32,32),8
+  // vp_ptr1: 0x7ffdb1e5c600
+  // mem1 a : 0x7ffdb1e5c608 (1)
+  // vp_ptr2: 0x7ffdb1e5c610
+  // mem2 b : 0x7ffdb1e5c618 (2)
+  // mem3 c : 0x7ffdb1e5c61c (3)
+
+  ((FunPtr) * (long *)((long *)(*vt_ptr1) + 0))();  // virtual BaseA::show()
+  ((FunPtr) * (long *)((long *)(*vt_ptr2) + 0))();  // virtual BaseB::play()
+
+  // 多继承，每个基类都有虚函数，所以每个类有一个虚函数表，每张表各自存储自己的虚函数表的信息。
+}
+}  // namespace test4
+
+namespace test5 {  // 两个基类中都含有虚函数，派生类有虚函数
+class BaseA {
+ public:
+  virtual void show() { std::cout << "virtual BaseA::show()" << std::endl; }
+  int a = 1;
+};
+
+class BaseB {
+ public:
+  virtual void play() { std::cout << "virtual BaseB::play()" << std::endl; }
+  int b = 2;
+};
+
+class Derived : public BaseA, public BaseB {
+ public:
+  virtual void print() { std::cout << "virtual Derived::print()" << std::endl; }
+  int c = 3;
+};
+void func() {
+  Derived obj;
+  long *vt_ptr1 = (long *)&obj + 0;
+  int *mem1_addr = (int *)vt_ptr1 + 2;
+  long *vt_ptr2 = (long *)((char *)&obj + sizeof(BaseA));
+  int *mem2_addr = (int *)vt_ptr2 + 2;
+  int *mem3_addr = (int *)mem2_addr + 1;
+
+  std::cout << "obj begin addr: " << &obj << " (" << sizeof(Derived) << ","
+            << sizeof(obj) << ")"
+            << "," << alignof(Derived) << std::endl;
+  std::cout << "vp_ptr1: " << vt_ptr1 << std::endl;
+  std::cout << "mem1 a : " << mem1_addr << " (" << *mem1_addr << ")"
+            << std::endl;
+  std::cout << "vp_ptr2: " << vt_ptr2 << std::endl;
+  std::cout << "mem2 b : " << mem2_addr << " (" << *mem2_addr << ")"
+            << std::endl;
+  std::cout << "mem3 c : " << mem3_addr << " (" << *mem3_addr << ")"
+            << std::endl;
+
+  // 内存模型：
+  // obj begin addr: 0x7ffcfcfb9110 (32,32),8
+  // vp_ptr1: 0x7ffcfcfb9110
+  // mem1 a : 0x7ffcfcfb9118 (1)
+  // vp_ptr2: 0x7ffcfcfb9120
+  // mem2 b : 0x7ffcfcfb9128 (2)
+  // mem3 c : 0x7ffcfcfb912c (3)
+
+  ((FunPtr) * (long *)((long *)(*vt_ptr1) + 0))();  // virtual BaseA::show()
+  ((FunPtr) * (long *)((long *)(*vt_ptr1) + 1))();  // virtual Derived::print()
+  ((FunPtr) * (long *)((long *)(*vt_ptr2) + 0))();  // virtual BaseB::play()
+
+  long **pVtab = (long **)&obj;
+  ((FunPtr)pVtab[0][0])();  // virtual BaseA::show()
+  ((FunPtr)pVtab[0][1])();  // virtual Derived::print()
+  pVtab = (long **)((char *)&obj + sizeof(BaseA));
+  ((FunPtr)pVtab[0][0])();  // virtual BaseB::play()
+
+  // 派生类的虚函数是追加在第一张虚表的后面。
+  // 当需要使用派生类的虚函数时，用第一张表的虚函数表指针指向派生类的虚函数即可。
+}
+}  // namespace test5
+
+void testN2() {
+  test1::func();
+  test2::func();
+  test3::func1();
+  test3::func2();
+  test4::func();
+  test5::func();
+}
+}  // namespace n2
+
+namespace n3 {
+
+void testN3() {}
+}  // namespace n3
+
+namespace n4 {
+
+void testN4() {}
+}  // namespace n4
+
+namespace n5 {
+
+void testN5() {}
+}  // namespace n5
+
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    std::cout << argv[0] << " i [0 - 4]" << std::endl;
+    return 0;
+  }
+  int type = argv[1][0] - '0';
+  switch (type) {
+    case 0:
+      n1::testN1();
+      break;
+    case 1:
+      n2::testN2();
+      break;
+    case 2:
+      n3::testN3();
+      break;
+    case 3:
+      n4::testN4();
+      break;
+    case 4:
+      n5::testN5();
+      break;
+    default:
+      std::cout << "invalid type" << std::endl;
+      break;
+  }
 
   return 0;
 }
