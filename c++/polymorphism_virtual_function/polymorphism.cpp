@@ -542,8 +542,8 @@ void func() {
   pVtab = (long **)((char *)&obj + sizeof(BaseA));
   ((FunPtr)pVtab[0][0])();  // virtual BaseB::play()
 
-  // 派生类的虚函数是追加在第一张虚表的后面。
-  // 当需要使用派生类的虚函数时，用第一张表的虚函数表指针指向派生类的虚函数即可。
+  // 多重继承下，子类不再具有自身的虚函数表，它的虚函数表与第一个父类的虚函数表合并了。
+  // 同样的，如果子类重写了任意父类的虚函数，都会覆盖对应的函数地址记录。
 }
 }  // namespace test5
 
@@ -558,19 +558,86 @@ void testN2() {
 }  // namespace n2
 
 namespace n3 {
+// 如果说没有虚函数的虚继承只是一个噩梦的话，那么既有虚函数又有虚继承就是真正的炼狱。
 
-void testN3() {}
+class Base {
+  int var = 100;
+
+ public:
+  virtual void fun() { std::cout << " Base::fun" << std::endl; }
+};
+class A : public Base {
+  int a = 101;
+
+ public:
+  virtual void fun() { std::cout << " A::fun" << std::endl; }
+  virtual void funA() { std::cout << " A::funA" << std::endl; }
+};
+class B : virtual public Base {
+  int b = 102;
+
+ public:
+  virtual void fun() { std::cout << " B::fun" << std::endl; }
+  virtual void funB() { std::cout << " B::funB" << std::endl; }
+};
+class C : public A, public B {
+  int c = 104;
+
+ public:
+  virtual void funB() { std::cout << " C::funB" << std::endl; }
+  virtual void funC() { std::cout << " C::funC" << std::endl; }
+};
+void testN3() {
+  C obj;
+
+  std::cout << "obj addr   : " << &obj << ", size :" << sizeof(C) << std::endl;
+  long *vfptr1 = (long *)&obj;
+  std::cout << "#1 vfptr1  : " << vfptr1 << std::endl;
+  ((FunPtr) * (long *)((long *)*vfptr1 + 0))();
+  ((FunPtr) * (long *)((long *)*vfptr1 + 1))();
+  ((FunPtr) * (long *)((long *)*vfptr1 + 2))();
+  ((FunPtr) * (long *)((long *)*vfptr1 + 3))();
+  std::cout << " " << *(long *)((long *)*vfptr1 + 4) << std::endl;
+  std::cout << " " << *(long *)((long *)*vfptr1 + 5) << std::endl;
+
+  int *mem1 = (int *)&obj + 2;
+  std::cout << "#2 mem3 var: " << mem1 << "," << *mem1 << std::endl;
+  int *mem2 = (int *)&obj + 3;
+  std::cout << "#3 mem3  a : " << mem2 << "," << *mem2 << std::endl;
+
+  long *vfptr2 = (long *)(mem2 + 1);
+  std::cout << "#4 vfptr2  : " << vfptr2 << std::endl;
+  ((FunPtr) * (long *)((long *)*vfptr2 + 0))();
+  ((FunPtr) * (long *)((long *)*vfptr2 + 1))();
+  std::cout << " " << *(long *)((long *)*vfptr2 + 2) << std::endl;
+  std::cout << " " << *(long *)((long *)*vfptr2 + 3) << std::endl;
+
+  int *mem3 = (int *)&obj + 6;
+  std::cout << "#5 mem3  b : " << mem3 << "," << *mem3 << std::endl;
+  int *mem4 = (int *)&obj + 7;
+  std::cout << "#6 mem6  c : " << mem4 << "," << *mem4 << std::endl;
+
+  // obj addr   : 0x7ffc57da5580, size :48
+  // #1 vfptr1  : 0x7ffc57da5580
+  //  A::fun
+  //  A::funA
+  //  C::funB
+  //  C::funC
+  //  16
+  //  -16
+  // #2 mem3 var: 0x7ffc57da5588,100
+  // #3 mem3  a : 0x7ffc57da558c,101
+  // #4 vfptr2  : 0x7ffc57da5590
+  //  B::fun
+  //  C::funB
+  //  -16
+  //  -32
+  // #5 mem3  b : 0x7ffc57da5598,102
+  // #6 mem6  c : 0x7ffc57da559c,104
+
+  // 才32个字节，剩下的16个字节用到哪里了？
+}
 }  // namespace n3
-
-namespace n4 {
-
-void testN4() {}
-}  // namespace n4
-
-namespace n5 {
-
-void testN5() {}
-}  // namespace n5
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
@@ -587,12 +654,6 @@ int main(int argc, char *argv[]) {
       break;
     case 2:
       n3::testN3();
-      break;
-    case 3:
-      n4::testN4();
-      break;
-    case 4:
-      n5::testN5();
       break;
     default:
       std::cout << "invalid type" << std::endl;

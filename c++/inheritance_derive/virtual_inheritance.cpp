@@ -307,6 +307,13 @@ void func4() {
 }  // namespace test1
 
 namespace test2 {
+// 为什么B、C和D的第二个虚基类表中的内容都不对？
+// D的第一个虚基类表中的16和-16是怎么来的？
+
+// 通过虚基类表指针往正负两个方向寻址，可以获得不同偏移值，也就是说有两个功能一样的虚函数表。
+// 不过在实际应用的时候，不知道虚基类表是否真的有用。
+// 发现编译器可能做了优化，根本就没有用虚基类表来寻址虚基类实例。
+
 class A {
  public:
   int a = 1;
@@ -315,11 +322,11 @@ class B : virtual public A {
  public:
   int b = 2;
 };
-class C : public B {
+class C : virtual public A {
  public:
   int c = 3;
 };
-class D : public C {
+class D : public B, public C {
  public:
   int d = 4;
 };
@@ -327,50 +334,81 @@ class D : public C {
 void func1() {
   A obj;  // 内存布局： a
   std::cout.setf(std::ios::dec);
-  std::cout << sizeof(obj) << std::endl;  // 4
+  std::cout << sizeof(obj) << std::endl;
 
   std::cout.setf(std::ios::hex);
   std::cout.setf(std::ios_base::showbase);
+  std::cout << &obj << std::endl;
+  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;
 
-  std::cout << &obj << std::endl;                              // 0x7ffdf43a2bf4
-  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;  // 0x7ffdf43a2be8
+  // 4
+  // 0x7fffa746baf4
+  // 0x7fffa746baf4 (1)
 }
 void func2() {
-  B obj;  // 内存布局： b A(a)
+  B obj;  // 内存布局： vbptr b A(a)
   std::cout.setf(std::ios::dec);
-  std::cout << sizeof(obj) << " " << alignof(B) << std::endl;  // 16
+  std::cout << sizeof(obj) << " " << std::endl;
 
   std::cout.setf(std::ios::hex);
   std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;  // 0x7ffdf43a2be0
+  std::cout << &obj << std::endl;
   std::cout << (int*)&obj << ": " << *(long*)(*(long*)&obj) << std::endl;
-  std::cout << &(obj.b) << " (" << obj.b << ")" << std::endl;  // 0x7ffdf43a2be8
-  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;  // 0x7ffdf43a2be8
+  std::cout << &(obj.b) << " (" << obj.b << ")" << std::endl;
+  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;
+
+  // 16
+  // 0x7fffa746bae0
+  // 0x7fffa746bae0: 94109290195024
+  // 0x7fffa746bae8 (2)
+  // 0x7fffa746baec (1)
 }
 void func3() {
-  C obj;  // 内存布局： B(b) c B(A(a))
+  C obj;  // 内存布局： vbptr c A(a)
   std::cout.setf(std::ios::dec);
-  std::cout << sizeof(obj) << std::endl;  // 24
+  std::cout << sizeof(obj) << std::endl;
 
   std::cout.setf(std::ios::hex);
   std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;                              // 0x7ffdf43a2be0
-  std::cout << &(obj.b) << " (" << obj.b << ")" << std::endl;  // 0x7ffdf43a2be8
-  std::cout << &(obj.c) << " (" << obj.c << ")" << std::endl;  // 0x7ffdf43a2be8
-  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;  // 0x7ffdf43a2be8
+  std::cout << &obj << std::endl;
+  std::cout << (int*)&obj << ": " << *(long*)(*(long*)&obj) << std::endl;
+  std::cout << &(obj.c) << " (" << obj.c << ")" << std::endl;
+  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;
+
+  // 16
+  // 0x7fffa746bae0
+  // 0x7fffa746bae0: 94109290194992
+  // 0x7fffa746bae8 (3)
+  // 0x7fffa746baec (1)
 }
 void func4() {
-  D obj;  // 内存布局： B(b) c d B(A(a))
+  D obj;  // 内存布局： vbptrB B(b) vbptrC C(c) d A(a)
   std::cout.setf(std::ios::dec);
-  std::cout << sizeof(obj) << std::endl;  // 24
+  std::cout << sizeof(obj) << std::endl;
 
   std::cout.setf(std::ios::hex);
   std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;                              // 0x7ffdf43a2be0
-  std::cout << &(obj.b) << " (" << obj.b << ")" << std::endl;  // 0x7ffdf43a2be8
-  std::cout << &(obj.c) << " (" << obj.c << ")" << std::endl;  // 0x7ffdf43a2be8
-  std::cout << &(obj.d) << " (" << obj.d << ")" << std::endl;  // 0x7ffdf43a2be8
-  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;  // 0x7ffdf43a2be8
+  std::cout << &obj << std::endl;
+  std::cout << (long*)&obj << std::endl;
+  std::cout << "  [0]:" << *(long*)(*(long*)&obj) << std::endl;
+  std::cout << "  [1]:" << *(((long*)(*(long*)&obj)) + 1) << std::endl;
+  std::cout << &(obj.b) << " (" << obj.b << ")" << std::endl;
+  std::cout << (long*)((char*)&obj + sizeof(B)) << ": "
+            << *(long*)((char*)&obj + sizeof(B)) << std::endl;
+  std::cout << &(obj.c) << " (" << obj.c << ")" << std::endl;
+  std::cout << &(obj.d) << " (" << obj.d << ")" << std::endl;
+  std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;
+
+  // 40
+  // 0x7ffe37fb6b00
+  // 0x7ffe37fb6b00
+  //   [0]:16
+  //   [1]:-16
+  // 0x7ffe37fb6b08 (2)
+  // 0x7ffe37fb6b10: 93991712532720
+  // 0x7ffe37fb6b18 (3)
+  // 0x7ffe37fb6b1c (4)
+  // 0x7ffe37fb6b20 (1)
 }
 }  // namespace test2
 
@@ -412,20 +450,36 @@ void func() {
   std::cout << "c address    : " << c << std::endl;
   std::cout << "fromB address: " << fromB << std::endl;
   std::cout << "fromC address: " << fromC << std::endl;
-  std::cout << std::endl;
+  // d address    : 0x562543e392c0
+  // b address    : 0x562543e392c0
+  // c address    : 0x562543e392d0
+  // fromB address: 0x562543e392e0
+  // fromC address: 0x562543e392e0
 
   std::cout << "vbptr address: " << (long*)d << std::endl;
   std::cout << "    [0] => " << *(long*)(*(long*)d) << std::endl;
-  std::cout << "    [1] => " << *(((long*)(*(long*)d)) + 1)
-            << std::endl;  // 偏移量20
-  // std::cout << "dataB value  : " << *((int*)d + 1) << std::endl;
+  std::cout << "    [1] => " << *(((long*)(*(long*)d)) + 1) << std::endl;
+  std::cout << "dataB value  : " << (int*)((long*)d + 1) << ","
+            << *(int*)((long*)d + 1) << std::endl;
   std::cout << "vbptr address: " << ((long*)d + 2) << std::endl;
   std::cout << "    [0] => " << *(long*)(*((long*)d + 2)) << std::endl;
-  std::cout << "    [1] => " << *((long*)(*((long*)d + 2)) + 1)
-            << std::endl;  // 偏移量12
-  // std::cout << "dataC value  : " << *((int*)d + 3) << std::endl;
-  // std::cout << "dataD value  : " << *((int*)d + 4) << std::endl;
-  // std::cout << "dataA value  : " << *((int*)d + 5) << std::endl;
+  std::cout << "    [1] => " << *((long*)(*((long*)d + 2)) + 1) << std::endl;
+  std::cout << "dataC value  : " << (int*)((long*)d + 3) << ","
+            << *(int*)((long*)d + 3) << std::endl;
+  std::cout << "dataD value  : " << (int*)((int*)d + 7) << ","
+            << *(int*)((int*)d + 7) << std::endl;
+  std::cout << "dataA value  : " << (int*)((int*)d + 8) << ","
+            << *(int*)((int*)d + 8) << std::endl;
+  // vbptr address: 0x562543e392c0
+  //     [0] => 16
+  //     [1] => -16
+  // dataB value  : 0x562543e392c8,100
+  // vbptr address: 0x562543e392d0
+  //     [0] => 94718024296536
+  //     [1] => 94718024296616
+  // dataC value  : 0x562543e392d8,1000
+  // dataD value  : 0x562543e392dc,10000
+  // dataA value  : 0x562543e392e0,10
 }
 }  // namespace test3
 
