@@ -24,5 +24,13 @@ void bubble_sort(int arr[], int n) {
 // 一个类模板的反面教材，它将类模板的声明和实现分别放到了头文件和源文件。
 template <class T1, class T2>
 void Point<T1, T2>::display() const {
-  cout << "x=" << m_x << ", y=" << m_y << endl;
+  std::cout << "x=" << m_x << ",y=" << m_y << std::endl;
 }
+
+#define EXPLICITINSTANTIATE
+#ifdef EXPLICITINSTANTIATE
+// 显式实例化定义
+template void Swap(double &a, double &b);
+template class Point<char *, char *>;
+template class Point<int, int>;
+#endif

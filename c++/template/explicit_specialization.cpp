@@ -13,39 +13,68 @@ using namespace std;
 // 这在C++中是可以做到的，这种技术称为模板的显示具体化（Explicit Specialization）。
 // 函数模板和类模板都可以显示具体化。
 
-// 函数模板的显式具体化:
+namespace n1 {  // 函数模板的显式具体化
+template <class T>
+const T& Max(const T& a, const T& b) {
+  std::cout << "template:";
+  return a > b ? a : b;
+}
+
 typedef struct {
   string name;
   int age;
   float score;
 } STU;
-// 函数模板
-template <class T>
-const T& Max(const T& a, const T& b);
-// 函数模板的显示具体化（针对STU类型的显示具体化）
-// template <>
-// const STU& Max<STU>(const STU& a, const STU& b);
-// Max<STU>中的STU是可选的，因为函数的形参已经表明，这是STU类型的一个具体化，编译器能够逆推出T的具体类型。简写后的函数声明为：
-template <>
-const STU& Max(const STU& a, const STU& b);
-ostream& operator<<(ostream& out, const STU& stu);
-
-template <class T>
-const T& Max(const T& a, const T& b) {
-  return a > b ? a : b;
-}
-template <>
-const STU& Max<STU>(const STU& a, const STU& b) {
+template <>  // 函数模板针对STU类型的显示具体化
+// const STU& Max<STU>(const STU& a, const STU& b) {
+// Max<STU>中的STU是可选的，因为函数的形参已经表明，这是STU类型的一个具体化，编译器能够逆推出T的具体类型：
+const STU& Max<>(const STU& a, const STU& b) {
+  std::cout << "explicit STU:";
   return a.score > b.score ? a : b;
 }
 ostream& operator<<(ostream& out, const STU& stu) {
-  out << stu.name << " , " << stu.age << " , " << stu.score;
+  out << stu.name << "," << stu.age << "," << stu.score;
   return out;
 }
-// 对于给定的函数名，可以有非模板函数、模板函数、显示具体化模板函数以及它们的重载版本，
-// 在调用函数时，显示具体化优先于常规模板，而非模板函数优先于显示具体化和常规模板。
 
-// 除了函数模板，类模板也可以显示具体化，并且它们的语法是类似的。
+// 对于给定的函数名，可以有非模板函数、模板函数、显示具体化模板函数以及它们的重载版本：
+const double Max(const double& a, const double& b) {
+  std::cout << "func:";
+  return a > b ? a : b;
+}
+template <>
+const double& Max<>(const double& a, const double& b) {
+  std::cout << "explicit double:";
+  return a > b ? a : b;
+}
+template <>
+const float& Max<>(const float& a, const float& b) {
+  std::cout << "explicit float:";
+  return a > b ? a : b;
+}
+
+void func1() {
+  std::cout << Max(4, 5) << std::endl;      // template:5
+  std::cout << Max('a', 'c') << std::endl;  // template:c
+  STU s1{"hello", 18, 80};
+  STU s2 = {"word", 20, 90};
+  std::cout << Max(s1, s2) << std::endl;  // explicit STU:world,20,90
+}
+
+void func2() {
+  // 在调用函数时，显示具体化优先于常规模板：
+  std::cout << Max(4.3f, 2.5f) << std::endl;  // explicit float:4.3
+  // 而非模板函数优先于显示具体化和常规模板：
+  std::cout << Max(4.3, 2.5) << std::endl;  // func:4.3
+}
+
+void test() {
+  func1();
+  func2();
+}
+}  // namespace n1
+
+namespace n2 {  // 除了函数模板，类模板也可以显示具体化，并且它们的语法是类似的
 template <class T1, class T2>
 class Point {
  public:
@@ -62,12 +91,12 @@ class Point {
   T1 m_x;
   T2 m_y;
 };
-template <class T1, class T2>  // 这里要带上模板头
+template <class T1, class T2>  // 类模板的成员函数，类外定义需要带上模板头
 void Point<T1, T2>::display() const {
-  cout << "x=" << m_x << ", y=" << m_y << endl;
+  cout << "x=" << m_x << ",y=" << m_y << endl;
 }
-// 类模板的显示具体化（针对字符串类型的显示具体化）
-template <>
+
+template <>  // 类模板针对字符串类型的显示具体化
 class Point<char*, char*> {
  public:
   Point(char* x, char* y) : m_x(x), m_y(y) {}
@@ -83,15 +112,14 @@ class Point<char*, char*> {
   char* m_x;
   char* m_y;
 };
-// 这里不能带模板头template<>
+// 显式具体化类模板的成员函数类外定义，不能带模板头template<>
 void Point<char*, char*>::display() const {
-  cout << "x=" << m_x << " | y=" << m_y << endl;
+  std::cout << "x=" << m_x << "|y=" << m_y << std::endl;
 }
+
 // 另外C++还允许只为一部分类型参数提供实参，这称为部分显式具体化。
 // 部分显式具体化只能用于类模板，不能用于函数模板。
-// 类名后面之所以要列出所有的类型参数，是为了让编译器确认“到底是第几个类型参数被具体化了”，如果这样：
-// template<typename T2> class Point<char*>
-// 编译器就不知道char*代表的是第一个类型参数，还是第二个类型参数。
+// 类名后面要列出所有的类型参数，是为了让编译器确认“到底是第几个类型参数被具体化了”：
 template <typename T2>
 class Point<char*, T2> {
  public:
@@ -108,23 +136,35 @@ class Point<char*, T2> {
   char* m_x;
   T2 m_y;
 };
-template <typename T2>  // 这里需要带上模板头
+template <typename T2>  // 部分显式具体化的类函数类外定义，需要带上模板头
 void Point<char*, T2>::display() const {
-  cout << "x=" << m_x << " ! y=" << m_y << endl;
+  std::cout << "x=" << m_x << "!y=" << m_y << std::endl;
 }
+void test() {
+  (new Point<int, int>(10, 20))->display();            // x=10,y=20
+  (new Point<int, char*>(10, "xxx"))->display();       // x=10,y=xxx
+  (new Point<char*, int>("yyy", 10))->display();       // x=yyy!y=10
+  (new Point<char*, char*>("mmm", "nnn"))->display();  // x=mmm|y=nnn
+}
+}  // namespace n2
 
-int main() {
-  int a = 10;
-  int b = 20;
-  cout << Max(a, b) << endl;  // 20
-  STU stu1 = {"王明", 16, 95.5};
-  STU stu2 = {"徐亮", 17, 90.0};
-  cout << Max(stu1, stu2) << endl;  // 王明 , 16 , 95.5
-
-  (new Point<int, int>(10, 20))->display();             // x=10, y=20
-  (new Point<int, char*>(10, "东京180度"))->display();  // x=10, y=东京180度
-  (new Point<char*, int>("东京180度", 10))->display();  // x=东京180度 ! y=10
-  (new Point<char*, char*>("8度", "2度"))->display();   // x=8度 | y=1度
+int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    std::cout << argv[0] << " i [0 - 1]" << std::endl;
+    return 0;
+  }
+  int type = argv[1][0] - '0';
+  switch (type) {
+    case 0:
+      n1::test();
+      break;
+    case 1:
+      n2::test();
+      break;
+    default:
+      std::cout << "invalid type" << std::endl;
+      break;
+  }
 
   return 0;
 }
