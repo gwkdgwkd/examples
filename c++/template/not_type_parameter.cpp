@@ -171,6 +171,7 @@ void test() {
 
   // int len = 5;
   // Array<int, len> arr;  // 错误，编译器推导出来的实参是len，是一个变量，而不是常量
+}
 }  // namespace n2
 
 int main(int argc, char *argv[]) {
