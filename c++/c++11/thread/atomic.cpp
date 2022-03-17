@@ -119,7 +119,7 @@ void testOperation() {
 }  // namespace operation
 
 namespace CAS {
-// CAS(compare and swap)是个原子操作，保证了如果需要更新的地址没有被他人改动多，那么它可以安全的写入。
+// CAS(compare and swap)是个原子操作，保证了如果需要更新的地址没有被他人改动过，那么它可以安全的写入。
 // 而这也是我们对于某个数据或者数据结构加锁要保护的内容，保证读写的一致性，不出现dirty data。
 // 现在几乎所有的CPU指令都支持CAS的原子操作。
 // compare_exchange_weak和compare_exchange_strong则是著名的CAS（compare and set）。
@@ -177,7 +177,7 @@ void testCAS() {
   std::cout << std::boolalpha << ret << ", ai1:" << ai1 << ",i1:" << i1
             << std::endl;  // false, ai1:10,i1:20
 
-  // 当前值10与期望值(参数1是20)不等时，将期望值(参数1是20)修改为当前值（10），返回false
+  // 当前值10与期望值(参数1是20)不等时，将期望值(参数1是20)修改为当前值(10)，返回false
   ret = ai1.compare_exchange_weak(i1, i2);
   std::cout << std::boolalpha << ret << ", ai1:" << ai1 << ",i1:" << i1
             << std::endl;  // false, ai1:10,i1:10

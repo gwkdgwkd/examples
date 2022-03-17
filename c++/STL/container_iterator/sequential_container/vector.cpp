@@ -89,50 +89,54 @@
 // 为了降低再次分配内存空间时的成本，每次扩容时vector都会申请比用户需求量更多的内存空间，以便后期使用。
 // vector容器扩容时，不同的编译器申请更多内存空间的量是不同的。以VS为例，它会扩容现有容器容量的50%。
 
+template <typename T>
+void print(std::vector<T>& v) {
+  std::copy(v.begin(), v.end(), std::ostream_iterator<T>(std::cout, " "));
+  std::cout << "[" << v.size() << "/" << v.capacity() << "]" << std::endl;
+}
+
 void func1() {  // 创建vector容器的几种方式
   // 1.空的vector容器：
   std::vector<double> v1;  // 因为容器中没有元素，所以没有为其分配空间
-  std::cout << v1.size() << "/" << v1.capacity() << std::endl;  // 0/0
+  print(v1);               // [0/0]
   v1.reserve(20);  // 在创建好空容器上，通过调用reserve()来增加容器的容量
-  std::cout << v1.size() << "/" << v1.capacity() << std::endl;  // 0/20
+  print(v1);           // [0/20]
   v1.emplace_back(6);  // 当添加第一个元素时，vector会自动分配内存
-  std::cout << v1.size() << "/" << v1.capacity() << std::endl;  // 1/20
+  print(v1);           // 6 [1/20]
 
   // 2.在创建的同时指定初始值以及元素个数, 创建了一个含有8个素数的vector容器：
   std::vector<int> v2{2, 3, 5, 7, 11, 13, 17, 19};
-  std::cout << v2.size() << "/" << v2.capacity() << std::endl;  // 8/8
+  print(v2);  // 2 3 5 7 11 13 17 19 [8/8]
 
   // 3.在创建vector容器时，也可以指定元素个数，values容器开始时就有2个元素，它们的默认初始值都为0：
   std::vector<double> v3(2);
-  std::cout << v3.size() << "/" << v3.capacity() << std::endl;  // 2/2
-  std::cout << v3[0] << "," << v3[1] << std::endl;              // 0,0
+  print(v3);  // 0 0 [2/2]
 
   // 圆括号()和大括号{}是有区别的，()表示元素的个数，而{}则表示vector容器中只有一个元素：
   std::vector<double> v4{2};
-  std::cout << v4.size() << "/" << v4.capacity() << std::endl;  // 1/1
-  std::cout << v4[0] << std::endl;                              // 2
+  print(v4);  // 2 [1/1]
   // 如果不想用0作为默认值，也可以指定一个其它值：
   std::vector<char> v5(5, 'c');
-  std::cout << v5.size() << "/" << v5.capacity() << std::endl;  // 5/5
+  print(v5);  // c c c c c [5/5]
   // 圆括号()中的2个参数，既可以是常量，也可以用变量来表示：
   int num = 20;
   double value = 1.0;
   std::vector<double> v6(num, value);
-  std::cout << v6.size() << "/" << v6.capacity() << std::endl;  // 20/20
+  print(v6);  // 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 [20/20]
 
   // 4.通过存储元素类型相同的其它vector容器，也可以创建新的vector容器：
   std::vector<char> v7(v5);
-  std::cout << v7.size() << "/" << v7.capacity() << std::endl;  // 5/5
+  print(v7);  // c c c c c [5/5]
   std::vector<char> v8 = v5;
-  std::cout << v8.size() << "/" << v8.capacity() << std::endl;  // 5/5
+  print(v8);  // c c c c c [5/5]
   // 如果不想复制其它容器中所有的元素，可以用一对指针或者迭代器来指定初始值的范围：
   int array[] = {1, 2, 3};
   std::vector<int> v9(array, array + 2);
+  print(v9);  // 1 2 [2/2]
   std::vector<int> v10{1, 2, 3, 4, 5};
+  print(v10);  // 1 2 3 4 5 [5/5]
   std::vector<int> v11(std::begin(v10), std::begin(v10) + 3);
-  std::cout << v9.size() << "/" << v9.capacity() << std::endl;    // 2/2
-  std::cout << v10.size() << "/" << v10.capacity() << std::endl;  // 5/5
-  std::cout << v11.size() << "/" << v11.capacity() << std::endl;  // 3/3
+  print(v11);  // 1 2 3 [3/3]
 }
 
 void func2() {  // vector容器访问元素
@@ -243,10 +247,7 @@ void func5() {  // 迭代器失效
   // v addr[3/20] : 0x55d86295d2e0
   // 0 0 1653911568
 
-  for (auto i = v.begin(); i < v.end(); ++i) {
-    std::cout << *i << " ";
-  }
-  std::cout << std::endl;  // 1 2 3
+  print(v);  // 1 2 3 [3/20]
 
   // 调用reserve前，如果vector的容量已经大于或等于要设置的大小，那么这条语句什么也不做：
   v.reserve(10);
@@ -279,32 +280,21 @@ void func6() {  // reserve和resize
   v.resize(21);  // 将元素个数改变为21个，所以会增加5个默认初始化的元素
   std::cout << v.size() << "/" << v.capacity() << " : " << v.data()
             << std::endl;
-  for (auto i = v.begin(); i < v.end(); ++i) {
-    std::cout << *i << ' ';
-  }
-  std::cout << std::endl;
   // 21/32 : 0x55f0bd6b1370
-  // 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 0 0 0 0 0
+  print(v);  // 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 0 0 0 0 0 [21/32]
 
   v.resize(24, 99);  // 将元素个数改变为24个，新增加的3个元素默认值为99
   std::cout << v.size() << "/" << v.capacity() << " : " << v.data()
             << std::endl;
-  for (auto i = v.begin(); i < v.end(); ++i) {
-    std::cout << *i << ' ';
-  }
-  std::cout << std::endl;
   // 24/32 : 0x55f0bd6b1370
-  // 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 0 0 0 0 0 99 99 99
+  print(v);
+  // 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 0 0 0 0 0 99 99 99 [24/32]
 
   v.resize(20);  // 当需要减小容器的大小时，会移除多余的元素
   std::cout << v.size() << "/" << v.capacity() << " : " << v.data()
             << std::endl;
-  for (auto i = v.begin(); i < v.end(); ++i) {
-    std::cout << *i << ' ';
-  }
-  std::cout << std::endl;
   // 20/32 : 0x55f0bd6b1370
-  // 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 0 0 0 0
+  print(v);  // 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 0 0 0 0 [20/32]
 
   // vector<T>对象的容量和大小类型都是vector<T>::size_type类型。
   // size_type类型是定义在由vector类模板生成的vecotr类中的，它和操作系统有关，
@@ -326,6 +316,7 @@ class A {
  private:
   int num;
 };
+
 void func7() {
   // 向vector容器中添加元素的唯一方式就是使用它的成员函数，如果不调用成员函数，非成员函数既不能添加也不能删除元素。
   // 这意味着，vector容器对象必须通过它所允许的函数去访问，迭代器显然不行。
@@ -335,9 +326,7 @@ void func7() {
   std::vector<int> v1;
   v1.push_back(1);
   v1.emplace_back(3);
-  std::copy(v1.begin(), v1.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << v1.size() << "/" << v1.capacity() << "]" << std::endl;
-  // 1 3  [2/2]
+  print(v1);  // 1 3 [2/2]
 
   // emplace_back()和push_back()的区别，就在于底层实现的机制不同。
   // push_back()向容器尾部添加元素时，首先会创建这个元素，然后再将这个元素拷贝或者移动到容器中，
@@ -370,9 +359,7 @@ void func7() {
   std::array<int, 3> a{7, 8, 9};
   v1.insert(v1.end(), a.begin(), a.end());
   v1.insert(v1.end(), {10, 11});
-  std::copy(v1.begin(), v1.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << v1.size() << "/" << v1.capacity() << "]" << std::endl;
-  // 1 9 3 5 5 7 8 9 10 11  [10/10]
+  print(v1);  // 1 9 3 5 5 7 8 9 10 11 [10/10]
 
   // emplace()是C++11标准新增加的成员函数，用于在vector容器指定位置之前插入一个新的元素。
   // emplace()每次只能插入一个元素，而不是多个。
@@ -380,9 +367,7 @@ void func7() {
   // 其中，pos为指定插入位置的迭代器；args...表示与新插入元素的构造函数相对应的多个参数；
   // 该函数会返回表示新插入元素位置的迭代器。
   v1.emplace(v1.begin(), 4);
-  std::copy(v1.begin(), v1.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << v1.size() << "/" << v1.capacity() << "]" << std::endl;
-  // 4 1 9 3 5 5 7 8 9 10 11  [11/20]
+  print(v1);  // 4 1 9 3 5 5 7 8 9 10 11 [11/20]
 
   // insert()需要调用类的构造函数和移动构造函数（或拷贝构造函数）；
   // 当拷贝构造函数和移动构造函数同时存在时，insert()会优先调用移动构造函数。
@@ -399,32 +384,25 @@ void func7() {
   // move
 
   v1.assign({100, 200, 300});
-  std::copy(v1.begin(), v1.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << v1.size() << "/" << v1.capacity() << "]" << std::endl;
-  // 100 200 300  [3/20]
+  print(v1);  // 100 200 300 [3/20]
 }
+
 void func8() {
   // 无论是向现有vector容器中访问元素、添加元素还是插入元素，都只能借助vector模板类提供的成员函数，
   // 但删除vector容器的元素例外，完成此操作除了可以借助本身提供的成员函数，还可以借助一些全局函数。
 
   std::vector<int> d{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-  std::copy(d.begin(), d.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << d.size() << "/" << d.capacity() << "]" << std::endl;
-  // 1 2 3 4 5 6 7 8 9 10  [10/10]
+  print(d);  // 1 2 3 4 5 6 7 8 9 10 [10/10]
 
   // pop_back()删除vector容器中最后一个元素，该容器的大小（size）会减1，但容量（capacity）不会发生改变：
   d.pop_back();
-  std::copy(d.begin(), d.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << d.size() << "/" << d.capacity() << "]" << std::endl;
-  // 1 2 3 4 5 6 7 8 9  [9/10]
+  print(d);  // 1 2 3 4 5 6 7 8 9 [9/10]
 
   // erase(pos)删除vector容器中pos迭代器指定位置处的元素，并返回指向被删除元素下一个位置元素的迭代器。
   // 该容器的大小（size）会减1，但容量（capacity）不会发生改变：
   auto i = d.erase(d.begin() + 1);
   std::cout << *i << std::endl;  // 3
-  std::copy(d.begin(), d.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << d.size() << "/" << d.capacity() << "]" << std::endl;
-  // 1 3 4 5 6 7 8 9  [8/10]
+  print(d);                      // 1 3 4 5 6 7 8 9 [8/10]
 
   // swap()函数在头文件<algorithm>和<utility>中都有定义，使用时引入其中一个即可。
   // 如果不在意容器中元素的排列顺序，先调用swap()函数交换要删除的目标元素和容器最后一个元素的位置，
@@ -433,48 +411,37 @@ void func8() {
   d.pop_back();
   std::swap(d[0], d[6]);
   d.pop_back();
-  std::copy(d.begin(), d.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << d.size() << "/" << d.capacity() << "]" << std::endl;
-  // 8 9 4 5 6 7  [6/10]
+  print(d);  // 8 9 4 5 6 7 [6/10]
 
   // erase(beg,end)删除vector容器中位于迭代器[beg,end)指定区域内的所有元素，
   // 并返回指向被删除区域下一个位置元素的迭代器。该容器size会减小，但capacity不会发生改变。
   i = d.erase(d.begin(), d.begin() + 3);
-  std::copy(d.begin(), d.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << d.size() << "/" << d.capacity() << "]" << std::endl;
-  // 5 6 7  [3/10]
+  print(d);  // 5 6 7 [3/10]
 
   // remove()删除容器中所有和指定元素值相等的元素，并返回指向最后一个元素下一个位置的迭代器。
   // 值得一提的是，调用该函数不会改变容器的大小和容量。
   d.insert(d.begin(), 3, 6);
-  std::copy(d.begin(), d.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << d.size() << "/" << d.capacity() << "]" << std::endl;
-  // 6 6 6 5 6 7  [6/10]
+  print(d);  // 6 6 6 5 6 7 [6/10]
   i = std::remove(d.begin(), d.end(), 6);
   std::cout << *i << std::endl;  // 6
-  std::copy(d.begin(), d.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << d.size() << "/" << d.capacity() << "]" << std::endl;
-  // 5 7 6 5 6 7  [6/10]
+  print(d);                      // 5 7 6 5 6 7 [6/10]
   // remove()函数之后，由于该函数并没有改变容器原来的大小和容量，因此无法使用之前的方法遍历容器
   // 需要借助remove()返回的迭代器完成正确的遍历
   std::copy(d.begin(), i, std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << d.size() << "/" << d.capacity() << "]" << std::endl;
-  // 5 7  [6/10]
+  std::cout << "[" << d.size() << "/" << d.capacity() << "]" << std::endl;
+  // 5 7 [6/10]
   // remove()的实现原理是，在遍历容器中的元素时，一旦遇到目标元素，就做上标记，然后继续遍历，直到找到一个非目标元素，
   // 即用此元素将最先做标记的位置覆盖掉，同时将此非目标元素所在的位置也做上标记，等待找到新的非目标元素将其覆盖。
   // 既然通过remove()函数删除掉v容器中的多个指定元素，该容器的大小和容量都没有改变，其剩余位置还保留了之前存储的元素。
   // 我们可以使用erase()成员函数删掉这些"无用"的元素。
   // remove()用于删除容器中指定元素时，常和erase()成员函数搭配使用。
   d.erase(i, d.end());
-  std::copy(d.begin(), d.end(), std::ostream_iterator<int>(std::cout, " "));
-  std::cout << " [" << d.size() << "/" << d.capacity() << "]" << std::endl;
-  // 5 7  [2/10]
+  print(d);  // 5 7 [2/10]
 
   // clear()删除vector容器中所有的元素，使其变成空的vector容器。
   // 该函数会改变vector的大小（变为0），但不是改变其容量。
   d.clear();
-  std::cout << "[" << d.size() << "/" << d.capacity() << "]" << std::endl;
-  // [0/10]
+  print(d);  // [0/10]
 }
 
 void func9() {
@@ -527,12 +494,13 @@ void func9() {
   // 可以轻松实现删除容器中已存储的元素。
   // 但需要注意得是，借助这些成员方法只能删除指定的元素，容器的容量并不会因此而改变。
   std::vector<int> v3;
+  print(v3);
   std::cout << v3.size() << "/" << v3.capacity() << std::endl;  // 0/0
 
   for (int i = 1; i <= 10; i++) {
     v3.push_back(i);
   }
-  std::cout << v3.size() << "/" << v3.capacity() << std::endl;  // 10/16
+  print(v3);  // 1 2 3 4 5 6 7 8 9 10 [10/16]
 
   v3.reserve(1000);
   std::cout << v3.size() << "/" << v3.capacity() << std::endl;  // 10/1000
@@ -544,10 +512,10 @@ void func9() {
   std::cout << v3.size() << "/" << v3.capacity() << std::endl;  // 8/1000
 
   v3.shrink_to_fit();  // 该方法的功能是将当前vector容器的容量缩减至和实际存储元素的个数相等
-  std::cout << v3.size() << "/" << v3.capacity() << std::endl;  // 8/8
+  print(v3);           // 2 3 4 5 6 7 8 9 [8/8]
 
   v3.clear();
-  std::cout << v3.size() << "/" << v3.capacity() << std::endl;  // 0/8
+  print(v3);  // [0/8]
 
   v3.reserve(1000);
   for (int i = 1; i <= 10; i++) {
@@ -568,10 +536,10 @@ void func9() {
   // 3.当整条语句执行结束时，临时的temp容器会被销毁，其占据的存储空间都会被释放。
   //   注意，这里释放的其实是原v容器占用的存储空间。
   std::vector<int>(v3).swap(v3);  // 和shrink_to_fit效果一样，删除多余的容量
-  std::cout << v3.size() << "/" << v3.capacity() << std::endl;  // 10/10
+  print(v3);                      // 1 2 3 4 5 6 7 8 9 10 [10/10]
 
   std::vector<int>().swap(v3);  // 清空vector，大小和容量都会变成0
-  std::cout << v3.size() << "/" << v3.capacity() << std::endl;  // 0/0
+  print(v3);                    // [0/0]
 }
 
 void func10() {
@@ -607,15 +575,47 @@ void func10() {
   std::vector<bool> v{true, false};
 }
 
-int main() {
-  func1();
-  func2();
-  func3();
-  func4();
-  func5();
-  func6();
-  func7();
-  func8();
-  func9();
-  func10();
+int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    std::cout << argv[0] << " i [0 - 9]" << std::endl;
+    return 0;
+  }
+  int type = argv[1][0] - '0';
+  switch (type) {
+    case 0:
+      func1();
+      break;
+    case 1:
+      func2();
+      break;
+    case 2:
+      func3();
+      break;
+    case 3:
+      func4();
+      break;
+    case 4:
+      func5();
+      break;
+    case 5:
+      func6();
+      break;
+    case 6:
+      func7();
+      break;
+    case 7:
+      func8();
+      break;
+    case 8:
+      func9();
+      break;
+    case 9:
+      func10();
+      break;
+    default:
+      std::cout << "invalid type" << std::endl;
+      break;
+  }
+
+  return 0;
 }
