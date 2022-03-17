@@ -3,8 +3,6 @@
 #include <list>
 #include <queue>
 
-using namespace std;
-
 // 和stack栈容器适配器不同，queue容器适配器有2个开口，其中一个开口专门用来输入数据，另一个专门用来输出数据。
 // 这种存储结构最大的特点是，最先进入queue的元素，也可以最先从queue中出来，
 // 即用此容器适配器存储数据具有“先进先出（简称"FIFO"）”的特点，因此queue又称为队列适配器。
@@ -28,11 +26,11 @@ using namespace std;
 int main() {
   // 创建queue容器适配器的方式大致可分为以下几种:
   // 1.创建一个空的queue容器适配器，其底层使用的基础容器选择默认的deque容器：
-  std::queue<int> values1;
+  std::queue<int> q1;
 
   // 2.可以手动指定queue容器适配器底层采用的基础容器类型：
-  std::queue<int, std::list<int>> values21;
-  std::queue<int, std::deque<int>> values22;
+  std::queue<int, std::list<int>> q2;
+  std::queue<int, std::deque<int>> q3;
   // 在手动指定基础容器的类型时，其存储的数据类型必须和queue容器适配器存储的元素类型保持一致。
   // 作为queue容器适配器的基础容器，
   // 其必须提供front()、back()、push_back()、pop_front()、empty()和size()这几个成员函数，
@@ -40,24 +38,28 @@ int main() {
 
   // 3.可以用基础容器来初始化queue容器适配器，只要该容器类型和queue底层使用的基础容器类型相同即可：
   std::deque<int> d{1, 2, 3};
-  std::queue<int> my_queue1(d);
+  std::queue<int> q4(d);
+
   // 4.可以直接通过queue容器适配器来初始化另一个queue容器适配器，
   // 只要它们存储的元素类型以及底层采用的基础容器类型相同即可：
-  std::queue<int> my_queue21(my_queue1);
-  std::queue<int> my_queue22 = my_queue1;
-  // 第3、4种初始化方法中my_queue容器适配器的数据是经过拷贝得来的，也就是说，
-  // 操作my_queue容器适配器中的数据，并不会对d容器以及my_queue1容器适配器有任何影响；反过来也是如此。
+  std::queue<int> q5(q1);
+  std::queue<int> q6 = q1;
 
   std::deque<int> values{1, 2, 3};
-  std::queue<int> my_queue(values);
-  cout << "size of my_queue: " << my_queue.size() << endl;  // 3
-  while (!my_queue.empty()) {
-    cout << my_queue.front() << endl;
-    my_queue.pop();
+  std::queue<int> q7(values);
+  q7.emplace(4);
+  q7.push(5);
+  std::cout << q7.back() << std::endl;                          // 5
+  std::cout << "size of my_queue: " << q7.size() << std::endl;  // 5
+  while (!q7.empty()) {
+    std::cout << q7.front() << std::endl;
+    q7.pop();
   }
   // 1
   // 2
   // 3
+  // 4
+  // 5
 
   return 0;
 }
