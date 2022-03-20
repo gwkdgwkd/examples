@@ -158,26 +158,29 @@ void func2() {
   std::cout << m['b'] << std::endl;
 
   m['d'];  // key不存在，新增key，value为对应类型的默认值
+  m['e'] = 5;
   print(m);
-  // size:4
+  // size:5
   // a:1
   // b:2
   // c:3
   // d:0
+  // e:5
   m['d'] = 4;  // key已经存在，更新key对应的value
   print(m);
-  // size:4
+  // size:5
   // a:1
   // b:2
   // c:3
   // d:4
+  // e:5
 
   // 2.除了借助[]运算符获取map容器中指定键对应的值，还可以使用at()成员方法。
   //   和前一种方法相比，at()成员方法也需要根据指定的键，才能从容器中找到该键对应的值；
   //   不同之处在于，如果在当前容器中查找失败，该方法不会向容器中添加新的键值对，而是直接抛出out_of_range异常。
   std::cout << m.at('b') << std::endl;  // 2
   try {
-    m.at('e');
+    m.at('f');
   } catch (std::out_of_range e) {
     std::cout << e.what() << std::endl;  // map::at
   }
@@ -187,7 +190,7 @@ void func2() {
   //   反之，则指向map容器最后一个键值对之后的位置（和end()成功方法返回的迭代器一样）。
   std::map<char, int>::iterator it = m.find('b');
   std::cout << it->first << ":" << it->second << std::endl;  // b:2
-  it = m.find('e');
+  it = m.find('f');
   if (it == m.end()) {  // 当find()失败时，其返回指向最后一个键值对之后的位置
     std::cout << "not found" << std::endl;
   }
@@ -210,17 +213,20 @@ void func3() {
   // 但这与map容器会自动对存储的键值对进行排序并不冲突。
   // 当使用insert()方法向map容器的指定位置插入新键值对时，其底层会先将新键值对插入到容器的指定位置，
   // 如果其破坏了map容器的有序性，该容器会对新键值对的位置进行调整。
-  // 自C++11标准后，insert()成员方法的用法大致有以下4种
-  // 1.无需指定插入位置，直接将键值对添加到map容器中。insert()方法的语法格式有以下2种：
+  // 自C++11标准后，insert()成员方法的用法大致有以下4种。
+
+  std::map<char, int> m{{'a', 1}, {'e', 5}, {'c', 3}};
+
+  // 1.无需指定插入位置，直接将键值对添加到map容器中：
   //  引用传递一个键值对pair<iterator,bool> insert (const value_type& val);
   //  以右值引用的方式传递键值对template <class P> pair<iterator,bool> insert (P&& val);
-  // 其中，val参数表示键值对变量，同时该方法会返回一个pair对象，其中pair.first表示一个迭代器，pair.second为一个bool类型变量：
+  // 其中，val参数表示键值对变量，同时该方法会返回一个pair对象，
+  // pair.first表示一个迭代器，pair.second为一个bool类型变量：
   //  如果成功插入val，则该迭代器指向新插入的val，bool值为true；
-  //  如果插入val失败，则表明当前map容器中存有和val的键相同的键值对（用p表示），此时返回的迭代器指向p，bool值为false。
-  // 以上2种语法格式的区别在于传递参数的方式不同，即无论是局部定义的键值对变量还是全局定义的键值对变量，都采用普通引用传递的方式；
+  //  如果插入val失败，则表明当前map容器中存在和val的键相同的键值对，此时返回的迭代器指向它，bool值为false。
+  // 以上2种语法格式的区别在于传递参数的方式不同：
+  // 即无论是局部定义的键值对变量还是全局定义的键值对变量，都采用普通引用传递的方式；
   // 而对于临时的键值对变量，则以右值引用的方式传参。
-
-  std::map<char, int> m{{'a', 1}, {'b', 2}, {'c', 3}};
   std::pair<std::map<char, int>::iterator, bool> ret;
   // ret = m.insert(std::pair<char, int>{'d', 4});
   // ret = m.insert(std::make_pair('d', 4));
@@ -234,113 +240,266 @@ void func3() {
             << std::boolalpha << ret.second << std::endl;
   // c:3, false
 
-  // 2 除此之外，insert()方法还支持向map容器的指定位置插入新键值对，该方法的语法格式如下：
-  //  以普通引用的方式传递val参数iterator insert (const_iterator position, const value_type& val);
-  //  以右值引用的方式传递val键值对参数template <class P> iterator insert (const_iterator position, P&& val);
+  print(m);
+  // size:4
+  // a:1
+  // c:3
+  // d:4
+  // e:5
+
+  // 2.除此之外，insert()方法还支持向map容器的指定位置插入新键值对，该方法的语法格式如下：
+  //  以普通引用的方式传递val参数iterator insert(const_iterator position, const value_type& val);
+  //  以右值引用的方式传递val键值对参数template <class P> iterator insert(const_iterator position, P&& val);
   // 其中val为要插入的键值对变量。注意，和第1种方式的语法格式不同，这里insert()方法返回的是迭代器，而不再是pair对象：
   //  如果插入成功，insert()方法会返回一个指向map容器中已插入键值对的迭代器；
   //  如果插入失败，insert()方法同样会返回一个迭代器，该迭代器指向map容器中和val具有相同键的那个键值对。
-  // std::map<string, string> mymap1;
-  // std::map<string, string>::iterator it = mymap1.begin();
-  // // 向it位置以普通引用的方式插入STL
-  // auto iter11 = mymap1.insert(it, STL);
-  // cout << iter11->first << " " << iter11->second << endl;  // STL教程 stl
-  // // 向it位置以右值引用的方式插入临时键值对
-  // auto iter2 = mymap1.insert(it, std::pair<string, string>("C语言教程", "c"));
-  // cout << iter2->first << " " << iter2->second << endl;  // C语言教程 c
-  // 插入失败样例
-  // auto iter3 = mymap1.insert(
-  //     it, std::pair<string, string>("STL教程", "http://c.biancheng.net/java/"));
-  // cout << iter3->first << " " << iter3->second << endl;  // STL教程 stl
-  // 3 insert()方法还支持向当前map容器中插入其它map容器指定区域内的所有键值对，该方法的语法格式如下：
-  // template <class InputIterator> void insert (InputIterator first, InputIterator last);
-  // 其中first和last都是迭代器，它们的组合<first,last>可以表示某map容器中的指定区域。
-  // std::map<std::string, std::string> copymap;
-  // std::map<string, string>::iterator first = ++myMap.begin();
-  // std::map<string, string>::iterator last = myMap.end();
-  // copymap.insert(first, last);
-  // for (auto iter = copymap.begin(); iter != copymap.end(); ++iter) {
-  //   cout << iter->first << " " << iter->second << endl;
-  // }
-  // Cxxx
-  // C语言教程 http://c.biancheng.net/c/
-  // Python教程 http://c.biancheng.net/python/
-  // 4 除了以上一种格式外，insert()方法还允许一次向map容器中插入多个键值对，其语法格式为：
-  // void insert ({val1, val2, ...}); 其中，vali都表示的是键值对变量。
-  // std::map<std::string, std::string> mymap2;
-  //向 mymap 容器中添加 3 个键值对
-  // mymap2.insert({{"STL教程", "http://c.biancheng.net/stl/"},
-  //                {"C语言教程", "http://c.biancheng.net/c/"},
-  //                {"Java教程", "http://c.biancheng.net/java/"}});
-  // for (auto iter = mymap2.begin(); iter != mymap2.end(); ++iter) {
-  //   cout << iter->first << " " << iter->second << endl;
-  // }
-  // C语言教程 http://c.biancheng.net/c/
-  // Java教程 http://c.biancheng.net/java/
-  // STL教程 http://c.biancheng.net/stl/
+  std::map<char, int>::iterator it = m.begin();
+  std::advance(it, 2);
+  std::cout << it->first << ":" << it->second << std::endl;  // d:4
+  std::map<char, int>::iterator ret2 = m.insert(it, {'b', 2});
+  std::cout << ret2->first << ":" << ret2->second << std::endl;  // b:2
+  ret2 = m.insert(it, {'d', 2});                                 // failed
+  std::cout << ret2->first << ":" << ret2->second << std::endl;  // d:4
+  print(m);
+  // size:5
+  // a:1
+  // b:2
+  // c:3
+  // d:4
+  // e:5
 
-  // map容器模板类中提供有operator[]和insert()这2个成员方法具有相同的功能，它们既可以实现向map容器中添加新的键值对元素，也可以实现更新（修改）map容器已存储键值对的值。
-  // std::map<string, string> mymap3;
-  // 借用operator[]添加新键值对
-  // mymap3["STL教程"] = "http://c.biancheng.net/java/";
-  // cout << "old mymap：" << mymap3["STL教程"] << endl;
-  // 借用operator[]更新某个键对应的值
-  // mymap3["STL教程"] = "http://c.biancheng.net/stl/";
-  // cout << "new mymap：" << mymap3["STL教程"] << endl;
-  // 借用insert()添加新键值对
-  // std::pair<string, string> STL1 = {"Java教程", "java"};
-  // std::pair<std::map<string, string>::iterator, bool> ret1;
-  // ret1 = mymap3.insert(STL1);
-  // cout << "old ret.iter = <{" << ret1.first->first << ", " << ret1.first->second
-  //      << "}, " << ret1.second << ">" << endl;
-  // 借用insert()更新键值对
-  // mymap3.insert(STL1).first->second = "http://c.biancheng.net/java/";
-  // cout << "new ret.iter = <" << ret1.first->first << ", " << ret1.first->second
-  //      << ">" << endl;
-  // old mymap：http://c.biancheng.net/java/
-  // new mymap：http://c.biancheng.net/stl/
-  // old ret.iter = <{Java教程, java}, 1>
-  // new ret.iter = <Java教程, http://c.biancheng.net/java/>
+  // 3.insert()方法还支持向当前map容器中插入其它map容器指定区域内的所有键值对，该方法的语法格式如下：
+  // template <class InputIterator> void insert(InputIterator first, InputIterator last);
+  // 其中first和last都是迭代器，它们的组合<first,last>可以表示某map容器中的指定区域。
+  std::map<char, int> m1{{'f', 6}, {'e', 7}, {'g', 8}};
+  m.insert(m1.begin(), m1.end());
+  print(m);
+  // size:7
+  // a:1
+  // b:2
+  // c:3
+  // d:4
+  // e:5
+  // f:6
+  // g:8
+
+  // 4.除了以上一种格式外，insert()方法还允许一次向map容器中插入多个键值对，其语法格式为：
+  // void insert({val1, val2, ...}); 其中，vali都表示的是键值对变量。
+  m.insert({{'h', 9}, {'e', 7}, {'g', 8}, {'i', 10}});
+  print(m);
+  // size:9
+  // a:1
+  // b:2
+  // c:3
+  // d:4
+  // e:5
+  // f:6
+  // g:8
+  // h:9
+  // i:10
+
+  // 借用insert()更新键值对：
+  m.insert({'b', 5}).first->second = 10;
+  print(m);
+  // size:9
+  // a:1
+  // b:10
+  // c:3
+  // d:4
+  // e:5
+  // f:6
+  // g:8
+  // h:9
+  // i:10
+}
+
+class A {
+ public:
+  A() { std::cout << "A()" << std::endl; }
+  A(int num) : num(num) { std::cout << "A(int)" << std::endl; }
+  A(const A& other) : num(other.num) { std::cout << "copy" << std::endl; }
+  ~A() { std::cout << "~A()" << std::endl; }
+  A(A&& other) : num(other.num) { std::cout << "move" << std::endl; }
+  A& operator=(const A& other) {
+    this->num = other.num;
+    return *this;
+  }
+
+ private:
+  int num;
+};
+void func4() {
+  // map容器模板类中提供有operator[]和insert()这2个成员方法具有相同的功能，
+  // 它们既可以实现向map容器中添加新的键值对元素，也可以实现更新（修改）map容器已存储键值对的值。
   // map模板类中operator[]和insert()的功能发生了重叠，这就产生了一个问题，谁的执行效率更高呢？
-  // 当实现“向map容器中添加新键值对元素”的操作时，insert()成员方法的执行效率更高；而在实现“更新map容器指定键值对的值”的操作时，operator[]的效率更高。
-  // 1 向map容器中增添元素，insert()效率更高：
-  // mymap["STL教程"] = "http://c.biancheng.net/java/";
-  // mymap["STL教程"]实际上是 mymap.operator[](“STL教程”)的缩写（底层调用的operator[]方法），该方法会返回一个指向“STL教程”对应的value值的引用。
-  // 由于此时mymap容器是空的，并没有"STL教程"对应的value值。这种情况下，operator[]方法会默认构造一个string对象，并将其作为"STL教程"对应的value值，然后返回一个指向
-  // 此string对象的引用。在此基础上，代码还会将"http://c.biancheng.net.java/"赋值给这个string对象。相当于以下流程：
-  // typedef map<string, string> mstr;
-  // pair<mstr::iterator, bool> res = mymap.insert(mstr::value_type("STL教程", string()));
-  // res.first->second = "http://c.biancheng.net/java/";
-  // 使用operator[]添加新键值对元素的流程是，先构造一个有默认值的键值对，然后再为其value赋值。那么，为什么不直接构造一个要添加的键值对元素呢？
-  // mymap.insert(mstr::value_type("STL教程", "http://c.biancheng.net/java/"));
-  // 和上面程序的执行效果完全相同，但它省略了创建临时string对象的过程以及析构该对象的过程，同时还省略了调用string类重载的赋值运算符。由于可见，同样是完成向map容器添加新键
-  // 值对，insert()方法比operator[]的执行效率更高。
-  // 2 更新map容器中的键值对，operator[]效率更高：
-  // mymap["STL教程"] = "http://c.biancheng.net/stl/";
-  // std::pair<string, string> STL = { "Java教程","http://c.biancheng.net/python/" };
-  // mymap.insert(STL).first->second = "http://c.biancheng.net/java/";
+  // 当实现“向map容器中添加新键值对元素”的操作时，insert()成员方法的执行效率更高；
+  // 而在实现“更新map容器指定键值对的值”的操作时，operator[]的效率更高。
+  // 1.向map容器中增添元素，insert()效率更高：
+  // 使用operator[]添加新键值对元素的流程是，先构造一个有默认值的键值对，key是期望值，value是默认值，
+  // 然后再为其value赋值。那么，为什么不直接构造一个要添加的键值对元素呢？
+  // insert和上面程序的执行效果完全相同，但它省略了创建临时value对象的过程以及析构该对象的过程，
+  // 同时还省略了调用重载的赋值运算符。、
+  // 由此可见，同样是完成向map容器添加新键值对，insert()方法比operator[]的执行效率更高。
+  std::map<int, A> m;
+  A a(2);  // A(int)
+  m.insert({1, a});
+  // copy
+  // move
+  // ~A()
+  m[2] = a;
+  // A()
+
+  // ~A()
+  // ~A()
+  // ~A()
+
+  // 2.更新map容器中的键值对，operator[]效率更高：
   // 仅仅从语法形式本身来考虑，或许已经促使很多读者选择operator[]了。
-  // insert()方法在进行更新操作之前，需要有一个pair类型（也就是map::value_type类型）元素做参数。这意味着，该方法要多构造一个pair对象（附带要构造2个string对象），并且事
-  // 后还要析构此pair对象（附带2个string对象的析构）。
-  // 而和insert()方法相比，operator[]就不需要使用pair对象，自然不需要构造（并析构）任何pair对象或者string对象。
+  // insert()方法在进行更新操作之前，需要有一个pair类型（也就是map::value_type类型）元素做参数。
+  // 这意味着，该方法要多构造一个pair对象（附带要构造first和second），
+  // 并且事后还要析构此pair对象（附带要析够first和second）。
+  // 而和insert()方法相比，operator[]就不需要使用pair对象，
+  // 自然不需要构造（并析构）任何pair对象或者string对象。
   // 因此，对于更新已经存储在map容器中键值对的值，应优先使用operator[]方法。
 }
 
-void func4() {}
+void func5() {
+  // map类模板中还提供了emplace()和emplace_hint()成员函数，也可以实现向map容器中插入新的键值对。
+  // 和insert()方法相比，emplace()和emplace_hint()方法的使用要简单很多，因为它们各自只有一种语法格式。
+  // 1.emplace()方法的语法格式如下：
+  //   template <class... Args> pair<iterator, bool> emplace(Args && ... args);
+  //   参数(Args&&... args)指的是，这里只需要将创建新键值对所需的数据作为参数直接传入即可，
+  //   此方法可以自行利用这些数据构建出指定的键值对。
+  //   另外，该方法的返回值也是一个pair对象，其中pair.first为一个迭代器，pair.second为一个bool类型变量：
+  //   当该方法将键值对成功插入到map容器中时，其返回的迭代器指向该新插入的键值对，同时bool变量的值为true；
+  //   当插入失败时，则表明map容器中存在具有相同键的键值对，此时返回的迭代器指向此具有相同键的键值对，同时bool变量的值为false。
+  std::map<char, int> m;
+  std::pair<std::map<char, int>::iterator, bool> ret = m.emplace('b', 2);
+  std::cout << std::boolalpha << ret.second << ", " << ret.first->first << ":"
+            << ret.first->second << std::endl;
+  ret = m.emplace('e', 5);
+  std::cout << std::boolalpha << ret.second << ", " << ret.first->first << ":"
+            << ret.first->second << std::endl;
+  ret = m.emplace('a', 1);
+  std::cout << std::boolalpha << ret.second << ", " << ret.first->first << ":"
+            << ret.first->second << std::endl;
+  // true, b:2
+  // true, e:5
+  // true, a:1
+  print(m);
+  // size:3
+  // a:1
+  // b:2
+  // e:5
 
-void func5() {}
+  // 2.emplace_hint()方法的功能和emplace()类似，其语法格式如下：
+  //   template <class... Args> iterator emplace_hint(const_iterator position, Args && ... args);
+  //   和emplace()语法格式相比，有以下2点不同：
+  //   该方法不仅要传入创建键值对所需要的数据，还需要传入一个迭代器作为第一个参数，
+  //   指明要插入的位置（新键值对键会插入到该迭代器指向的键值对的前面）；
+  //   该方法的返回值是一个迭代器，而不再是pair对象。
+  //    当成功插入新键值对时，返回的迭代器指向新插入的键值对；
+  //    反之，如果插入失败，则表明map容器中存有相同键的键值对，返回的迭代器就指向这个键值对。
+  std::map<char, int>::iterator it1 = m.begin();
+  std::advance(it1, 2);
+  std::cout << it1->first << ":" << it1->second << std::endl;  // e:5
+  std::map<char, int>::iterator it2 =
+      m.emplace_hint(it1, std::pair<char, int>({'c', 3}));
+  std::cout << it2->first << ":" << it2->second << std::endl;  // c:3
+  it2 = m.emplace_hint(it1, std::pair<char, int>({'a', 3}));
+  std::cout << it2->first << ":" << it2->second << std::endl;  // a:1
+  print(m);
+  // size:4
+  // a:1
+  // b:2
+  // c:3
+  // e:5
 
-void func6() {}
+  // 向map容器中插入键值对时，emplace()和emplace_hint()方法都省略了移动键值对的过程，因此执行效率更高。
+  // 原因很简单，它们向map容器插入键值对时，底层的实现方式不同：
+  // 使用insert()向map容器中插入键值对的过程是，先创建该键值对，然后再将该键值对复制或者移动到map容器中的指定位置；
+  // 使用emplace()或emplace_hint()插入键值对的过程是，直接在map容器中的指定位置构造该键值对。
+  std::map<int, A> m1;
+  m1.insert({1, A(2)});
+  // A(int)
+  // move
+  // move
+  // ~A()
+  // ~A()
+  m1.emplace(2, A(4));
+  // A(int)
+  // move
+  // ~A()
+  m1.emplace_hint(m1.begin(), std::pair<char, A>({3, A(6)}));
+  // A(int)
+  // move
+  // move
+  // ~A()
 
-void func7() {}
+  // ~A()
+  // ~A()
+  // ~A()
+  // ~A()
+}
 
-void func8() {}
+void func6() {
+  // map类模板中还提供有lower_bound(key)和upper_bound(key)成员方法，它们的功能是类似的，唯一的区别在于：
+  // lower_bound(key)返回的是指向第一个键不小于key的键值对的迭代器；
+  // upper_bound(key)返回的是指向第一个键大于key的键值对的迭代器；
+  std::map<int, std::string> m{{1, "一"}, {2, "一"}, {3, "一"},
+                               {4, "一"}, {5, "一"}, {6, "一"}};
+  auto it = m.lower_bound(2);
+  std::cout << it->first << " " << it->second << std::endl;  // 2 一
+  it = m.upper_bound(2);
+  std::cout << it->first << " " << it->second << std::endl;  // 3 一
+  // lower_bound(key)和upper_bound(key)更多用于multimap容器，在map容器中很少用到。
 
-void func9() {}
+  // equal_range(key)成员方法可以看做是lower_bound(key)和upper_bound(key)的结合体，
+  // 该方法会返回一个pair对象，其中的2个元素都是迭代器类型，其中pair.first实际上就
+  // 是lower_bound(key)的返回值，而pair.second则等同于upper_bound(key)的返回值。
+  std::pair<std::map<int, std::string>::iterator,
+            std::map<int, std::string>::iterator>
+      myPair = m.equal_range(4);
+  for (auto iter = myPair.first; iter != myPair.second; ++iter) {
+    std::cout << iter->first << " " << iter->second << std::endl;  // 4 一
+  }
+  // 和lower_bound(key)、upper_bound(key)一样，该方法也更常用于multimap容器，
+  // 因为map容器中各键值对的键的值都是唯一的，因此通过map容器调用此方法，其返回的范围内最多也只有1个键值对。
+}
+
+void func7() {
+  std::map<int, std::string> m{{1, "一"}, {2, "一"}, {3, "一"},
+                               {4, "一"}, {5, "一"}, {6, "一"}};
+
+  m.erase(m.begin());
+  print(m);
+  // size:5
+  // 2:一
+  // 3:一
+  // 4:一
+  // 5:一
+  // 6:一
+
+  m.erase(3);
+  print(m);
+  // size:4
+  // 2:一
+  // 4:一
+  // 5:一
+  // 6:一
+
+  std::cout << std::boolalpha << m.empty() << std::endl;  // false
+  std::cout << m.count(2) << std::endl;                   // 1
+  std::cout << m.max_size() << std::endl;                 // 128102389400760775
+
+  m.clear();
+  print(m);
+  // size:0
+}
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 8]" << std::endl;
+    std::cout << argv[0] << " i [0 - 6]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
@@ -365,12 +524,6 @@ int main(int argc, char* argv[]) {
       break;
     case 6:
       func7();
-      break;
-    case 7:
-      func8();
-      break;
-    case 8:
-      func9();
       break;
     default:
       std::cout << "invalid type" << std::endl;
