@@ -2,8 +2,6 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
-
 // find()、find_if()、search()这些函数的底层实现都采用的是顺序查找（逐个遍历）的方式，在某些场景中的执行效率并不高。
 // 例如，当指定区域内的数据处于有序状态时，如果想查找某个目标元素，更推荐使用二分查找的方法。
 // C++ STL标准库中还提供有lower_bound()、upper_bound()、equal_range()以及binary_search()这4个查找函数，
@@ -21,10 +19,10 @@ using namespace std;
 // val用于指定目标元素；
 // comp用于自定义比较规则，此参数可以接收一个包含2个形参（第二个形参值始终为val）且返回值为bool类型的函数，
 // 可以是普通函数，也可以是函数对象。
-bool mycomp1(int i, int j) { return i > j; }
+bool mycomp1(int i, int j) { return i < j; }
 class mycomp2 {
  public:
-  bool operator()(const int& i, const int& j) { return i > j; }
+  bool operator()(const int& i, const int& j) { return i < j; }
 };
 // 实际上，第一种语法格式也设定有比较规则，只不过此规则无法改变，
 // 即使用<小于号比较[first, last)区域内某些元素和val的大小，直至找到一个不小于val的元素。
@@ -52,19 +50,24 @@ class mycomp2 {
 //   return first;
 // }
 
-int a[5] = {1, 2, 3, 4, 5};
-std::vector<int> v{1, 2, 3, 4, 5};
+int a[7] = {1, 2, 3, 3, 3, 4, 5};
+std::vector<int> v{1, 2, 3, 3, 3, 4, 5};
 
 void func1() {
-  int* p = lower_bound(a, a + 5, 3);
-  cout << "*p = " << *p << endl;
-  // *p = 3
+  int* p = std::lower_bound(a, a + 7, 3);
+  std::cout << "a[" << p - a << "]=" << *p << std::endl;  // a[2]=3
 
-  std::vector<int>::iterator it = lower_bound(v.begin(), v.end(), 3, mycomp1);
-  std::cout << "*iter = " << *it << std::endl;  // *iter = 3
+  p = std::lower_bound(a, a + 7, 4);
+  std::cout << "a[" << p - a << "]=" << *p << std::endl;  // a[5]=4
 
-  it = lower_bound(v.begin(), v.end(), 3, mycomp2());
-  std::cout << "*iter = " << *it << std::endl;  // *iter = 3
+  std::vector<int>::iterator it =
+      std::lower_bound(v.begin(), v.end(), 3, mycomp1);
+  std::cout << "it[" << std::distance(v.begin(), it) << "]=" << *it
+            << std::endl;  // it[2]=3
+
+  it = std::lower_bound(v.begin(), v.end(), 4, mycomp2());
+  std::cout << "it[" << std::distance(v.begin(), it) << "]=" << *it
+            << std::endl;  // it[5]=4
 }
 
 // upper_bound用于在指定范围内查找大于目标值的第一个元素。该函数的语法格式有2种，分别是：
@@ -102,15 +105,20 @@ void func1() {
 //   return first;
 // }
 void func2() {
-  int* p = upper_bound(a, a + 5, 3);
-  cout << "*p = " << *p << endl;
-  // *p = 4
+  int* p = std::upper_bound(a, a + 7, 3);
+  std::cout << "a[" << p - a << "]=" << *p << std::endl;  // a[5]=4
 
-  std::vector<int>::iterator it = upper_bound(v.begin(), v.end(), 3, mycomp1);
-  std::cout << "*iter = " << *it << std::endl;  // *iter = 1
+  p = std::upper_bound(a, a + 7, 4);
+  std::cout << "a[" << p - a << "]=" << *p << std::endl;  // a[6]=5
 
-  it = upper_bound(v.begin(), v.end(), 3, mycomp2());
-  std::cout << "*iter = " << *it << std::endl;  // *iter = 1
+  std::vector<int>::iterator it =
+      std::upper_bound(v.begin(), v.end(), 3, mycomp1);
+  std::cout << "it[" << std::distance(v.begin(), it) << "]=" << *it
+            << std::endl;  // it[5]=4
+
+  it = std::upper_bound(v.begin(), v.end(), 4, mycomp2());
+  std::cout << "it[" << std::distance(v.begin(), it) << "]=" << *it
+            << std::endl;  // it[6]=5
 }
 
 // equel_range用于在指定范围内查找等于目标值的所有元素。
@@ -142,21 +150,30 @@ void func2() {
 //     return std::make_pair ( it, std::upper_bound(it,last,val,comp) );
 // }
 void func3() {
-  int a1[9] = {1, 2, 3, 4, 4, 4, 5, 6, 7};
-  pair<int*, int*> range = equal_range(a1, a1 + 9, 4);
-  std::cout << "a[9]：";
-  for (int* p = range.first; p < range.second; ++p) {
+  std::pair<int*, int*> range1 = std::equal_range(a, a + 7, 3);
+  for (int* p = range1.first; p < range1.second; ++p) {
     std::cout << *p << " ";
   }
-  std::cout << std::endl;  // a[9]：4 4 4
-  std::vector<int> my2{7, 8, 5, 4, 3, 3, 3, 3, 2, 1};
-  std::pair<std::vector<int>::iterator, vector<int>::iterator> range2;
-  range2 = equal_range(my2.begin(), my2.end(), 3, mycomp2());
-  std::cout << "myvector：";
+  std::cout << std::endl;  // 3 3 3
+
+  range1 = std::equal_range(a, a + 7, 4);
+  for (int* p = range1.first; p < range1.second; ++p) {
+    std::cout << *p << " ";
+  }
+  std::cout << std::endl;  // 4
+
+  std::pair<std::vector<int>::iterator, std::vector<int>::iterator> range2;
+  range2 = std::equal_range(v.begin(), v.end(), 3, mycomp1);
   for (auto it = range2.first; it != range2.second; ++it) {
     std::cout << *it << " ";
   }
-  std::cout << std::endl;  // myvector：3 3 3 3
+  std::cout << std::endl;  // 3 3 3
+
+  range2 = std::equal_range(v.begin(), v.end(), 4, mycomp2());
+  for (auto it = range2.first; it != range2.second; ++it) {
+    std::cout << *it << " ";
+  }
+  std::cout << std::endl;  // 4
 }
 
 // binary_search用于查找指定区域内是否包含某个目标元素。该函数有2种语法格式，分别为：
@@ -183,18 +200,38 @@ void func3() {
 //     return (!(first == last) && !(comp(val, *first)));
 // }
 void func4() {
-  int a[7] = {1, 2, 3, 4, 5, 6, 7};
-  bool haselem = binary_search(a, a + 9, 4);
+  bool haselem = std::binary_search(a, a + 7, 4);
   std::cout.setf(std::ios::boolalpha);
-  cout << haselem << endl;  // true
-  haselem = binary_search(a, a + 9, 8);
-  cout << haselem << endl;  // false
+  std::cout << haselem << std::endl;  // true
 
-  haselem = binary_search(v.begin(), v.end(), 3, mycomp1);
-  cout << haselem << endl;  // false
+  haselem = std::binary_search(a, a + 7, 8);
+  std::cout << haselem << std::endl;  // false
 
-  haselem = binary_search(v.begin(), v.end(), 3, mycomp2());
-  cout << haselem << endl;  // false
+  haselem = std::binary_search(v.begin(), v.end(), 3, mycomp1);
+  std::cout << haselem << std::endl;  // true
+
+  haselem = std::binary_search(v.begin(), v.end(), 8, mycomp2());
+  std::cout << haselem << std::endl;  // false
+}
+
+bool mycomp3(int i, int j) { return i > j; }  // 降序
+void func5() {
+  std::vector<int> v{5, 4, 3, 3, 3, 2, 1};
+
+  std::vector<int>::iterator it =
+      std::lower_bound(v.begin(), v.end(), 3, mycomp3);
+  std::cout << "it[" << std::distance(v.begin(), it) << "]=" << *it
+            << std::endl;  // it[2]=3
+  it = std::upper_bound(v.begin(), v.end(), 3, mycomp3);
+  std::cout << "it[" << std::distance(v.begin(), it) << "]=" << *it
+            << std::endl;  // it[5]=2
+
+  std::pair<std::vector<int>::iterator, std::vector<int>::iterator> range;
+  range = std::equal_range(v.begin(), v.end(), 3, mycomp3);
+  for (auto it = range.first; it != range.second; ++it) {
+    std::cout << *it << " ";
+  }
+  std::cout << std::endl;  // 3 3 3
 }
 
 int main() {
@@ -202,5 +239,6 @@ int main() {
   func2();
   func3();
   func4();
+  func5();
   return 0;
 }
