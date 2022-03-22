@@ -1,16 +1,14 @@
 #include <iostream>
 #include <list>
 
-using namespace std;
-
 // 理解自定义分配子的合理用法
 
 // STL默认的内存管理器太慢、或者浪费内存，或者在使用STL的情形下导致了太多的内存碎片。
 // 下面情形中的每一个都对应了自定义分配子所适合解决的一个问题：
-//  你相信自己可以做的更好；
-//  或者发现allocator<T>是线程安全的，而你所感兴趣的是单线程环境下执行，不愿意为同步付出不必要的开销；
-//  或者指定某些容器中的对象通常是一起使用的，想把它们放在一个特殊堆中的相邻位置上，以便尽可能地做到引用局部化；
-//  或者你想建立一个与共享内存相对应的特殊的堆，然后在内存中存放一个或多个容器，以便其他进程可以共享这些容器。
+// 1.你相信自己可以做的更好；
+// 2.或者发现allocator<T>是线程安全的，而你所感兴趣的是单线程环境下执行，不愿意为同步付出不必要的开销；
+// 3.或者指定某些容器中的对象通常是一起使用的，想把它们放在一个特殊堆中的相邻位置上，以便尽可能地做到引用局部化；
+// 4.或者你想建立一个与共享内存相对应的特殊的堆，然后在内存中存放一个或多个容器，以便其他进程可以共享这些容器。
 
 // 有一些特殊过程，采用malloc和free内存模型来管理一个位于共享内存的堆：
 void mallocShared(size_t byteNeeded);
@@ -28,7 +26,8 @@ void freeShared(void* ptr);
 // };
 // typedef vector<double, ShareMemoryAllocator<double> > SharedDoubleVec;
 // SharedDoubleVec v;
-// v所分配的用来容纳其元素的内存将来自共享内存。而v自己（包括所有的数据成员）几乎肯定不会位于共享内存中。v只是普通的基于栈的对象。
+// v所分配的用来容纳其元素的内存将来自共享内存。
+// 而v自己（包括所有的数据成员）几乎肯定不会位于共享内存中。v只是普通的基于栈的对象。
 // 如果想把v的内容和v自身都放到共享内存中，需要这样做：
 // void* pVectorMemory = mallocShared(sizeof(SharedDoubleVec));
 // SharedDoubleVec* pv = new (pVectorMemory) SharedDoubleVec;
