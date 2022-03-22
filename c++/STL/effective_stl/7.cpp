@@ -5,14 +5,12 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 // 如果容器中包括了通过new创建的指针，切记在容器对象析构前将指针delete掉
 
 // 指针容器在自己被析构时会析构所包含的每个元素，但指针的“析构函数”不做任何事情，当然也不会调用delete。
 class Widget {};
 void doSomething() {  // 导致资源泄露
-  vector<Widget *> vwp;
+  std::vector<Widget *> vwp;
   for (int i = 0; i < 10; ++i) {
     vwp.push_back(new Widget);
   }
@@ -20,11 +18,11 @@ void doSomething() {  // 导致资源泄露
 
 // 简单的做法是：
 void doSomething1() {
-  vector<Widget *> vwp;
+  std::vector<Widget *> vwp;
   for (int i = 0; i < 10; ++i) {
     vwp.push_back(new Widget);
   }
-  for (vector<Widget *>::iterator i = vwp.begin(); i != vwp.end(); ++i) {
+  for (std::vector<Widget *>::iterator i = vwp.begin(); i != vwp.end(); ++i) {
     delete *i;
   }
   // 这段代码可以删除，但是不是异常安全的
@@ -32,22 +30,22 @@ void doSomething1() {
 }
 
 template <typename T>
-struct DeleteObject : public unary_function<const T *, void> {
+struct DeleteObject : public std::unary_function<const T *, void> {
   void operator()(const T *ptr) const { delete ptr; }
 };
 void doSomething2() {
-  vector<Widget *> vwp;
+  std::vector<Widget *> vwp;
   for (int i = 0; i < 10; ++i) {
     vwp.push_back(new Widget);
   }
-  for_each(vwp.begin(), vwp.end(), DeleteObject<Widget>());
+  std::for_each(vwp.begin(), vwp.end(), DeleteObject<Widget>());
 }
 
 // 从没有虚析构函数的类进行公有继承是C++的一项重要禁忌
-class SpecialString : public string {};  // string没有虚析构函数
+class SpecialString : public std::string {};  // string没有虚析构函数
 void doSomething3() {
-  deque<SpecialString *> dssp;
-  for_each(dssp.begin(), dssp.end(), DeleteObject<string>());
+  std::deque<SpecialString *> dssp;
+  std::for_each(dssp.begin(), dssp.end(), DeleteObject<std::string>());
   // 不确定的行为。通过基类的指针删除派生类对象，而基类又没有虚析构函数
 }
 
@@ -59,7 +57,7 @@ struct DeleteObject1 {
   }
 };
 void doSomething4() {
-  deque<SpecialString *> dssp;
+  std::deque<SpecialString *> dssp;
   for (int i = 0; i < 10; ++i) {
     dssp.push_back(new SpecialString);
   }
@@ -70,9 +68,9 @@ void doSomething4() {
 }
 
 void doSomething5() {
-  vector<shared_ptr<Widget>> vwp;
+  std::vector<std::shared_ptr<Widget>> vwp;
   for (int i = 0; i < 10; ++i) {
-    vwp.push_back(shared_ptr<Widget>(new Widget));
+    vwp.push_back(std::shared_ptr<Widget>(new Widget));
   }
   // 不会有Widget资源泄露，即使上面的代码有异常被抛出
   // 永远都不要错误的认为：可以通过创建auto_ptr的容器使指针被自动删除。这个想法很可怕，也很危险。
