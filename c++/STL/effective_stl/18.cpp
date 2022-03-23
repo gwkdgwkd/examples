@@ -1,8 +1,6 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
-
 // 避免使用vector<bool>
 
 // 作为一个STL容器，vector<bool>只要两点不对：
@@ -18,23 +16,29 @@ using namespace std;
 // 位域与bool相似，它只能表示两个可能的值。它们之间有一个很重要的区别：
 // 可以创建一个指向bool的指针，而指向单个位的指针则是不允许的。
 // 指向单个位的引用也是被禁止的，这使vector<bool>的接口有问题，因为vector<T>::operator[]的返回值应该是T&。
-// 如果vector<bool>中存储的确实是bool，那么没问题。但实际并非如此，所以vector<T>::operator[]需要返回单个位的引用，这个引用不存在。
+// 如果vector<bool>中存储的确实是bool，那么没问题。
+// 但实际并非如此，所以vector<T>::operator[]需要返回单个位的引用，这个引用不存在。
 // 为了克服这一困难，vector<T>::operator[]返回一个对象，这个对象表现的像是一个指向单个位的引用，即所谓的代理对象。
 
 // vector<bool>之所以会出现在C++标准中，是因为一个雄心勃勃的试验，但这个试验失败了。
-// 代理对象在C++软件开发中经常会很有用，决定开发vector<boo>，以演示STL如何支持“通过代理来存取其元素的容器”。于是C++标准中有了这个例子。
+// 代理对象在C++软件开发中经常会很有用，决定开发vector<boo>，以演示STL如何支持“通过代理来存取其元素的容器”。
+// 于是C++标准中有了这个例子。
 // 后来发现，要创建一个基于代理的容器，同时又要求它满足STL容器的所有要求是不可能的。
 // 由于种种原因，失败了的尝试被遗漏在标准中。
 
 // 当需要vector<bool>时，应该使用什么呢？标准库提供了两种选择，可以满足绝大多数的需求：
-//  1 deque<bool>，deque几乎提供了vector提供的一切，但deque<bool>是一个STL容器，而且确是存储bool。
-//    deque<bool>中的元素不是连续的，不能把deque<bool>中的数据传递给一个期望bool数组的C API。vector<bool>也不能这样做。
-//  2 bitset，它不是容器，但它是标准C++库的一部分。与容器不同的是，它的大小（即元素的个数）在编译时就确定了，所以它不支持插入和删除元素。
-//    而且因为它不是一个STL容器，所以它不支持迭代器。但与vector<bool>一样，使用了紧凑表示，每个值提供一位空间。
-//    提供了vector<bool>所特有的、对位的集合有意义的成员函数。如果不需要迭代器和动态改变大小，那么bitset会很合适。
+// 1.deque<bool>，deque几乎提供了vector提供的一切，但deque<bool>是一个STL容器，而且确是存储bool。
+//   deque<bool>中的元素不是连续的，不能把deque<bool>中的数据传递给一个期望bool数组的C API。
+//   vector<bool>也不能这样做。
+// 2.bitset，它不是容器，但它是标准C++库的一部分。
+//   与容器不同的是，它的大小（即元素的个数）在编译时就确定了，所以它不支持插入和删除元素。
+//   而且因为它不是一个STL容器，所以它不支持迭代器。
+//   但与vector<bool>一样，使用了紧凑表示，每个值提供一位空间。
+//   提供了vector<bool>所特有的、对位的集合有意义的成员函数。
+//   如果不需要迭代器和动态改变大小，那么bitset会很合适。
 
 int main() {
-  vector<bool> v;
+  std::vector<bool> v;
   // bool *pb = &v[0];  // 不能编译
 
   return 0;
