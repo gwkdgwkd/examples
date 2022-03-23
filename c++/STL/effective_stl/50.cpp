@@ -1,7 +1,5 @@
 #include <iostream>
 
-using namespace std;
-
 // 熟悉与STL相关的Web站点
 
 // 一位STL程序员都会经常光顾的站点：

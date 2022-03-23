@@ -3,8 +3,6 @@
 #include <list>
 #include <vector>
 
-using namespace std;
-
 // 确保目标足够大
 
 // STL最受欢迎的要属容器了，是STL最重要的成就之一。STL算法也有此殊荣。STL中有8个容器，却包含超过100个算法。
@@ -13,20 +11,21 @@ using namespace std;
 // 要在算法执行过程中增大目标区间，请使用插入性迭代器。
 // 比如back_inserter、front_inserter和inserter返回的迭代器。
 
-int transmogrify(int x) {}
+int transmogrify(int x) { return 2; }
 
 int main() {
-  vector<int> values;
-  vector<int> results;
+  std::vector<int> values;
+  std::vector<int> results;
   transform(values.begin(), values.end(), results.end(), transmogrify);
   // transform调用是错误的，因为导致了对无效对象的赋值操作。
 
   results.reserve(results.size() + values.size());
   transform(values.begin(), values.end(), back_inserter(results), transmogrify);
   // back_inserter可适用于所有提供了push_back方法的容器（所有标准序列容器：vector、string、deque和list）。
-  // 在头部插入调用front_inserter，在内部利用了push_front，所以front_inserter仅适用与提供了push_front的容器（deque和list）。
+  // 在头部插入调用front_inserter，在内部利用了push_front，
+  // 所以front_inserter仅适用与提供了push_front的容器（deque和list）。
 
-  list<int> result1;
+  std::list<int> result1;
   results.reserve(result1.size() + values.size());  // 预先调用reseve
   transform(values.begin(), values.end(), front_inserter(result1),
             transmogrify);

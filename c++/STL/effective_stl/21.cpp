@@ -1,21 +1,21 @@
 #include <iostream>
 #include <set>
 
-using namespace std;
-
 // 总是让比较函数在等值情况下返回false
 
 struct StringPtrGreater1
-    : public binary_function<const string *, const string *, bool> {
-  bool operator()(const string *ps1, const string *ps2) const {
+    : public std::binary_function<const std::string *, const std::string *,
+                                  bool> {
+  bool operator()(const std::string *ps1, const std::string *ps2) const {
     // 把旧的测试简单取反，这是不对的，得到的是>=，对于相等的值将返回true
     return !(*ps1 < *ps2);
   }
 };
 
 struct StringPtrGreater2
-    : public binary_function<const string *, const string *, bool> {
-  bool operator()(const string *ps1, const string *ps2) const {
+    : public std::binary_function<const std::string *, const std::string *,
+                                  bool> {
+  bool operator()(const std::string *ps1, const std::string *ps2) const {
     return *ps2 < *ps1;
   }
 };
@@ -28,23 +28,23 @@ struct StringPtrGreater2
 // 但是在“严格的弱序化”的要求中，有一个要求就是任何一个定义了“严格的弱序化”的函数必须对相同值的两个拷贝返回false。
 
 int main() {
-  set<int, less_equal<int> > s;
+  std::set<int, std::less_equal<int> > s;
   s.insert(10);
-  // !(10A <= 10B) && !(10B <= 10A)  结果为false
+  // !(10A <= 10B) && !(10B <= 10A)结果为false
   // 任何一个比较函数，如果它对相等的值返回true，则都会导致同样的结果。
   s.insert(10);
-  for (set<int>::iterator i = s.begin(); i != s.end(); ++i) {
-    cout << *i << " ";
+  for (std::set<int>::iterator i = s.begin(); i != s.end(); ++i) {
+    std::cout << *i << " ";
   }
-  cout << endl;  // 10 10
+  std::cout << std::endl;  // 10 10
 
-  multiset<int, less_equal<int> > ms;
+  std::multiset<int, std::less_equal<int> > ms;
   ms.insert(10);
   ms.insert(10);
-  for (set<int>::iterator i = ms.begin(); i != ms.end(); ++i) {
-    cout << *i << " ";
+  for (std::set<int>::iterator i = ms.begin(); i != ms.end(); ++i) {
+    std::cout << *i << " ";
   }
-  cout << endl;  // 10 10
+  std::cout << std::endl;  // 10 10
 
   return 0;
 }

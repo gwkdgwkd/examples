@@ -4,8 +4,6 @@
 #include <iterator>
 #include <list>
 
-using namespace std;
-
 // 算法调用优先于手写的循环
 
 // 算法的内部都是循环，由于STL算法涉及面很广，所以意味着本该编写循环来完成的任务也可以用STL算法来完成。
@@ -23,9 +21,9 @@ class Widget {
 // 次要的是可以减少冗余的计算，每次迭代都需要检查i是否等于lw.end()。这意味着每次循环时，函数list::end()都要被调用。
 //  但我们并不需要每次都调用它，因为我们并没有改变链表。这个函数调用一次就够了。
 //  for (list<Widget>::iterator i = lw.begin(); i != lw.end(); ++i)
-//  STL实现者很清除，begin、end（类似的size）都是被频繁使用的函数，几乎肯定会使用inline来编译，并努力改善这些函数的代码，
-//  尽可能让大多数编译器都能将循环中的计算提到外面来，比避免重复计算。然而，实践表明，实现者并不是每次都能成功。
-//  不成功时，使用算法就比手写循环值得了。
+//  STL实现者很清楚，begin、end（类似的size）都是被频繁使用的函数，几乎肯定会使用inline来编译，
+//  并努力改善这些函数的代码，尽可能让大多数编译器都能将循环中的计算提到外面来，比避免重复计算。
+//  然而，实践表明，实现者并不是每次都能成功，不成功时，使用算法就比手写循环值得了。
 // 最主要的是，类库的实现者可以根据对容器实现的了解程度对遍历过程进行优化，这是库的使用者很难做到的。
 //  例如deque中的对象通常被存放在一个或多个固定大小的数组中。对于这些数组，基于指针的遍历比基于迭代器的遍历要快的多。
 //  但是只有库的实现者才可以使用基于指针的遍历，因为只有他们才知道内部数组的大小，才知道如何从一个数组转移到另一个数组。
@@ -37,7 +35,7 @@ class Widget {
 // 除了效率的原因，正确性也许更有说服力。当编写循环代码时，最要紧的莫过于要保证所使用的迭代器都是：
 //  都是有效的；
 //  并且指向你所希望的地方。
-size_t fillArray(double *pArray, size_t arraySize) {}
+size_t fillArray(double *pArray, size_t arraySize) { return arraySize; }
 
 // 使用算法的关键是要熟知算法的名称。在STL中有70个算法名称，如果考虑重载的情形，大约有100个不同的函数模板。
 // 每一位专业C++程序员都应该知道（或者会查找）每一个算法所做的事情。
@@ -48,27 +46,27 @@ size_t fillArray(double *pArray, size_t arraySize) {}
 // 这样提高了抽象层次，更易于编写，更易于文档化，也更易于扩展和维护。
 
 int main() {
-  list<Widget> lw;
-  for (list<Widget>::iterator i = lw.begin(); i != lw.end(); ++i) {
+  std::list<Widget> lw;
+  for (std::list<Widget>::iterator i = lw.begin(); i != lw.end(); ++i) {
     i->redraw();
   }
-  for_each(lw.begin(), lw.end(), mem_fun_ref(&Widget::redraw));
+  for_each(lw.begin(), lw.end(), std::mem_fun_ref(&Widget::redraw));
 
   double data[10];
-  deque<double> d;
+  std::deque<double> d;
   size_t numDoubles = fillArray(data, 10);
   for (size_t i = 0; i < numDoubles; ++i) {
     d.insert(d.begin(), data[i] + 41);
   }
   // 新插入的数据与data中相应的数据排列顺序相反，最后插入的元素跑到了deque的最前面
 
-  deque<double>::iterator insertLocation = d.begin();
+  std::deque<double>::iterator insertLocation = d.begin();
   for (size_t i = 0; i < numDoubles; ++i) {
     d.insert(insertLocation++, data[i] + 41);
   }
   // 产生未定义的行为，每次insert被调用的时候，都会使deque中的所有迭代器无效，也包括insertLocation
 
-  deque<double>::iterator insertLocation1 = d.begin();
+  std::deque<double>::iterator insertLocation1 = d.begin();
   for (size_t i = 0; i < numDoubles; ++i) {
     insertLocation1 = d.insert(insertLocation1, data[i] + 41);
     ++insertLocation1;
@@ -76,7 +74,7 @@ int main() {
   // 这段代码是真正想要的，但这个例子就是手写循环难以保证其正确性的一个典型实例，因为要一刻不停地为迭代器的有效性担心
 
   transform(data, data + numDoubles, inserter(d, d.begin()),
-            bind2nd(plus<double>(), 41));
+            std::bind2nd(std::plus<double>(), 41));
 
   return 0;
 }
