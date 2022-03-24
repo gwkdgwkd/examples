@@ -58,6 +58,15 @@ class C : public B {
  protected:
   int m = 31;
 };
+class D : public A {
+ public:
+  virtual void func_e() { std::cout << "D::func_e" << std::endl; }
+  virtual void func_a() { std::cout << "D::func_a" << std::endl; }
+  virtual void func_f() { std::cout << "D::func_f" << std::endl; }
+
+ protected:
+  int n = 22;
+};
 
 void func1() {
   // 64位计算机，计算虚函数相关地址时，使用long *
@@ -202,7 +211,7 @@ void func3() {
   int *mem4_ptr = mem3_ptr + 1;
   long *func_d_addr = f_vt_addr + 3;
   std::cout << "#5 mem3 m addr: " << mem4_ptr << "(" << *mem4_ptr
-            << ")      func_c in v_table: " << (long *)*func_d_addr
+            << ")      func_d in v_table: " << (long *)*func_d_addr
             << std::endl;
 
   // 内存模型：
@@ -252,10 +261,73 @@ void func3() {
 // 转换后的表达式没有用到与p的类型有关的信息，只要知道p的指向就可以调用函数，
 // 因为在基类和派生类中，p指向地址所代表的对象，虚函数表中相同偏移量保存的函数的地址不一样，从而实现了多态。
 
+void func4() {
+  D obj;
+
+  std::cout << "obj begin addr: " << &obj << " (" << sizeof(D) << ","
+            << sizeof(obj) << ")" << std::endl;
+
+  long *vt_ptr = (long *)&obj;
+  long *f_vt_addr = (long *)*((long *)&obj + 0);
+  std::cout << "#1 v_table ptr: " << vt_ptr
+            << "     --> first v_table addr: " << f_vt_addr << std::endl;
+
+  int *mem1_ptr = (int *)((long *)&obj + 1);
+  long *func_a_addr = f_vt_addr + 0;
+  std::cout << "#2 mem1 i addr: " << mem1_ptr << "(" << *mem1_ptr
+            << ")      func_a in v_table: " << (long *)*func_a_addr
+            << std::endl;
+
+  int *mem2_ptr = mem1_ptr + 1;
+  long *func_b_addr = f_vt_addr + 1;
+  std::cout << "#3 mem2 j addr: " << mem2_ptr << "(" << *mem2_ptr
+            << ")      func_b in v_table: " << (long *)*func_b_addr
+            << std::endl;
+
+  int *mem3_ptr = mem2_ptr + 1;
+  long *func_e_addr = f_vt_addr + 2;
+  std::cout << "#4 mem3 n addr: " << mem3_ptr << "(" << *mem3_ptr
+            << ")      func_e in v_table: " << (long *)*func_e_addr
+            << std::endl;
+
+  long *func_f_addr = f_vt_addr + 3;
+  std::cout << "#5                                      func_f in v_table: "
+            << (long *)*func_f_addr << std::endl;
+
+  // 内存模型：
+  // obj begin addr: 0x7fffc16a2760 (24,24)
+  // #1 v_table ptr: 0x7fffc16a2760     --> first v_table addr: 0x5610f3d05a58
+  // #2 mem1 i addr: 0x7fffc16a2768(11)      func_a in v_table: 0x5610f3d01bf4
+  // #3 mem2 j addr: 0x7fffc16a276c(12)      func_b in v_table: 0x5610f3d01a8c
+  // #4 mem3 n addr: 0x7fffc16a2770(22)      func_e in v_table: 0x5610f3d01bb8
+  // #5                                      func_f in v_table: 0x5610f3d01c30
+
+  // 派生类中新增加的虚函数，排列在虚函数表的末尾，哪怕声明的的顺序比基类的虚函数早，也放最后
+  FunPtr func_a = (FunPtr) * ((long *)*((long *)&obj + 0) + 0);
+  FunPtr func_b = (FunPtr) * ((long *)*((long *)&obj + 0) + 1);
+  FunPtr func_e = (FunPtr) * ((long *)*((long *)&obj + 0) + 2);
+  FunPtr func_f = (FunPtr) * ((long *)*((long *)&obj + 0) + 3);
+  std::cout << (long *)func_a << std::endl;  // 0x5610f3d01bf4
+  std::cout << (long *)func_b << std::endl;  // 0x5610f3d01a8c
+  std::cout << (long *)func_e << std::endl;  // 0x5610f3d01bb8
+  std::cout << (long *)func_f << std::endl;  // 0x5610f3d01c30
+  func_a();                                  // D::func_a
+  func_b();                                  // A::func_b
+  func_e();                                  // D::func_e
+  func_f();                                  // D::func_f
+
+  long **pVtab = (long **)&obj;
+  ((FunPtr)pVtab[0][0])();  // D::func_a
+  ((FunPtr)pVtab[0][1])();  // A::func_b
+  ((FunPtr)pVtab[0][2])();  // D::func_e
+  ((FunPtr)pVtab[0][3])();  // D::func_f
+}
+
 void testN1() {
   func1();
   func2();
   func3();
+  func4();
 }
 }  // namespace n1
 

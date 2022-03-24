@@ -14,7 +14,8 @@ int priority() {}
 void processWidget(shared_ptr<Widget> pw, int priority) {}
 
 // 请记住：
-// 以独立语句将newed对象存储于（置入）智能指针内。如果不这样做，一旦异常被抛出，有可能导致难以察觉的资源泄露。
+// 以独立语句将newed对象存储于（置入）智能指针内。
+// 如果不这样做，一旦异常被抛出，有可能导致难以察觉的资源泄露。
 
 int main() {
   // processWidget(new Widget, priority());  // 编译失败
@@ -38,7 +39,7 @@ int main() {
   // 避免这类问题的办法很简单，使用分离语句：
   shared_ptr<Widget> pw(new Widget);  // 在单独语句内以智能指针存储newed对象
   processWidget(pw, priority());  // 不会造成泄露
-  // 上面的语句之所以不会泄露，是因为编译器对“跨越语句的各项操作”没有重新排列的自由（只有在语句内它才拥有那个自由度）。
+  // 上面的语句之所以不会泄露，是因为编译器对“跨越语句的各项操作”没有重新排列的自由，只有在语句内它才拥有那个自由度。
 
   return 0;
 }

@@ -20,14 +20,15 @@ class Widget {
   Widget operator=(const Widget& rhs) {
     if (this == &rhs) return *this;  // 证同测试
     delete pb;
-    // 这个版本仍然存在异常方面的麻烦。如果new导致异常，Widget最终会持有一个指向一块被删除的Bitmap。
+    // 这个版本仍然存在异常方面的麻烦。
+    // 如果new导致异常，Widget最终会持有一个指向一块被删除的Bitmap。
     pb = new Bitmap(*rhs.pb);
     return *this;
   }
 #endif
 #if 0
   // 让operator=具备异常安全性往往自动获得自我赋值安全的回报。
-  // 如果很关系效率，也可以把“证同测试”放到开始处。
+  // 如果很关心效率，也可以把“证同测试”放到开始处。
   Widget operator=(const Widget& rhs) {
     Bitmap* pOrig = pb;
     pb = new Bitmap(*rhs.pb);
@@ -50,7 +51,8 @@ class Widget {
 };
 
 // 请记住：
-// 确保当对象自我赋值时operator=有良好行为。其中技术包括比较“来源对象”和“目标对象”的地址、精心周到的语句顺序、以及copy-and-swap。
+// 确保当对象自我赋值时operator=有良好行为。
+// 其中技术包括比较“来源对象”和“目标对象”的地址、精心周到的语句顺序、以及copy-and-swap。
 // 确定任何函数如果操作一个以上的对象，而其中多个对象是同一个对象时，其行为仍然正确。
 
 int main() {

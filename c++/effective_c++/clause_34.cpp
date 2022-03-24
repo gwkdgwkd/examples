@@ -34,7 +34,8 @@ class Ellipse : public Shape {
 
 // 可以为pure virtual函数提供定义，C++并不会发出怨言，但调用它的唯一途径是“调用时明确指出其class名称”。
 void Shape::draw() const { cout << "Shape::draw" << endl; }
-// 除了给大师程序员一个深刻印象外，一般而言这项性质用途有限。但它可以实现一种机制：为简朴的impure virtual函数提供更平常更安全的缺省实现。
+// 除了给大师程序员一个深刻印象外，一般而言这项性质用途有限。
+// 但它可以实现一种机制：为简朴的impure virtual函数提供更平常更安全的缺省实现。
 
 // 声明impure virtual函数同时指定函数声明和函数缺省行为，有可能造成危险。
 class Airport {};
@@ -77,8 +78,10 @@ class ModelC1 : public Airplane1 {
 };
 void ModelC1::fly(const Airport& destination) { cout << "ModelC1 fly" << endl; }
 
-// 有人反对想上面一样以不同的函数分别提供接口和缺省实现。关心过度雷同的函数名引起class命名空间污染问题。
-// 但是他们也同意，接口和缺省实现应该分开。可以利用“pure virtual函数必须在derived class中重新声明，但它们也可以有自己的实现”这一事实。
+// 有人反对像上面一样以不同的函数分别提供接口和缺省实现。
+// 关心过度雷同的函数名引起class命名空间污染问题。
+// 但是他们也同意，接口和缺省实现应该分开。
+// 可以利用“pure virtual函数必须在derived class中重新声明，但它们也可以有自己的实现”这一事实。
 class Airplane2 {
  public:
   virtual void fly(const Airport& destination) = 0;
@@ -104,7 +107,8 @@ void ModelC2::fly(const Airport& destination) { cout << "ModelC2 fly" << endl; }
 // 声明成员函数时，必须谨慎选择。常犯的两个错误：
 //  1 将所有函数声明为non-virtual。使得derived class没有能力做特化工作。
 //    non-virtual析构函数尤其会带来问题。
-//  2 将所有成员函数声明为virtual，有些时候是正确的，也有可能是class设计者缺乏坚定的立场，某些函数就不该在derived class中被重新定义。
+//  2 将所有成员函数声明为virtual，有些时候是正确的，也有可能是class设计者缺乏坚定的立场，
+//    某些函数就不该在derived class中被重新定义。
 
 // 请记住：
 // 接口继承和实现继承不同。在public继承之下，derived class总是继承base class的接口。

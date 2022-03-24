@@ -15,7 +15,8 @@ class Widget {
   static void operator delete(void* pMemory, size_t size) throw() {}
 };
 // placement new意味带任意额外参数的new，placement delete直接派生自它。
-// 当new调用成功，default构造函数抛出异常时，C++运行系统无法知道真正被调用的那个new如何运作，也就无法取消分配并恢复原样(没有任何delete被调用)。
+// 当new调用成功，default构造函数抛出异常时，C++运行系统无法知道真正被调用的那个new如何运作，
+// 也就无法取消分配并恢复原样(没有任何delete被调用)。
 // 运行期系统寻找”参数个数和类型都与operator new相同“的某个delete。如果找到就调用。所以delete应该是：
 // void operator delete(void*,ostream&) throw();
 class Widget2 {
@@ -68,7 +69,7 @@ class StandardNewDeleteForms {
   static void* operator new(size_t size, const nothrow_t& nt) throw() {
     return ::operator new(size, nt);
   }
-  static void operator delete(void* pMemory, const nothrow_t&)throw() {
+  static void operator delete(void* pMemory, const nothrow_t&) throw() {
     ::operator delete(pMemory);
   }
 };

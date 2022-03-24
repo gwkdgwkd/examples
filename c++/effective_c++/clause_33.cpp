@@ -44,7 +44,8 @@ class Derived1 : public Base {
 // 因此几乎总会想要推翻(override)C++对“继承而来的名称的缺省遮掩行为。
 class Derived2 : public Base {
  public:
-  // 如果base class有重载函数，而derived希望重新定义或覆写（推翻）其中一部分，那么你必须为原本会被遮掩的每个名称用using引入derived class
+  // 如果base class有重载函数，而derived希望重新定义或覆写（推翻）其中一部分，
+  // 那么你必须为原本会被遮掩的每个名称用using引入derived class
   // 让Base class内名为mf1和mf3的所有东西在Derived作用域内都可见，并且为public
   using Base::mf1;
   using Base::mf3;

@@ -4,11 +4,14 @@ using namespace std;
 
 // 编写new和delete时需固守常规
 
-// 实现operator new必须返回正确的值，内存不足时必须调用new-handing函数，必须有对付零内存需求的准备，还需避免不慎掩盖正常形式的new。
+// 实现operator new必须返回正确的值，内存不足时必须调用new-handing函数，
+// 必须有对付零内存需求的准备，还需避免不慎掩盖正常形式的new。
 
-// operator new的返回值十分单纯。如果有能力提供内存，就返回指针指向那块内存。如果没有能力，就遵循条款49的规则，并抛出bad_alloc异常。
+// operator new的返回值十分单纯。如果有能力提供内存，就返回指针指向那块内存。
+// 如果没有能力，就遵循条款49的规则，并抛出bad_alloc异常。
 // 然后其实也不是非常单纯，因为operator new实际上不只一次尝试分配内存，并在每次失败后调用new-handling函数。
-// 假设new-handling函数也许能够做某些动作将某些内存释放出来。只有当指向new-handling函数的指针是null，operator new才会抛出异常。
+// 假设new-handling函数也许能够做某些动作将某些内存释放出来。
+// 只有当指向new-handling函数的指针是null，operator new才会抛出异常。
 
 // C++规定，即使客户要求0 byte，operator new也得返回一个合法指针。
 // void *operator new(size_t size) throw(bad_alloc) {
@@ -39,8 +42,10 @@ class Base {
   static void operator delete(void* rawMemory, size_t size) throw();
 };
 class Derived : public Base {};
-// 不能在Base::operator new[]内假设array的每个元素对象的大小是sizeof(Base)，这意味着不能假设array元素对象个数为：byte申请数/sizeof(Base)。
-// 此外，传递给operator new[]的size_t参数，其值可能比“将被填充以对象”的内存数量更多。因为动态分配的array可能包含额外空间来存放元素个数。
+// 不能在Base::operator new[]内假设array的每个元素对象的大小是sizeof(Base)，
+// 这意味着不能假设array元素对象个数为：byte申请数/sizeof(Base)。
+// 此外，传递给operator new[]的size_t参数，其值可能比“将被填充以对象”的内存数量更多。
+// 因为动态分配的array可能包含额外空间来存放元素个数。
 
 // operator delete情况更简单，需要记住的唯一事情就是C++保证“删除null指针永远安全”,所以必须实现这项保证：
 void operator delete(void* rawMemory) throw() {

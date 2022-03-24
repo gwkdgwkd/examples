@@ -10,7 +10,8 @@ class Widget {
  public:
   Widget &operator=(const Widget &rhs) { return *this; }
 };
-// 上面只是个协议，并无强制性。不遵守也能编译通过。但是string，vector，complex，tr1::shared_ptr都准守这个协议。
+// 上面只是个协议，并无强制性。
+// 不遵守也能编译通过，但是string，vector，complex，tr1::shared_ptr都准守这个协议。
 
 // 请记住：
 // 令赋值操作符号返回一个reference to *this。

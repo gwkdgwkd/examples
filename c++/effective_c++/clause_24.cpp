@@ -3,7 +3,7 @@ using namespace std;
 
 // 若所有参数皆需类型转换，请为此采用non-member函数
 
-// 令class支持隐式类型转换通常是个糟糕的主意。最常见的例外是在建立数值类型时。
+// 令class支持隐式类型转换通常是个糟糕的主意，最常见的例外是在建立数值类型时。
 class Rational1 {
  public:
   // 不为explicit，允许int to Rational1隐式转换。
@@ -74,8 +74,9 @@ int main() {
   c1.display();  // 8,128
   // 尝试混合运算(乘法应该满足交换率)：
   c1 = a1 * 2;  // 很好，result = a1.operator*(2);
-  // c1 = 2 * a1;  // 错误，result = 2.operator*(al); 2没有perator*成员函数
-  // c1 = a1 * 2;发生来隐式类型转换，编译知道正在传递int，但函数需要Rational1;也知道调用构造函数就能把int变成Rational1，于是就那样做了。
+  // c1 = 2 * a1;  // 错误，result = 2.operator*(al); 2没有operator*成员函数
+  // c1 = a1 * 2;发生来隐式类型转换，编译知道正在传递int，
+  // 但函数需要Rational1;也知道调用构造函数就能把int变成Rational1，于是就那样做了。
   // 当然，只有non-explicit构造函数，编译器才会这么做。
 
   // 只有当参数被列于参数列内，这个参数才是隐式类型转换的合格参与者。所以c1 = 2 * a1不能通过编译。

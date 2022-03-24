@@ -78,10 +78,12 @@ const Rectangle1 boundingBox(const GUIObject &obj){};
 //  也不论那个返回handle的成员函数是否为const。
 // 唯一关键是，有handle被传出去了，一旦如此就暴露在“handle比其所指对象更长寿”的风险下。
 // 这并不意味绝对不让成员函数返回handle，有时候必须那么做。尽管如此，这样的函数毕竟是例外，不是常态。
-// 例如operator[]就允许你采摘string和vector的个别元素，而这些operator[]就是返回引用指向“容器内的数据”，那些数据随容器被销毁而销毁。
+// 例如operator[]就允许你采摘string和vector的个别元素，而这些operator[]就是返回引用指向“容器内的数据”，
+// 那些数据随容器被销毁而销毁。
 
 // 请记住：
-// 避免返回handles（包括引用、指针、迭代器）指向对象内部。遵守这个条款可增加封装性，帮助const成员函数的行为像个const，并将发生“虚吊号码牌”的可能性降至最低。
+// 避免返回handles（包括引用、指针、迭代器）指向对象内部。遵守这个条款可增加封装性，
+// 帮助const成员函数的行为像个const，并将发生“虚吊号码牌”的可能性降至最低。
 
 int main() {
   Point coord1(0, 0);
@@ -105,9 +107,11 @@ int main() {
   GUIObject *pgo;
   const Point *pUpperLeft = &(boundingBox(*pgo).upperLeft());
   // boundingBox的调用获得一个新的、暂时的Rectangle1对象。没有名称，用temp表示。
-  // 随后temp调用upperLeft，返回一个引用指向temp的一个内部成分，也就是Point。于是pUpperLeft指向那个Point对象。
+  // 随后temp调用upperLeft，返回一个引用指向temp的一个内部成分，也就是Point。
+  // 于是pUpperLeft指向那个Point对象。
   // 语句结束后，boundingBox的返回值，也就是那个temp，将被销毁，间接导致temp内的Point析构。
-  // 最终导致pUpperLeft指向一个不再存在的对象。也就是说产出pUpperLeft哪个语句结束，pUpperLeft就变成悬空、虚吊（dangling）。
+  // 最终导致pUpperLeft指向一个不再存在的对象。
+  // 也就是说产出pUpperLeft哪个语句结束，pUpperLeft就变成悬空、虚吊（dangling）。
 
   return 0;
 }

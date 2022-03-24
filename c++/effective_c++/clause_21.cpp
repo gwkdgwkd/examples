@@ -5,7 +5,8 @@ using namespace std;
 
 // 必须返回对象时，别妄想返回其引用
 
-// 程序员一旦学习了条款20，眼中就容不下pass by value了。那样就会犯错：开始传递一些其实并不存在的对象的引用。
+// 程序员一旦学习了条款20，眼中就容不下pass by value了。
+// 那样就会犯错：开始传递一些其实并不存在的对象的引用。
 
 class Rational1 {
  public:
@@ -77,16 +78,18 @@ bool operator==(const Rational3& lhs, const Rational3& rhs) { return false; }
 // } else {
 //   cout << "bu xiang deng" << endl;
 // }
-// 在==被调用前，已经有两个*被调用，每个都返回内部定义的static对象。因此==比较的都是内部的static对象，所以永远都会是true。
+// 在==被调用前，已经有两个*被调用，每个都返回内部定义的static对象。
+// 因此==比较的都是内部的static对象，所以永远都会是true。
 
 // 一个必须返回新对象的函数的正确写法是：就让那个函数返回一个新对象。当然，需要承受返回值的构造和析构成本。
 // inline const Rational1 operator*(const Rational1& lhs, const Rational1& rhs) {
 //   return Rational1(lhs.n * rhs.n, lhs.d * rhs.d);
 // }
-// 当必须在“返回一个引用和返回一个对象”之间抉择时，选择返回对象，让编译器厂商为尽量优化吧。
+// 当必须在“返回一个引用和返回一个对象”之间抉择时，选择返回对象，让编译器厂商尽量优化吧。
 
 // 请记住：
-// 绝不要返回一个指向局部对象（local stack）的指针或引用。或返回指向heap对象，或返回指向局部静态对象的指针或引用。
+// 绝不要返回一个指向局部对象（local stack）的指针或引用。
+// 或返回指向heap对象，或返回指向局部静态对象的指针或引用。
 // 条款4已经为“在单线程环境中合理返回局部静态对象的引用”提供了方法。
 
 int main() {

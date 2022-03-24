@@ -22,7 +22,8 @@ class Person {
   Date theBirthDate;
   Address theAddress;
 };
-如果这些头文件中任何一个被改变，或这些头文件所依赖的其他头文件有任何改变，那么每一个含入Person class的文件都要重新编译。
+如果这些头文件中任何一个被改变，或这些头文件所依赖的其他头文件有任何改变，
+那么每一个含入Person class的文件都要重新编译。
 这样连串编译依存关系会对许多项目造成难以形容的灾难。
 */
 
@@ -90,7 +91,8 @@ string Person::name const { return pImpl->name(); }
 
 /*
 另一个制作Handle class的办法是，令Person成为一种特殊的抽象基类，称为Interface class。
-这种class的目地是详细描述derived class的接口，因此通常不带成员变量，也没有构造函数，只有一个virtual析构函数以及一组pure virtual函数，用来描述整个接口。
+这种class的目地是详细描述derived class的接口，因此通常不带成员变量，也没有构造函数，
+只有一个virtual析构函数以及一组pure virtual函数，用来描述整个接口。
 Interface class类似Java和.NET的Interfaces，但C++的Interface class并不需要负担Java和.NET的Interfac所需负担的责任。
 Java和.NET都不允许在Interface内实现成员变量或成员函数，但C++不禁止这两样东西。
 class Person{
@@ -101,7 +103,8 @@ class Person{
   virtual string address() const = 0;
 
   Interface class的客户必须有办法为这种class创建新的对象。
-  通常调用一个特殊函数（factory函数或virtual构造函数），返回指针（或智能指针），指向动态分配的对象，而该对象支持Interface class的接口。
+  通常调用一个特殊函数（factory函数或virtual构造函数），返回指针（或智能指针），
+  指向动态分配的对象，而该对象支持Interface class的接口。
   这样的函数又往往在Interface class内被声明为static。
   static shared_ptr<Person> create(const string& name, const Date& birthday, const Address& addr);
 };
@@ -115,7 +118,8 @@ Address address;
 shared_ptr<Person> pp(Person::create(name,dateOfBirth,address));
 cout << pp->name() << pp->birthDate() << pp->address();
 
-支持Interface class接口的那个具体类必须被定义出来，而且真正的构造函数必须被调用。一切都在virtual构造函数实现代码所在的文件内秘密发生。
+支持Interface class接口的那个具体类必须被定义出来，而且真正的构造函数必须被调用。
+一切都在virtual构造函数实现代码所在的文件内秘密发生。
 class RealPerson : public Person{
  public:
   RealPerson(const string& name, const Date& birthday, const Address& addr)

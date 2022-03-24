@@ -67,7 +67,8 @@ class Point2 {
 };
 
 // string不含任何virtual函数，但有时候会错误地把它当做base class。
-// 所有STL容器也都不含virtual析构函数。所以不要企图继承一个标准容器或任何其他“带有non-virtual析构函数”的class。
+// 所有STL容器也都不含virtual析构函数。
+// 所以不要企图继承一个标准容器或任何其他“带有non-virtual析构函数”的class。
 // 很不幸C++没有提供类似Java的final classes或C#的sealed classes那样的禁止派生机制。
 
 // 纯虚函数
@@ -81,7 +82,8 @@ AWOV::~AWOV() {}
 class DD : public AWOV {};
 
 // 请记住：
-// 带多态性质的base class应该声明一个virtual析构函数。如果class带有任何virtual函数，就应该拥有一个virtual析构函数。
+// 带多态性质的base class应该声明一个virtual析构函数。
+// 如果class带有任何virtual函数，就应该拥有一个virtual析构函数。
 // class的设计目的如果不是作为base class使用，或不是为了具备多态，就不不该声明virtual析构函数。
 
 int main() {

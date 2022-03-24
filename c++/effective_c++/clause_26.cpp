@@ -68,6 +68,6 @@ string encryptPassword3(const string &password) {
 // 否则应该定义在循环体内。
 
 // 请记住：
-// 尽可能延后变量定义式的出现。着牙做可增加程序的清晰度并改善程序效率。
+// 尽可能延后变量定义式的出现。这样做可增加程序的清晰度并改善程序效率。
 
 int main() { return 0; }

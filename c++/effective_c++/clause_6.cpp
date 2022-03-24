@@ -6,11 +6,14 @@ using namespace std;
 // 若不想使用编译器自动生成的函数，就该明确拒绝
 
 // 如果不希望class支持某一特定机能，只要不声明对应函数就是了。
-// 但对copy构造函数和copy assignment操作符却不起作用。如果不声明它们，而某些人尝试调用它们，编译器会声明它们。
-// 编译器产生的函数都是public。为阻止这些函数被创建出来，需要声明为private的。即阻止了编译生成，也阻止别人调用它。
+// 但对copy构造函数和copy assignment操作符却不起作用。
+// 如果不声明它们，而某些人尝试调用它们，编译器会声明它们。
+// 编译器产生的函数都是public，
+// 为阻止这些函数被创建出来，需要声明为private的，即阻止了编译生成，也阻止别人调用它。
 // 这样的做法并不绝对安全，因为member函数和friend函数还是可以调用private函数。
 // 除非够聪明，不去定义它们，那么如果某些人不慎调用任何一个，会获得一个链接错误。
-// “将成员函数声明为private而且故意不实现它们”这一伎俩为大家接受，因而被用在C++ iostream库(ios_base,basic_ios和sentry)中阻止copying行为。
+// “将成员函数声明为private而且故意不实现它们”这一伎俩为大家接受，
+// 因而被用在C++ iostream库(ios_base,basic_ios和sentry)中阻止copying行为。
 class HomeForSale {
  public:
   HomeForSale() {}
@@ -34,10 +37,12 @@ class Uncopyable {
 };
 // class不再声明copy构造函数或copy assignment操作符。
 class HomeForSale1 : private Uncopyable {};
-// 任何人（包括member函数或friend函数）尝试拷贝HomeForSale1对象，编译器便尝试生成，还会调用基类对应的函数，但会被编译器拒绝，因为是私有的。
+// 任何人（包括member函数或friend函数）尝试拷贝HomeForSale1对象，
+// 编译器便尝试生成，还会调用基类对应的函数，但会被编译器拒绝，因为是私有的。
 
 // 请记住：
-// 为驳回编译器自动提供的能力，可将相应的成员函数声明为private并且不予实现。使用uncopyable这样的base class也是一种做法。
+// 为驳回编译器自动提供的能力，可将相应的成员函数声明为private并且不予实现。
+// 使用uncopyable这样的base class也是一种做法。
 
 int main() {
   HomeForSale h1, h2;

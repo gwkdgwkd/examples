@@ -2,7 +2,8 @@
 
 using namespace std;
 
-// 三个著名的C++语言扩充性质，它们都会影响C++对象：template、execption handling和runtime type identification（RTTI）。
+// 三个著名的C++语言扩充性质，它们都会影响C++对象：
+// template、execption handling和runtime type identification（RTTI）。
 
 // 7.1 Template
 
@@ -27,15 +28,18 @@ class Point {
 // 一个对象的定义，不论是有编译器暗中地做，或是有程序员明确地做，都会导致template class的“具现”。
 // 只有在成员函数被使用的时候，C++标准才要求它们被“具现”出来。
 // 之所以由使用者来主导“具现”规则，有两个主要原因：
-//  1 空间和时间效率的考虑。如果类有100个成员函数，但相关类型只使用了2个，那么其他198个函数都“具现”将会花费大量的时间和空间。
-//  2 尚未实现的机能。并不是一个template具现出来的所有类型就一定能够完整支持一组成员函数所需的所有运算符。
-//    如果只具现那些真正用到的成员函数，template就能够支持那些原本可能会造成编译时期错误的类型。
-//    例如：Point<float> *p = new Point<float>;
-//    只有template的float实例、new运算符、默认构造函数需要被“具现”化。
+// 1.空间和时间效率的考虑。
+//   如果类有100个成员函数，但相关类型只使用了2个，那么其他198个函数都“具现”将会花费大量的时间和空间。
+// 2.尚未实现的机能。并不是一个template具现出来的所有类型就一定能够完整支持一组成员函数所需的所有运算符。
+//   如果只具现那些真正用到的成员函数，template就能够支持那些原本可能会造成编译时期错误的类型。
+//   例如：Point<float> *p = new Point<float>;
+//   只有template的float实例、new运算符、默认构造函数需要被“具现”化。
 // 函数在什么时候“具现”出来呢？有两种策略：
-//  在编译时候。那么函数将“具现”与origin和p存在的哪个文件中。
-//  在链接时候。那么编译器会别一些辅助工具重新激活。template函数实体可能被放在这个文件中，别的文件中，或一个分离的存储位置上。
-// 在int和long一致（或double和long double一致）的结构之中，目前所有的编译器都会产生两个实体。C++标准并未对此有什么强制规定。
+//  在编译时候，那么函数将“具现”与origin和p存在的哪个文件中。
+//  在链接时候，那么编译器会别一些辅助工具重新激活。
+//  template函数实体可能被放在这个文件中，别的文件中，或一个分离的存储位置上。
+// 在int和long一致（或double和long double一致）的结构之中，目前所有的编译器都会产生两个实体。
+// C++标准并未对此有什么强制规定。
 
 // Template的错误报告
 
@@ -55,7 +59,8 @@ class ScopeRules {
 // scope of the template instantiantion
 int foo(int) { cout << "int" << endl; }
 
-// template之中，对于一个nonmember name的决议结构是根据这个name的使用是否与“用以具现出该template的参数类型”有关而决定的。
+// template之中，对于一个nonmember name的决议结构是根据这个name的使用
+// 是否与“用以具现出该template的参数类型”有关而决定的：
 // 如果互不相关，那么就以“scope of the template definition”来决定name。
 // 如果互相关联，那么就以“scope of the template instantiantion”来决定name。
 // 此外，函数的决议结果只和函数的原型有关，和函数的返回值没有关联。
@@ -67,8 +72,8 @@ int foo(int) { cout << "int" << endl; }
 // 如果ScopeRules是以unsigned int或log类型具现出来，那么foo调用操作就暧昧不明。
 // 如果ScopeRules是以某一个类类型具现出来，而该类没有针对int或double实现出转换运算符，那么foo()调用操作会被标示为错误。
 // 这意味这一个编译器必须保持两个scope contexts：
-//  1 "scope of the template definition"，用以专注与一般的template class。
-//  2 "scope of the template instantiantion"，用以专注与特定的实体。
+// 1."scope of the template definition"，用以专注与一般的template class。
+// 2."scope of the template instantiantion"，用以专注与特定的实体。
 // 编译器的决议算法必须决定哪一个才是适当的scope，然后在其中搜寻适当的name。
 
 // Member Function的具现行为
@@ -132,8 +137,10 @@ int foo(int) { cout << "int" << endl; }
 // 共享内存
 // 当一个共享库被加载，它在内存中的位置由runtime linker决定，一般而言与执行中的进程无关。
 // 然而，在C++对象模型中，当一个动态库支持一个对象，其中含有虚函数，上述说法便不正确。
-// 问题并不在于“将该对象放置于共享内存中”的那个进程，而在于“想要经过这个共享对象调用一个虚函数”的第二个或更后继的进程。
-// 除非共享库放在完全相同的内存位置上，就像当初加载这个共享对象的进程一样，否则虚函数会死的很难看，可能包括段错误或bus error。
+// 问题并不在于“将该对象放置于共享内存中”的那个进程，
+// 而在于“想要经过这个共享对象调用一个虚函数”的第二个或更后继的进程。
+// 除非共享库放在完全相同的内存位置上，就像当初加载这个共享对象的进程一样，
+// 否则虚函数会死的很难看，可能包括段错误或bus error。
 // 因为每一个虚函数在virtual table中的位置已经写死了。
 // 目前的解决方法是属于程序层面，程序员必须保证让跨进程的共享库有相同的地址。
 // 编译系统层面上的解决方法，势必得牺牲原本的virtual table实现模型所带来的高效率。
@@ -147,7 +154,8 @@ int main() {
   // 使用静态成员，会使其一份实体与Point class的float在程序中产生关联。
 
   Point<float> *ptr = 0;
-  // 程序什么也没发生。因为一个指向对象的指针，本身并不是一个对象，编译器不需要知道与该类有关的任何成员数据或对象布局数据。
+  // 程序什么也没发生。因为一个指向对象的指针，本身并不是一个对象，
+  // 编译器不需要知道与该类有关的任何成员数据或对象布局数据。
   // 所以将“Point的一个float实体”具现也就没有必要。
   // 在C++标准之前，没有强制定义，编译器可以自行决定要不要将template“具现”出来。
   // 如今，C++标准已经禁止编译器“具现”了。

@@ -41,7 +41,8 @@ using namespace std;
 //  不能够直接存取其class中nonstatic members。
 //  不能够被声明为const、volatile或virtual。
 //  不需要经由对象才能被调用，虽然大部分时候它是这样被调用的。
-// 对一个静态成员函数取地址，获得的是内存中的位置。由于没有this指针，所以地址的类型不是“指向类成员函数的指针”，而是一个“非成员函数指针”。
+// 对一个静态成员函数取地址，获得的是内存中的位置。
+// 由于没有this指针，所以地址的类型不是“指向类成员函数的指针”，而是一个“非成员函数指针”。
 // 静态成员函数差不多等同于普通函数，因此提供了意想不到的好处：
 // 成为一个callback函数，使我们得以将C++和C系统结合。也可以成功地应用在线程函数身上。
 
@@ -54,10 +55,12 @@ using namespace std;
 //  为了找到函数地址，每一个虚函数被指派一个表格索引值。
 // 上面的工作都由编译器完成。执行期间要做的，只是在特定的virtual table slot中调用virtual function。
 
-// 一个类只会有一个virtual table。每一个table内含其对应的对象中所有active virtual functions函数实体的地址。可能包括：
+// 一个类只会有一个virtual table。
+// 每一个table内含其对应的对象中所有active virtual functions函数实体的地址。可能包括：
 //  这个类所定义的函数实体，它会改写一个可能存在的基类虚函数实体。
 //  继承自基类的函数实体。这是在派生类决定不改写虚函数时才会出现的情况。
-//  一个pure_virtual_called()函数实体，它既可以扮演pure virtual function的空间保卫者角色，也可以当做执行期异常处理函数。
+//  一个pure_virtual_called()函数实体，它既可以扮演pure virtual function的空间保卫者角色，
+//  也可以当做执行期异常处理函数。
 // 每一个虚函数都别指派一个固定的索引值，这个索引值在整个继承体系中保持与特定的虚函数的关联。
 class Point {
  public:
@@ -135,7 +138,8 @@ class Point3d : public Point2d {
 // 这些信息使得编译可以将调用转换为：
 // (*ptr->vptr[4])(ptr);
 // 唯一不在编译期知道的是：slot 4所指的到底是哪一个z()函数实体。
-// 在一个单一继承体系中，虚函数机制十分良好，不但有效率而且很容被塑造出来。但是多重继承和虚拟继承中，对虚函数的支持就没那么好了。
+// 在一个单一继承体系中，虚函数机制十分良好，不但有效率而且很容被塑造出来。
+// 但是多重继承和虚拟继承中，对虚函数的支持就没那么好了。
 
 // 多重继承下的Virtual Functions
 // 在多重继承中支持virtual functions，其复杂度围绕在第二个及后续的基类身上，以及“必须在执行期调整this指针”这一点。
@@ -173,7 +177,7 @@ class Base2 {
   //  data_Base2
   // Virtual Table Base2
   //  type_info for Base2
-  //  Base2::~Base1()
+  //  Base2::~Base2()
   //  Base2::mumble()
   //  Base2::clone()
 };
@@ -230,7 +234,8 @@ class Derived : public Base1, public Base2 {
 // 一般规则是，经由指向“第二或后继的基类”的指针（或引用）来调用派生类虚函数。
 // 调用操作所连带的“必要的this指针调整”操作，必须在执行期完成。
 // 也就是说，offset的大小，以及把offset加到this指针上头的那一小段代码，必须有编译器插入到某个地方。问题是在哪个地方？
-// 比较有效率的解决方法是理由所谓的thunk。是一小段assembly码，用来以适当的offset值调整this指针和跳到virtual function去。
+// 比较有效率的解决方法是理由所谓的thunk。
+// 是一小段assembly码，用来以适当的offset值调整this指针和跳到virtual function去。
 // pbbase2_dtor_thunk:
 //   this += sizeof(base1);
 //   Derived::~Derived(this);
@@ -245,7 +250,8 @@ class Derived : public Base1, public Base2 {
 //    delete pbase1;
 //    delete pbase2;
 //    虽然两个delete操作导致调用相同的派生类析构函数，但它们需要两个不同的vitrual table slots:
-//    pbase1不需要调整this指针，因为Base1是最左端的base class，已经指向了Derived对象的起始处。vitrual table slot放置的是真正的destructor地址。
+//    pbase1不需要调整this指针，因为Base1是最左端的base class，已经指向了Derived对象的起始处。
+//    vitrual table slot放置的是真正的destructor地址。
 //    pbase2需要调整this指针。其vitrual table slot需要相关的thunk地址。
 // 在多重继承下，一个派生类内含n-1个额外的virtual tables，n表示上一层次基类的数目（单一继承不会有额外的virtual tables）。
 

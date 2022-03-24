@@ -17,14 +17,15 @@ using namespace std;
 
 // C++的转型：
 // 1 const_cast<T>(expression)
-//   通常被用来将对象的常来性转除。唯一有此能力的转型操作符。
+//   通常被用来将对象的常量性删除。唯一有此能力的转型操作符。
 // 2 dynamic_cast<T>(expression)
 //   主要用来执行“安全向下转型”，用来决定某对象是否归属继承体系中的某个类型。
 //   唯一无法由旧式语法执行的动作，也是唯一可能耗费重大运行成功的转型动作。
 // 3 reinterpret_cast<T>(expression)
 //   执行低级转型，实际动作及结果可能取决于编译器，表示它不可以移植。
 // 4 static_cast<T>(expression)
-//   强迫隐式转换，将non-const转换为const，或将int转为double等等。无法将const转为non-const，这个只有const_cast才能做到。
+//   强迫隐式转换，将non-const转换为const，或将int转为double等等。
+//   无法将const转为non-const，这个只有const_cast才能做到。
 
 // 旧式转型仍然合法，但新式转型比较受欢迎。因为：
 //  容易在代码中被识别出来，便于定位问题;
@@ -60,7 +61,8 @@ class SpecialWindow1 : public Window {
 };
 
 // dynameic_cast的许多实现版本执行速度相当慢（需要调用多次strcmp，根据继承的层次决定的）。
-// 之所以需要dynameic_cast，通常是因为想在derived class对象上执行derived class操作函数，但手上却只有一个指向base的指针或引用。
+// 之所以需要dynameic_cast，通常是因为想在derived class对象上执行derived class操作函数，
+// 但手上却只有一个指向base的指针或引用。
 // 有两个一般性做法可以避免这个问题：
 //  使用容器并在其中存储执行derived class对象的指针;
 //  在base class内提供virtual函数，可以通过base class指针或引用处理所有可能的各种派生类。
@@ -69,7 +71,8 @@ class SpecialWindow1 : public Window {
 // 优良的C++代码很少使用转型，但若要说完全摆脱它们又太过不切实际。
 
 // 请记住：
-// 如果可以，尽量避免转型，特别是在注重效率的代码中避免dynamic_cast。如果有个设计需要转型动作，试着发展无需转型的代替设计。
+// 如果可以，尽量避免转型，特别是在注重效率的代码中避免dynamic_cast。
+// 如果有个设计需要转型动作，试着发展无需转型的代替设计。
 // 如果转型是必要的，试着将它隐藏于某个函数背后。客户随后可以调用该该函数，而不需要将转型放进自己的代码内。
 // 宁可使用C++风格转型，不要使用旧式转型。前者很容易辨别出来，而且职责已经分好类了。
 
