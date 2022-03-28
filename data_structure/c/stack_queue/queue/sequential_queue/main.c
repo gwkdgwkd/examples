@@ -22,7 +22,7 @@ int main() {
   int front, rear;
   // 设置队头指针和队尾指针，当队列中没有元素时，队头和队尾指向同一块地址
   front = rear = 0;
-  //入队
+  // 入队
   rear = enQueue(a, front, rear, 1);
   rear = enQueue(a, front, rear, 2);
   rear = enQueue(a, front, rear, 3);
