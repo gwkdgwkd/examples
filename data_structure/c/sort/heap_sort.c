@@ -28,74 +28,56 @@
 // 堆排序在最坏的情况下，其时间复杂度仍为O(nlogn)。这是相对于快速排序的优点所在。
 // 同时堆排序相对于树形选择排序，其只需要一个用于记录交换（rc）的辅助存储空间，比树形选择排序的运行空间更小。
 
-#define MAX 9
-// 单个记录的结构体
-typedef struct {
-  int key;
-} SqNote;
-// 记录表的结构体
-typedef struct {
-  SqNote r[MAX];
-  int length;
-} SqList;
-// 将以r[s]为根结点的子树构成堆，堆中每个根结点的值都比其孩子结点的值大
-void HeapAdjust(SqList *H, int s, int m) {
-  // 先对操作位置上的结点数据进行保存，放置后序移动元素丢失。
-  SqNote rc = H->r[s];
-  // 对于第s个结点，筛选一直到叶子结点结束
-  for (int j = 2 * s; j <= m; j *= 2) {
-    // 找到值最大的孩子结点
-    if (j + 1 < m && (H->r[j].key < H->r[j + 1].key)) {
-      j++;
-    }
-    // 如果当前结点比最大的孩子结点的值还大，则不需要对此结点进行筛选，直接略过
-    if (!(rc.key < H->r[j].key)) {
-      break;
-    }
-    // 如果当前结点的值比孩子结点中最大的值小，则将最大的值移至该结点，
-    // 由于rc记录着该结点的值，所以该结点的值不会丢失
-    H->r[s] = H->r[j];
-    s = j;  // s相当于指针的作用，指向其孩子结点，继续进行筛选
+void print(int *heap, int size) {
+  for (int i = 0; i < size; ++i) {
+    printf("%d ", heap[i]);
   }
-  H->r[s] = rc;  // 最终需将rc的值添加到正确的位置
+  printf("\n");
 }
-// 交换两个记录的位置
-void swap(SqNote *a, SqNote *b) {
-  int key = a->key;
-  a->key = b->key;
-  b->key = key;
-}
-void HeapSort(SqList *H) {
-  // 构建堆的过程
-  for (int i = H->length / 2; i > 0; i--) {
-    // 对于有孩子结点的根结点进行筛选
-    HeapAdjust(H, i, H->length);
+void HeapAdjust(int *heap, int top, int size) {
+  int temp = heap[top];  // 保存父节点的值
+
+  for (int i = top * 2 + 1; i < size; i = 2 * i + 1) {
+    // i是top的左孩子，i+1是top的右孩子
+    if (i + 1 < size && heap[i] < heap[i + 1]) {
+      ++i;  // 如果右孩子大于左孩子，i指向右孩子
+    }
+    if (temp > heap[i]) {
+      break;  // 如果左右孩子中最大的，比父节点小，什么都不做
+    }
+    heap[top] = heap[i];  // 父节点等于左右孩子中最大的那个
+    top = i;              // top标识目前需要更新的孩子
+
+    // 此时的i位置所表示的孩子（左右孩子中最大并且比父亲节点大）需要被更新，
+    // 下次循环，目前的节点i更新到的它的左孩子处，即i=2*i+1
   }
-  // 通过不断地筛选出最大值，同时不断地进行筛选剩余元素
-  for (int i = H->length; i > 1; i--) {
-    // 交换过程，即为将选出的最大值进行保存大表的最后，同时用最后位置上的元素进行替换，为下一次筛选做准备
-    swap(&(H->r[1]), &(H->r[i]));
-    // 进行筛选次最大值的工作
-    HeapAdjust(H, 1, i - 1);
+  heap[top] = temp;  // 此时top表示，父亲节点值（temp）应该存放的位置
+}
+void HeapSort(int *heap, int size) {
+  // 根据无序数组创建大顶堆
+  for (int i = size / 2 - 1; i >= 0; --i) {
+    // size/2-1是从下标0开始的数组中（当成二叉树），从上到下，从左到右最后一个非叶子节点
+    HeapAdjust(heap, i, size);
+    print(heap, size);
+  }
+
+  // 从大顶堆到升序排列的数组
+  for (int i = size - 1; i >= 0; --i) {
+    // 数组最后的元素依次与heap[0]交换，每次把heap中最大的元素放到数组后面
+    int temp = heap[i];
+    heap[i] = heap[0];
+    heap[0] = temp;
+
+    // 堆定已经不是最大的元素来，调整堆
+    HeapAdjust(heap, 0, i);
   }
 }
 
 int main() {
-  SqList *L = (SqList *)malloc(sizeof(SqList));
-  L->length = 8;
-  L->r[1].key = 49;
-  L->r[2].key = 38;
-  L->r[3].key = 65;
-  L->r[4].key = 97;
-  L->r[5].key = 76;
-  L->r[6].key = 13;
-  L->r[7].key = 27;
-  L->r[8].key = 49;
-  HeapSort(L);
-  for (int i = 1; i <= L->length; i++) {
-    printf("%d ", L->r[i].key);
-  }
-  printf("\n");  // 13 27 38 49 49 65 76 97
+  int a[] = {49, 38, 65, 97, 76, 13, 98, 100};
+  int len = sizeof(a) / sizeof(int);
+  print(a, len);
 
-  return 0;
+  HeapSort(a, len);
+  print(a, len);
 }
