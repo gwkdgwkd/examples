@@ -4,7 +4,8 @@
 // 在C++11之前的版本（C++98和C++03）中，定义变量或者声明变量之前都必须指明它的类型，比如int、char等；
 // 但是在一些比较灵活的语言中，比如C#、JavaScript、PHP、Python等，
 // 程序员在定义变量时可以不指明具体的类型，而是让编译器（或者解释器）自己去推导，这就让代码的编写更加方便。
-// C++11为了顺应这种趋势也开始支持自动类型推导了！C++11使用auto关键字来支持自动类型推导。
+// C++11为了顺应这种趋势也开始支持自动类型推导了！
+// C++11使用auto关键字来支持自动类型推导。
 
 // 在之前的C++版本中，auto关键字用来指明变量的存储类型，它和static关键字是相对的。
 // auto表示变量是自动存储的，这也是编译器的默认规则，所以写不写都一样，
@@ -70,7 +71,7 @@ void func3() {
 
   // 当const和引用结合时，auto的推导将保留表达式的const类型。
   const auto &r1 = x;  // r1为const int&类型，auto被推导为int
-  auto &r2 = r1;  // r1为const int&类型，auto被推导为const int类型，
+  auto &r2 = r1;  // r1为const int&类型，auto被推导为const int类型
   // r2 = 5;         // assignment of read-only reference ‘r2’
 
   std::cout << typeid(n).name() << std::endl;   // i
@@ -131,11 +132,11 @@ void func(void) {
 }
 
 // auto的应用:
-// 1.auto的一个典型应用场景是用来定义stl的迭代器
+// 1.auto的一个典型应用场景是用来定义STL的迭代器
 void func1() {
   std::vector<std::vector<int>> v;
   std::vector<std::vector<int>>::iterator i1 = v.begin();
-  // 使用auto代替具体的类型，auto可以根据表达式v.begin()的类型来推导出变量iii的类型。
+  // 使用auto代替具体的类型，auto可以根据表达式v.begin()的类型来推导出变量i的类型。
   auto i2 = v.begin();
   if (i1 == i2) {
     std::cout << "same" << std::endl;

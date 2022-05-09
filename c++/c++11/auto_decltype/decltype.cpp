@@ -37,36 +37,14 @@ namespace n1 {
 // 3.如果exp是一个左值，或者被括号()包围，那么decltype(exp)的类型就是exp的引用；
 //   假设exp的类型为T，那么decltype(exp)的类型就是T&。
 
-class Student {
- public:
-  static int total;
-  std::string name;
-  int age;
-  float scores;
-};
-int Student::total = 0;
-
-void test();
-int &func_int_r(int, char);            // 返回值为 int&
-int &&func_int_rr(void);               // 返回值为 int&&
-int func_int(double);                  // 返回值为 int
-const int &fun_cint_r(int, int, int);  // 返回值为 const int&
-const int &&func_cint_rr(void);        // 返回值为 const int&&
-
-class Base {
- public:
-  Base(){};
-  int x;
-};
-
+// decltype能够根据变量、字面量、带有运算符的表达式推导出变量的类型:
 void func1() {
-  // decltype能够根据变量、字面量、带有运算符的表达式推导出变量的类型:
-
   int i1 = 0;
   decltype(i1) i2 = 1;      // i2被推导成了int
   decltype(10.8) d1 = 5.5;  // d1被推导成了double
 
-  // auto根据=右边的初始值value推导出变量的类型，而decltype根据exp表达式推导出变量的类型，跟=右边的value没有关系。
+  // auto根据=右边的初始值value推导出变量的类型，
+  // 而decltype根据exp表达式推导出变量的类型，跟=右边的value没有关系。
   // auto是根据变量的初始值来推导出变量类型的，如果不初始化，变量的类型也就无法推导了。
   decltype(d1 + 100) d2;  // d2被推导成了double，没有初始化
 
@@ -75,9 +53,16 @@ void func1() {
   printType(d2);  // d double
 }
 
+// exp是一个普通表达式:
+class Student {
+ public:
+  static int total;
+  std::string name;
+  int age;
+  float scores;
+};
+int Student::total = 0;
 void func2() {
-  // exp是一个普通表达式:
-
   int i1 = 0;
   const int &r1 = i1;
 
@@ -98,9 +83,14 @@ void func2() {
   // std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >
 }
 
+// exp为函数调用:
+void test();                           // 返回值为void
+int &func_int_r(int, char);            // 返回值为int&
+int &&func_int_rr(void);               // 返回值为int&&
+int func_int(double);                  // 返回值为int
+const int &fun_cint_r(int, int, int);  // 返回值为const int&
+const int &&func_cint_rr(void);        // 返回值为const int&&
 void func3() {
-  // exp为函数调用:
-
   int i = 100;
   decltype(func_int_r(100, 'A')) i1 = i;  // i1的类型为int&
   decltype(func_int_rr()) i2 = 0;         // i2的类型为int&&
@@ -108,14 +98,19 @@ void func3() {
   decltype(fun_cint_r(1, 2, 3)) i4 = i;   // i4的类型为const int&
   decltype(func_cint_rr()) i5 = 0;        // i5的类型为const int&&
 
-  // 原则上讲，exp就是一个普通的表达式，它可以是任意复杂的形式，但是我们必须要保证exp的结果是有类型的，不能是void；
+  // 原则上讲，exp就是一个普通的表达式，它可以是任意复杂的形式，
+  // 但是我们必须要保证exp的结果是有类型的，不能是void；
   // 当exp调用一个返回值类型为void的函数时，exp的结果也是void类型，此时就会导致编译错误。
   // decltype(test());  // declaration does not declare anything [-fpermissive]
 }
 
+// exp是左值，或者被()包围:
+class Base {
+ public:
+  Base(){};
+  int x;
+};
 void func4() {
-  // exp是左值，或者被()包围:
-
   const Base obj;
 
   // 带有括号的表达式
@@ -177,7 +172,8 @@ void testN2() {
   // Base1<const std::vector<int>> obj3;
   // obj3.func(v1);
   // 使用Base1类的时候，如果传入一个const类型的容器，编译器马上就会弹出一大堆错误信息。
-  // 原因就在于，T::iterator并不能包括所有的迭代器类型，当T是一个const容器时，应当使用const_iterator。
+  // 原因就在于，T::iterator并不能包括所有的迭代器类型，
+  // 当T是一个const容器时，应当使用const_iterator。
   Base2<const std::vector<int>> obj4;
   obj4.func(v1);
 }

@@ -20,7 +20,7 @@ void isnull(int n) { std::cout << "int n" << std::endl; }
 
 int main() {
   // 对于isnull(0)来说，显然它真正调用的是参数为整形的isnull()函数；
-  // 而对于isnull(NULL)，我们期望它实际调用的是参数为void*c的isnull() 函数
+  // 而对于isnull(NULL)，我们期望它实际调用的是参数为void*c的isnull()函数
   isnull(0);  // int n
   // isnull(NULL);  // int n
   // C++98/03标准中，如果想令isnull(NULL)实际调用的是isnull(void* c)，就需要对NULL（或者0）进行强制类型转换：
@@ -39,7 +39,7 @@ int main() {
   int *a1 = nullptr;
   char *a2 = nullptr;
   double *a3 = nullptr;
-  // 不同类型的指针变量都可以使用nullptr来初始化，编译器分别将nullptr隐式转换成int*、char* 以及 double*指针类型。
+  // 不同类型的指针变量都可以使用nullptr来初始化，编译器分别将nullptr隐式转换成int*、char*以及double*指针类型。
 
   // 通过将指针初始化为nullptr，可以很好地解决NULL遗留的问题:
   // isnull(NULL);  // int n

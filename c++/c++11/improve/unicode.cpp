@@ -18,9 +18,9 @@ namespace n1 {
 // 由于wchar_t宽度没有一个统规定，导致使用wchar_t的代码在不同平台间移植时，可能出现问题。
 
 // 这一状况在C++11中得到了一定的改善，从此Unicode字符的存储有了统一类型：
-//  1.char16_t：用于存储UTF-16编码的Unicode字符。
-//  2.char32_t：用于存储UTF-32编码的Unicode字符。
-//  3.至于UTF-8编码的Unicode数据，C++11还是使用了8bits宽度的char类型数组来表示，
+// 1.char16_t：用于存储UTF-16编码的Unicode字符。
+// 2.char32_t：用于存储UTF-32编码的Unicode字符。
+// 3.至于UTF-8编码的Unicode数据，C++11还是使用了8bits宽度的char类型数组来表示。
 
 void testN1() {
   // C++98中有两种定义字符串的方式：
@@ -140,7 +140,7 @@ void func4() {
               << (uint32_t)(uint8_t)gbk[i] << " ";
   }
 
-  // failed 不是GBK编码的文件
+  // failed不是GBK编码的文件
 }
 
 void func5() {

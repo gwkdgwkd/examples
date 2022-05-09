@@ -152,7 +152,7 @@ void func2() {
   std::cout << std::endl;
 }
 
-// 4) 基于关联式容器（包括哈希容器）底层存储机制的限制：
+// 4.基于关联式容器（包括哈希容器）底层存储机制的限制：
 void func3() {
   // 不允许修改map、unordered_map、multimap以及unordered_multimap容器存储的键的值；
   // 不允许修改set、unordered_set、multiset以及unordered_multiset容器中存储的元素的值。

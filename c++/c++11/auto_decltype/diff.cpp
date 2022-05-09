@@ -29,7 +29,7 @@ void func1() {
 
 void func2() {
   // 对cv限定符的处理:
-  // 「cv限定符」是const和volatile关键字的统称：
+  // cv限定符是const和volatile关键字的统称：
   // const关键字用来表示数据是只读的，也就是不能被修改；
   // volatile和const是相反的，它用来表示数据是可变的、易变的，
   // 目的是不让CPU将数据缓存到寄存器，而是从原始的内存中读取。
@@ -62,7 +62,7 @@ void func2() {
   const int &r1 = n1;
   auto r2 = r1;
   // r2赋值失败，说明是带const的，也就是说const 没有被auto抛弃，这验证了auto的第二条规则。
-  // r1 = 5;  // const引用，不能修改
+  // r2 = 5;  // const引用，不能修改
   decltype(r1) r3 = r1;
   // 说明decltype不会去掉表达式的const属性
   // r3 = 6;  // const引用，不能修改
@@ -117,13 +117,13 @@ template <typename R, typename T, typename U>
 R add1(T t, U u) {
   return t + u;
 }
-
 void func1() {
   int a = 1;
   float b = 2.0;
 
   // 并不关心a+b的类型是什么，因此，只需要通过decltype(a+b)直接得到返回值类型即可。
-  // 但是这样使用十分不方便，因为外部其实并不知道参数之间应该如何运算，只有add函数才知道返回值应当如何推导。
+  // 但是这样使用十分不方便，因为外部其实并不知道参数之间应该如何运算，
+  // 只有add函数才知道返回值应当如何推导。
   auto c = add1<decltype(a + b)>(a, b);
   std::cout << c << " " << typeid(c).name() << std::endl;  // 3 f
 }
@@ -135,13 +135,11 @@ void func1() {
 // }
 // 直接像上面这样写是编译不过的。
 // 因为t、u在参数列表中，而C++的返回值是前置语法，在返回值定义的时候参数变量还不存在。
-
 // 可行的写法如下：
 template <typename T, typename U>
 decltype(T() + U()) add3(T t, U u) {
   return t + u;
 }
-
 void func2() {
   int a = 1;
   double b = 2.0;
@@ -157,7 +155,6 @@ decltype((*(T *)0) + (*(U *)0)) add4(T t, U u) {
 }
 // 虽然成功地使用decltype完成了返回值的推导，但写法过于晦涩，
 // 会大大增加decltype在返回值类型推导上的使用难度并降低代码的可读性。
-
 void func3() {
   int a = 1;
   int b = 3;
@@ -175,7 +172,6 @@ template <typename T, typename U>
 auto add5(T t, U u) -> decltype(t + u) {
   return t + u;
 }
-
 void func4() {
   double a = 1;
   float b = 3;
@@ -185,11 +181,17 @@ void func4() {
 }
 
 // 如果说add使用C++98/03的返回值写法还勉强可以完成，那下面的例子只能用C++11来实现了。
-int &foo(int &i);
-float foo(float &f);
+int &foo(int &i) { return i; }
+float foo(float &f) { return f; }
 template <typename T>
 auto func(T &val) -> decltype(foo(val)) {
   return foo(val);
+}
+void func5() {
+  int i = 6;
+  std::cout << func<int>(i) << std::endl;  // 6
+  float f = 2.45;
+  std::cout << func<float>(f) << std::endl;  // 2.45
 }
 
 void testTrailingReturnType() {
@@ -197,6 +199,7 @@ void testTrailingReturnType() {
   func2();
   func3();
   func4();
+  func5();
 }
 }  // namespace trailingreturntype
 

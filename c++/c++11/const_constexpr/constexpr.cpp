@@ -1,7 +1,5 @@
 #include <iostream>
 
-using namespace std;
-
 // 所谓常量表达式，指的就是由多个（≥1）常量组成的表达式。
 // 换句话说，如果表达式中的成员都是常量，那么该表达式就是一个常量表达式。
 // 这也意味着，常量表达式一旦确定，其值将无法修改。
@@ -49,20 +47,20 @@ namespace n2 {
 // 注意，constexpr并非可以修饰任意函数的返回值。
 // 换句话说，一个函数要想成为常量表达式函数，必须满足如下4个条件:
 
-// 1)整个函数的函数体中，除了可以包含using、typedef以及static_assert外，只能包含一条return返回语句。
+// 1.整个函数的函数体中，除了可以包含using、typedef以及static_assert外，只能包含一条return返回语句。
 // constexpr int func1(int x) {  // 函数内部包含多条语句，报错
 //   int ret = 1 + 2 + x;
 //   return ret;
 // }
 
-// 2)该函数必须有返回值，即函数的返回值类型不能是void。
+// 2.该函数必须有返回值，即函数的返回值类型不能是void。
 // constexpr void func2() {}  // 通过类似的函数根本无法获得一个常量
 
-// 3)函数在使用之前，必须有对应的定义语句。
+// 3.函数在使用之前，必须有对应的定义语句。
 // 普通函数在调用时，只需要保证调用位置之前有相应的声明即可；
 // 而常量表达式函数则不同，调用位置之前必须要有该函数的定义，否则会导致程序编译失败。
 
-// 4)return返回的表达式必须是常量表达式，举个例子：
+// 4.return返回的表达式必须是常量表达式，举个例子：
 // int num = 3;
 // constexpr int func3(int x) { return num + x; }
 // 常量表达式函数的返回值必须是常量表达式的原因很简单，如果想在程序编译阶段获得某个函数返回的常量，
@@ -72,6 +70,10 @@ namespace n2 {
 
 constexpr int func4(int x) {
   // 可以添加using执行、typedef语句以及static_assert断言
+  using namespace std;
+  typedef int a;
+  static_assert(5 > 0);
+
   return 1 + 2 + x;
 }
 
@@ -107,10 +109,10 @@ struct myType {
 void testN3() {
   constexpr struct myType mt { "zhangsan", 10 };
   constexpr const char *name = mt.getname();
-  cout << name << endl;  // zhangsan
+  std::cout << name << std::endl;  // zhangsan
   constexpr int age = mt.getage();
-  cout << age << endl;                       // 10
-  cout << mt.name << " " << mt.age << endl;  // zhangsan 10
+  std::cout << age << std::endl;                       // 10
+  std::cout << mt.name << " " << mt.age << std::endl;  // zhangsan 10
 
   // int i = 20;
   // constexpr struct myType mt1 { "test", i };
@@ -134,11 +136,14 @@ void testN4() {
   // 当模板函数中以自定义结构体myType类型进行实例化时，由于该结构体中没有定义常量表达式构造函数，
   // 所以实例化后的函数不是常量表达式函数，此时constexpr是无效的；
   struct myType ret = func1(stu);
-  cout << ret.name << " " << ret.age << endl;  // zhangsan 10
+  std::cout << ret.name << " " << ret.age << std::endl;  // zhangsan 10
+  ret.age = 8;  // constexpr是无效的
+  std::cout << ret.name << " " << ret.age << std::endl;  // zhangsan 8
 
   // 模板函数的类型T为int类型，实例化后的函数符合常量表达式函数的要求，所以该函数的返回值就是一个常量表达式。
   constexpr int ret1 = func1(10);
-  cout << ret1 << endl;  // 10
+  std::cout << ret1 << std::endl;  // 10
+  // ret1 = 6;  // assignment of read-only variable ‘ret1’
 }
 }  // namespace n4
 
