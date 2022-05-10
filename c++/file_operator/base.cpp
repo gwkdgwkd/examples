@@ -19,12 +19,14 @@
 // 1.ofstream，实现写文件；
 // 2.ifstream，实现读文件；
 // 3.fstream，实现读写文件。
-// 关于文件操作，虽然在C++程序中可以继续沿用C语言的那套文件操作方式，但更推荐使用适当的文件流类来读写文件。
+// 关于文件操作，虽然在C++程序中可以继续沿用C语言的那套文件操作方式，
+// 但更推荐使用适当的文件流类来读写文件。
 
 // ifstream类和fstream类是从istream类派生而来的，因此ifstream类拥有istream类的全部成员方法。
 // 同样地，ofstream和fstream类也拥有ostream类的全部成员方法。
 // 这也就意味着，istream和ostream类提供的供cin和cout调用的成员方法，也同样适用于文件流。
-// 并且这3个类中有些成员方法是相同的，比如operator <<()、operator >>()、peek()、ignore()、getline()、get()等。
+// 并且这3个类中有些成员方法是相同的，
+// 比如operator <<()、operator >>()、peek()、ignore()、getline()、get()等。
 // 值得一提的是，和<iostream>头文件中定义有ostream和istream类的对象cin和cout不同，
 // <fstream>头文件中并没有定义可直接使用的fstream、ifstream和ofstream类对象。
 // 因此，如果我们想使用该类操作文件，需要自己创建相应类的对象。
@@ -43,10 +45,12 @@
 // 2.fstream、ifstream
 //  operator>> 	 	    重载>>运算符，用于从指定文件中读取数据。
 //  gcount() 	        返回上次从文件流提取出的字符个数。
-//                    该函数常和get()、getline()、ignore()、peek()、read()、readsome()、putback()和unget()联用。
+//                    该函数常和get()、getline()、ignore()、peek()、read()、
+//                    readsome()、putback()和unget()联用。
 //  get() 	          从文件流中读取一个字符，同时该字符会从输入流中消失。
 //  getline(str,n,ch) 从文件流中接收n-1个字符给str变量，当遇到指定ch字符时会停止读取，默认情况下ch为'\0'。
-//  ignore(n,ch) 	    从文件流中逐个提取字符，但提取出的字符被忽略，不被使用，直至提取出n个字符，或者当前读取的字符为ch。
+//  ignore(n,ch) 	    从文件流中逐个提取字符，但提取出的字符被忽略，不被使用，
+//                    直至提取出n个字符，或者当前读取的字符为ch。
 //  peek() 	          返回文件流中的第一个字符，但并不是提取该字符。
 //  putback(c) 	      将字符c置入文件流（缓冲区）。
 // 3.fstream、ofstream
