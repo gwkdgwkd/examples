@@ -6,8 +6,9 @@
 #include <string>
 
 // 想要从线程中返回异步任务结果，一般需要依靠全局变量，从安全角度看，有些不妥；
-// 为此C++11提供了std::future类模板，future对象提供访问异步操作结果的机制，很轻松解决从异步任务中返回结果。
-// 当在一个线程中创建（通过std::async，std::packaged_task或者std::promise）了一个异步操作（通常是线程）的时候，
+// 为此C++11提供了std::future类模板，future对象提供访问异步操作结果的机制，
+// 很轻松解决从异步任务中返回结果。
+// 当在一个线程中创建（通过std::async，std::packaged_task或者std::promise）了一个异步操作（线程）时，
 // 这个异步操作会返回一个future对象给当前的线程，供其访问异步操作的状态，结果等等。
 
 // std::future_errc继承于C++标准异常体系中的logic_error。
@@ -24,8 +25,8 @@
 namespace future {
 // future某种意义上表示的是一个异步操作，通过其成员函数我们能够获悉异步操作处于什么样的情况。
 // 在C++标准库中，有两种“期望”，使用两种类型模板实现：
-//   唯一期望(unique futures，std::future<>) std::future的实例只能与一个指定事件相关联。
-//   共享期望(shared futures)(std::shared_future<>) std::shared_future的实例就能关联多个事件。
+// 1.唯一期望(unique futures，std::future<>) std::future的实例只能与一个指定事件相关联。
+// 2.共享期望(shared futures)(std::shared_future<>) std::shared_future的实例能关联多个事件。
 // 一般来说，通过异步操作创建的future会被这些异步操作设置共享状态。
 // future对象可以通过valid()函数查询其共享状态是否有效，
 // 一般来说，只有当valid()返回true的时候才调用get()去获取结果，这也是C++文档推荐的操作。
@@ -215,7 +216,8 @@ void testFuture() {
 }  // namespace future
 
 namespace promise {
-// promise对象保存某一类型的值，该值可被future对象读取（可能在其他线程），因此promise也提供了一种线程同步的手段。
+// promise对象保存某一类型的值，该值可被future对象读取（可能在其他线程），
+// 因此promise也提供了一种线程同步的手段。
 // std::promise::get_future函数返回一个与promise共享状态相关联的future。
 // 返回的future对象可以访问由promise对象设置在共享状态上的值或者某个异常对象。
 // 只能从promise共享状态获取一个future对象。
@@ -224,7 +226,8 @@ namespace promise {
 // std::promise::set_value函数设置共享状态的值，此后promise的共享状态标志变为ready。
 // std::promise::set_value_at_thread_exit设置共享状态的值，
 // 但是不将共享状态的标志设置为ready，当线程退出时该promise对象会自动设置为ready，
-// 如果在线程结束之前有其他设置或者修改共享状态的值的操作，则会抛出future_error(promise_already_satisfied)。
+// 如果在线程结束之前有其他设置或者修改共享状态的值的操作，
+// 则会抛出future_error(promise_already_satisfied)。
 // std::promise::swap交换promise的共享状态。
 // std::promise::set_exception_at_thread_exit。
 
@@ -276,16 +279,16 @@ void testPromise() {
 
 namespace packagedtask {
 // 几种构造函数的语义：
-//   默认构造函数，初始化一个空的共享状态，并且该packaged_task对象无包装任务。
-//   初始化一个共享状态，并且被包装任务由参数fn指定。
-//   带自定义内存分配器的构造函数，与默认构造函数类似，但是使用自定义分配器来分配共享状态。
-//   拷贝构造函数，被禁用。
-//   移动构造函数。
+// 1.默认构造函数，初始化一个空的共享状态，并且该packaged_task对象无包装任务。
+// 2.初始化一个共享状态，并且被包装任务由参数fn指定。
+// 3.带自定义内存分配器的构造函数，与默认构造函数类似，但是使用自定义分配器来分配共享状态。
+// 4.拷贝构造函数，被禁用。
+// 5.移动构造函数。
 // 与std::promise类似，std::packaged_task也禁用了普通的赋值操作运算，只允许move赋值运算。
 
 // packaged_task对象内部包含两个基本元素：
-//  1.包装的任务，即一个可调用对象
-//  2.共享状态，用于保存任务的返回值。可以通过future对象来达到异步访问共享状态的效果
+// 1.包装的任务，即一个可调用对象
+// 2.共享状态，用于保存任务的返回值。可以通过future对象来达到异步访问共享状态的效果
 // packaged_task是对一个任务的抽象，可以给其传递一个函数来完成其构造。
 // 相较于promise，它应是更高层次的一个抽象。
 // 同样地，可以将任务投递给任何线程去完成，然后获取packaged_task的future来获取共享数据。
@@ -293,17 +296,18 @@ namespace packagedtask {
 // std::packaged_task::get_future返回一个与packaged_task对象共享状态相关的future对象。
 // 返回的future对象可以获得由另外一个线程在该packaged_task对象的共享状态上设置的某个值或者异常。
 
-// std::packaged_task::operator()(Args... args)，调用该packaged_task对象所包装的对象(通
-// 常为函数指针，函数对象，lambda 表达式等)，传入的参数为args.调用该函数一般会发生两种情况：
-//   如果调用包装的对象成功，则返回值（如果被包装的对象有返回值的话）被保存在packaged_task的共享状态中。
-//   如果调用包装的对象失败，并且抛出了异常，则异常也会被保存在packaged_task的共享状态中。
+// std::packaged_task::operator()(Args... args)，
+// 调用该packaged_task对象所包装的对象(通常为函数指针，函数对象，lambda 表达式等)，
+// 传入的参数为args.调用该函数一般会发生两种情况：
+// 1.如果调用包装的对象成功，则返回值（如果被包装的对象有返回值的话）被保存在packaged_task的共享状态中。
+// 2.如果调用包装的对象失败，并且抛出了异常，则异常也会被保存在packaged_task的共享状态中。
 // 以上两种情况都使共享状态的标志变为ready，因此其他等待该共享状态的线程可以获取共享状态的值或者异常并继续执行。
 
 // 被包装的任务在构造时指定，因此调用operator()的效果由packaged_task对象构造时所指定的可调用对象来决定：
-//  1.如果被包装的任务是函数指针或者函数对象，调用operator()只是将参数传递给被包装的对象。
-//  2.如果被包装的任务是指向类的非静态成员函数的指针，那么operator()的第一个参数应该指定为成员函数被调用的
-//    那个对象，剩余的参数作为该成员函数的参数。
-//  3.如果被包装的任务是指向类的非静态成员变量，那么std::packaged_task::operator()只允许单个参数。 ？
+// 1.如果被包装的任务是函数指针或者函数对象，调用operator()只是将参数传递给被包装的对象。
+// 2.如果被包装的任务是指向类的非静态成员函数的指针，那么operator()的第一个参数应该指定为成员函数被调用的
+//   那个对象，剩余的参数作为该成员函数的参数。
+// 3.如果被包装的任务是指向类的非静态成员变量，那么std::packaged_task::operator()只允许单个参数。 ？
 
 // std::packaged_task::make_ready_at_thread_exit
 // 该函数会调用被包装的任务，并向任务传递参数，类似std::packaged_task的operator()成员函数。
@@ -336,7 +340,7 @@ void func3() {
 
   task.reset();
   f = task.get_future();
-  std::thread t = std::thread(std::move(task), 300);  //转移了所有权
+  std::thread t = std::thread(std::move(task), 300);  // 转移了所有权
   t.join();
   std::cout << f.get() << std::endl;  // 900
 
@@ -386,17 +390,18 @@ void testPackagedtask() {
 namespace async {
 // 不用thread对象也可以创建线程。
 // std::async大概的工作过程：
-//  1.先将异步操作用std::packaged_task包装起来，然后将异步操作的结果放到std::promise中，这个过程就是创造未来的过程。
-//  2.外面再通过future.get/wait来获取这个未来的结果。
+// 1.先将异步操作用std::packaged_task包装起来，
+//   然后将异步操作的结果放到std::promise中，这个过程就是创造未来的过程。
+// 2.外面再通过future.get/wait来获取这个未来的结果。
 // 可以说，std::async帮我们将std::future、std::promise和std::packaged_task三者结合了起来。
 // async返回一个与函数返回值相对应类型的future，通过它我们可以在其他任何地方获取异步结果。
 
 // 与std::future相关的函数主要是std::async()
 // 第一类std::async没有指定异步任务（即执行某一函数）的启动策略(launch policy)，
 // 第二类函数指定了启动策略，std::launch：
-//  1.launch::async:异步任务会在另外一个线程中调用，并通过共享状态返回异步任务的结果。
-//  2.launch::deferred:异步任务将会在共享状态被访问时调用，相当与按需调用（即延迟(deferred)调用）。
-//    也就是说只有当我们调用future.get()时子线程才会被创建以执行任务。
+// 1.launch::async:异步任务会在另外一个线程中调用，并通过共享状态返回异步任务的结果。
+// 2.launch::deferred:异步任务将会在共享状态被访问时调用，相当与按需调用（即延迟(deferred)调用）。
+//   也就是说只有当我们调用future.get()时子线程才会被创建以执行任务。
 
 void func1(std::future<int>& f) {
   std::future_status status;
@@ -435,12 +440,12 @@ void testAsync() {
   // timeout
   // ready, value:5
 
-  // launch::async表示在调用async函数的时候就开始创建新线程
+  // launch::deferred表示延迟调用，在调用future中的wait()或者get()函数时，才执行入口函数
   std::future<int> f3 = std::async(std::launch::deferred, lma);
   std::thread(func1, std::ref(f3)).join();
   // deferred, value:5
 
-  // launch::deferred表示延迟调用，在调用future中的wait()或者get()函数时，才执行入口函数
+  // launch::async表示在调用async函数的时候就开始创建新线程
   std::future<int> f4 = std::async(std::launch::async, lma);
   std::thread(func1, std::ref(f4)).join();
   // timeout

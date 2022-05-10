@@ -1,8 +1,6 @@
 #include <iostream>
 #include <memory>
 
-using namespace std;
-
 // 和shared_ptr、unique_ptr一样，weak_ptr智能指针也是以模板类的方式实现的。
 // weak_ptr<T>（T为指针所指数据的类型）定义在<memory>头文件，并位于std命名空间中。
 
@@ -15,19 +13,19 @@ using namespace std;
 
 namespace create {
 void testCreate() {
-  // 1)可以创建一个空weak_ptr指针:
+  // 1.可以创建一个空weak_ptr指针:
   std::weak_ptr<int> wp1;
   // std::weak_ptr<int> wp2(nullptr);  // 不行
   // std::weak_ptr<int> wp3 = nullptr;  // 不行
 
-  // 2)weak_ptr指针更常用于指向某一shared_ptr指针拥有的堆内存，因为在构建weak_ptr指针对象时，
+  // 2.weak_ptr指针更常用于指向某一shared_ptr指针拥有的堆内存，因为在构建weak_ptr指针对象时，
   // 可以利用已有的shared_ptr指针为其初始化:
   std::shared_ptr<int> sp(new int(5));
   std::cout << sp.use_count() << std::endl;  // 1
   std::weak_ptr<int> wp4(sp);
   std::cout << wp4.use_count() << std::endl;  // 1
 
-  // 3)凭借已有的weak_ptr指针，可以创建一个新的weak_ptr指针:
+  // 3.凭借已有的weak_ptr指针，可以创建一个新的weak_ptr指针:
   std::weak_ptr<int> wp5(wp1);  // 若wp1为空指针，则wp5也为空指针；
   std::cout << wp5.use_count() << std::endl;  // 0
   // 反之，如果wp4指向某一shared_ptr指针拥有的堆内存，则wp6也指向该块存储空间（可以访问，但无所有权）。

@@ -1,14 +1,12 @@
 #include <iostream>
 
-using namespace std;
-
 // 完美转发指的是函数模板可以将自己的参数“完美”地转发给内部调用的其它函数。
 // 所谓完美，即不仅能准确地转发参数的值，还能保证被转发参数的左、右值属性不变。
 // C++11标准为C++引入右值引用语法的同时，还解决了一个C++98/03标准长期存在的短板，
 // 即使用简单的方式即可在函数模板中实现参数的完美转发。
 
-void otherdef(int& t) { cout << " lvalue" << std::endl; }
-void otherdef(const int& t) { cout << " rvalue" << std::endl; }
+void otherdef(int& t) { std::cout << " lvalue" << std::endl; }
+void otherdef(const int& t) { std::cout << " rvalue" << std::endl; }
 
 namespace n1 {
 // 显然，function()函数模板并没有实现完美转发:
@@ -89,7 +87,7 @@ namespace n4 {
 template <typename T>
 void function(T&& t) {
   // forword()用于修饰被调用函数中需要维持参数左、右值属性的参数
-  otherdef(forward<T>(t));
+  otherdef(std::forward<T>(t));
 }
 
 // 总的来说，在定义模板函数时应该：

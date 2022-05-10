@@ -5,9 +5,11 @@
 #include <mutex>
 #include <thread>
 
-// 当std::condition_variable对象的某个wait函数被调用的时候，它使用std::unique_lock(通过 std::mutex)来锁住当前线程。
-// 当前线程会一直被阻塞，直到另外一个线程在相同的std::condition_variable对象上调用了notification函数来唤醒当前线程。
-// condition_variable条件变量可以阻塞（wait、wait_for、wait_until）调用的线程直到使用（notify_one或notify_all）通知恢复为止。
+// 当std::condition_variable对象的某个wait函数被调用的时候，
+// 它使用std::unique_lock(通过std::mutex)来锁住当前线程，当前线程会一直被阻塞，
+// 直到另外一个线程在相同的std::condition_variable对象上调用了notification函数来唤醒当前线程。
+// condition_variable条件变量可以阻塞（wait、wait_for、wait_until）调用的线程，
+// 直到使用（notify_one或notify_all）通知恢复为止。
 // std::condition_variable对象通常使用std::unique_lock<std::mutex>来等待，
 // 如果需要使用另外的lockable类型，可以使用std::condition_variable_any类。
 
@@ -27,7 +29,8 @@ namespace wait {
 // 直到某一个线程调用notify_one或notify_all为止，被唤醒后，wait重新尝试获取互斥量，
 // 如果得不到，线程会卡在这里，直到获取到互斥量，然后继续判断第二个参数，
 // 如果表达式为false，wait对互斥量解锁，然后休眠，如果为true，则进行后面的操作。
-// 当前线程调用wait()后将被阻塞(此时当前线程应该获得了锁（mutex）lck)，直到另外某个线程调用notify_*唤醒了当前线程。
+// 当前线程调用wait()后将被阻塞(此时当前线程应该获得了锁（mutex）lck)，
+// 直到另外某个线程调用notify_*唤醒了当前线程。
 // 在线程被阻塞时，该函数会自动调用lck.unlock()释放锁，使得其他被阻塞在锁竞争上的线程得以继续执行。
 // 另外，一旦当前线程获得通知(notified，通常是另外某个线程调用notify_*唤醒了当前线程)，
 // wait()函数也是自动调用lck.lock()，使得lck的状态和wait函数被调用时相同。
@@ -40,14 +43,14 @@ bool ready = false;
 void do_print_id(int id) {
   std::unique_lock<std::mutex> lck(mtx);
   while (!ready)   // 如果标志位不为true, 则等待...
-    cv.wait(lck);  // 当前线程被阻塞, 当全局标志位变为true之后,
-  // 线程被唤醒, 继续往下执行打印线程编号id.
+    cv.wait(lck);  // 当前线程被阻塞
+  // 当全局标志位变为true之后，线程被唤醒, 继续往下执行打印线程编号id
   std::cout << "thread " << id << '\n';
 }
 void go() {
   std::unique_lock<std::mutex> lck(mtx);
-  ready = true;     // 设置全局标志位为true.
-  cv.notify_all();  // 唤醒所有线程.
+  ready = true;     // 设置全局标志位为true
+  cv.notify_all();  // 唤醒所有线程
 }
 
 std::mutex mtx1;
@@ -72,7 +75,7 @@ void testWait() {
   // spawn 10 threads:
   for (int i = 0; i < 10; ++i) threads[i] = std::thread(do_print_id, i);
   std::cout << "10 threads ready to race...\n";
-  go();  // go!
+  go();
   for (auto& th : threads) th.join();
   // 10 threads ready to race...
   // thread 0
@@ -112,7 +115,8 @@ namespace waitfor {
 // wait_for()与wait()类似，不过wait_for可以指定一个时间段，
 // 在当前线程收到通知或者指定的时间rel_time超时之前，该线程都会处于阻塞状态。
 // 而一旦超时或者收到了其他线程的通知，wait_for返回，剩下的处理步骤和wait()类似。
-// wait_for的重载版本的最后一个参数pred表示wait_for的预测条件，只有当pred条件为false时调用wait()才会阻塞当前线程，
+// wait_for的重载版本的最后一个参数pred表示wait_for的预测条件，
+// 只有当pred条件为false时调用wait()才会阻塞当前线程，
 // 并且在收到其他线程的通知后只有当pred为true时才会被解除阻塞。因此相当于如下代码：
 // return wait_until (lck, chrono::steady_clock::now() + rel_time, std::move(pred));
 std::condition_variable cv1;

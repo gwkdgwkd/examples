@@ -1,16 +1,14 @@
 #include <iostream>
 #include <memory>
 
-using namespace std;
-
 // 开发中，常会遇到诸如程序运行中突然崩溃、程序运行所用内存越来越多最终不得不重启等问题，
 // 这些问题往往都是内存资源管理不当造成的。比如：
-// 有些内存资源已经被释放，但指向它的指针并没有改变指向（成为了野指针），并且后续还在使用；
-// 有些内存资源已经被释放，后期又试图再释放一次（重复释放同一块内存会导致程序运行崩溃）；
-// 没有及时释放不再使用的内存资源，造成内存泄漏，程序占用的内存资源越来越多。
+// 1.有些内存资源已经被释放，但指向它的指针并没有改变指向（成为了野指针），并且后续还在使用；
+// 2.有些内存资源已经被释放，后期又试图再释放一次（重复释放同一块内存会导致程序运行崩溃）；
+// 3.没有及时释放不再使用的内存资源，造成内存泄漏，程序占用的内存资源越来越多。
 
-// 早在1959年前后，就有人提出了“垃圾自动回收”机制。所谓垃圾，指的是那些不再使用或者没有任
-// 何指针指向的内存空间，而“回收”则指的是将这些“垃圾”收集起来以便再次利用。
+// 早在1959年前后，就有人提出了“垃圾自动回收”机制。所谓垃圾，指的是那些不再使用或者没有任何指针指向的内存空间，
+// 而“回收”则指的是将这些“垃圾”收集起来以便再次利用。
 // 如今，垃圾回收机制已经大行其道，得到了诸多编程语言的支持，例如Java、Python、C#、PHP等。
 // C++虽然从来没有公开得支持过垃圾回收机制，但C++98/03标准中，支持使用auto_ptr智能指针来实现堆内存的自动回收；
 // C++11在废弃auto_ptr的同时，增添了unique_ptr、shared_ptr以及weak_ptr这3个智能指针来实现堆内存的自动回收。
@@ -48,7 +46,7 @@ class A {
 namespace create {
 // shared_ptr智能指针的创建, shared_ptr<T>类模板中，提供了多种实用的构造函数:
 void func1() {
-  // 1)构造出shared_ptr<T>类型的空智能指针(空的shared_ptr指针，其初始引用计数为0，而不是1)：
+  // 1.构造出shared_ptr<T>类型的空智能指针(空的shared_ptr指针，其初始引用计数为0，而不是1)：
   std::shared_ptr<A> p1;           // 不传入任何实参
   std::shared_ptr<A> p2(nullptr);  // 传入空指针nullptr
   std::cout << std::boolalpha << "p1 is Empty: " << (p1 == nullptr)
@@ -61,7 +59,7 @@ void func1() {
 }
 
 void func2() {
-  // 2)在构建shared_ptr智能指针，也可以明确其指向:
+  // 2.在构建shared_ptr智能指针，也可以明确其指向:
   std::shared_ptr<A> p1(new A(3));
   // 同时，C++11标准中还提供了std::make_shared<T>模板函数，可以初始化shared_ptr:
   std::shared_ptr<A> p2 = std::make_shared<A>(5);  // 与p1是完全相同的
@@ -79,7 +77,7 @@ void func2() {
 }
 
 void func3() {
-  // 3)除此之外，shared_ptr<T>模板还提供有相应的拷贝构造函数:
+  // 3.除此之外，shared_ptr<T>模板还提供有相应的拷贝构造函数:
   std::shared_ptr<A> p1(new A());
   std::shared_ptr<A> p2(p1);
   std::cout << std::boolalpha << p1 << " " << p1.operator bool() << std::endl;
@@ -89,8 +87,9 @@ void func3() {
   std::cout << "p1 count: " << p1.use_count() << std::endl;
   std::cout << "p2 count: " << p2.use_count() << std::endl;
   std::cout << "p3 count: " << p3.use_count() << std::endl;
-  // p3、p5、p6都是shared_ptr类型的智能指针，因此可以用p3来初始化p5和p6,由于p3是左值，因此会调用拷贝构造函数。
-  // p5、p6和p3指向同一块堆内存，同时该堆空间的引用计数会加1。
+  // p1、p2、p3都是shared_ptr类型的智能指针，因此可以用p1来初始化p2和p3，
+  // 由于p1是左值，因此会调用拷贝构造函数。
+  // p1、p2和p3指向同一块堆内存，同时该堆空间的引用计数会加1。
   std::cout << "p1 == p2 : " << (p1 == p2) << std::endl;
   std::cout << "p2 == p3 : " << (p2 == p3) << std::endl;
   std::cout << "p1 == p3 : " << (p1.get() == p3.get()) << std::endl;
@@ -130,7 +129,7 @@ void func4() {
 }
 
 void func5() {
-  // 5.调用移动构造函数
+  // 4.调用移动构造函数
   std::shared_ptr<A> p1(new A());
   std::cout << "p1 count: " << p1.use_count() << std::endl;  // 1
   std::shared_ptr<A> p2(std::move(p1));
@@ -160,7 +159,8 @@ namespace func {
 // operator->()   重载->号，当智能指针指向的数据类型为自定义的结构体时，通过->运算符可以获取其内部的指定成员。
 // swap() 	      交2个相同类型shared_pt智能指针的内容。
 // reset() 	      当函数没有实参时，该函数会使当前shared_ptr所指堆内存的引用计数减1，同时将当前对象重置为一个空指针；
-//                当为函数传递一个新申请的堆内存时，则调用该函数的shared_ptr对象会获得该存储空间的所有权，并且引用计数的初始值为1。
+//                当为函数传递一个新申请的堆内存时，
+//                则调用该函数的shared_ptr对象会获得该存储空间的所有权，并且引用计数的初始值为1。
 // get() 	        获得shared_ptr对象内部包含的普通指针。
 // use_count() 	  返回同当前shared_ptr对象（包括它）指向相同的所有shared_ptr对象的数量。
 // unique() 	    判断当前shared_ptr对象指向的堆内存，是否不再有其它shared_ptr对象再指向它。
@@ -188,8 +188,8 @@ void func2() {
   std::cout << p2->GetI() << " (" << p2.use_count() << ")" << std::endl;
   std::cout << p3->GetI() << " (" << p3.use_count() << ")" << std::endl;
   p1.reset();  // p1引用计数减1，p1为nullptr
-  p2.reset(new A(88));
   std::cout << std::boolalpha << (p1 == nullptr) << std::endl;
+  p2.reset(new A(88));
   std::cout << p2->GetI() << " (" << p2.use_count() << ")" << std::endl;
   std::cout << p3->GetI() << " (" << p3.use_count() << ")" << std::endl;
 
@@ -199,8 +199,8 @@ void func2() {
   // 77 (2)
   // 77 (2)
   // delete A
-  // create A, i = 88
   // true
+  // create A, i = 88
   // 88 (1)
   // 77 (1)
   // delete A

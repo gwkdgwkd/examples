@@ -10,7 +10,8 @@ template <typename T = int>  // error in C++98/03: default template arguments
 void func1(T t) {
   std::cout << typeid(T).name() << ":" << t << std::endl;
 }
-// error: default template arguments may not be used in function templates without -std=c++11 or -std=gnu++11
+// error: default template arguments may not be used in
+// function templates without -std=c++11 or -std=gnu++11
 
 // g++-4.8 default_arg.cpp
 
@@ -54,7 +55,7 @@ namespace n2 {
 // 函数模板的参数推导规则也并不复杂，简单地讲：
 // 如果能够从函数实参中推导出类型的话，那么默认模板参数就不会被使用，反之，默认模板参数则可能会被使用。
 // 这意味着当默认模板参数和编译器自行推导出模板参数类型的能力一起结合使用时，代码的书写将变得异常灵活。
-// 可以一部分模板参数采用默认参数，而另一部分使用自动推导:
+// 可以一部分模板参数采用默认参数，而另一部分使用自动推导：
 template <typename R = int, typename U>
 R func1(U val) {
   std::cout << "R:" << typeid(R).name() << ",U:" << typeid(U).name()
@@ -62,8 +63,9 @@ R func1(U val) {
   return val;
 }
 
-// 当默认模板参数和自行推导的模板参数同时使用时，若无法推导出函数模板参数的类型，编译器会选择使用默认模板参数；
-// 如果模板参数即无法推导出来，又未设置其默认值，则编译器直接报错
+// 当默认模板参数和自行推导的模板参数同时使用时，
+// 若无法推导出函数模板参数的类型，编译器会选择使用默认模板参数；
+// 如果模板参数即无法推导出来，又未设置其默认值，则编译器直接报错：
 template <typename T, typename U = double>
 void func2(T t = 0, U u = 0) {
   std::cout << "T:" << typeid(T).name() << ",U:" << typeid(U).name()

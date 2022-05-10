@@ -1,8 +1,6 @@
 #include <iostream>
 #include <memory>
 
-using namespace std;
-
 // 作为智能指针的一种，unique_ptr指针自然也具备“在适当时机自动释放堆内存空间”的能力。
 // 和shared_ptr指针最大的不同之处在于，unique_ptr指针指向的堆内存无法同其它unique_ptr共享，
 // 也就是说，每个unique_ptr指针都独自拥有对其所指堆内存空间的所有权。
@@ -27,21 +25,21 @@ class A {
 namespace create {
 void testCreate() {
   // unique_ptr智能指针的创建:
-  // 1)通过以下2种方式，可以创建出空的unique_ptr指针：
+  // 1.通过以下2种方式，可以创建出空的unique_ptr指针：
   std::unique_ptr<A> p1();
   std::unique_ptr<A> p2(nullptr);
   std::unique_ptr<A> p3 = nullptr;
 
-  // 2)创建unique_ptr指针的同时，也可以明确其指向:
+  // 2.创建unique_ptr指针的同时，也可以明确其指向:
   std::unique_ptr<A> p4(new A(5));  // create A, i = 5
   // 和可以用make_shared<T>()模板函数初始化shared_ptr指针不同，
   // C++11标准中并没有为unique_ptr类型指针添加类似的模板函数。
 
-  // 3)基于unique_ptr类型指针不共享各自拥有的堆内存:
+  // 3.基于unique_ptr类型指针不共享各自拥有的堆内存:
   // std::unique_ptr<int> p5(p4);   // 错误，没有提供拷贝构造函数
   // std::unique_ptr<int> p6 = p4;  // 错误
 
-  // 4)提供了移动构造函数和移动赋值操作符
+  // 4.提供了移动构造函数和移动赋值操作符
   std::unique_ptr<A> p7(std::move(p4));  // 正确，调用移动构造函数
   std::unique_ptr<A> p8 = std::move(p4);
 
