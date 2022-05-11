@@ -6,7 +6,8 @@
 // 2.如果该函数是虚函数，并且派生类有同名的函数遮蔽它，那么编译器会根据指针的指向找到该函数；
 //   也就是说，指针指向的对象属于哪个类就调用哪个类的函数，这就是多态。
 // 编译器之所以能通过指针指向的对象找到虚函数，是因为在创建对象时额外地增加了虚函数表。
-// 如果一个类包含了虚函数，那么在创建该类的对象时就会额外地增加一个数组，数组中的每一个元素都是虚函数的入口地址。
+// 如果一个类包含了虚函数，那么在创建该类的对象时就会额外地增加一个数组，
+// 数组中的每一个元素都是虚函数的入口地址。
 // 不过数组和对象是分开存储的，为了将对象和数组关联起来，
 // 编译器还要在对象中安插一个指针，指向数组的起始位置。
 // 这里的数组就是虚函数表（Virtual function table），简写为vtable。
@@ -243,7 +244,8 @@ void func3() {
 }
 
 // 仔细观察虚函数表，可以发现:
-// 基类的虚函数在vtable中的索引是固定的，不会随着继承层次的增加而改变，派生类新增的虚函数放在vtable的最后。
+// 基类的虚函数在vtable中的索引是固定的，不会随着继承层次的增加而改变，
+// 派生类新增的虚函数放在vtable的最后。
 // 如果派生类有同名的虚函数覆盖了基类的虚函数，那么将使用派生类的虚函数替换基类的虚函数，
 // 这样具有遮蔽关系的虚函数在vtable中只会出现一次。
 // 当通过指针调用虚函数时，先根据指针找到vfptr，再根据vfptr找到虚函数的入口地址。
@@ -255,11 +257,13 @@ void func3() {
 //  0是vfptr在对象中的偏移，p+0是vfptr的地址；
 //  *(p+0)是vfptr的值，而vfptr是指向vtable的指针，所以*(p+0)也就是vtable的地址；
 //  func_a()在vtable中的索引是0，所以(*(p+0)+0)也就是display()的地址；
-//  知道了func_a()的地址，(*(*(p+0)+0))(p)也就是对func_a()的调用了，这里的p就是传递的实参，它会赋值给this指针。
+//  知道了func_a()的地址，(*(*(p+0)+0))(p)也就是对func_a()的调用了，
+//  这里的p就是传递的实参，它会赋值给this指针。
 // 转换后的表达式是固定的，只要调用func_a()函数，不管它是哪个类的，都会使用这个表达式。
 // 换句话说，编译器不管p指向哪里，一律转换为相同的表达式。
 // 转换后的表达式没有用到与p的类型有关的信息，只要知道p的指向就可以调用函数，
-// 因为在基类和派生类中，p指向地址所代表的对象，虚函数表中相同偏移量保存的函数的地址不一样，从而实现了多态。
+// 因为在基类和派生类中，p指向地址所代表的对象，
+// 虚函数表中相同偏移量保存的函数的地址不一样，从而实现了多态。
 
 void func4() {
   D obj;
@@ -335,7 +339,8 @@ namespace n2 {
 // 当存在多继承时，虚函数表的结构就会变得复杂
 // 在多继承情况下，有多少个有虚函数的基类就有多少个虚函数表指针。
 // 当子类有多出来的虚函数时，添加在第一个虚函数表中，父类指针不能调用。
-// 当有多个虚函数表时，虚函数表的结果是0代表没有下一个虚函数表，不同操作系统中代表有下一个虚函数表的标识不同。
+// 当有多个虚函数表时，虚函数表的结果是0代表没有下一个虚函数表，
+// 不同操作系统中代表有下一个虚函数表的标识不同。
 
 namespace test1 {  // 基类无虚函数，派生类也没有虚函数
 class BaseA {
@@ -417,7 +422,7 @@ void func() {
   ((FunPtr) * (long *)(*vt_ptr + 0))();  // derived::print()
 
   // 因为派生类存在虚函数，故排在最前的是虚函数表指针（此时，虚函数表指针属于派生类，而非基类），
-  // 接着在世基类成员变量，这里先是基类baseA,然后才是基类baseB,最后才是派生类成员变量。
+  // 接着才是基类成员变量，这里先是基类baseA,然后才是基类baseB,最后才是派生类成员变量。
   // 由于只有派生类存在虚函数，故虚函数表中只有派生类的虚函数地址。
 }
 }  // namespace test2
@@ -615,9 +620,72 @@ void func() {
   ((FunPtr)pVtab[0][0])();  // virtual BaseB::play()
 
   // 多重继承下，子类不再具有自身的虚函数表，它的虚函数表与第一个父类的虚函数表合并了。
-  // 同样的，如果子类重写了任意父类的虚函数，都会覆盖对应的函数地址记录。
 }
 }  // namespace test5
+
+namespace test6 {  // 两个基类中都含有虚函数，派生类有虚函数并重写基类函数
+class BaseA {
+ public:
+  virtual void show() { std::cout << "virtual BaseA::show()" << std::endl; }
+  int a = 1;
+};
+
+class BaseB {
+ public:
+  virtual void play() { std::cout << "virtual BaseB::play()" << std::endl; }
+  int b = 2;
+};
+
+class Derived : public BaseA, public BaseB {
+ public:
+  virtual void print() { std::cout << "virtual Derived::print()" << std::endl; }
+  virtual void show() { std::cout << "virtual Derived::show()" << std::endl; }
+  virtual void play() { std::cout << "virtual Derived::play()" << std::endl; }
+  int c = 3;
+};
+void func() {
+  Derived obj;
+  long *vt_ptr1 = (long *)&obj + 0;
+  int *mem1_addr = (int *)vt_ptr1 + 2;
+  long *vt_ptr2 = (long *)((char *)&obj + sizeof(BaseA));
+  int *mem2_addr = (int *)vt_ptr2 + 2;
+  int *mem3_addr = (int *)mem2_addr + 1;
+
+  std::cout << "obj begin addr: " << &obj << " (" << sizeof(Derived) << ","
+            << sizeof(obj) << ")"
+            << "," << alignof(Derived) << std::endl;
+  std::cout << "vp_ptr1: " << vt_ptr1 << std::endl;
+  std::cout << "mem1 a : " << mem1_addr << " (" << *mem1_addr << ")"
+            << std::endl;
+  std::cout << "vp_ptr2: " << vt_ptr2 << std::endl;
+  std::cout << "mem2 b : " << mem2_addr << " (" << *mem2_addr << ")"
+            << std::endl;
+  std::cout << "mem3 c : " << mem3_addr << " (" << *mem3_addr << ")"
+            << std::endl;
+
+  // 内存模型：
+  // obj begin addr: 0x7ffe153c3f20 (32,32),8
+  // vp_ptr1: 0x7ffe153c3f20
+  // mem1 a : 0x7ffe153c3f28 (1)
+  // vp_ptr2: 0x7ffe153c3f30
+  // mem2 b : 0x7ffe153c3f38 (2)
+  // mem3 c : 0x7ffe153c3f3c (3)
+
+  ((FunPtr) * (long *)((long *)(*vt_ptr1) + 0))();  // virtual Derived::show()
+  ((FunPtr) * (long *)((long *)(*vt_ptr1) + 1))();  // virtual Derived::print()
+  ((FunPtr) * (long *)((long *)(*vt_ptr1) + 2))();  // virtual Derived::play()
+  ((FunPtr) * (long *)((long *)(*vt_ptr2) + 0))();  // virtual Derived::play()
+
+  long **pVtab = (long **)&obj;
+  ((FunPtr)pVtab[0][0])();  // virtual Derived::show()
+  ((FunPtr)pVtab[0][1])();  // virtual Derived::print()
+  ((FunPtr)pVtab[0][2])();  // virtual Derived::play()
+  pVtab = (long **)((char *)&obj + sizeof(BaseA));
+  ((FunPtr)pVtab[0][0])();  // virtual Derived::play()
+
+  // 如果子类重写了任意父类的虚函数，都会覆盖对应的函数地址记录。
+}
+}  // namespace test6
 
 void testN2() {
   test1::func();
@@ -626,12 +694,17 @@ void testN2() {
   test3::func2();
   test4::func();
   test5::func();
+  test6::func();
 }
 }  // namespace n2
 
 namespace n3 {
 // 如果说没有虚函数的虚继承只是一个噩梦的话，那么既有虚函数又有虚继承就是真正的炼狱。
-
+// 总结：
+// 1.如有虚函数，则内存中加入vptr指针，放在内存中最高位置，
+//   其余应继承的成员变量按就近原则在内存中从近到远分布；
+// 2.如有虚继承，则在内存汇总加入vbptr指针，指向虚表，表中是距离基类成员变量的偏移量，
+//   指针放在vptr（如有）的下面，如有重复拷贝则只继承一份成员变量，放到对象最后面。
 class Base {
   int var = 100;
 
@@ -673,9 +746,9 @@ void testN3() {
   std::cout << " " << *(long *)((long *)*vfptr1 + 5) << std::endl;
 
   int *mem1 = (int *)&obj + 2;
-  std::cout << "#2 mem3 var: " << mem1 << "," << *mem1 << std::endl;
+  std::cout << "#2 mem1 var: " << mem1 << "," << *mem1 << std::endl;
   int *mem2 = (int *)&obj + 3;
-  std::cout << "#3 mem3  a : " << mem2 << "," << *mem2 << std::endl;
+  std::cout << "#3 mem2  a : " << mem2 << "," << *mem2 << std::endl;
 
   long *vfptr2 = (long *)(mem2 + 1);
   std::cout << "#4 vfptr2  : " << vfptr2 << std::endl;
@@ -687,7 +760,7 @@ void testN3() {
   int *mem3 = (int *)&obj + 6;
   std::cout << "#5 mem3  b : " << mem3 << "," << *mem3 << std::endl;
   int *mem4 = (int *)&obj + 7;
-  std::cout << "#6 mem6  c : " << mem4 << "," << *mem4 << std::endl;
+  std::cout << "#6 mem4  c : " << mem4 << "," << *mem4 << std::endl;
 
   // obj addr   : 0x7ffc57da5580, size :48
   // #1 vfptr1  : 0x7ffc57da5580
@@ -697,23 +770,128 @@ void testN3() {
   //  C::funC
   //  16
   //  -16
-  // #2 mem3 var: 0x7ffc57da5588,100
-  // #3 mem3  a : 0x7ffc57da558c,101
+  // #2 mem1 var: 0x7ffc57da5588,100
+  // #3 mem2  a : 0x7ffc57da558c,101
   // #4 vfptr2  : 0x7ffc57da5590
   //  B::fun
   //  C::funB
   //  -16
   //  -32
   // #5 mem3  b : 0x7ffc57da5598,102
-  // #6 mem6  c : 0x7ffc57da559c,104
+  // #6 mem4  c : 0x7ffc57da559c,104
 
   // 才32个字节，剩下的16个字节用到哪里了？
 }
 }  // namespace n3
 
+namespace n4 {
+class Base {
+  int var = 100;
+
+ public:
+  virtual void fun() { std::cout << " Base::fun" << std::endl; }
+};
+class A : virtual public Base {
+  int a = 101;
+
+ public:
+  // virtual void fun() { std::cout << " A::fun" << std::endl; }
+  virtual void funA() { std::cout << " A::funA" << std::endl; }
+};
+class B : virtual public Base {
+  int b = 102;
+
+ public:
+  // virtual void fun() { std::cout << " B::fun" << std::endl; }
+  virtual void funB() { std::cout << " B::funB" << std::endl; }
+};
+class C : public A, public B {
+  int c = 103;
+
+ public:
+  virtual void fun() { std::cout << " C::fun" << std::endl; }
+  virtual void funB() { std::cout << " C::funB" << std::endl; }
+  virtual void funC() { std::cout << " C::funC" << std::endl; }
+  virtual void funD() { std::cout << " C::funD" << std::endl; }
+};
+void testN4() {
+  C obj;
+
+  std::cout << "obj addr   : " << &obj << ", size :" << sizeof(C) << std::endl;
+  long *vfptr1 = (long *)&obj;
+  std::cout << "#1 vfptr1  : " << vfptr1 << std::endl;
+  ((FunPtr) * (long *)((long *)*vfptr1 + 0))();
+  ((FunPtr) * (long *)((long *)*vfptr1 + 1))();
+  ((FunPtr) * (long *)((long *)*vfptr1 + 2))();
+  ((FunPtr) * (long *)((long *)*vfptr1 + 3))();
+  ((FunPtr) * (long *)((long *)*vfptr1 + 4))();
+  std::cout << " " << *(long *)((long *)*vfptr1 + 5) << std::endl;
+  std::cout << " " << *(long *)((long *)*vfptr1 + 6) << std::endl;
+
+  int *mem1 = (int *)&obj + 2;
+  std::cout << "#2 mem1  a : " << mem1 << "," << *mem1 << std::endl;
+
+  long *vfptr2 = (long *)(mem1 + 2);
+  std::cout << "#4 vfptr2  : " << vfptr2 << std::endl;
+  ((FunPtr) * (long *)((long *)*vfptr2 + 0))();
+  std::cout << " " << *(long *)((long *)*vfptr2 + 1) << std::endl;
+  std::cout << " " << *(long *)((long *)*vfptr2 + 2) << std::endl;
+
+  // B重写来fun
+  // ((FunPtr) * (long *)((long *)*vfptr2 + 0))();
+  // ((FunPtr) * (long *)((long *)*vfptr2 + 1))();
+  // std::cout << " " << *(long *)((long *)*vfptr2 + 2) << std::endl;
+  // std::cout << " " << *(long *)((long *)*vfptr2 + 3) << std::endl;
+
+  int *mem2 = (int *)&obj + 6;
+  std::cout << "#5 mem2  b : " << mem2 << "," << *mem2 << std::endl;
+  int *mem3 = (int *)&obj + 7;
+  std::cout << "#6 mem3  c : " << mem3 << "," << *mem3 << std::endl;
+  int *mem4 = (int *)&obj + 10;  // 共享的元素，放到最后。为什么空了好多位置？
+  std::cout << "#7 mem4 var: " << mem4 << "," << *mem4 << std::endl;
+
+  // obj addr   : 0x7ffcfaa5d0e0, size :48
+  // #1 vfptr1  : 0x7ffcfaa5d0e0
+  //  A::funA
+  //  C::fun
+  //  C::funB
+  //  C::funC
+  //  C::funD
+  //  16
+  //  -16
+  // #2 mem1  a : 0x7ffcfaa5d0e8,101
+  // #4 vfptr2  : 0x7ffcfaa5d0f0
+  //  C::funB
+  //  -32
+  //  -32
+  // #5 mem2  b : 0x7ffcfaa5d0f8,102
+  // #6 mem3  c : 0x7ffcfaa5d0fc,103
+  // #7 mem4 var: 0x7ffcfaa5d108,100
+
+  // 如果A重写了fun：
+  // #1 vfptr1  : 0x7ffc5c3c8ba0
+  //  C::fun
+  //  A::funA
+  //  C::funB
+  //  C::funC
+  //  C::funD
+
+  //  如果B重写来func：
+  // #1 vfptr1  : 0x7fffebdf2340
+  //  A::funA
+  //  C::fun
+  //  C::funB
+  //  C::funC
+  //  C::funD
+  // #4 vfptr2  : 0x7fffebdf2350
+  //  C::fun
+  //  C::funB
+}
+}  // namespace n4
+
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 4]" << std::endl;
+    std::cout << argv[0] << " i [0 - 3]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
@@ -726,6 +904,9 @@ int main(int argc, char *argv[]) {
       break;
     case 2:
       n3::testN3();
+      break;
+    case 3:
+      n4::testN4();
       break;
     default:
       std::cout << "invalid type" << std::endl;
