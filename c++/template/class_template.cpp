@@ -142,7 +142,7 @@ void func() {
 }
 }  // namespace test2
 
-namespace test3 {  // 类模板的成员函数声明为友元
+namespace test3 {  // 函数模板作为类的友元
 class A {
   int v;
 

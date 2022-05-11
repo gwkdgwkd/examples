@@ -52,7 +52,8 @@ namespace n2 {
 // 待缓冲区刷新，数据才会输出到指定位置（屏幕或者文件中）。
 // tellp()成员方法用于获取当前输出流缓冲区中最后一个字符所在的位置，其语法格式如下：streampos tellp();
 // tellp()不需要传递任何参数，会返回一个streampos类型值。
-// 事实上，streampos是fpos类型的别名，而fpos通过自动类型转换，可以直接赋值给一个整形变量（即short、int和long）。
+// 事实上，streampos是fpos类型的别名，而fpos通过自动类型转换，
+// 可以直接赋值给一个整形变量（即short、int和long）。
 // 也就是说，在使用此函数时，我们可以用一个整形变量来接收该函数的返回值。
 // 注意，当输出流缓冲区中没有任何数据时，该函数返回的整形值为0；
 // 当指定的输出流缓冲区不支持此操作，或者操作失败时，该函数返回的整形值为-1。
@@ -152,7 +153,8 @@ namespace n3 {
 //  ios::scientific 浮点数以科学记数法格式输出
 //  ios::fixed 	    浮点数以定点格式（小数形式）输出
 //  ios::unitbuf 	  每次输出之后刷新所有的流
-// 值得一提的是，当调用unsetf()或者1个参数的setf()函数时，为了提高编写代码的效率，可以给mask参数传递如下3个组合格式：
+// 值得一提的是，当调用unsetf()或者1个参数的setf()函数时，为了提高编写代码的效率，
+// 可以给mask参数传递如下3个组合格式：
 //  ios::adjustfield：等价于ios::left|ios::right|ios::internal；
 //  ios::basefield：等价于ios::dec|ios::oct|ios::hex；
 //  ios::floatfield：等价于ios::scientific|ios::fixed。
@@ -171,8 +173,9 @@ namespace n3 {
 //                    注意，该函数所起的作用是一次性的，即只影响下一次cout输出。
 // 　setfill(c) 	    在指定输出宽度的情况下，输出的宽度不足时用字符c填充（默认情况是用空格填充）
 // 　setprecision(n) 	设置输出浮点数的精度为n。
-// 　                 在使用非fixed且非scientific方式输出的情况下，n即为有效数字最多的位数，如果有效数字位数超过n，
-//                    则小数部分四舍五人，或自动变为科学计数法输出并保留一共n位有效数字。
+// 　                 在使用非fixed且非scientific方式输出的情况下，n即为有效数字最多的位数，
+//                    如果有效数字位数超过n，则小数部分四舍五人，
+//                    或自动变为科学计数法输出并保留一共n位有效数字。
 //                    在使用fixed方式和scientific方式输出的情况下，n是小数点后面应保留的位数。
 // 　setiosflags(mask)在当前格式状态下，追加mask格式。
 // 　resetiosflags(mask) 在当前格式状态下，删除mask格式。
@@ -258,9 +261,10 @@ void func4() {
   // [-   1]
 }
 void func5() {
-  // 除非知道当前没有设置基标志，否则ios::setf(_IFlags)不应和ios::dec、ios::oct或ios::hex的标志值一起使用。
-  // 格式化的输入/输出函数和运算符假定只设置了一个基。
-  // 改用ios_base。例如，setf(ios_base::oct,ios_base::basefield)清除所有基信息并将基设置成八进制。
+  // 除非知道当前没有设置基标志，
+  // 否则ios::setf(_IFlags)不应和ios::dec、ios::oct或ios::hex的标志值一起使用。
+  // 格式化的输入/输出函数和运算符假定只设置了一个基，该用ios_base。
+  // 例如，setf(ios_base::oct,ios_base::basefield)清除所有基信息并将基设置成八进制。
   std::cout.setf(std::ios::showbase);
   std::cout.setf(std::ios::hex, std::ios_base::basefield);
   std::cout << 12 << std::endl;  // 0xc

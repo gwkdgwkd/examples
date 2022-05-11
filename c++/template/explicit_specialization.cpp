@@ -1,14 +1,14 @@
 #include <iostream>
 
-using namespace std;
-
 // C++没有办法限制类型参数的范围，可以使用任意一种类型来实例化模板。
-// 但是模板中的语句（函数体或者类体）不一定就能适应所有的类型，可能会有个别的类型没有意义，或者会导致语法错误。
+// 但是模板中的语句（函数体或者类体）不一定就能适应所有的类型，
+// 可能会有个别的类型没有意义，或者会导致语法错误。
 // template<class T> const T& Max(const T& a, const T& b){ return a > b ? a : b; }
 // a>b这条语句，>能够用来比较int、float、char等基本类型数据的大小，
 // 但是却不能用来比较结构体变量、对象以及数组的大小，因为我们并没有针对结构体、类和数组重载>。
 // 另外，该函数模板虽然可以用于指针，但比较的是地址大小，而不是指针指向的数据，所以也没有现实的意义。
-// 模板是一种泛型技术，它能接受的类型是宽泛的、没有限制的，并且对这些类型使用的算法都是一样的（函数体或类体一样）。
+// 模板是一种泛型技术，它能接受的类型是宽泛的、没有限制的，
+// 并且对这些类型使用的算法都是一样的（函数体或类体一样）。
 // 但是现在我们希望改变这种“游戏规则”，让模板能够针对某种具体的类型使用不同的算法（函数体或类体不同），
 // 这在C++中是可以做到的，这种技术称为模板的显示具体化（Explicit Specialization）。
 // 函数模板和类模板都可以显示具体化。
@@ -21,18 +21,19 @@ const T& Max(const T& a, const T& b) {
 }
 
 typedef struct {
-  string name;
+  std::string name;
   int age;
   float score;
 } STU;
 template <>  // 函数模板针对STU类型的显示具体化
 // const STU& Max<STU>(const STU& a, const STU& b) {
-// Max<STU>中的STU是可选的，因为函数的形参已经表明，这是STU类型的一个具体化，编译器能够逆推出T的具体类型：
+// Max<STU>中的STU是可选的，因为函数的形参已经表明，
+// 这是STU类型的一个具体化，编译器能够逆推出T的具体类型：
 const STU& Max<>(const STU& a, const STU& b) {
   std::cout << "explicit STU:";
   return a.score > b.score ? a : b;
 }
-ostream& operator<<(ostream& out, const STU& stu) {
+std::ostream& operator<<(std::ostream& out, const STU& stu) {
   out << stu.name << "," << stu.age << "," << stu.score;
   return out;
 }
@@ -93,7 +94,7 @@ class Point {
 };
 template <class T1, class T2>  // 类模板的成员函数，类外定义需要带上模板头
 void Point<T1, T2>::display() const {
-  cout << "x=" << m_x << ",y=" << m_y << endl;
+  std::cout << "x=" << m_x << ",y=" << m_y << std::endl;
 }
 
 template <>  // 类模板针对字符串类型的显示具体化

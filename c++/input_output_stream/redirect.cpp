@@ -3,7 +3,8 @@
 #include <iostream>
 #include <string>
 
-// cout和cerr、clog的一个区别是，cout允许被重定向，而cerr和clog都不支持。值得一提的是，cin也允许被重定向。
+// cout和cerr、clog的一个区别是，cout允许被重定向，而cerr和clog都不支持。
+// 值得一提的是，cin也允许被重定向。
 // 在默认情况下，cin只能接收从键盘输入的数据，cout也只能将数据输出到屏幕上。
 // 但通过重定向，cin可以将指定文件作为输入源，即接收文件中早已准备好的数据，
 // 同样cout可以将原本要输出到屏幕上的数据转而写到指定文件中。C++中，实现重定向的常用方式有3种。
@@ -22,7 +23,8 @@ void func1() {
 
 // rdbuf()函数实现重定向:
 // rdbuf()函数定义在<ios>头文件中，专门用于实现C++输入输出流的重定向。
-// 值得一提的是，ios作为istream和ostream类的基类，rdbuf()函数也被继承，因此cin和cout可以直接调用该函数实现重定向。
+// 值得一提的是，ios作为istream和ostream类的基类，rdbuf()函数也被继承，
+// 因此cin和cout可以直接调用该函数实现重定向。
 // rdbuf()函数的语法格式有2种，分别为：
 //  streambuf * rdbuf() const;
 //  streambuf * rdbuf(streambuf * sb);

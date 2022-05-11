@@ -37,7 +37,8 @@
 _Pragma("once")
 // 头文件内容
 
-// 另外在某些场景中，考虑到编译效率和可移植性，#pragma once和#ifndef经常被结合使用来避免头文件被重复引入。
+// 另外在某些场景中，考虑到编译效率和可移植性，
+// #pragma once和#ifndef经常被结合使用来避免头文件被重复引入。
 // 当编译器可以识别#pragma once时，则整个文件仅被编译一次；
 // 反之，即便编译器不识别#pragma once指令，此时仍有#ifndef在发挥作用。
 #pragma once

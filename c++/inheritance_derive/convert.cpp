@@ -3,9 +3,9 @@
 // 数据类型转换的前提是，编译器知道如何对数据进行取舍。
 // 类也是一种数据类型，也可以发生数据类型转换。
 // 不过这种转换只有在基类和派生类之间才有意义，并且只能将派生类赋值给基类，包括：
-//  将派生类对象赋值给基类对象；
-//  将派生类指针赋值给基类指针；
-//  将派生类引用赋值给基类引用。
+// 1.将派生类对象赋值给基类对象；
+// 2.将派生类指针赋值给基类指针；
+// 3.将派生类引用赋值给基类引用。
 // 这在C++中称为向上转型（Upcasting）。
 // 相应地，将基类赋值给派生类称为向下转型（Downcasting）。
 // 向上转型非常安全，可以由编译器自动完成；
@@ -131,7 +131,7 @@ class D1 : public B, public C {
               << ", m_d=" << m_d << std::endl;
   }
 
- private:
+ public:
   int m_d;
 };
 
@@ -146,17 +146,19 @@ void func1() {
   // 调用display()函数时虽然使用了派生类的成员变量，但是display()函数本身却是基类的。
   // pa本来是基类A的指针，现在指向了派生类D的对象，这使得隐式指针this发生了变化，
   // 也指向了D1类的对象，所以最终在display()内部使用的是D1类对象的成员变量。
-  // 编译器虽然通过指针的指向来访问成员变量，但是却不通过指针的指向来访问成员函数：编译器通过指针的类型来访问成员函数。
+  // 编译器虽然通过指针的指向来访问成员变量，但是却不通过指针的指向来访问成员函数：
+  // 编译器通过指针的类型来访问成员函数。
   // 对于pa，它的类型是A，不管它指向哪个对象，使用的都是A类的成员函数。
 
   pb = pd;
   pb->display();  // Class B: m_a=4, m_b=40
   pc = pd;        // 执行pc = pd;语句后，pc和pd的值并不相等。
   pc->display();  // Class C: m_c=400
-  std::cout << "pa=" << pa << std::endl;  // pa=0x5616d0318f10
-  std::cout << "pb=" << pb << std::endl;  // pb=0x5616d0318f10
-  std::cout << "pc=" << pc << std::endl;  // pc=0x5616d0318f18
-  std::cout << "pd=" << pd << std::endl;  // pd=0x5616d0318f10
+  std::cout << "pa=" << pa << std::endl;           // pa=0x5647e4fd1f10
+  std::cout << "pb=" << pb << std::endl;           // pb=0x5647e4fd1f10
+  std::cout << "pc=" << pc << std::endl;           // pc=0x5647e4fd1f18
+  std::cout << "pd=" << pd << std::endl;           // pd=0x5647e4fd1f10
+  std::cout << "m_d=" << &(pd->m_d) << std::endl;  // m_d=0x5647e4fd1f1c
   // 将最终派生类的指针pd分别赋值给了基类指针pa、pb、pc，按理说它们的值应该相等，都指向同一块内存，
   // 但是运行结果却有力地反驳了这种推论，只有pa、pb、pd三个指针的值相等，pc的值比它们都大。
   // 赋值就是将一个变量的值交给另外一个变量，这种想法虽然没错，但是赋值以前编译器可能会对现有的值进行处理。
@@ -167,12 +169,13 @@ void func1() {
   // 对象的指针必须要指向对象的起始位置。
   // 对于A类和B类来说，它们的子对象的起始地址和D1类对象一样，
   // 所以将pd赋值给pa、pb时不需要做任何调整，直接传递现有的值即可；
-  // 而C类子对象距离D类对象的开头有一定的偏移，将pd赋值给pc时要加上这个偏移，这样pc才能指向C类子对象的起始位置。
+  // 而C类子对象距离D类对象的开头有一定的偏移，将pd赋值给pc时要加上这个偏移，
+  // 这样pc才能指向C类子对象的起始位置。
   // 也就是说，执行pc = pd;语句时编译器对pd的值进行了调整，才导致pc、pd的值不同。
   // 调整过程：pc = (C*)((int)pd + sizeof(B));
   std::cout << "(C *)(reinterpret_cast<long>(pd) + sizeof(B)) = "
             << (C *)(reinterpret_cast<long>(pd) + sizeof(B)) << std::endl;
-  // (C*)((int)pd + sizeof(B)) = 0x5616d0318f18
+  // (C *)(reinterpret_cast<long>(pd) + sizeof(B)) = 0x5647e4fd1f18
 }
 
 // 把B、C类的继承顺序调整一下，让C在B前面：
@@ -180,7 +183,7 @@ class D2 : public C, public B {
  public:
   D2(int a, int b, int c, int d) : B(a, b), C(c), m_d(d) {}
 
- private:
+ public:
   int m_d;
 };
 void func2() {
@@ -189,24 +192,25 @@ void func2() {
   C *pc = new C(3);
   D2 *pd = new D2(4, 40, 400, 4000);
 
-  std::cout << "pa=" << pa << std::endl;  // pa=0x560546145340
-  std::cout << "pb=" << pb << std::endl;  // pb=0x560546145360
-  std::cout << "pc=" << pc << std::endl;  // pc=0x560546145380
-  std::cout << "pd=" << pd << std::endl;  // pd=0x5605461453a0
+  std::cout << "pa=" << pa << std::endl;  // pa=0x5647e4fd2340
+  std::cout << "pb=" << pb << std::endl;  // pb=0x5647e4fd2360
+  std::cout << "pc=" << pc << std::endl;  // pc=0x5647e4fd2380
+  std::cout << "pd=" << pd << std::endl;  // pd=0x5647e4fd23a0
 
   pa = pd;
   pb = pd;
   pc = pd;
-  std::cout << "pa=" << pa << std::endl;  // pa=0x559d2515b3a4
-  std::cout << "pb=" << pb << std::endl;  // pb=0x559d2515b3a4
-  std::cout << "pc=" << pc << std::endl;  // pc=0x559d2515b3a0
-  std::cout << "pd=" << pd << std::endl;  // pd=0x559d2515b3a0
+  std::cout << "pc=" << pc << std::endl;           // pc=0x5647e4fd23a0
+  std::cout << "pd=" << pd << std::endl;           // pd=0x5647e4fd23a0
+  std::cout << "pa=" << pa << std::endl;           // pa=0x5647e4fd23a4
+  std::cout << "pb=" << pb << std::endl;           // pb=0x5647e4fd23a4
+  std::cout << "m_d=" << &(pd->m_d) << std::endl;  // m_d=0x5647e4fd23ac
 
-  // pd的内存模型：    (pc pd)          (pa pb)
-  //                    C(m_c)   m_d     B(A(m_a)   m_b)
-  std::cout << "pd + m_d = " << (B *)(reinterpret_cast<long>(pd) + sizeof(int))
-            << std::endl;
-  // pd + m_d = 0x559d2515b3a4
+  // pd的内存模型： (pc pd)    (pa pb)
+  //                 C(m_c)     B(A(m_a) m_b)   m_d
+  std::cout << "pd + sizeof(C) = "
+            << (B *)(reinterpret_cast<long>(pd) + sizeof(C)) << std::endl;
+  // pd + sizeof(C) = 0x5647e4fd23a4
 }
 
 void func3() {
