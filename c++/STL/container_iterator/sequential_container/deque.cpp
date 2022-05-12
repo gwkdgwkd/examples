@@ -6,11 +6,11 @@
 
 // deque是double-ended queue的缩写，又称双端队列容器。
 // deque容器和vecotr容器有很多相似之处，比如：
-//  deque容器也擅长在序列尾部添加或删除元素（时间复杂度为O(1)），而不擅长在序列中间添加或删除元素。
-//  deque容器也可以根据需要修改自身的容量和大小。
+// 1.deque容器也擅长在序列尾部添加或删除元素（时间复杂度为O(1)），而不擅长在序列中间添加或删除元素。
+// 2.deque容器也可以根据需要修改自身的容量和大小。
 // 和vector不同的是：
-//  deque还擅长在序列头部添加或删除元素，所耗费的时间复杂度也为常数阶O(1)。
-//  当需要向序列两端频繁的添加或删除元素时，应首选deque容器。
+// 1.deque还擅长在序列头部添加或删除元素，所耗费的时间复杂度也为常数阶O(1)。
+// 2.当需要向序列两端频繁的添加或删除元素时，应首选deque容器。
 // 并且更重要的一点是，deque容器中存储元素并不能保证所有元素都存储到连续的内存空间中。
 
 // deque容器可利用的成员函数:
@@ -62,9 +62,11 @@
 // 换句话说，当deque容器需要在头部或尾部增加存储空间时，它会申请一段新的连续空间，
 // 同时在map数组的开头或结尾添加指向该空间的指针，由此该空间就串接到了deque容器的头部或尾部。
 // 如果map数组满了怎么办？
-// 很简单，再申请一块更大的连续空间供map数组使用，将原有数据（很多指针）拷贝到新的map数组中，然后释放旧的空间。
+// 很简单，再申请一块更大的连续空间供map数组使用，
+// 将原有数据（很多指针）拷贝到新的map数组中，然后释放旧的空间。
 // deque容器的分段存储结构，提高了在序列两端添加或删除元素的效率，但也使该容器迭代器的底层实现变得更复杂。
-// 由于deque容器底层将序列中的元素分别存储到了不同段的连续空间中，因此要想实现迭代器的功能，必须先解决如下2个问题：
+// 由于deque容器底层将序列中的元素分别存储到了不同段的连续空间中，
+// 因此要想实现迭代器的功能，必须先解决如下2个问题：
 // 1.迭代器在遍历deque容器时，必须能够确认各个连续空间在map数组中的位置；
 // 2.迭代器在遍历某个具体的连续空间时，必须能够判断自己是否已经处于空间的边缘位置。
 //   如果是，则一旦前进或者后退，就需要跳跃到上一个或者下一个连续空间中。
@@ -77,8 +79,10 @@
 //     T* last;  // 指向当前连续空间的末尾地址；
 //     map_pointer node;  // map_pointer等价于T**,它是一个二级指针，用于指向map数组中存储的指向当前连续空间的指针。
 // }
-// 借助这4个指针，deque迭代器对随机访问迭代器支持的各种运算符进行了重载，能够对deque分段连续空间中存储的元素进行遍历。
-// 当迭代器处于当前连续空间边缘的位置时，如果继续遍历，就需要跳跃到其它的连续空间中，该函数可用来实现此功能
+// 借助这4个指针，deque迭代器对随机访问迭代器支持的各种运算符进行了重载，
+// 能够对deque分段连续空间中存储的元素进行遍历。
+// 当迭代器处于当前连续空间边缘的位置时，如果继续遍历，
+// 就需要跳跃到其它的连续空间中，该函数可用来实现此功能：
 // void set_node(map_pointer new_node) {
 //   node = new_node;    // 记录新的连续空间在 map 数组中的位置
 //   first = *new_node;  // 更新first指针
@@ -146,7 +150,8 @@ void func1() {  // 创建deque容器
   // 1.创建一个没有任何元素的空deque容器：
   std::deque<int> d1;
   print(d1);  // [0]
-  // 和空array容器不同，空的deque容器在创建之后可以做添加或删除，因此这种简单创建deque容器的方式比较常见。
+  // 和空array容器不同，空的deque容器在创建之后可以做添加或删除，
+  // 因此这种简单创建deque容器的方式比较常见。
 
   // 2.创建一个具有n个元素的deque容器，其中每个元素都采用对应类型的默认值：
   std::deque<int> d2(10);  // 创建一个具有10个元素（默认都为0）的deque容器
@@ -211,8 +216,8 @@ void func2() {  // 遍历
     std::cout << *i << " ";
   }
   std::cout << std::endl;  // 5 4 3 2 1
-  // crbegin()/crend()组合和rbegin()/crend()组合唯一的区别在于，前者返回的迭代器为const类型迭代器，
-  // 不能用来修改容器中的元素，除此之外在使用上和后者完全相同。
+  // crbegin()/crend()组合和rbegin()/crend()组合唯一的区别在于，
+  // 前者返回的迭代器为const类型迭代器，不能用来修改容器中的元素，除此之外在使用上和后者完全相同。
 
   for (auto i : d) {
     std::cout << i << " ";
@@ -240,18 +245,20 @@ void func3() {  // 访问和修改元素
     // deque::_M_range_check: __n (which is 8)>= this->size() (which is 4)
   }
 
-  // 3.deque提供了2个成员函数，即front()和back()，它们返回vector容器中第一个和最后一个元素的引用，
-  // 通过利用它们的返回值，可以访问（甚至修改）容器中的首尾元素：
+  // 3.deque提供了2个成员函数，即front()和back()，
+  //   它们返回vector容器中第一个和最后一个元素的引用，
+  //   通过利用它们的返回值，可以访问（甚至修改）容器中的首尾元素：
   std::cout << d.front() << std::endl;  // 1
   std::cout << d.back() << std::endl;   // 4
   d.front() = 10;
   d.back() = 20;
   std::cout << d.front() << std::endl;  // 10
   std::cout << d.back() << std::endl;   // 20
-  // 和vector容器不同，deque容器没有提供data()成员函数，同时deque容器在存储元素时，
-  // 也无法保证其会将元素存储在连续的内存空间中，因此尝试使用指针去访问deque容器中指定位置处的元素，是非常危险的。
+  // 和vector容器不同，deque容器没有提供data()成员函数，
+  // 同时deque容器在存储元素时，也无法保证其会将元素存储在连续的内存空间中，
+  // 因此尝试使用指针去访问deque容器中指定位置处的元素，是非常危险的。
 
-  // 另外，结合deque模板类中和迭代器相关的成员函数，可以实现遍历deque容器中指定区域元素的方法
+  // 另外，结合deque模板类中和迭代器相关的成员函数，可以实现遍历deque容器中指定区域元素的方法：
   print(d);  // 10 4 3 20 [4]
   auto first = d.begin() + 1;
   auto end = d.end() - 1;
@@ -330,31 +337,62 @@ class A {
  private:
   int num;
 };
+class B {
+ public:
+  B(int num) : num(num) { std::cout << "create" << std::endl; }
+  B(const B& other) : num(other.num) { std::cout << "copy" << std::endl; }
+  B& operator=(const B& other) {
+    this->num = other.num;
+    return *this;
+  }
+
+ private:
+  int num;
+};
 void func6() {
-  std::deque<A> d;
+  std::deque<A> da;
 
   // emplace系列函数都只调用了构造函数，而没有调用移动构造函数，提高了代码的运行效率
-  d.emplace(d.begin(), 2);
+  da.emplace(da.begin(), 2);
   // create
-  d.emplace_front(2);
+  da.emplace_front(2);
   // create
-  d.emplace_back(2);
+  da.emplace_back(2);
   // create
 
-  d.insert(d.begin(), 2);
+  da.insert(da.begin(), 2);
   // create
   // move
-  d.push_front(2);
+  da.push_front(2);
   // create
   // move
-  d.push_back(2);
+  da.push_back(2);
   // create
   // move
+
+  std::deque<B> db;
+  db.emplace(db.begin(), 2);
+  // create
+  db.emplace_front(2);
+  // create
+  db.emplace_back(2);
+  // create
+
+  db.insert(db.begin(), 2);
+  // create
+  // copy
+  db.push_front(2);
+  // create
+  // copy
+  db.push_back(2);
+  // create
+  // copy
 }
 
 void func7() {
   // 当向deque容器添加元素时，deque容器会申请更多的内存空间，
-  // 同时其包含的所有元素可能会被复制或移动到新的内存地址（原来的内存会释放），这会导致之前创建的迭代器失效。
+  // 同时其包含的所有元素可能会被复制或移动到新的内存地址（原来的内存会释放），
+  // 这会导致之前创建的迭代器失效。
   std::deque<int> d;
   auto db = d.begin();
 
