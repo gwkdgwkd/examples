@@ -70,7 +70,7 @@ void print(std::multiset<T>& s) {
   std::cout << "[" << s.size() << "]" << std::endl;
 }
 
-int main() {
+void func1() {
   std::multiset<int> ms{1, 2, 2, 2, 3, 4, 5};
   std::cout << "count(2) =" << ms.count(2) << std::endl;  // 3
   ms.insert(8);
@@ -109,6 +109,22 @@ int main() {
     std::cout << *i << " ";
   }
   std::cout << std::endl;  // 4 4 4 4
+}
+
+int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    std::cout << argv[0] << " i [0]" << std::endl;
+    return 0;
+  }
+  int type = argv[1][0] - '0';
+  switch (type) {
+    case 0:
+      func1();
+      break;
+    default:
+      std::cout << "invalid type" << std::endl;
+      break;
+  }
 
   return 0;
 }

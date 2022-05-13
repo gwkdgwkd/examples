@@ -3,9 +3,8 @@
 #include <iterator>
 #include <vector>
 
-using namespace std;
-
-// next_permutation()会生成一个序列的重排列，它是所有可能的字典序中的下一个排列，默认使用<运算符来做这些事情。
+// next_permutation()会生成一个序列的重排列，
+// 它是所有可能的字典序中的下一个排列，默认使用<运算符来做这些事情。
 // 它的参数为定义序列的迭代器和一个返回布尔值的函数，这个函数在下一个排列大于上一个排列时返回true，
 // 如果上一个排列是序列中最大的，它返回false，所以会生成字典序最小的排列。
 
@@ -91,12 +90,13 @@ void func4() {
 }
 
 void func5() {
-  // 在开始生成全排列之前，可以先生成一个原始容器的副本，然后在循环中改变它，从而避免到达最小排列的全部开销。
+  // 在开始生成全排列之前，可以先生成一个原始容器的副本，
+  // 然后在循环中改变它，从而避免到达最小排列的全部开销。
   std::vector<std::string> words{"one", "two", "three"};
   auto words_copy = words;  // Copy the original
   do {
     std::copy(std::begin(words), std::end(words),
-              std::ostream_iterator<string>{std::cout, " "});
+              std::ostream_iterator<std::string>{std::cout, " "});
     std::cout << std::endl;
     std::next_permutation(std::begin(words), std::end(words));
   } while (words != words_copy);
@@ -147,8 +147,10 @@ void func6() {
 
 void func7() {
   // 另一个版本的is_permutation()允许只用开始迭代器指定第二个序列。
-  // 在这种情况下，第二个序列可以包含比第一个序列还要多的元素，但是只会被认为拥有第一个序列中的元素个数。
-  // 然而，并不推荐使用它，因为如果第二个序列包含的元素少于第一个序列，会产生未定义的错误。(C++11只有这种方式吧？)
+  // 在这种情况下，第二个序列可以包含比第一个序列还要多的元素，
+  // 但是只会被认为拥有第一个序列中的元素个数。
+  // 然而，并不推荐使用它，因为如果第二个序列包含的元素少于第一个序列，会产生未定义的错误。
+  // C++11只有这种方式吧？
   std::vector<double> data1{44.5, 22.0, 15.6, 1.5};
   std::vector<double> data2{1.5, 44.5, 15.6, 22.0, 88.0, 999.0};
   std::copy(std::begin(data1), std::end(data1),
@@ -165,10 +167,11 @@ void func7() {
 }
 
 void func8() {
-  // 可以为next_permutation()提供一个函数对象作为第三个参数，从而用这个函数对象定义的比较函数来代替默认的比较函数。
+  // 可以为next_permutation()提供一个函数对象作为第三个参数，
+  // 从而用这个函数对象定义的比较函数来代替默认的比较函数。
   std::vector<std::string> words{"one", "two", "three"};
   do {
-    std::copy(std::rbegin(words), std::rend(words),
+    std::copy(words.rbegin(), words.rend(),
               std::ostream_iterator<std::string>{std::cout, " "});
     std::cout << std::endl;
   } while (
@@ -183,12 +186,12 @@ void func8() {
 
 void func9() {
   // 找出单词中字母的全部排列
-  std::vector<string> words;
-  string word;
+  std::vector<std::string> words;
+  std::string word;
   while (true) {
     std::cout << "\nEnter a word, or Ctrl+z to end: ";
     if ((std::cin >> word).eof()) break;
-    string word_copy{word};
+    std::string word_copy{word};
     do {
       words.push_back(word);
       std::next_permutation(std::begin(word), std::end(word));

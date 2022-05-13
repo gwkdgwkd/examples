@@ -41,15 +41,17 @@ int main() {
   std::cout << *it2 << std::endl;                  // 8
   std::cout << v.end() - it2.base() << std::endl;  // 0
 
-  // 3.reverse_iterator模板类还提供了一个复制（拷贝）构造函数，可以实现直接将一个反向迭代器复制给新建的反向迭代器
+  // 3.reverse_iterator模板类还提供了一个复制（拷贝）构造函数，
+  //   可以实现直接将一个反向迭代器复制给新建的反向迭代器
   std::reverse_iterator<std::vector<int>::iterator> it3(v.rbegin());
   std::reverse_iterator<std::vector<int>::iterator> it4 = v.rbegin();
 
   std::reverse_iterator<std::vector<int>::iterator> it(v.rbegin());
-  std::cout << *it << std::endl;        // 8
-  std::cout << *(it + 3) << std::endl;  // 5
-  std::cout << *(++it) << std::endl;    // 7
-  std::cout << it[4] << std::endl;      // 3
+  std::cout << *it << std::endl;           // 8
+  std::cout << *(it + 3) << std::endl;     // 5
+  std::cout << *(++it) << std::endl;       // 7
+  std::cout << *(it.base()) << std::endl;  // 8
+  std::cout << it[4] << std::endl;         // 3
 
   // reverse_iterator模板类还提供了base()成员方法，该方法可以返回当前反向迭代器底层所使用的基础迭代器。
   std::reverse_iterator<std::vector<int>::iterator> begin(v.begin());

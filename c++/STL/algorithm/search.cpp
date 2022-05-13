@@ -4,7 +4,8 @@
 
 // find_end()函数用于在序列中查找序列B最后一次出现的位置。
 // 那么，如果想知道序列B在序列中第一次出现的位置，该如何实现呢？可以借助search()函数。
-// search()函数定义在<algorithm>头文件中，其功能恰好和find_end()函数相反，用于在序列A中查找序列B第一次出现的位置。
+// search()函数定义在<algorithm>头文件中，其功能恰好和find_end()函数相反，
+// 用于在序列A中查找序列B第一次出现的位置。
 // 和find_end()相同，search()函数也提供有以下2种语法格式：
 // 查找[first1,last1)范围内第一个[first2,last2)子序列
 // ForwardIterator search(ForwardIterator first1, ForwardIterator last1,
@@ -70,7 +71,8 @@ void func1() {
   // 第一个{2,4,6}的起始位置为：3,*it = 4
 }
 
-// 和search()一样，search_n()函数也定义在<algorithm>头文件中，用于在指定区域内查找第一个符合要求的子序列。
+// 和search()一样，search_n()函数也定义在<algorithm>头文件中，
+// 用于在指定区域内查找第一个符合要求的子序列。
 // 不同之处在于，前者查找的子序列中可包含多个不同的元素，而后者查找的只能是包含多个相同元素的子序列。
 // search_n()函数的语法格式如下：
 // 在[first,last]中查找count个val第一次连续出现的位置

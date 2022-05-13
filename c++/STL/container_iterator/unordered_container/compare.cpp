@@ -3,7 +3,8 @@
 
 // 虽然每种无序容器都指定了默认的hash<key>哈希函数和equal_to<key>比较规则，
 // 但它们仅适用于存储基本类型（比如int、double、float、string等）数据的无序容器。
-// 换句话说，如果无序容器存储的数据类型为自定义的结构体或类，则STL标准库提供的hash<key>和equal_to<key>将不再适用。
+// 换句话说，如果无序容器存储的数据类型为自定义的结构体或类，
+// 则STL标准库提供的hash<key>和equal_to<key>将不再适用。
 // 无序容器以键值对的方式存储数据，且底层采用哈希表结构存储各个键值对。
 // 在此存储结构中，哈希函数的功能是根据各个键值对中键的值，计算出一个哈希值（本质就是一个整数），
 // 哈希表可以根据该值判断出该键值对具体的存储位置。
@@ -26,7 +27,8 @@
 
 // 总的来说，当无序容器中存储的是基本类型（int、double、float、string）数据时，
 // 自定义哈希函数和比较规则，都只能以函数对象类的方式实现。
-// 而当无序容器中存储的是用结构体或类自定义类型的数据时，自定义哈希函数的方式仍只有一种，即使用函数对象类的形式；
+// 而当无序容器中存储的是用结构体或类自定义类型的数据时，
+// 自定义哈希函数的方式仍只有一种，即使用函数对象类的形式；
 // 而自定义比较规则的方式有两种，要么也以函数对象类的方式，
 // 要么仍使用默认的std::equal_to<key>规则，但前提是必须重载==运算符。
 
@@ -51,7 +53,7 @@ void test() {
   // 可以将hash_fun作为参数传递给该容器模板类中的Pred参数，
   // 但是，此时创建的myset容器还无法使用，
   // 因为该容器使用的是默认的std::equal_to<key>比较规则，但此规则并不适用于该容器。
-  // std::unordered_set<Person, hash_fun> us;
+  std::unordered_set<Person, hash_fun> us;
 }
 }  // namespace n1
 
@@ -116,9 +118,23 @@ void test() {
 }
 }  // namespace n2
 
-int main() {
-  n1::test();
-  n2::test();
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    std::cout << argv[0] << " i [0 - 1]" << std::endl;
+    return 0;
+  }
+  int type = argv[1][0] - '0';
+  switch (type) {
+    case 0:
+      n1::test();
+      break;
+    case 1:
+      n2::test();
+      break;
+    default:
+      std::cout << "invalid type" << std::endl;
+      break;
+  }
 
   return 0;
 }

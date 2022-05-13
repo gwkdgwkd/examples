@@ -18,7 +18,8 @@ auto end_iter2 = std::end(words2);
 // 如果两个序列的长度相同，并且对应元素都相等，equal()算法会返回true。
 // 有4个版本的equal()算法，其中两个用==运算符来比较元素，
 // 另外两个用我们提供的作为参数的函数对象来比较元素，所有指定序列的迭代器都必须至少是输入迭代器。
-// 尽管可以用equal()来比较两个同种类型的容器的全部内容，但最好还是使用容器的成员函数operator==()来做这些事。
+// 尽管可以用equal()来比较两个同种类型的容器的全部内容，
+// 但最好还是使用容器的成员函数operator==()来做这些事。
 // 不应该用equal()来比较来自于无序map或set容器中的元素序列。
 // 在无序容器中，一组给定元素的顺序可能和保存在另一个无序容器中的一组相等元素不同，
 // 因为不同容器的元素很可能会被分配到不同的格子中。
@@ -43,7 +44,8 @@ void func1() {
   std::cout << std::equal(iter2, end_iter2 - 1, iter1) << std::endl;
 
   std::cout << "3. Compare from words1[1] to words1[5] with words2:";
-  // 当用equal()从开始迭代器开始比较两个序列时，第二个序列用来和第一个序列比较的元素个数由第一个序列的长度决定。
+  // 当用equal()从开始迭代器开始比较两个序列时，
+  // 第二个序列用来和第一个序列比较的元素个数由第一个序列的长度决定。
   // 就算第二个序列比第一个序列的元素多，equal()仍然会返回true。
   std::cout << std::equal(iter1 + 1, iter1 + 6, iter2) << std::endl;
 
@@ -92,7 +94,8 @@ void func1() {
 
 // equal()算法可以告诉我们两个序列是否匹配。
 // mismatch()算法也可以告诉我们两个序列是否匹配，而且如果不匹配，它还能告诉我们不匹配的位置。
-// mismatch()的4个版本和equal()一样有相同的参数——第二个序列有或没有结束迭代器，有或没有定义比较的额外的函数对象参数。
+// mismatch()的4个版本和equal()一样有相同的参数——第二个序列有或没有结束迭代器，
+// 有或没有定义比较的额外的函数对象参数。
 // mismatch()返回的pair对象包含两个迭代器。
 // 它的first成员是一个来自前两个参数所指定序列的迭代器，second是来自于第二个序列的迭代器。
 // 当序列不匹配时，pair包含的迭代器指向第一对不匹配的元素；因此这个pair对象为pair<iter1+n，iter2+n>，
@@ -104,8 +107,10 @@ void func1() {
 //   返回pair<end_iter1,(iter2+(end_ter1-iter1))>，pair的成员second等于iter2加上第一个序列的长度。
 //   如果第二个序列比第一个序列短，结果是未定义的。
 //  对于mismatch(iterl, end_iter1, iter2, end_iter2)：
-//   当第一个序列比第二个序列长时，返回pair<end_iter1,(iter2+(end_iter1-iter1))>，所以成员second为iter2加上第一个序列的长度。
-//   当第二个序列比第一个序列长时，返回pair<(iter1+(end_iter2-iter2)),end_iter2>， 所以成员first等于iter1加上第二个序列的长度。
+//   当第一个序列比第二个序列长时，返回pair<end_iter1,(iter2+(end_iter1-iter1))>，
+//   所以成员second为iter2加上第一个序列的长度。
+//   当第二个序列比第一个序列长时，返回pair<(iter1+(end_iter2-iter2)),end_iter2>，
+//   所以成员first等于iter1加上第二个序列的长度。
 //   当序列的长度相等时，返回pair<end_iter1, end_iter2>。
 // 不管是否添加一个用于比较的函数对象作为参数，上面的情况都同样适用。
 void func2() {
@@ -233,5 +238,6 @@ int main() {
   func1();
   func2();
   func3();
+
   return 0;
 }

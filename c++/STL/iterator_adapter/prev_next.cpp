@@ -3,7 +3,8 @@
 #include <list>
 #include <vector>
 
-// prev原意为“上一个”，但prev()的功能远比它的本意大得多，该函数可用来获取一个距离指定迭代器n个元素的迭代器。
+// prev原意为“上一个”，但prev()的功能远比它的本意大得多，
+// 该函数可用来获取一个距离指定迭代器n个元素的迭代器。
 // prev()函数的语法格式如下：
 // template <class BidirectionalIterator>
 //     BidirectionalIterator prev (BidirectionalIterator it,
@@ -18,7 +19,8 @@
 // template <class ForwardIterator>
 //     ForwardIterator next (ForwardIterator it,
 //     typename iterator_traits<ForwardIterator>::difference_type n = 1);
-// 其中it为源迭代器，其类似可以为前向迭代器、双向迭代器以及随机访问迭代器；n为指定新迭代器距离it的距离，默认值为1。
+// 其中it为源迭代器，其类似可以为前向迭代器、双向迭代器以及随机访问迭代器；
+// n为指定新迭代器距离it的距离，默认值为1。
 // 该函数会返回一个距离it迭代器n个元素的新迭代器。
 // 需要注意的是，当it为前向迭代器时，n只能为正数，该函数最终得到的新迭代器位于it右侧；
 // 当it为双向迭代器或者随机访问迭代器时，若n为正数，则得到的新迭代器位于it右侧，反之位于it左侧。

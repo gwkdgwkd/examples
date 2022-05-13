@@ -17,7 +17,8 @@
 // multimap容器包含的成员方法:
 // begin() 	        返回指向容器中第一个（是已排好序的第一个）键值对的双向迭代器。
 //                  如果multimap容器用const限定，则该方法返回的是const类型的双向迭代器。
-// end() 	          返回指向容器最后一个元素（是已排好序的最后一个）所在位置后一个位置的双向迭代器，通常和begin()结合使用。
+// end() 	          返回指向容器最后一个元素（是已排好序的最后一个）所在位置后一个位置的双向迭代器，
+//                  通常和begin()结合使用。
 //                  如果multimap容器用const限定，则返回const类型的双向迭代器。
 // rbegin()         返回指向最后一个（是已排好序的最后一个）元素的反向双向迭代器。
 //                  如果multimap容器用const限定，则该方法返回的是const类型的反向双向迭代器。
@@ -64,6 +65,7 @@ void func1() {
   for (auto iter = mymultimap.begin(); iter != mymultimap.end(); ++iter) {
     std::cout << iter->first << " " << iter->second << std::endl;
   }
+  std::cout << std::endl;
   // a 10
   // b 20
   // b 15
@@ -75,6 +77,7 @@ void func1() {
   for (auto iter = myPair1.first; iter != myPair1.second; ++iter) {
     std::cout << iter->first << " " << iter->second << std::endl;
   }
+  std::cout << std::endl;
   // b 20
   // b 15
   // b 10
@@ -83,21 +86,42 @@ void func1() {
   for (auto iter = mymultimap.begin(); iter != it; ++iter) {
     std::cout << iter->first << " " << iter->second << std::endl;
   }
+  std::cout << std::endl;
   // a 10
 
   it = mymultimap.lower_bound('b');
   for (auto iter = it; iter != mymultimap.end(); ++iter) {
     std::cout << iter->first << " " << iter->second << std::endl;
   }
+  std::cout << std::endl;
   // b 20
   // b 15
   // b 10
   // c 30
+
+  it = mymultimap.upper_bound('b');
+  for (auto iter = mymultimap.begin(); iter != it; ++iter) {
+    std::cout << iter->first << " " << iter->second << std::endl;
+  }
+  std::cout << std::endl;
+  // a 10
+  // b 20
+  // b 15
+  // b 10
+
+  it = mymultimap.upper_bound('b');
+  for (auto iter = it; iter != mymultimap.end(); ++iter) {
+    std::cout << iter->first << " " << iter->second << std::endl;
+  }
+  std::cout << std::endl;
+  // c 30
+
+  std::cout << mymultimap.count('b') << std::endl;  // 3
 }
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 6]" << std::endl;
+    std::cout << argv[0] << " i [0]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';

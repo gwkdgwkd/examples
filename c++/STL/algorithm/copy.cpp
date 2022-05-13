@@ -14,8 +14,11 @@ void func1() {  // copy
 }
 
 // copy_n()算法可以从源容器复制指定个数的元素到目的容器中。
-// 第一个参数是指向第一个源元素的输入迭代器，第二个参数是需要复制的元素的个数，第三个参数是指向目的容器的第一个位置的迭代器。
-// 这个算法会返回一个指向最后一个被复制元素的后一个位置的迭代器，或者只是第三个参数——输出迭代器——如果第二个参数为0。
+// 第一个参数是指向第一个源元素的输入迭代器，
+// 第二个参数是需要复制的元素的个数，
+// 第三个参数是指向目的容器的第一个位置的迭代器。
+// 这个算法会返回一个指向最后一个被复制元素的后一个位置的迭代器，
+// 或者只是第三个参数——输出迭代器——如果第二个参数为0。
 // 注意，如果被复制元素的个数超过了实际元素的个数，程序会因此崩溃。
 // 如果元素的个数为0或负数，copy_n()算法什么也不做。
 void func2() {
@@ -26,7 +29,8 @@ void func2() {
 }
 
 // copy_if()算法可以从源序列复制使谓词返回true的元素，所以可以把它看作一个过滤器。
-// 前两个参数定义源序列的输入迭代器，第三个参数是指向目的序列的第一个位置的输出迭代器，第4个参数是一个谓词。
+// 前两个参数定义源序列的输入迭代器，
+// 第三个参数是指向目的序列的第一个位置的输出迭代器，第四个参数是一个谓词。
 // 会返回一个输出迭代器，它指向最后一个被复制元素的下一个位置。
 void func3() {
   std::copy_if(std::begin(v), std::end(v), std::inserter(us, std::begin(us)),
@@ -56,7 +60,8 @@ void func4() {
 // 不要被copy_backward()算法的名称所误导，它不会逆转元素的顺序。
 // 它只会像copy()那样复制元素，但是从最后一个元素开始直到第一个元素。
 // copy_backward()会复制前两个迭代器参数指定的序列。
-// 第三个参数是目的序列的结束迭代器，通过将源序列中的最后一个元素复制到目的序列的结束迭代器之前，源序列会被复制到目的序列中。
+// 第三个参数是目的序列的结束迭代器，通过将源序列中的最后一个元素复制到目的序列的结束迭代器之前，
+// 源序列会被复制到目的序列中。
 // copy_backward()的3个参数都必须是可以自增或自减的双向迭代器，这意味着这个算法只能应用到序列容器的序列上。
 // 从源序列的反向，将每一个元素依次复制到目的序列的前一个元素之前的位置。
 // 在进行这个操作之前，目的序列中的元素必须存在，因此目的序列至少要有和源序列一样多的元素，但也可以有更多。
@@ -108,15 +113,21 @@ void func6() {
               << (only_letters == reversed ? " is" : " is not")
               << " a palindrome." << std::endl;
   }
+}
+
+void func7() {
   // reverse()算法可以在原地逆序它的两个双向迭代器参数所指定序列的元素。
   // 可以用下面的语句来代替上述程序中的reverse_copy():
-  // string reversed{only_letters};
-  // std::reverse(std::begin(reversed), std::end(reversed));
+  std::string reversed = "123456789";
+  std::reverse(std::begin(reversed), std::end(reversed));
+  std::copy_n(reversed.begin(), reversed.size(),
+              std::ostream_iterator<char>(std::cout, " "));
+  std::cout << std::endl;
 }
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 2]" << std::endl;
+    std::cout << argv[0] << " i [0 - 3]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
@@ -132,6 +143,9 @@ int main(int argc, char* argv[]) {
       break;
     case 2:
       func6();
+      break;
+    case 3:
+      func7();
       break;
     default:
       std::cout << "invalid type" << std::endl;

@@ -19,7 +19,8 @@
 //  size() 	           返回stack栈中存储元素的个数。
 //  top() 	           返回一个栈顶元素的引用，类型为T&。如果栈为空，程序会报错。
 //  push(const T& val) 先复制val，再将val副本压入栈顶。这是通过调用底层容器的push_back()函数完成的。
-//  push(T&& obj)      以移动元素的方式将其压入栈顶。这是通过调用底层容器的有右值引用参数的push_back()函数完成的。
+//  push(T&& obj)      以移动元素的方式将其压入栈顶。
+//                     这是通过调用底层容器的有右值引用参数的push_back()函数完成的。
 //  pop() 	           弹出栈顶元素。
 //  emplace(arg...)    arg...可以是一个参数，也可以是多个参数，但它们都只用于构造一个对象，
 //                     并在栈顶直接生成该对象，作为新的栈顶元素。
@@ -38,14 +39,16 @@ int main() {
   std::stack<std::string, std::deque<int>> s4;
   // std::stack<std::string, std::set<int>> s5;  // 不报错？
 
-  // 3.可以用一个基础容器来初始化stack适配器，只要该容器的类型和stack底层使用的基础容器类型相同即可：
+  // 3.可以用一个基础容器来初始化stack适配器，
+  //   只要该容器的类型和stack底层使用的基础容器类型相同即可：
   std::list<int> l{1, 2, 3};
   std::stack<int, std::list<int>> s6(l);
   // 初始化后的适配器中，栈顶元素为3，而不是1。
   // stack第2个模板参数必须显式指定为list<int>（必须为int类型，和存储类型保持一致），
   // 否则stack底层将默认使用deque容器，也就无法用lsit容器的内容来初始化stack适配器。
 
-  // 4.还可以用一个stack适配器来初始化另一个stack适配器，只要它们存储的元素类型以及底层采用的基础容器类型相同即可：
+  // 4.还可以用一个stack适配器来初始化另一个stack适配器，
+  //   只要它们存储的元素类型以及底层采用的基础容器类型相同即可：
   std::stack<int, std::list<int>> s7 = s6;
   std::stack<int, std::list<int>> s8(s6);
 
@@ -56,7 +59,7 @@ int main() {
   std::stack<int, std::list<int>> s9(values);
   s9.emplace(4);
   s9.push(5);
-  std::cout << "size of stack: " << s9.size() << std::endl;  // 4
+  std::cout << "size of stack: " << s9.size() << std::endl;  // 5
   while (!s9.empty()) {
     std::cout << s9.top() << std::endl;
     s9.pop();

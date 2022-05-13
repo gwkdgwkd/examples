@@ -8,7 +8,7 @@
 //  std::less<T>    	      底层采用<运算符实现升序排序，各关联式容器默认采用的排序规则。
 //  std::greater<T> 	      底层采用>运算符实现降序排序，同样适用于各个关联式容器。
 //  std::less_equal<T> 	    底层采用<=运算符实现升序排序，多用于multimap和multiset容器。
-//  std::greater_equal<T> 	底层采用>=运算符实现降序排序，多用于multimap和multiset容器
+//  std::greater_equal<T> 	底层采用>=运算符实现降序排序，多用于multimap和multiset容器。
 // 底层也是采用函数对象的方式实现的，以std::less<T>为例，其底层实现为：
 // template <typename T>
 // struct less {

@@ -25,7 +25,8 @@
 // set容器包含的成员方法:
 // begin()	        返回指向容器中第一个（是已排好序的第一个）元素的双向迭代器。
 //                  如果set容器用const限定，则该方法返回的是const类型的双向迭代器。
-// end()	          返回指向容器最后一个元素（是已排好序的最后一个）所在位置后一个位置的双向迭代器，通常和begin()结合使用。
+// end()	          返回指向容器最后一个元素（是已排好序的最后一个）所在位置后一个位置的双向迭代器，
+//                  通常和begin()结合使用。
 //                  如果set容器用const限定，则返回const类型的双向迭代器。
 // rbegin()         返回指向最后一个（是已排好序的最后一个）元素的反向双向迭代器。
 //                  如果set容器用const限定，则该方法返回的是const类型的反向双向迭代器。
@@ -65,7 +66,8 @@
 // 并且2个双向迭代器之间做比较，也只能使用==或者!=运算符。
 // 在set容器类模板提供的返回的迭代器的成员函数，指向的只是set容器中存储的元素，而不再是键值对。
 // 无论是const类型还是非const类型，都不能用于修改set容器中的值。
-// 因为iter迭代器指向的是set容器存储的某个元素，而不是键值对，因此通过*iter可以直接获取该迭代器指向的元素的值。
+// 因为iter迭代器指向的是set容器存储的某个元素，而不是键值对，
+// 因此通过*iter可以直接获取该迭代器指向的元素的值。
 
 template <typename T>
 void print(std::set<T>& s) {
@@ -94,7 +96,7 @@ void func1() {
   // 将已有set容器中存储的所有元素全部复制到新set容器中:
   std::set<char> s3(s2);
   print(s3);  // a b c z [4]
-  std::set<char> s4(s2);
+  std::set<char> s4 = s2;
   print(s4);  // a b c z [4]
   // C++11标准还为set类模板新增了移动构造函数，其功能是实现创建新set容器的同时，利用临时的set容器为其初始化
   std::set<char> s5(retSet());
@@ -123,7 +125,8 @@ void func2() {  // insert
   //  pair<iterator,bool> insert(value_type&& val); // 右值引用方式传参
   // 以上2种语法格式的insert()方法，返回的都是pair类型的值，其包含2个数据，一个迭代器和一个bool值：
   //  当向set容器添加元素成功时，该迭代器指向set容器新添加的元素，bool类型的值为true；
-  //  如果添加失败，即证明原已存有相同的元素，此时返回的迭代器就指向容器中相同的此元素，同时bool类型的值为false。
+  //  如果添加失败，即证明原已存有相同的元素，
+  //  此时返回的迭代器就指向容器中相同的此元素，同时bool类型的值为false。
   std::set<char> s;
   std::pair<std::set<char>::iterator, bool> retpair;
   char ch = 'a';  // 采用普通引用传值方式
@@ -132,18 +135,20 @@ void func2() {  // insert
             << std::endl;   // true,a
   retpair = s.insert('b');  // 采用右值引用传值方式
   std::cout << std::boolalpha << retpair.second << "," << *retpair.first
-            << std::endl;  // false,a
+            << std::endl;  // true,b
   retpair = s.insert('b');
   std::cout << std::boolalpha << retpair.second << "," << *retpair.first
             << std::endl;  // false,b
   print(s);                // a b [2]
 
   // 2.insert()还可以指定将新元素插入到set容器中的具体位置，其语法格式如下：
-  //  iterator insert(const_iterator position, const value_type& val);  // 以普通引用的方式传递val值
-  //  iterator insert(const_iterator position, value_type&& val);  // 以右值引用的方式传递val值
-  // 以上2种语法格式中，insert()函数的返回值为迭代器：
-  //  当向set容器添加元素成功时，该迭代器指向容器中新添加的元素；
-  //  当添加失败时，证明原set容器中已有相同的元素，该迭代器就指向set容器中相同的这个元素。
+  //   以普通引用的方式传递val值
+  //   iterator insert(const_iterator position, const value_type& val);
+  //   以右值引用的方式传递val值
+  //   iterator insert(const_iterator position, value_type&& val);
+  //   以上2种语法格式中，insert()函数的返回值为迭代器：
+  //   当向set容器添加元素成功时，该迭代器指向容器中新添加的元素；
+  //   当添加失败时，证明原set容器中已有相同的元素，该迭代器就指向set容器中相同的这个元素。
   ch = 'c';  // 采用普通引用传值方式
   auto it = s.insert(s.begin(), ch);
   std::cout << *it << std::endl;  // c
@@ -154,9 +159,10 @@ void func2() {  // insert
   // set容器还会自行对新元素的位置做进一步调整。
   // 也就是说，insert()方法中指定新元素插入的位置，并不一定就是该元素最终所处的位置。
 
-  // 3.insert()方法支持向当前set容器中插入其它set容器指定区域内的所有元素，只要这2个set容器存储的元素类型相同即可:
-  // template <class InputIterator> void insert(InputIterator first, InputIterator last);
-  // 其中first和last都是迭代器，它们的组合[first,last)可以表示另一set容器中的一块区域。
+  // 3.insert()方法支持向当前set容器中插入其它set容器指定区域内的所有元素，
+  //   只要这2个set容器存储的元素类型相同即可:
+  //   template <class InputIterator> void insert(InputIterator first, InputIterator last);
+  //   其中first和last都是迭代器，它们的组合[first,last)可以表示另一set容器中的一块区域。
   std::set<char> s1{'o', 'p', 'q'};
   s.insert(++s1.begin(), s1.end());
   print(s);  // a b c d p q [6]
@@ -169,10 +175,12 @@ void func2() {  // insert
 void func3() {
   // emplace()和emplace_hint()是C++11标准加入到set类模板中的，相比具有同样功能的insert()方法，
   // 完成同样的任务，emplace()和emplace_hint()的效率会更高。
-  // emplace()方法的语法格式如下：template <class... Args> pair<iterator,bool> emplace (Args&&... args);
+  // emplace()方法的语法格式如下：
+  // template <class... Args> pair<iterator,bool> emplace (Args&&... args);
   // 该方法的返回值类型为pair类型，其包含2个元素，一个迭代器和一个bool值：
   //  当该方法将目标元素成功添加到set容器中时，其返回的迭代器指向新插入的元素，同时bool值为true；
-  //  当添加失败时，则表明原set容器中已存在相同值的元素，此时返回的迭代器指向容器中具有相同键的这个元素，同时bool值为false。
+  //  当添加失败时，则表明原set容器中已存在相同值的元素，
+  //  此时返回的迭代器指向容器中具有相同键的这个元素，同时bool值为false。
   std::set<int> s;
   std::pair<std::set<int>::iterator, bool> r = s.emplace(7);
   std::cout << std::boolalpha << r.second << "," << *r.first
@@ -182,7 +190,7 @@ void func3() {
             << std::endl;  // false,7
   print(s);                // 7 [1]
 
-  // emplace_hint() 方法的功能和emplace()类似，其语法格式如下：
+  // emplace_hint()方法的功能和emplace()类似，其语法格式如下：
   // template <class... Args> iterator emplace_hint (const_iterator position, Args&&... args);
   // 和emplace()方法相比，有以下2点不同：
   //  该方法需要额外传入一个迭代器，用来指明新元素添加到set容器的具体位置（新元素会添加到该迭代器指向元素的前面）；

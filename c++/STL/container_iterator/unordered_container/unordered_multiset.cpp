@@ -79,7 +79,7 @@ std::unordered_multiset<std::string> retums() {
   return tempums;
 }
 
-int main() {
+void func1() {
   // unordered_multiset容器模板类共提供了以下4种创建unordered_multiset容器的方式
   // 1.调用unordered_multiset模板类的默认构造函数，可以创建空的unordered_multiset容器：
   std::unordered_multiset<std::string> ums1;
@@ -93,13 +93,13 @@ int main() {
   // 3.调用unordered_multiset模板中提供的复制（拷贝）构造函数，
   //   将现有unordered_multiset容器中存储的元素全部用于为新建unordered_multiset容器初始化：
   std::unordered_multiset<std::string> ums3(ums2);
-  std::unordered_multiset<std::string> ums4(ums2);
+  std::unordered_multiset<std::string> ums4 = ums2;
   print(ums3);  // hello world nihao [3]
   print(ums4);  // hello world nihao [3]
   // C++11标准中还向unordered_multiset模板类增加了移动构造函数，即以右值引用的方式，
   // 利用临时unordered_multiset容器中存储的所有元素，给新建容器初始化：
   std::unordered_multiset<std::string> ums5(retums());
-  std::unordered_multiset<std::string> ums6(retums());
+  std::unordered_multiset<std::string> ums6 = retums();
   print(ums5);  // world1 nihao1 hello1 [3]
   print(ums6);  // world1 nihao1 hello1 [3]
   // 无论是调用复制构造函数还是拷贝构造函数，必须保证2个容器的类型完全相同。
@@ -108,6 +108,22 @@ int main() {
   //   在现有unordered_multiset容器中选择部分区域内的元素，为新建unordered_multiset容器初始化：
   std::unordered_multiset<std::string> ums7(++ums2.begin(), ums2.end());
   print(ums7);  // nihao world [2]
+}
+
+int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    std::cout << argv[0] << " i [0]" << std::endl;
+    return 0;
+  }
+  int type = argv[1][0] - '0';
+  switch (type) {
+    case 0:
+      func1();
+      break;
+    default:
+      std::cout << "invalid type" << std::endl;
+      break;
+  }
 
   return 0;
 }

@@ -33,6 +33,7 @@ void func1() {
   // merge()函数底层是通过拷贝的方式实现合并操作的。
   // 换句话说，上面程序在采用merge()函数实现合并操作的同时，并不会对first和second数组有任何影响。
 }
+
 void func2() {
   // 对于2个有序序列是各自存储（像first和second这样）还是存储到一起，merge()函数并不关心，
   // 只需要给它传入恰当的迭代器（或指针），该函数就可以正常工作。
@@ -77,12 +78,13 @@ void func3() {
 // 和merge()函数相比，inplace_merge()函数的语法格式要简单很多：
 // 默认采用升序的排序规则
 // void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle,
-//                     BidirectionalIterator last);
+//                    BidirectionalIterator last);
 // 采用自定义的comp排序规则
 // void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle,
-//                     BidirectionalIterator last, Compare comp);
+//                    BidirectionalIterator last, Compare comp);
 // first、middle和last都为双向迭代器，[first,middle)和[middle,last)各表示一个有序序列。
-// 和merge()函数一样，inplace_merge()函数也要求[first,middle)和[middle,last)指定的这2个序列必须遵循相同的排序规则，
+// 和merge()函数一样，
+// inplace_merge()函数也要求[first,middle)和[middle,last)指定的这2个序列必须遵循相同的排序规则，
 // 且当采用第一种语法格式时，这2个序列中的元素必须支持<小于运算符；
 // 同样，当采用第二种语法格式时，这2个序列中的元素必须支持comp排序规则内部的比较运算符。
 // 不同之处在于，merge()函数会将最终合并的有序序列存储在其它数组或容器中，

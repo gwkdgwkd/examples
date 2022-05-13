@@ -15,10 +15,12 @@ class mycomp2 {
 };
 
 // partition()函数的语法格式：
-// ForwardIterator partition(ForwardIterator first, ForwardIterator last, UnaryPredicate pred);
+// ForwardIterator partition(ForwardIterator first,
+//                           ForwardIterator last, UnaryPredicate pred);
 // 其中，first和last都为正向迭代器，其组合[first,last)用于指定该函数的作用范围；pred用于指定筛选规则。
 // 所谓筛选规则，其本质就是一个可接收1个参数且返回值类型为bool的函数，可以是普通函数，也可以是一个函数对象。
-// 同时，partition()函数还会返回一个正向迭代器，其指向的是两部分数据的分界位置，更确切地说，指向的是第二组数据中的第1个元素。
+// 同时，partition()函数还会返回一个正向迭代器，其指向的是两部分数据的分界位置，
+// 更确切地说，指向的是第二组数据中的第1个元素。
 void func1() {
   std::vector<int> v{1, 2, 3, 4, 5, 6, 7, 8, 9};
   std::vector<int>::iterator bound =
@@ -66,7 +68,8 @@ void func2() {
 // 这种情况下，就可以考虑使用partition_copy()函数。
 // 和stable_partition()一样，partition_copy()函数也能按照某个筛选规则对指定区域内的数据进行“分组”，
 // 并且分组后不会改变各个元素的相对位置。
-// 更重要的是，partition_copy()函数不会对原序列做修改，而是以复制的方式将序列中各个元组“分组”到其它的指定位置存储。
+// 更重要的是，partition_copy()函数不会对原序列做修改，
+// 而是以复制的方式将序列中各个元组“分组”到其它的指定位置存储。
 // pair<OutputIterator1,OutputIterator2> partition_copy (
 //                     InputIterator first, InputIterator last,
 //                     OutputIterator1 result_true, OutputIterator2 result_false,
@@ -116,11 +119,13 @@ void func3() {
 }
 
 // 对于如何在已分好组的数据中找到分界位置，C++11标准库提供了专门解决此问题的函数，即partition_point()函数。
-// ForwardIterator partition_point(ForwardIterator first, ForwardIterator last, UnaryPredicate pred);
+// ForwardIterator partition_point(ForwardIterator first,
+//                                 ForwardIterator last, UnaryPredicate pred);
 // 其中，first和last为正向迭代器，[first,last)用于指定该函数的作用范围；pred用于指定数据的筛选规则。
 // 所谓筛选规则，其实就是包含1个参数且返回值类型为bool的函数，此函数可以是一个普通函数，也可以是一个函数对象。
 // 同时，该函数会返回一个正向迭代器，该迭代器指向的是[first,last]范围内第一个不符合pred筛选规则的元素。
-// partition_point()返回了一个指向元素1的迭代器，而该元素为容器中第一个不符合规则的元素，同时其也可以第二组数据中第一个元素。
+// partition_point()返回了一个指向元素1的迭代器，而该元素为容器中第一个不符合规则的元素，
+// 同时其也可以第二组数据中第一个元素。
 // C++11标准库中给出了partition_point()函数底层实现：
 // template <class ForwardIterator, class UnaryPredicate>
 // ForwardIterator partition_point(ForwardIterator first, ForwardIterator last, UnaryPredicate pred) {

@@ -20,16 +20,16 @@ int main() {
   // 调用构造函数默认构造函数
   std::pair<std::string, double> pair1;
   // 调用第2种构造函数
-  std::pair<std::string, std::string> pair2("hello1,", "world1");
+  std::pair<std::string, std::string> pair2("hello1", "world1");
   // 调用拷贝构造函数
   std::pair<std::string, std::string> pair3(pair2);
   // 调用移动构造函数
   // make_pair()函数，它也是<utility>头文件提供的，其功能是生成一个pair对象。
-  // 因此，当将make_pair()函数的返回值（是一个临时对象）作为参数传递给pair()构造函数时，其调用的是移动构造函数，而不是拷贝构造函数。
-  std::pair<std::string, std::string> pair4(
-      std::make_pair("hello2,", "world2"));
+  // 因此，当将make_pair()函数的返回值（是一个临时对象）作为参数传递给pair()构造函数时，
+  // 其调用的是移动构造函数，而不是拷贝构造函数。
+  std::pair<std::string, std::string> pair4(std::make_pair("hello2", "world2"));
   std::pair<std::string, std::string> pair5 =
-      std::make_pair("hello3,", "world3");
+      std::make_pair("hello3", "world3");
   // 调用第5种构造函数
   std::pair<std::string, std::string> pair6(std::string("Hello4"),
                                             std::string("world5"));
@@ -41,21 +41,23 @@ int main() {
   std::cout << "pair5: " << pair5.first << " " << pair5.second << std::endl;
   std::cout << "pair6: " << pair6.first << " " << pair6.second << std::endl;
   // pair1:  0
-  // pair2: hello1, world1
-  // pair3: hello1, world1
-  // pair4: hello2, world2
-  // pair5: hello3, world3
+  // pair2: hello1 world1
+  // pair3: hello1 world1
+  // pair4: hello2 world2
+  // pair5: hello3 world3
   // pair6: Hello4 world5
 
   // C++11还允许我们手动为pair对象赋值
   std::pair<std::string, std::string> pair7;
-  pair7.first = "hello5,";
+  pair7.first = "hello5";
   pair7.second = "world5";
   std::cout << pair7.first << " " << pair7.second << std::endl;
-  // hello5, world5
+  // hello5 world5
 
-  // <utility>头文件中除了提供创建pair对象的方法之外，还为pair对象重载了 <、<=、>、>=、==、!= 这6的运算符，
-  // 其运算规则是：对于进行比较的2个pair对象，先比较pair.first元素的大小，如果相等则继续比较pair.second元素的大小。
+  // <utility>头文件中除了提供创建pair对象的方法之外，
+  // 还为pair对象重载了 <、<=、>、>=、==、!= 这6的运算符，
+  // 其运算规则是：对于进行比较的2个pair对象，先比较pair.first元素的大小，
+  // 如果相等则继续比较pair.second元素的大小。
   // 对于进行比较的2个pair对象，其对应的键和值的类型比较相同，否则将没有可比性，
   // 同时编译器提示没有相匹配的运算符，即找不到合适的重载运算符。
   std::pair<std::string, int> pair8("STL教程", 20);

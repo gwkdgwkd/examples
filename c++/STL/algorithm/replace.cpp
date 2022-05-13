@@ -25,8 +25,10 @@ void func2() {
   std::cout << password << std::endl;  // This_is_a_good_choice_!
 }
 
-// replace_copy()算法和replace()做的事是一样的，但它的结果会被保存到另一个序列中，而不会改变原始序列。
-// 它的前两个参数是输入序列的正向迭代器，第3个参数是输入序列的开始迭代器，最后两个参数分别是要被替换的值和替换值。
+// replace_copy()算法和replace()做的事是一样的，
+// 但它的结果会被保存到另一个序列中，而不会改变原始序列。
+// 它的前两个参数是输入序列的正向迭代器，第3个参数是输入序列的开始迭代器，
+// 最后两个参数分别是要被替换的值和替换值。
 void func3() {
   std::vector<std::string> words{"one", "none", "two", "three", "none", "four"};
   std::vector<std::string> new_words;

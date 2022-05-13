@@ -8,9 +8,11 @@ namespace n1 {
 //  InputIterator find(InputIterator first, InputIterator last, const T& val);
 // 其中，first和last为输入迭代器，[first, last)用于指定该函数的查找范围；val为要查找的目标元素。
 // 正因为first和last的类型为输入迭代器，因此该函数适用于所有的序列式容器。
-// 另外，该函数会返回一个输入迭代器，当find()函数查找成功时，其指向的是在[first,last)区域内查找到的第一个目标元素；
+// 另外，该函数会返回一个输入迭代器，当find()函数查找成功时，
+// 其指向的是在[first,last)区域内查找到的第一个目标元素；
 // 如果查找失败，则该迭代器的指向和last相同。
-// 值得一提的是，find()函数的底层实现，其实就是用==运算符将val和[first,last)区域内的元素逐个进行比对。
+// 值得一提的是，find()函数的底层实现，
+// 其实就是用==运算符将val和[first,last)区域内的元素逐个进行比对。
 // 这也就意味着，[first,last)区域内的元素必须支持==运算符。
 // find()函数除了可以作用于序列式容器，还可以作用于普通数组。
 // 对于find()函数的底层实现，C++标准库中给出了参数代码：
@@ -26,18 +28,19 @@ std::vector<int>::iterator it;
 std::vector<int> v1{10, 20, 30, 40, 50};
 std::vector<int> v2{10, 21, 30, 41, 50};
 std::vector<int> v3{11, 21, 31, 41, 51};
+auto print = [](std::vector<int>::iterator& it, std::vector<int>& v) {
+  if (it == v.end()) {
+    std::cout << "not found" << std::endl;
+  } else {
+    std::cout << "*it = " << *it << std::endl;
+  }
+};
+
 void func1() {
-  auto print = [](std::vector<int>::iterator& it) {
-    if (it != v1.end()) {
-      std::cout << "found：" << *it << std::endl;
-    } else {
-      std::cout << "not found" << std::endl;
-    }
-  };
   it = std::find(v1.begin(), v1.end(), 30);
-  print(it);  // found：30
+  print(it, v1);  // found：30
   it = std::find(v1.begin(), v1.end(), 60);
-  print(it);  // not found
+  print(it, v1);  // not found
 }
 
 // 和find()函数相同，find_if()函数也用于在指定区域内执行查找操作。
@@ -45,13 +48,15 @@ void func1() {
 // 所谓自定义查找规则，实际上指的是有一个形参且返回值类型为bool的函数。
 // 值得一提的是，该函数可以是一个普通函数（又称为一元谓词函数），比如：
 bool mycomp1(int i) { return ((i % 2) == 1); }
+bool mycomp3(int i) { return ((i % 2) == 0); }
 // mycomp()就是一个一元谓词函数，其可用来判断一个整数是奇数还是偶数。
 // 也可以是一个函数对象，比如：
 class mycomp2 {  // 此函数对象的功能和mycomp()函数一样。
  public:
   bool operator()(const int& i) { return ((i % 2) == 1); }
 };
-// 确切地说，find_if()函数会根据指定的查找规则，在指定区域内查找第一个符合该函数要求（使函数返回true）的元素。
+// 确切地说，find_if()函数会根据指定的查找规则，
+// 在指定区域内查找第一个符合该函数要求（使函数返回true）的元素。
 
 // find_if()函数的语法格式如下：
 //  InputIterator find_if(InputIterator first, InputIterator last, UnaryPredicate pred);
@@ -69,32 +74,28 @@ class mycomp2 {  // 此函数对象的功能和mycomp()函数一样。
 //   }
 //   return last;
 // }
-void func2() {
-  auto print = [](std::vector<int>::iterator& it, std::vector<int>& v) {
-    if (it == v.end()) {
-      std::cout << "not found" << std::endl;
-    } else {
-      std::cout << "*it = " << *it << std::endl;
-    }
-  };
 
+void func2() {
   it = std::find_if(v1.begin(), v1.end(), mycomp1);
   print(it, v1);  // not found
   it = std::find_if(v2.begin(), v2.end(), mycomp2());
   print(it, v2);  // *it = 21
 }
 
-// find_if_not()函数和find_if()函数的功能恰好相反，find_if()函数用于查找符合谓词函数规则的第一个元素，
+// find_if_not()函数和find_if()函数的功能恰好相反，
+// find_if()函数用于查找符合谓词函数规则的第一个元素，
 // 而find_if_not()函数则用于查找第一个不符合谓词函数规则的元素。
 // find_if_not()函数的语法规则如下所示：
-//  InputIterator find_if_not(InputIterator first, InputIterator last, UnaryPredicate pred);
+// InputIterator find_if_not(InputIterator first,
+//                           InputIterator last, UnaryPredicate pred);
 // 其中，first和last都为输入迭代器，[first, last)用于指定查找范围；pred 用于自定义查找规则。
 // 和find_if()函数一样，find_if_not()函数也适用于所有的容器，包括所有序列式容器和关联式容器。
 // 同样，该函数也会返回一个输入迭代器，当find_if_not()函数查找成功时，该迭代器指向的是查找到的那个元素；
 // 反之，如果查找失败，该迭代器的指向和last迭代器相同。
 // find_if_not()函数的底层实现和find_if()函数非常类似:
 // template <class InputIterator, class UnaryPredicate>
-// InputIterator find_if_not(InputIterator first, InputIterator last, UnaryPredicate pred) {
+// InputIterator find_if_not(InputIterator first,
+//                           InputIterator last, UnaryPredicate pred) {
 //   while (first != last) {
 //     if (!pred(*first)) return first;
 //     ++first;
@@ -102,17 +103,13 @@ void func2() {
 //   return last;
 // }
 void func3() {
-  auto print = [](std::vector<int>::iterator& it, std::vector<int>& v) {
-    if (it == v.end()) {
-      std::cout << "not found" << std::endl;
-    } else {
-      std::cout << "*it = " << *it << std::endl;
-    }
-  };
-
   it = std::find_if_not(v3.begin(), v3.end(), mycomp1);
   print(it, v3);  // not found
+  it = std::find_if(v3.begin(), v3.end(), mycomp3);
+  print(it, v3);  // not found
   it = std::find_if_not(v2.begin() + 1, v2.end(), mycomp2());
+  print(it, v2);  // *it = 30
+  it = std::find_if(v2.begin() + 1, v2.end(), mycomp3);
   print(it, v2);  // *it = 30
 }
 
@@ -121,7 +118,6 @@ void test() {
   func2();
   func3();
 }
-
 }  // namespace n1
 
 namespace n2 {
@@ -206,7 +202,7 @@ void test() {
 namespace n3 {
 // 需要在A序列中查找和B序列中任意元素相匹配的第一个元素，这时就可以使用find_first_of()函数。
 // find_first_of()函数定义于<algorithm>头文件中
-// ind_first_of()函数有2种语法格式，分别是：
+// find_first_of()函数有2种语法格式，分别是：
 // 以判断两者相等作为匹配规则
 //  InputIterator find_first_of(InputIterator first1, InputIterator last1,
 //                                ForwardIterator first2, ForwardIterator last2);
@@ -217,7 +213,8 @@ namespace n3 {
 // 其中，各个参数的含义如下：
 //  first1、last1：都为输入迭代器，它们的组合[first1,last1)用于指定该函数要查找的范围；
 //  first2、last2：都为正向迭代器，它们的组合[first2,last2)用于指定要进行匹配的元素所在的范围；
-//  pred：可接收一个包含2个形参且返回值类型为bool的函数，该函数可以是普通函数（又称为二元谓词函数），也可以是函数对象。
+//  pred：可接收一个包含2个形参且返回值类型为bool的函数，
+//        该函数可以是普通函数（又称为二元谓词函数），也可以是函数对象。
 // find_first_of()函数用于在[first1, last1)范围内查找和[first2, last2)中任何元素相匹配的第一个元素。
 // 如果匹配成功，该函数会返回一个指向该元素的输入迭代器；
 // 反之，则返回一个和last1迭代器指向相同的输入迭代器。
@@ -226,7 +223,8 @@ namespace n3 {
 //  和[first2,last2)中的每个元素（假设为B）做A==B运算，如果成立则匹配成功；
 //  第2种语法格式：逐个取[first1, last1)范围内的元素（假设为A），
 //  和[first2,last2)中的每个元素（假设为B）一起带入pred(A,B)谓词函数，如果函数返回true则匹配成功。
-// 注意，当采用第一种语法格式时，如果[first1,last1)或者[first2,last2)范围内的元素类型为自定义的类对象或者结构体变量，
+// 注意，当采用第一种语法格式时，
+// 如果[first1,last1)或者[first2,last2)范围内的元素类型为自定义的类对象或者结构体变量，
 // 此时应对==运算符进行重载，使其适用于当前场景。
 // 自定义二元谓词函数，作为 find_first_of() 函数的匹配规则
 bool mycomp1(int c1, int c2) { return (c2 % c1 == 0); }
@@ -283,7 +281,8 @@ namespace n4 {
 // 查找2个连续相等的元素
 //  ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last);
 // 查找2个连续满足pred规则的元素
-//  ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last, BinaryPredicate pred);
+//  ForwardIterator adjacent_find(ForwardIterator first,
+//                                ForwardIterator last, BinaryPredicate pred);
 // 其中，first和last都为正向迭代器，其组合[first, last)用于指定该函数的查找范围；
 // pred用于接收一个包含2个参数且返回值类型为bool的函数，以实现自定义查找规则。
 // 值得一提的是，pred参数接收的函数既可以定义为普通函数，也可以用函数对象的形式定义。

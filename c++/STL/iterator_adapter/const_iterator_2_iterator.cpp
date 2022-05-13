@@ -10,8 +10,8 @@
 // 是不是给insert()方法传递其它类型迭代器就不行呢？
 // 当然不是，对于给const_iterator类型的迭代器传值，还可以使用iterator类型迭代器，
 // 但不能使用const_reverse_iterator和reverse_iterator类型迭代器，这是为什么呢？
-// 当我们将某一类型的迭代器传递给insert()方法中const_iterator类型的position形参时，
-// 即便类型不匹配，编译器也不会立即报错，而是先尝试将其类型转换成const_iterator类型，如果转换成功，则程序仍可以正常执行；
+// 当我们将某一类型的迭代器传递给insert()方法中const_iterator类型的position形参时，即便类型不匹配，
+// 编译器也不会立即报错，而是先尝试将其类型转换成const_iterator类型，如果转换成功，则程序仍可以正常执行；
 // 反之如果转换失败，编译器才会报错。
 // 通常将编译器自行尝试进行类型转换的整个过程称为隐式转换（或者自动类型转换）。
 
@@ -37,9 +37,11 @@
 // 注意，在使用distance()函数时，必须额外指明2个参数为const迭代器类型，
 // 否则会因为传入的iter和citer类型不一致导致distance()函数编译出错。
 // 该实现方式的本质是，先创建一个迭代器citer，并将其初始化为指向容器中第一个元素的位置。
-// 在此基础上，通过计算和目标迭代器iter的距离（调用distance()），将其移动至和iter同一个位置（调用advance()），
+// 在此基础上，通过计算和目标迭代器iter的距离（调用distance()），
+// 将其移动至和iter同一个位置（调用advance()），
 // 由此就可以间接得到一个指向同一位置的iter迭代器。
-// 此方法的实现效率仍取决于目标容器的迭代器类型，如果是随机访问迭代器，则该方法的执行效率为O(1)；反之，则执行效率为O(n)。
+// 此方法的实现效率仍取决于目标容器的迭代器类型，如果是随机访问迭代器，则该方法的执行效率为O(1)；
+// 反之，则执行效率为O(n)。
 
 int main() {
   std::vector<int> v{1, 2, 3, 4, 5};
@@ -57,7 +59,8 @@ int main() {
   std::cout << "*cit = " << *cit << std::endl;  // *cit = 5
   std::cout << "*it = " << *it << std::endl;    // *it = 11
 
-  // 通过使用advance()和distance()函数的组合格式，得到一个和citer指向相同但类型为iterator的迭代器：
+  // 通过使用advance()和distance()函数的组合格式，
+  // 得到一个和citer指向相同但类型为iterator的迭代器：
   std::advance(it, std::distance<std::vector<int>::const_iterator>(it, cit));
   std::cout << "*cit = " << *cit << std::endl;  // *cit = 5
   std::cout << "*it = " << *it << std::endl;    // *it = 5

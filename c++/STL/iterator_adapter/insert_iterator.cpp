@@ -11,7 +11,8 @@
 // 2.front_insert_iterator在指定容器的头部插入新元素，
 //   但前提必须是提供有push_front()成员方法的容器（包括list、deque和forward_list）。
 // 3.insert_iterator在容器的指定位置之前插入新元素，前提是该容器必须提供有insert()成员方法。
-// back_insert_iterator，front_insert_iterator，insert_iterator迭代器定义在<iterator>头文件，并位于std命名空间中
+// back_insert_iterator，front_insert_iterator，
+// insert_iterator迭代器定义在<iterator>头文件，并位于std命名空间中。
 
 // back_insert_iterator迭代器可用于在指定容器的末尾处添加新元素。
 // 由于此类型迭代器的底层实现需要调用指定容器的push_back()成员方法，这就意味着，
@@ -36,10 +37,12 @@
 
 // 当需要向容器的任意位置插入元素时，就可以使用insert_iterator类型的迭代器。
 // 该类型迭代器的底层实现，需要调用目标容器的insert()成员方法。
-// 幸运的是，STL标准库中所有容器都提供有insert()成员方法，因此insert_iterator是唯一可用于关联式容器的插入迭代器。
+// 幸运的是，STL标准库中所有容器都提供有insert()成员方法，
+// 因此insert_iterator是唯一可用于关联式容器的插入迭代器。
 // 定义insert_iterator类型迭代器的语法格式如下：
 // std::insert_iterator<Container> insert_it (container,it);
-// 其中，Container表示目标容器的类型，参数container表示目标容器，而it是一个基础迭代器，表示新元素的插入位置。
+// 其中，Container表示目标容器的类型，参数container表示目标容器，
+// 而it是一个基础迭代器，表示新元素的插入位置。
 // 和前2种插入迭代器相比，insert_iterator迭代器除了定义时需要多传入一个参数，它们的用法完全相同。
 // 除此之外，C++ STL标准库中还提供有inserter()函数，可以快速创建insert_iterator类型迭代器。
 // 如果insert_iterator迭代器的目标容器为关联式容器，由于该类型容器内部会自行对存储的元素进行排序，

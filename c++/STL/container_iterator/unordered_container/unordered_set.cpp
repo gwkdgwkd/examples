@@ -24,8 +24,10 @@
 //  Hash = hash<Key> 指定unordered_set容器底层存储各个元素时，所使用的哈希函数。
 //                   需要注意的是，默认哈希函数hash<Key>只适用于基本数据类型（包括string类型），
 //                   而不适用于自定义的结构体或者类。
-//  Pred = equal_to<Key> unordered_set容器内部不能存储相等的元素，而衡量2个元素是否相等的标准，取决于该参数指定的函数。
-//                       默认情况下，使用STL标准库中提供的equal_to<key>规则，该规则仅支持可直接用==运算符做比较的数据类型。
+//  Pred = equal_to<Key> unordered_set容器内部不能存储相等的元素，
+//                       而衡量2个元素是否相等的标准，取决于该参数指定的函数。
+//                       默认情况下，使用STL标准库中提供的equal_to<key>规则，
+//                       该规则仅支持可直接用==运算符做比较的数据类型。
 // 如果unordered_set容器中存储的元素为自定义的数据类型，
 // 则默认的哈希函数hash<key>以及比较函数equal_to<key>将不再适用，
 // 只能自己设计适用该类型的哈希函数和比较函数，并显式传递给Hash参数和Pred参数。
@@ -57,14 +59,16 @@
 //                    即load_factor()=size()/bucket_count()。
 // max_load_factor()  返回或者设置当前unordered_map容器的负载因子。
 // rehash(n)          将当前容器底层使用桶的数量设置为n。
-// reserve()          将存储桶的数量（bucket_count()）设置为至少容纳count个元（不超过最大负载因子）所需的数量，并重新整理容器。
+// reserve()          将存储桶的数量（bucket_count()）设置为至少容纳count个元（不超过最大负载因子）所需的数量，
+//                    并重新整理容器。
 // hash_function()	  返回当前容器使用的哈希函数对象。
 
 // 此容器模板类中没有重载[]运算符，也没有提供at()成员方法。
 // 不仅如此，由于unordered_set容器内部存储的元素值不能被修改，
 // 因此无论使用那个迭代器方法获得的迭代器，都不能用于修改容器中元素的值。
 // 对于实现互换2个相同类型unordered_set容器的所有元素，除了调用swap()成员方法外，
-// 还可以使用STL标准库提供的swap()非成员函数，它们具有相同的名称，用法也相同（都只需要传入2个参数即可），仅是调用方式上有差别。
+// 还可以使用STL标准库提供的swap()非成员函数，它们具有相同的名称，
+// 用法也相同（都只需要传入2个参数即可），仅是调用方式上有差别。
 
 template <typename K>
 void print(std::unordered_set<K>& us) {
@@ -79,7 +83,7 @@ std::unordered_set<std::string> retuset() {
   return tempuset;
 }
 
-int main() {
+void func1() {
   // 创建C++ unordered_set容器
   // 1.过调用unordered_set模板类的默认构造函数，可以创建空的unordered_set容器，
   //   该容器底层采用默认的哈希函数hash<Key>和比较函数equal_to<Key>：
@@ -108,6 +112,22 @@ int main() {
   //   在现有unordered_set容器中选择部分区域内的元素，为新建unordered_set容器初始化：
   std::unordered_set<std::string> us7(++us2.begin(), us2.end());
   print(us7);  // hello world [2]
+}
+
+int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    std::cout << argv[0] << " i [0]" << std::endl;
+    return 0;
+  }
+  int type = argv[1][0] - '0';
+  switch (type) {
+    case 0:
+      func1();
+      break;
+    default:
+      std::cout << "invalid type" << std::endl;
+      break;
+  }
 
   return 0;
 }

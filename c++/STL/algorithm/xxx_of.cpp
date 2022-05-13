@@ -47,7 +47,8 @@ void func1() {
 }
 
 // count和count_if可以告诉我们，在前两个参数指定的范围内，有多少满足指定的第三个参数条件的元素。
-// count()会返回等同于第三个参数的元素的个数。count_if()会返回可以使作为第三个参数的谓词返回true的元素个数。
+// count()会返回等同于第三个参数的元素的个数。
+// count_if()会返回可以使作为第三个参数的谓词返回true的元素个数。
 void func2() {
   int the_age{19};
   std::cout << "There are "

@@ -11,7 +11,8 @@
 // 这个算法会返回一个迭代器，它指向第二个序列的最后一个被交换元素的下一个位置。
 
 // 定义在utility头文件中的swap()算法的重载函数的模板原型为：
-// template<typename T1, typename T2> void swap(std::pair<T1,T2> left, std::pair<T1,T2> right);
+// template<typename T1, typename T2>
+// void swap(std::pair<T1,T2> left, std::pair<T1,T2> right);
 // 这段代码会对pair<T1,T2>对象进行交换，在前面的代码段中也可以用swap_ranges()来交换元素。
 // 除了pair对象的重载之外，utility文件头中也有可以交换任何类型的容器对象的模板的重载。
 // 也就是说，可以交换两个list<T>容器或者两个set<T>容器但不能是一个list<T>和vector<T>，

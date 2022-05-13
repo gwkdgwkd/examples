@@ -4,7 +4,8 @@
 
 // 无论是序列式容器还是关联式容器（包括哈希容器），不仅模板类内部提供有begin()和end()成员方法，
 // C++ STL标准库中还提供有同名且具有相同功能的begin()和end()函数。
-// begin()和end()是以函数模板的形式定义的，但它们的模板并没有位于某一个头文件中，而是很多头文件中都有它们的定义。
+// begin()和end()是以函数模板的形式定义的，但它们的模板并没有位于某一个头文件中，
+// 而是很多头文件中都有它们的定义。
 // C++ STL标准库中，包含begin()和end()函数模板的头文件包括：
 // <iterator>, <array>, <deque>, <forward_list>, <list>, <map>,
 // <regex>, <set>, <string>, <unordered_map>, <unordered_set>, <vector>
