@@ -20,10 +20,12 @@ int main() {
   // reinterpret_cast、static_cast甚至C语言风格的类型转换也不能胜任。
 
   // 其他容器得到的结果也是一样的。
-  // 也许vector或string强制转换的代码能通过编译，但这非常特殊，大多数STL实现都会利用指针作为vector或string容器的迭代器。
+  // 也许vector或string强制转换的代码能通过编译，但这非常特殊，
+  // 大多数STL实现都会利用指针作为vector或string容器的迭代器。
   // vector<T>::iterator和vector<T>::const_iterator则分别被定义为T*和const T*,
   // string::iterator和string::cosnt_iterator则被定义为char*和const char*。
-  // 从const_iterator到iterator的const_cast转换被最终解释成从cosnt T*到T*的转换，因而可以通过编译，而且结果也是正确的。
+  // 从const_iterator到iterator的const_cast转换被最终解释成从cosnt T*到T*的转换，
+  // 因而可以通过编译，而且结果也是正确的。
   // 然而即便在这样的STL实现中，reverse_iterator和const_reverse_iterator仍然是真正的类，
   // 所以不能直接将const_reverse_iterator通过cosnt_cast强制转换成reverse_iterator。
   // 这些STL实现为了便于调试，通常只会在Release模式下才使用指针来表示vector和string的迭代器。

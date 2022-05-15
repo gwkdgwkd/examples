@@ -5,7 +5,8 @@
 
 // 切勿直接修改set或multiset中的键
 
-// set和multiset按照一定的顺序来存放自己的元素，而这些容器的正确行为也是建立在其元素保持有序的基础上的。
+// set和multiset按照一定的顺序来存放自己的元素，
+// 而这些容器的正确行为也是建立在其元素保持有序的基础上的。
 // 如果你把关联容器中一个元素的值改变了，那么新的值可能不在正确的位置上，这将会打破容器的有序性。
 
 class Employee {
@@ -22,7 +23,8 @@ struct IDNumberLess : public std::binary_function<Employee, Employee, bool> {
   }
 };
 
-// 如果不关心可移植性，而想改变set和multiset中的元素的值，并且STL的实现允许这样做，那就做。只要不修改键就好了。
+// 如果不关心可移植性，而想改变set和multiset中的元素的值，并且STL的实现允许这样做，那就做。
+// 只要不修改键就好了。
 // 如果重视可移植性，就要确保set和multiset中的元素不能被修改。至少不能未经过强制类型转换就修改。
 
 // 对于set和multiset，如果直接对容器中的元素做了修改，那么要保证该容器仍然是排序的。
@@ -36,13 +38,15 @@ int main() {
   // mm.begin()->first = 20;
 
   // 下面的方法对set和multiset没有任何问题，但对于map和multimap，情况就复杂了。
-  // map和multimap中保存的是pair，pair的第一个部分被定义成const，如果试图强制转换掉const属性，结果将可能会改变键部分。
+  // map和multimap中保存的是pair，pair的第一个部分被定义成const，
+  // 如果试图强制转换掉const属性，结果将可能会改变键部分。
   // 理论上，一个STL实现可以把这样的值写在一个只读的内存区域，这时要是尝试修改，最好的结果将是没有效果。
   // 如果你坚持要遵从C++标准所制定的规则，那就永远都不要试图修改在map和multimap中作为键的对象。
 
   // 但对set和multiset是可能的。对于set和multiset类型的对象，容器中元素类型是T，而不是const T。
   // 因此，只要你愿意，随时可以改变set或multiset中的元素，而无需任何强制类型转换。
-  // 为什么set和multiset中的元素不能是const的？如果是const，那么将不能修改其中对象的非排序部分，这样的需求是合理的。
+  // 为什么set和multiset中的元素不能是const的？
+  // 如果是const，那么将不能修改其中对象的非排序部分，这样的需求是合理的。
   typedef std::set<Employee, IDNumberLess> EmpIDSet;
   EmpIDSet se;
   Employee selectedID;
@@ -58,7 +62,8 @@ int main() {
     const_cast<Employee&>(*i).setTitle("Corporate Deity");
     // 通过强制类型转换到引用类型，避免了创建新对象。
 
-    // 下面的方法可以通过编译，但是不会修改*i。在这两种情况下，类型转换的结果是一个临时的匿名对象，是*i的一个拷贝：
+    // 下面的方法可以通过编译，但是不会修改*i。
+    // 在这两种情况下，类型转换的结果是一个临时的匿名对象，是*i的一个拷贝：
     static_cast<Employee>(*i).setTitle("Corporate Deity");
     ((Employee)(*i)).setTitle("Corporate Deity");
     // 类似下面的写法：

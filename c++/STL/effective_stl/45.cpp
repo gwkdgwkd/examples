@@ -20,7 +20,8 @@ class Widget {
 
 // 从未排序的区间到排序的区间的转变也带来了另一种变化：
 // 前者利用相等性来决定两个值是否相同，而后者使用等价性作为判断的依据。
-// count和find使用相等性进行搜索，而binary_search、lower_bound、upper_bound和equal_range使用了等价性。
+// count和find使用相等性进行搜索，
+// 而binary_search、lower_bound、upper_bound和equal_range使用了等价性。
 class Timestamp {};
 bool operator<(const Timestamp& lhs, const Timestamp& rhs) {}
 
@@ -102,7 +103,8 @@ int main() {
   }
 
   // 如果在，在哪里？需要使用equal_range。先看下lower_bound:
-  // 使用lower_bound查找某个特定值的时候，它会返回一个迭代器，迭代器要么指向该值的第一份拷贝（如果找到了的话），
+  // 使用lower_bound查找某个特定值的时候，它会返回一个迭代器，
+  // 迭代器要么指向该值的第一份拷贝（如果找到了的话），
   // 要么指向一个适合插入该值的位置（如果没有找到的话）。
   std::vector<Widget>::iterator i1 = lower_bound(vw.begin(), vw.end(), w);
   if (i1 != vw.end() && *i1 == w) {
@@ -117,7 +119,8 @@ int main() {
   // 所以正确的做法是，必须检查lower_bound返回的迭代器所指的对象是否等价于你要查找的值。
   // 可以手工实现这一点，但有风险，必须保证使用与lower_bound相同的比较函数。
   // 一般来说，它可能是任意一个函数（或函数对象）。
-  // 如果你给lower_bound传递了一个比较函数，那么你必须确保在手工编写的等价性测试代码中也使用同样的比较函数。
+  // 如果你给lower_bound传递了一个比较函数，
+  // 那么你必须确保在手工编写的等价性测试代码中也使用同样的比较函数。
   // 这意味着改变了传给lower_bound的比较函数，那么必须同时也要修改等价性检查的代码。
   // 使比较函数保持同步并不是什么尖端科技，但这是需要时刻记住的事情。
 
@@ -125,9 +128,9 @@ int main() {
   // 第一个等于lower_bound返回的迭代器，第二个等于upper_bound返回的迭代器。
   // equal_range返回的一对迭代器标识了一个子区间，其中的值与你查找的值等价。
   // 关于equal_range的返回值有两个需要注意的地方：
-  //  首先，如果返回的两个迭代器相同，则说明查找所得到的对象区间为空；即没有找到这样的值。
-  //  其次，equal_range返回的迭代器之间的距离与这个区间中的对象数目是相等的。
-  //  对于排序区间，equal_range不仅完成了find的工作，同时也代替了count。
+  // 1.首先，如果返回的两个迭代器相同，则说明查找所得到的对象区间为空；即没有找到这样的值。
+  // 2.其次，equal_range返回的迭代器之间的距离与这个区间中的对象数目是相等的。
+  //   对于排序区间，equal_range不仅完成了find的工作，同时也代替了count。
   typedef std::vector<Widget>::iterator VWIter;
   typedef std::pair<VWIter, VWIter> VWIterPair;
   VWIterPair p = equal_range(vw.begin(), vw.end(), w);
@@ -168,9 +171,9 @@ int main() {
   // 对于set和map而言，这不是一个问题，因为set不允许有重复的值，而map不允许有重复的键。
   // 要在关联容器中统计个数，使用count是非常安全的。
   // 特别是，它比先调用equal_range，再在结果迭代器上调用distance的做法要好得多。
-  //  首先，用法非常清晰，count的含义就是计数。
-  //  其次，使用count更加简单，没有必要先创建一对迭代器，再将first和second两个迭代器传给distance。
-  //  第三，速度更快一些。
+  // 1.首先，用法非常清晰，count的含义就是计数。
+  // 2.其次，使用count更加简单，没有必要先创建一对迭代器，再将first和second两个迭代器传给distance。
+  // 3.第三，速度更快一些。
 
   return 0;
 }

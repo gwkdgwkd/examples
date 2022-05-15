@@ -44,7 +44,8 @@ int main() {
   // 因为iterator是以内置指针的方式来实现的。
   // C和C++都规定了从函数返回的指针不应该被修改，所以，如果在STL平台上string和vector的iterator是指针的话，
   // 那么--ri.base()这样的表达式就无法通过编译。
-  // 因此，出于通用性和可移植性的考虑，想要在一个reverse_iterator指定的位置上删除一个元素，应该避免直接修改base()的返回值。
+  // 因此，出于通用性和可移植性的考虑，想要在一个reverse_iterator指定的位置上删除一个元素，
+  // 应该避免直接修改base()的返回值。
   // 可以先递增reverse_iterator，然后在调用base()函数即可：
   v.insert(i, 3);
   ri = find(v.rbegin(), v.rend(), 3);

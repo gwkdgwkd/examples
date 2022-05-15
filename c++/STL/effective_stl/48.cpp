@@ -12,10 +12,12 @@
 // 所以，其他的STL平台完全有可能拒绝你的代码。
 
 // STL有关的标准头文件中所包含的内容：
-// 1.几乎所有的标准STL容器都被声明在与之同名的头文件，比如vector被声明在<vector>中，list被声明在<list>中，等等。
+// 1.几乎所有的标准STL容器都被声明在与之同名的头文件，比如vector被声明在<vector>中，
+//   list被声明在<list>中，等等。
 //   但<set>和<map>是个例外，<set>中声明了set和multiset，<map>中声明了map和multimap。
 // 2.除了4个STL算法以外，其他所有的算法都被声明在<algorithm>中，
-//   这四个算法是accumulate、inner_product、adjactnt_difference和partial_sum，它们被声明在头文件<numeric>中。
+//   这四个算法是accumulate、inner_product、adjactnt_difference和partial_sum，
+//   它们被声明在头文件<numeric>中。
 // 3.特殊类型的迭代器，包括istream_iterator和istreambuf_iterator，被声明在<iterator>中。
 // 4.标准的函数子（比如less<T>）和函数子配接器（比如not1、bind2nd）被声明在头文件<functional>中。
 

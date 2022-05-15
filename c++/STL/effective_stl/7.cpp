@@ -25,8 +25,9 @@ void doSomething1() {
   for (std::vector<Widget *>::iterator i = vwp.begin(); i != vwp.end(); ++i) {
     delete *i;
   }
-  // 这段代码可以删除，但是不是异常安全的
-  // 如果在填充指针和删除指针的两个过程中有异常抛出，同样会资源泄露。幸运的是，这两个问题都可以克服
+  // 这段代码可以删除，但是不是异常安全的，
+  // 如果在填充指针和删除指针的两个过程中有异常抛出，同样会资源泄露。
+  // 幸运的是，这两个问题都可以克服。
 }
 
 template <typename T>
@@ -62,8 +63,8 @@ void doSomething4() {
     dssp.push_back(new SpecialString);
   }
   for_each(dssp.begin(), dssp.end(), DeleteObject1());
-  // 直接而类型安全，正是我们所希望的方式
-  // 仍然不是异常安全的。如果在SpecialString被创建而for_each的调用还没有开始时有异常抛出，则会资源泄露。
+  // 直接而类型安全，正是我们所希望的方式，仍然不是异常安全的。
+  // 如果在SpecialString被创建而for_each的调用还没有开始时有异常抛出，则会资源泄露。
   // 有很多方式类解决这个问题，最简单的是用智能指针代替指针容器。
 }
 

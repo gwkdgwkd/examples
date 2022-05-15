@@ -5,8 +5,8 @@
 // iterator优先于const_iterator、reverse_iterator以及const_reverse_iterator
 
 // STL中的所有标准容器都提供了4中迭代器。对于容器类container<T>而言：
-//  iterator和reverse_iterator类型的功效相当与T*;
-//  const_iterator和const_reverse_iterator相当于const T*，或T cosnt*;
+// 1.iterator和reverse_iterator类型的功效相当与T*;
+// 2.const_iterator和const_reverse_iterator相当于const T*，或T cosnt*;
 // iterator和const_iterator递增从容器的头部一直遍历到尾部。
 // reverse_iterator和const_reverse_iterator从尾部反向变量到容器头部。
 
@@ -15,7 +15,8 @@
 //  iterator erase(iterator position);
 //  iterator erase(iterator rangeBegin, iterator rangeEnd);
 // 每个标准容器都提供了类似的函数，只不过对于不同的容器类型，返回值有所不同。
-// 但这些函数仅接受iterator类型的参数，而不是const_iterator、reverse_iterator以及const_reverse_iterator，
+// 但这些函数仅接受iterator类型的参数，
+// 而不是const_iterator、reverse_iterator以及const_reverse_iterator，
 // 总是iterator，iterator与其他的迭代器有所不同。
 
 // 迭代器的转换关系：
@@ -59,7 +60,8 @@ int main() {
   // 原因在于，这些STL实现将const_iterator的等于操作符作为一个成员函数而不是一个非成员函数。
   // 解决办法：只要交换两个iterator的位置，就万事大吉了。也是相等?
 
-  // 不仅在进行比较的时候会发生这样的问题，只要在同一个表达式中混用iterator和const_iterator，这样的问题就会出现：
+  // 不仅在进行比较的时候会发生这样的问题，
+  // 只要在同一个表达式中混用iterator和const_iterator，这样的问题就会出现：
   if (i - c >= 3) {  // 但这次无法交换i和c的位置了
   }
   if (c + 3 <= i) {
@@ -68,7 +70,8 @@ int main() {
   }
   // 避免这种问题的最简单办法是减少混用不同类型的迭代器，尽量使用iterator来代替const_iterator。
   // 从const正确性的角度来看，仅仅为了避免一些可能存在的STL实现缺陷而放弃cosnt_iterator显得有欠公允。
-  // 但考虑到在容器类的某些成员函数中指定使用iterator的现状，得出iterator比const_iterator更为有用的结论就不足为奇了。
+  // 但考虑到在容器类的某些成员函数中指定使用iterator的现状，
+  // 得出iterator比const_iterator更为有用的结论就不足为奇了。
 
   return 0;
 }

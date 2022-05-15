@@ -10,17 +10,20 @@ bool isInteresting(const Widget* pw) {}
 
 // STL的4个标准的函数配接器（not1、not2、bind1st和bind2nd）都要求一些特殊的类型定义，
 // 那些非标准的、与STL兼容的配接器通常也是如此。
-// 提供了这些必要的类型定义的函数对象被称为可配接的函数对象，反之，如果函数对象缺少这些类型定义，则称为不可配接的。
+// 提供了这些必要的类型定义的函数对象被称为可配接的函数对象，
+// 反之，如果函数对象缺少这些类型定义，则称为不可配接的。
 // 可配接的函数对象能够与其他STL组件更为默契地协同工作，它们能够应用于更多的上下文环境中，
 // 因此应当尽可能地使你编写的函数对象可以配接。
 // 这些类型是:argument_type、first_argument_type、second_argument_type已经result_type。
 // 不同种类的函数子类所提供的定义也不尽相同，是上面类型的不同子集。
-// 提供这些类型定义最简单的办法是让韩淑子从特定的基类继承：
-//  如果函数子类的operator()只有一个实参，那么它应该从std::unary_function继承；
-//  如果函数子类的operator()有两个实参，那么它应该从std::binary_function继承。
-// std::unary_function和std::binary_function是模板，不能直接继承，必须继承它们所产生的结构，就是要指定某些类型实参。
+// 提供这些类型定义最简单的办法是让函数子从特定的基类继承：
+// 1.如果函数子类的operator()只有一个实参，那么它应该从std::unary_function继承；
+// 2.如果函数子类的operator()有两个实参，那么它应该从std::binary_function继承。
+// std::unary_function和std::binary_function是模板，不能直接继承，
+// 必须继承它们所产生的结构，就是要指定某些类型实参。
 // 对于std::unary_function必须指定函数子类operator()所带的参数的类型，以及返回类型。
-// 而对于std::binary_function必须指定三个类型，operator()的第一个和第二个参数的类型，以及operator()的返回类型。
+// 而对于std::binary_function必须指定三个类型，
+// operator()的第一个和第二个参数的类型，以及operator()的返回类型。
 // std::unary_function和std::binary_function operator()的返回类型
 // 是std::unary_function和std::binary_function的最后一个参数。
 template <typename T>

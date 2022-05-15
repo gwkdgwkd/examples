@@ -3,8 +3,6 @@
 #include <iterator>
 #include <vector>
 
-using namespace std;
-
 // 切勿对STL容器的线程安全性有不切实际的依赖
 
 // 标准C++的世界相当狭小和古旧。
@@ -26,8 +24,8 @@ using namespace std;
 // 2.在容器所返回的每个迭代器的生存期结束前，都锁住容器（比如通过begin或end调用）。
 // 3.对于作用于容器的每个算法，都锁住该容器，直到算法结束（实际上这样做没有意义）。
 // 需要手工做同步控制。
-void getMutexFor(const vector<int> &) {}
-void releaseMutexFor(const vector<int> &) {}
+void getMutexFor(const std::vector<int> &) {}
+void releaseMutexFor(const std::vector<int> &) {}
 
 // 使用类（如Lock）来管理资源的生存期的意思通常被称为“获得资源时即初始化”
 template <typename Container>
@@ -40,29 +38,30 @@ class Lock {
   const Container &c;
 };
 
-// 当涉及到STL容器和线程安全性时，你可以指望一个STL库允许多个线程同时读一个容器，以及多个线程对不同容器的写入操作。
+// 当涉及到STL容器和线程安全性时，你可以指望一个STL库允许多个线程同时读一个容器，
+// 以及多个线程对不同容器的写入操作。
 // 你不能指望STL库把你从手工同步控制中解脱出来，而且不能依赖于任何线程支持。
 
 int main() {
-  vector<int> v;
-  vector<int>::iterator it1(find(v.begin(), v.end(), 5));
+  std::vector<int> v;
+  std::vector<int>::iterator it1(find(v.begin(), v.end(), 5));
   if (it1 != v.end()) {
     *it1 = 0;
   }
 
-  vector<int> v1;
+  std::vector<int> v1;
   getMutexFor(v1);
-  vector<int>::iterator it2(find(v1.begin(), v1.end(), 5));
+  std::vector<int>::iterator it2(find(v1.begin(), v1.end(), 5));
   if (it2 != v1.end()) {
     *it2 = 0;
   }
   releaseMutexFor(v1);  // 上面有异常，这里不会被执行
 
   // 基于Lock的方案在有异常发生时也是强壮的。C++保证，如果有异常被抛出，局部对象会被析构。
-  vector<int> v2;
+  std::vector<int> v2;
   {  // 创建代码块
-    Lock<vector<int> > lock(v2);
-    vector<int>::iterator it2(find(v1.begin(), v1.end(), 5));
+    Lock<std::vector<int> > lock(v2);
+    std::vector<int>::iterator it2(find(v1.begin(), v1.end(), 5));
     if (it2 != v1.end()) {
       *it2 = 0;
     }

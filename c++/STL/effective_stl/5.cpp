@@ -29,17 +29,17 @@ class Widget {};
 // 对于关联容器，效率问题更加难以说清楚。
 
 // 哪些函数支持区间？
-// 区间创建：所有标准容器都提供了下面的构造函数。
-//  container::container(InputIterator Begin, InputIterator end);
-// 区间插入：所有标准序列容器都提供了如下形式的inert。
-//  void container::insert(iterator position, InputIterator Begin, InputIterator end);
-//  void container::insert(InputIterator Begin, InputIterator end);
-//  关联容器利用比较函数来决定元素插入位置，不用position
-// 区间删除：所有的标准容器都提供了区间形式的删除操作。
-//  iterator container::erase(InputIterator Begin, InputIterator end);  // 序列容器
-//  void container::erase(InputIterator Begin, InputIterator end);  // 关联容器
-// 区间赋值：所有的标准容器都提供了区间形式的assign。
-//  void container::assign(InputIterator Begin, InputIterator end);
+// 1.区间创建：所有标准容器都提供了下面的构造函数。
+//   container::container(InputIterator Begin, InputIterator end);
+// 2.区间插入：所有标准序列容器都提供了如下形式的inert。
+//   void container::insert(iterator position, InputIterator Begin, InputIterator end);
+//   void container::insert(InputIterator Begin, InputIterator end);
+//   关联容器利用比较函数来决定元素插入位置，不用position
+// 3.区间删除：所有的标准容器都提供了区间形式的删除操作。
+//   iterator container::erase(InputIterator Begin, InputIterator end);  // 序列容器
+//   void container::erase(InputIterator Begin, InputIterator end);  // 关联容器
+// 4.区间赋值：所有的标准容器都提供了区间形式的assign。
+//   void container::assign(InputIterator Begin, InputIterator end);
 
 // 优先选择区间成员函数而不是其对应的单元素成员函数有三条充分的理由：
 // 1.区间成员函数写起来更容易；

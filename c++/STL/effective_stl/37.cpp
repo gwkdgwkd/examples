@@ -43,11 +43,14 @@ class PointAverage : public std::binary_function<Point, Point, Point> {
 // for_each是另一个可被用来统计区间的算法，而且它不受accumulate的那些限制。
 // 与accumulate一样，for_each也带两个参数：一个是区间，一个是函数（通常是函数对象）。
 // 区间中的每个元素都要调用这个函数，但是，传给for_each的这个函数只接收一个实参（即当前的区间元素）。
-// for_each执行完毕后会返回它的函数（返回的是一份拷贝），重要的是，传给for_each的函数（及后来返回的函数）可以有副作用。
+// for_each执行完毕后会返回它的函数（返回的是一份拷贝），
+// 重要的是，传给for_each的函数（及后来返回的函数）可以有副作用。
 // 抛开副作用，for_each和accumulate在两个方面有所不同：
-// 首先，accumulate暗示这个算法会计算出一个区间的统计信息。而for_each听起来是对一个区间的每个元素做一个操作（主要应用）。
+// 首先，accumulate暗示这个算法会计算出一个区间的统计信息。
+// 而for_each听起来是对一个区间的每个元素做一个操作（主要应用）。
 // 用for_each统计某个区间是合法的，但是不如accumulate来得清晰。
-// 其次，accumulate直接返回我们要的统计结果，而for_each取返回一个函数对象，必须从这个函数对象中提取出我们所要统计的信息。
+// 其次，accumulate直接返回我们要的统计结果，而for_each取返回一个函数对象，
+// 必须从这个函数对象中提取出我们所要统计的信息。
 // 在C++中，这意味着我们必须在函数子类中加入一个成员函数，以便获得我们想要的统计信息。
 class PointAverage1 : public std::binary_function<Point, Point, Point> {
  public:

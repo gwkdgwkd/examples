@@ -9,7 +9,8 @@ class Widget {
   Widget(double weight) {}
   Widget& operator=(double weight) { return *this; }
 };
-// map的operator[]函数与众不同，它与vector、deque和string的operator[]函数无关，与用与数组的内置operator[]也没有关系。
+// map的operator[]函数与众不同，它与vector、deque和string的operator[]函数无关，
+// 与用与数组的内置operator[]也没有关系。
 // 相反，map::operator[]的设计目的是为了提供“添加和更新”的功能。
 // m[k]=v;检查键k是否已经在map中了，如果没有，它就被加入，并以v作为响应的值。
 // 如果k已经在映射表中了，则与关联的值被更新为v。
@@ -41,8 +42,10 @@ typename MapType::iterator efficientAddOrUpdate(MapType& m, const KeyArgType& k,
     // 则插入操作将耗费常数时间，而不是对数时间。
   }
 
-  // KeyArgType和ValueArgType不必是存储在映射表中的类型。只要它们能够转换储存在映射表中的类型就可以了。
-  // 另一种选择是去掉类型参数KeyArgType和ValueArgType，而用MapType::key_type和MapType::mapped_type来代替。
+  // KeyArgType和ValueArgType不必是存储在映射表中的类型。
+  // 只要它们能够转换储存在映射表中的类型就可以了。
+  // 另一种选择是去掉类型参数KeyArgType和ValueArgType，
+  // 而用MapType::key_type和MapType::mapped_type来代替。
   // 然而如果这样做的话，在函数被调用时可能会导致不必要的类型转换。
 }
 
@@ -51,11 +54,12 @@ int main() {
   m[1] = 1.50;  // m[1]是m.operator[](1)的缩写，必须返回一个指向Widget的引用
   m.insert(std::map<int, Widget>::value_type(1, 1.50));
   // 上面两种方式的最终效果相同，只是insert会节省三个函数调用：
-  //  一个用于创建默认构造的临时对象
-  //  一个用于析构该临时对象
-  //  一个用于调用对象的赋值操作符
+  // 1.一个用于创建默认构造的临时对象
+  // 2.一个用于析构该临时对象
+  // 3.一个用于调用对象的赋值操作符
   // 这些函数调用的代价越高，使用insert代替operator[]节省的开销就越大
-  // 每个标准容器都会提供value_type类型定义，对于map和multimap以及hash_map和hash_multimap的元素类型总是某一种pair
+  // 每个标准容器都会提供value_type类型定义，
+  // 对于map和multimap以及hash_map和hash_multimap的元素类型总是某一种pair
   m[2] = 3.67;
   m[3] = 10.5;
   m[4] = 45.8;
