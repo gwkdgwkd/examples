@@ -56,7 +56,8 @@ class TextBlock {
 void print(const TextBlock& ctb) { cout << ctb[0]; }
 
 // 成员函数如果是const，意味着什么？有两个流行概念：
-// 1.bitwise constness(physical constness)相信，成员函数只有在不更改对象任何变量（static除外）时才可以说是const。
+// 1.bitwise constness(physical constness)相信，
+//   成员函数只有在不更改对象任何变量（static除外）时才可以说是const。
 //   这正是C++对常量性的定义，因此const成员函数不可以更改对象内任何non-static成员变量。
 //   许多成员函数虽然不十足具备const性质却能通过bitwise测试。
 class TextBlock1 {
@@ -67,7 +68,8 @@ class TextBlock1 {
  private:
   char* pText;
 };
-// 2.logical constness主张，一个const成员函数可以修改它所处理的对象的某些bit，但只有在客户端侦测不到的情况下才得这样。
+// 2.logical constness主张，一个const成员函数可以修改它所处理的对象的某些bit，
+//   但只有在客户端侦测不到的情况下才得这样。
 //   textLength和lengthIsValid不是bitwise constness，可以被修改。
 //   编译器坚持bitwise constness，解决方法为：
 //   利用C++的一个与const相关的关键字：mutable(可变的)。

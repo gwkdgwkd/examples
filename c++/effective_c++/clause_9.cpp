@@ -17,15 +17,17 @@ class Base {
   virtual void display() { cout << "Base display" << endl; }
 };
 class Derived : public Base {
-  virtual void display() { cout << "Derivedss display" << endl; }
+  virtual void display() { cout << "Derived display" << endl; }
 };
 
 // 请记住：
 // 在构造和析构函数中不要调用virtual函数，因为这类调用从不会调用到derived class中的函数。
 
 int main() {
-  Derived d;
+  Base *b = new Derived();
   // Base display
+
+  delete b;
   // Base display
 
   return 0;

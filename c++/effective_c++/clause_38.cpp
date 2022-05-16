@@ -23,9 +23,10 @@ class Person {  // Person对象由string，Address，PhoneNumber构成
 // is-a和has-a很好区分，但是is-a和is-implemented-in-terms-of区分起来比较麻烦。
 
 // 希望制造一组class用来表示不重复对象组成的set。
-// 首先想到STL的set。但是set招致“每个元素用三个指针”的额外开销。
+// 首先想到STL的set，但是set招致“每个元素用三个指针”的额外开销。
 // 因为set通常以平衡查找树实现而成，使它们在查找、插入、移除元素时保证拥有对数时间效率，速度比空间重要。
-// 但如果你的程序空间比速度重要呢？需要自己写template，实现set的方法很多，可以使用标准库的list template。
+// 但如果你的程序空间比速度重要呢？
+// 需要自己写template，实现set的方法很多，可以使用标准库的list template。
 // template <typename T>
 // class Set : public std::list<T> {};
 // 使用public继承看起来对，实际是错误的。Set和list不是is-a的关系。
@@ -57,6 +58,7 @@ class Set {
 
 // 请记住：
 // 复合（composition）的意义和public继承完全不同。
-// 在应用域，复合意味着has-a（有一个）。在实现域，复合意味着is-implemented-in-terms-of（根据某物实现出）。
+// 在应用域，复合意味着has-a（有一个）。
+// 在实现域，复合意味着is-implemented-in-terms-of（根据某物实现出）。
 
 int main() { return 0; }

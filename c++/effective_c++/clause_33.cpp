@@ -5,7 +5,8 @@ using namespace std;
 // 避免遮掩继承而来的名称
 
 // 其实和继承无关，和作用域有关。
-// C++的名称遮掩规则所做的唯一事情就是：遮掩名称。至于名称是否类型相同，并不重要。
+// C++的名称遮掩规则所做的唯一事情就是：遮掩名称。
+// 至于名称是否类型相同，并不重要。
 int x;
 void sonmeFunc() {
   double x;
@@ -40,7 +41,8 @@ class Derived1 : public Base {
   };
 };
 
-// 使用public继承而又不继承那些重载函数，就违反了base和derived class之间的is-a关系，is-a关系是public继承的基石。
+// 使用public继承而又不继承那些重载函数，就违反了base和derived class之间的is-a关系，
+// is-a关系是public继承的基石。
 // 因此几乎总会想要推翻(override)C++对“继承而来的名称的缺省遮掩行为。
 class Derived2 : public Base {
  public:
@@ -54,19 +56,22 @@ class Derived2 : public Base {
   void mf4() {}
 };
 
-// 有时并不想继承base class的所有函数，这是可以理解的。在public继承不能发生，违背了public继承的is-a关系。
-// 但在private继续下，是有意义的。此时using声明排不上用场。
+// 有时并不想继承base class的所有函数，这是可以理解的。
+// 在public继承不能发生，违背了public继承的is-a关系。
+// 但在private继续下，是有意义的。
+// 此时using声明派不上用场。
 class Derived3 : private Base {
  public:
   virtual void mf1() { Base::mf1(5); }  // 转交函数，暗自成为inline
-  // inline转交函数（forwarding function）的另一个用途是为那些不支持using声明的老旧编译器另辟一条新路，
+  // inline转交函数的另一个用途是为那些不支持using声明的老旧编译器另辟一条新路，
   // 将继承而得的名称汇入derived class作用域内。
 };
 
 // 当继承结合template时，有将面对“继承名称被遮掩”的一个全然不同的形式。
 
 // 请记住：
-// derived class内的名称会遮掩base class内的名称。在public继承下从来不会有人希望如此。
+// derived class内的名称会遮掩base class内的名称。
+// 在public继承下从来不会有人希望如此。
 // 为了让被遮掩的名称再见天日，可以使用using声明或转交函数（forwarding functions）。
 
 int main() {

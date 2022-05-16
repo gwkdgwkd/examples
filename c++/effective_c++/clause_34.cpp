@@ -6,15 +6,17 @@ using namespace std;
 
 // public继承概念，有两部分组成：函数接口继承和函数实现继承。就像是函数声明与函数定义之间的差异。
 // derived class继承的内容：
-//  有时希望只继承函数的接口（声明）；
-//  有时希望继承函数的接口和实现，但希望能够覆写继承的实现；
-//  有时希望继承函数的接口和实现，并且不允许覆写任何东西。
+// 1.有时希望只继承函数的接口（声明）；
+// 2.有时希望继承函数的接口和实现，但希望能够覆写继承的实现；
+// 3.有时希望继承函数的接口和实现，并且不允许覆写任何东西。
+
 class Shape {
   // Shape是个抽象类；所以客户不能创建Shape class的实体，只能创建其derived class的实体。
   // 尽管如此，Shape还是强烈影响了所有以public形式继承它的derived class，因为：
   // 成员函数的接口总是会被继承。
  public:
-  // pure virtual函数有两个最突出的特性：它们必须被任何“继承了它们”的class重新声明，而且在抽象class中通常没有定义。
+  // pure virtual函数有两个最突出的特性：
+  // 它们必须被任何“继承了它们”的class重新声明，而且在抽象class中通常没有定义。
   // 声明一个pure virtual函数的目的是为了让derived class只继承函数接口。
   virtual void draw() const = 0;  // pure virtual
   // impure virtual函数会提供一份实现代码，derived class可能覆写它。
@@ -87,7 +89,8 @@ class Airplane2 {
   virtual void fly(const Airport& destination) = 0;
 };
 void Airplane2::fly(const Airport& destination) {
-  // 合并了fly和defaultFly，就丧失了“让两个函数享有不同保护级别”的机会，实际上被protected的函数如今成了public。
+  // 合并了fly和defaultFly，就丧失了“让两个函数享有不同保护级别”的机会，
+  // 实际上被protected的函数如今成了public。
   cout << "Airplane2 fly" << endl;
 }
 class ModelA2 : public Airplane2 {
@@ -105,13 +108,14 @@ class ModelC2 : public Airplane2 {
 void ModelC2::fly(const Airport& destination) { cout << "ModelC2 fly" << endl; }
 
 // 声明成员函数时，必须谨慎选择。常犯的两个错误：
-//  1 将所有函数声明为non-virtual。使得derived class没有能力做特化工作。
-//    non-virtual析构函数尤其会带来问题。
-//  2 将所有成员函数声明为virtual，有些时候是正确的，也有可能是class设计者缺乏坚定的立场，
-//    某些函数就不该在derived class中被重新定义。
+// 1.将所有函数声明为non-virtual。使得derived class没有能力做特化工作。
+//   non-virtual析构函数尤其会带来问题。
+// 2.将所有成员函数声明为virtual，有些时候是正确的，也有可能是class设计者缺乏坚定的立场，
+//   某些函数就不该在derived class中被重新定义。
 
 // 请记住：
-// 接口继承和实现继承不同。在public继承之下，derived class总是继承base class的接口。
+// 接口继承和实现继承不同。
+// 在public继承之下，derived class总是继承base class的接口。
 // pure virtual函数只具体指定接口继承。
 // 简朴的（非纯）impure virtual函数具体指定接口继承及缺省实现继承。
 // non-virtual函数具体指定接口继承以及强制性实现继承。
@@ -136,8 +140,14 @@ int main() {
   Airplane1* pa1 = new ModelC1;
   pa1->fly(PDX);  // ModelC1 fly
 
-  Airplane2* pa2 = new ModelC2;
-  pa2->fly(PDX);  // ModelC2 fly
+  Airplane2* pa21 = new ModelA2;
+  pa21->fly(PDX);  // Airplane2 fly
+
+  Airplane2* pa22 = new ModelB2;
+  pa22->fly(PDX);  // Airplane2 fly
+
+  Airplane2* pa23 = new ModelC2;
+  pa23->fly(PDX);  // ModelC2 fly
 
   return 0;
 }

@@ -6,7 +6,8 @@ using namespace std;
 
 class Widget1 {};
 
-// 写了一个class专属的operator new，要求接受一个ostream，用来标记相关分配信息，同时有写了一个正常形式的class专属operator delete：
+// 写了一个class专属的operator new，要求接受一个ostream，用来标记相关分配信息，
+// 同时有写了一个正常形式的class专属operator delete：
 class Widget {
  public:
   // 非正常形式的new，这便是所谓的placement new。
@@ -17,7 +18,8 @@ class Widget {
 // placement new意味带任意额外参数的new，placement delete直接派生自它。
 // 当new调用成功，default构造函数抛出异常时，C++运行系统无法知道真正被调用的那个new如何运作，
 // 也就无法取消分配并恢复原样(没有任何delete被调用)。
-// 运行期系统寻找”参数个数和类型都与operator new相同“的某个delete。如果找到就调用。所以delete应该是：
+// 运行期系统寻找”参数个数和类型都与operator new相同“的某个delete，如果找到就调用。
+// 所以delete应该是：
 // void operator delete(void*,ostream&) throw();
 class Widget2 {
  public:
@@ -29,7 +31,8 @@ class Widget2 {
   static void operator delete(void* pMemory) throw() {}  // 正常delete版本
 };
 
-// 由于成员函数的名称会掩盖其外围作用域中的相同名称，必须小心避免让class专属的new掩盖客户期望的其他new（包括正常版本）。
+// 由于成员函数的名称会掩盖其外围作用域中的相同名称，
+// 必须小心避免让class专属的new掩盖客户期望的其他new（包括正常版本）。
 // 假设有一个base class，声明唯一一个placement operator new，客户端会发现无法使用正常形式的new：
 class Base {
  public:
@@ -82,14 +85,17 @@ class Widget3 : public StandardNewDeleteForms {
 };
 
 // 请记住：
-// 当写一个placement operator new，请确定也出了对应的placement operator delete。否则程序可能发生隐秘的时断时续的内存泄露。
+// 当写一个placement operator new，请确定也出了对应的placement operator delete。
+// 否则程序可能发生隐秘的时断时续的内存泄露。
 // 当声明placement new和placement delete，请确定不要无意识（非故意）地遮掩了它们的正常版本。
 
 int main() {
   Widget1* pw = new Widget1;
   // 共有两个函数被调用，一个是operator new，一个是Widget的default构造函数。
-  // 假设new调用成功，default构造函数抛出异常。那么new分配的内存必须取消并恢复原样，否则会造成内存泄露。
-  // 这个时候客户无法归还内存，因为pw尚未被赋值，客户手上也就没有指针指向未被归还的内存。取消步骤需要C++运行期系统身上。
+  // 假设new调用成功，default构造函数抛出异常。
+  // 那么new分配的内存必须取消并恢复原样，否则会造成内存泄露。
+  // 这个时候客户无法归还内存，因为pw尚未被赋值，客户手上也就没有指针指向未被归还的内存。
+  // 取消步骤需要C++运行期系统身上。
   // 运行期系统会高高兴兴地调用new对应的delete版本，前提当然是它必须知道哪一个delete该被调用。
 
   Widget* pw1 = new (cerr) Widget;  // 构造函数发生异常，还会发生内存泄露

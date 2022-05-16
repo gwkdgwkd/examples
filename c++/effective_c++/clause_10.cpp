@@ -16,4 +16,9 @@ class Widget {
 // 请记住：
 // 令赋值操作符号返回一个reference to *this。
 
-int main() { return 0; }
+int main() {
+  Widget a, b, c;
+  a = b = c;
+
+  return 0;
+}

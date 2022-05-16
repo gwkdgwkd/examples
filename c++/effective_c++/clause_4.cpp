@@ -7,7 +7,8 @@ using namespace std;
 // 确定对象被使用前已先被初始化
 
 // 永远在使用对象之前先将它初始化。对于内置类型，必须手工完成初始化。
-// 对于内置类型以外的任何其他东西，初始化责任落在构造函数身上，确保每一个构造函数都将对象的每一个成员初始化。
+// 对于内置类型以外的任何其他东西，初始化责任落在构造函数身上，
+// 确保每一个构造函数都将对象的每一个成员初始化。
 class PhoneNumber {};
 class ABEntry {
  public:
@@ -22,7 +23,8 @@ class ABEntry {
 };
 
 #if 0
-// 这会正确初始化对象，但不是最佳做法。首先调用default构造函数，然后立刻再对它们赋值，default构造函数浪费了。
+// 这会正确初始化对象，但不是最佳做法。首先调用default构造函数，
+// 然后立刻再对它们赋值，default构造函数浪费了。
 ABEntry::ABEntry(const string& name, const string& address,
                  const list<PhoneNumber>& phones) {
   // 下面都不是被初始化，而是被赋值。
@@ -34,7 +36,8 @@ ABEntry::ABEntry(const string& name, const string& address,
   numTimesConsulted = 0;
 }
 #else
-// ABEntry构造函数的较佳写法是，使用初始化列表替换赋值动作。和上面最终结果相同，但通常效率较高。
+// ABEntry构造函数的较佳写法是，使用初始化列表替换赋值动作。
+// 和上面最终结果相同，但通常效率较高。
 // 初始化列表是针对各个成员变量而设的实参，被拿去作为各成员变量构造函数的实参，进行copy构造。
 // 对大多数类型而言，只调用一次copy构造函数比先调用default在调用copy assignment操作符要高效。
 // 对于内置类型，初始化和赋值成本相同，但为了一致性，最好也通过成员初始化列表来初始化。

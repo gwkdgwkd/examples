@@ -42,7 +42,7 @@ class Derived : public Base {
 };
 
 // 当编写一个copying函数，请确保：
-// 1.复制所以local成员变量
+// 1.复制所有local成员变量；
 // 2.调用所有base class内的适当的copy函数。
 
 // copy assignment操作符和copy构造函数往往有相近的实现。

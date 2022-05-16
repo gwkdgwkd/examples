@@ -25,6 +25,7 @@ const Rational1 operator*(const Rational1& lhs, const Rational1& rhs) {
   return result;
 }
 
+// 改为传递引用，就不需要付出代价
 class Rational2 {
  public:
   Rational2(int numerator = 0, int denominator = 1)
@@ -35,7 +36,7 @@ class Rational2 {
   int n, d;
   friend const Rational2& operator*(const Rational2& lhs, const Rational2& rhs);
 };
-// 改为传递引用，就不需要付出代价
+
 // 函数创建新对象的途径有两个：在stack或heap上创建。
 #if 0
 const Rational2& operator*(const Rational2& lhs, const Rational2& rhs) {
@@ -81,7 +82,8 @@ bool operator==(const Rational3& lhs, const Rational3& rhs) { return false; }
 // 在==被调用前，已经有两个*被调用，每个都返回内部定义的static对象。
 // 因此==比较的都是内部的static对象，所以永远都会是true。
 
-// 一个必须返回新对象的函数的正确写法是：就让那个函数返回一个新对象。当然，需要承受返回值的构造和析构成本。
+// 一个必须返回新对象的函数的正确写法是：就让那个函数返回一个新对象。
+// 当然，需要承受返回值的构造和析构成本。
 // inline const Rational1 operator*(const Rational1& lhs, const Rational1& rhs) {
 //   return Rational1(lhs.n * rhs.n, lhs.d * rhs.d);
 // }

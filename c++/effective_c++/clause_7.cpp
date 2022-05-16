@@ -4,7 +4,8 @@ using namespace std;
 
 // 为多态基类声明virtual析构函数
 
-// C++明确指出，当派生类对象经由一个基类指针被删除，而该基类带着一个non-virtual析构函数，其结果未定义。
+// C++明确指出，当派生类对象经由一个基类指针被删除，
+// 而该基类带着一个non-virtual析构函数，其结果未定义。
 // 实际执行时通常发生的是对象的派生成分没被销毁，基类通常会被销毁，造成诡异的局部销毁对象。
 // 这可是造成资源泄露、败坏的数据结构、在调试上浪费许多时间的绝佳途径。
 class A {
@@ -84,7 +85,7 @@ class DD : public AWOV {};
 // 请记住：
 // 带多态性质的base class应该声明一个virtual析构函数。
 // 如果class带有任何virtual函数，就应该拥有一个virtual析构函数。
-// class的设计目的如果不是作为base class使用，或不是为了具备多态，就不不该声明virtual析构函数。
+// class的设计目的如果不是作为base class使用，或不是为了具备多态，就不该声明virtual析构函数。
 
 int main() {
   Base1 *ptr1 = new (Derived1);

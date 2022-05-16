@@ -58,12 +58,14 @@ const Rational3 operator*(const Rational3& lhs, const Rational3& rhs) {
 }
 
 // Rational3的operator*是否应该成为friend函数呢？
-// 对Rational3来说，答案式否定的。因为operator*完全可以通过Rational3的public接口完成任务。
+// 对Rational3来说，答案式否定的。
+// 因为operator*完全可以通过Rational3的public接口完成任务。
 // 无论何时如果能避免friend函数就该避免。朋友带来的麻烦往往多个其价值。
 // 不应该只因为函数不该成为member，就自动让它成为friend。
 
 // 请记住：
-// 如果需要为某个函数的所有参数（包括被this指针所指的哪个隐喻参数）进行类型转换，那么这个函数必须是个non-member。
+// 如果需要为某个函数的所有参数（包括被this指针所指的哪个隐喻参数）进行类型转换，
+// 那么这个函数必须是个non-member。
 
 int main() {
   // Rational1可以使两个有理数以最轻松的方式相乘：
@@ -79,7 +81,8 @@ int main() {
   // 但函数需要Rational1;也知道调用构造函数就能把int变成Rational1，于是就那样做了。
   // 当然，只有non-explicit构造函数，编译器才会这么做。
 
-  // 只有当参数被列于参数列内，这个参数才是隐式类型转换的合格参与者。所以c1 = 2 * a1不能通过编译。
+  // 只有当参数被列于参数列内，这个参数才是隐式类型转换的合格参与者。
+  // 所以c1 = 2 * a1不能通过编译。
   // this指针不是合格的参与者。
 
   Rational2 a2(2, 8);

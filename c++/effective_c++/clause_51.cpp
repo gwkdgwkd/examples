@@ -9,7 +9,8 @@ using namespace std;
 
 // operator new的返回值十分单纯。如果有能力提供内存，就返回指针指向那块内存。
 // 如果没有能力，就遵循条款49的规则，并抛出bad_alloc异常。
-// 然后其实也不是非常单纯，因为operator new实际上不只一次尝试分配内存，并在每次失败后调用new-handling函数。
+// 然后其实也不是非常单纯，因为operator new实际上不只一次尝试分配内存，
+// 并在每次失败后调用new-handling函数。
 // 假设new-handling函数也许能够做某些动作将某些内存释放出来。
 // 只有当指向new-handling函数的指针是null，operator new才会抛出异常。
 
@@ -47,7 +48,8 @@ class Derived : public Base {};
 // 此外，传递给operator new[]的size_t参数，其值可能比“将被填充以对象”的内存数量更多。
 // 因为动态分配的array可能包含额外空间来存放元素个数。
 
-// operator delete情况更简单，需要记住的唯一事情就是C++保证“删除null指针永远安全”,所以必须实现这项保证：
+// operator delete情况更简单，
+// 需要记住的唯一事情就是C++保证“删除null指针永远安全”,所以必须实现这项保证：
 void operator delete(void* rawMemory) throw() {
   if (rawMemory == 0) return;
   // ...
@@ -63,14 +65,18 @@ void Base::operator delete(void* rawMemory, size_t size) throw() {
   return;
 }
 
-// 如果即将被删除的对象派生自某个base class而后者欠缺virtual析构函数，那么C++传给operator delete的size数值可能不正确。
+// 如果即将被删除的对象派生自某个base class而后者欠缺virtual析构函数，
+// 那么C++传给operator delete的size数值可能不正确。
 // 这是“让你的base class拥有virtual析构函数”的一个够好的理由。
 // 换句话说，如果base class遗漏virtual析构函数，operator delete可能无法正确运作。
 
 // 请记住：
-// operator new应该内含一个无穷循环，并在其中尝试分配内存，如果它无法满足内存需求，就应该调用new_handler。
-// 它也应该有能力处理0 byte申请。class专属版本则还应处理“比正确大小更大的（错误）申请”。
-// operator delete应该在收到null指针时不做任何事情。class专属版本则还应该处理“比正确大小更大的（错误）申请”。
+// operator new应该内含一个无穷循环，并在其中尝试分配内存，
+// 如果它无法满足内存需求，就应该调用new_handler。
+// 它也应该有能力处理0 byte申请。
+// class专属版本则还应处理“比正确大小更大的（错误）申请”。
+// operator delete应该在收到null指针时不做任何事情。
+// class专属版本则还应该处理“比正确大小更大的（错误）申请”。
 
 int main() {
   Derived* p = new Derived;  // 调用的是Base::operator new

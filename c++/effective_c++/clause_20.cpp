@@ -46,8 +46,8 @@ class WindowWithScroollBars : public Window {
 };
 
 // 以by reference方式也可以避免对象切割问题：
-//  当一个派生类对象以by value方式传递并被视为一个基类对象，基础类copy构造函数会被调用，
-//  派生类属性被切割，仅仅留下基类对象。
+// 当一个派生类对象以by value方式传递并被视为一个基类对象，基础类copy构造函数会被调用，
+// 派生类属性被切割，仅仅留下基类对象。
 void printNameAndDisplay1(Window w) {
   // 不论传递过来的对象原本是什么类型，参数w就是一个Window对象。
   // 因此，函数内调用的是基类版本的函数。
@@ -62,15 +62,18 @@ void printNameAndDisplay2(const Window& w) {
 }
 
 // 引用往往通过指针实现，因此pass by reference通常意味着真正传递的是指针。
-// 对于内置类型，pass by vlaue往往比pass by reference的效率高些。如果可以选择，就用pass by vlaue。
+// 对于内置类型，pass by vlaue往往比pass by reference的效率高些。
+// 如果可以选择，就用pass by vlaue。
 // 上面的忠告也适用于STL的迭代器和函数对象，习惯上它们都被设计为pass by vlaue。
 // 内置类型都很小，但不是小的类型就可以使用pass by vlaue。
 // 即使小型对象拥有并不昂贵的copy构造函数，还是可能有效率上的争议。
 // 编译器对待内置类型和用户自定义类型的态度截然不同，哪怕两者拥有相同的底层类型。
 
 // 请记住：
-// 尽量以pass-by-reference-to-const替换pass-by-value。前者通常比较高效，并可避免切割问题。
-// 以上规则并不适用于内置类型，以及STL的迭代器和函数对象。对它们而言，pass-by-value往往比较适当。
+// 1.尽量以pass-by-reference-to-const替换pass-by-value。
+//   前者通常比较高效，并可避免切割问题。
+// 2.以上规则并不适用于内置类型，以及STL的迭代器和函数对象。
+//   对它们而言，pass-by-value往往比较适当。
 
 int main() {
   Student p;
@@ -78,8 +81,18 @@ int main() {
   validateStudend1(p);
   cout << "call validateStudend1 X:" << endl;
 
+  // Person
+  // Student
+  // call validateStudend1 E:
+  // Person
+  // Student copy
+  // ~Student
+  // ~Person
+  // call validateStudend1 X:
+
   // validateStudend调用时，发生了什么事？
-  // 无疑Student的copy构造函数会被调用，以p来初始化s。当validateStudend返回时，s会被销毁。
+  // 无疑Student的copy构造函数会被调用，以p来初始化s。
+  // 当validateStudend返回时，s会被销毁。
   // 因此，对此函数而言，参数的传递成本是“一次Student copy构造函数调用，加上一次Student析构函数调用”。
   // Student对象内有两个string对象，一次构造一个Student也就构造了两个string对象。
   // Student对象继承自Person对象，所以每次构造Student对象也必须构造出一个Person对象。
@@ -97,14 +110,6 @@ int main() {
   // const很重要，以by value方式，调用者不会修改实参，只会修改副本。
   // 以by reference方式，调用者需要考虑会不会改变实参数。
 
-  // Person
-  // Student
-  // call validateStudend1 E:
-  // Person
-  // Student copy
-  // ~Student
-  // ~Person
-  // call validateStudend1 X:
   // call validateStudend2 E:
   // call validateStudend2 X:
   // ~Student
