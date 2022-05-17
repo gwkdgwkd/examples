@@ -23,8 +23,8 @@ class Printer {
   friend Printer& thePrinter();
 
  private:
-  Printer() {}
-  Printer(const Printer& rhs) {}
+  Printer() { std::cout << "Printer" << std::endl; }
+  Printer(const Printer& rhs) { std::cout << "Printer Copy" << std::endl; }
 };
 Printer& thePrinter() {
   static Printer p;  // 单个打印机对象
@@ -39,8 +39,22 @@ class PrintJob {
  public:
   PrintJob(const string& whatToPrint) {}
 };
+
+void func1() {
+  // CantBeInstantiated c;
+
+  std::string buffer;
+  thePrinter().reset();
+  thePrinter().submitJob(buffer);
+
+  thePrinter() = thePrinter();
+
+  // Printer
+}
+
 // thePrinter使用全局命名空间完全是多余的，想把所有与打印有关的功能都放到Printer类里。
-// 这很简单，只要在Prihter类中声明thePrinter为静态函数，然后把它放在你想放的位置，就不再需要友元声明了。
+// 这很简单，只要在Prihter类中声明thePrinter为静态函数，
+// 然后把它放在你想放的位置，就不再需要友元声明了。
 class Printer1 {
  public:
   static Printer1& thePrinter();
@@ -48,13 +62,24 @@ class Printer1 {
   void reset() {}
 
  private:
-  Printer1() {}
-  Printer1(const Printer1& rhs) {}
+  Printer1() { std::cout << "Printer1" << std::endl; }
+  Printer1(const Printer1& rhs) { std::cout << "Printer1 Copy" << std::endl; }
 };
 Printer1& Printer1::thePrinter() {
   static Printer1 p;
   return p;
 }
+
+void func2() {
+  std::string buffer;
+  Printer1::thePrinter().reset();
+  Printer1::thePrinter().submitJob(buffer);
+
+  Printer1::thePrinter() = Printer1::thePrinter();
+
+  // Printer1
+}
+
 // 另一种方法是把thePrinter移出全局域，放入namespace（命名空间）。
 // 命名空间是C++一个较新的特性，任何能在全局域声明东西也能在命名空间里声明，
 // 包括类、结构、函数、变量、对象、typedef等等。
@@ -70,14 +95,31 @@ class Printer {  // 在命名空间
   friend Printer& thePrinter();
 
  private:
-  Printer() {}
-  Printer(const Printer& rhs) {}
+  Printer() { std::cout << "PrintingStuff::Printer" << std::endl; }
+  Printer(const Printer& rhs) {
+    std::cout << "PrintingStuff::Printer Copy" << std::endl;
+  }
 };
 Printer& thePrinter() {
   static Printer p;
   return p;
 }
 }  // namespace PrintingStuff
+
+void func3() {
+  std::string buffer;
+
+  PrintingStuff::thePrinter().reset();  // PrintingStuff::Printer::reset
+  PrintingStuff::thePrinter().submitJob(buffer);
+
+  using PrintingStuff::thePrinter;  // 使用using声明，简化键盘输入
+  thePrinter().reset();  // 现在可以象使用局部命名，覆盖了全局的thePrinter
+  thePrinter().submitJob(buffer);  // 一样，使用thePrinter
+
+  // PrintingStuff::Printer
+  // PrintingStuff::Printer::reset
+  // PrintingStuff::Printer::reset
+}
 
 // 在thePrinter的实现上有两个微妙的不引人注目的地方，值得我们看一看：
 // 1.唯一的Pritner对象是位于函数里的静态成员而不是在类中的静态成员，这样做是非常重要的。
@@ -147,12 +189,23 @@ class CPFMachine {
  private:
   Printer2 p;
 };
+
+void func4() {
+  Printer2 p;
+  // ColorPrinter cp;
+  // terminate called after throwing an instance of 'Printer2::TooManyObjects'
+
+  // CPFMachine m1;  // 运行正常
+  // CPFMachine m2;  // 抛出TooManyObjects异常
+  // terminate called after throwing an instance of 'Printer2::TooManyObjects'
+}
+
 // 问题是Printer对象能存在于三种不同的环境中：
 // 1.只有它们本身；
 // 2.作为其它派生类的基类；
 // 3.被嵌入在更大的对象里。
 // 存在这些不同环境极大地混淆了跟踪“存在对象的数目”的含义，
-// 因为你心目中的“对象的存在” 的含义与编译器不一致。
+// 因为你心目中的“对象的存在”的含义与编译器不一致。
 
 // 通常你仅会对允许对象本身存在的情况感兴趣，你希望限制这种实例（instantiation）的数量。
 // 如果你使用最初的Printer类示例的方法，就很容易进行这种限制，因为Printer构造函数是private，
@@ -176,7 +229,7 @@ FSA* FSA::makeFSA(const FSA& rhs) { return new FSA(rhs); }
 // 不象thePrinter函数总是返回一个对象的引用（引用的对象是固定的），
 // 每个makeFSA的伪构造函数则是返回一个指向对象的指针（指向的对象都是惟一的，不相同的）。
 // 也就是说允许建立的FSA对象数量没有限制。
-// 不过每个伪构造函数都调用new这个事实暗示调用者必须记住调用delete。否则就会发生资源泄漏。
+// 不过每个伪构造函数都调用new这个事实暗示调用者必须记住调用delete，否则就会发生资源泄漏。
 // 如果调用者希望退出生存空间时delete会被自动调用，他可以把makeFSA返回的指针存储在auto_ptr中。
 
 // 允许对象来去自由
@@ -207,11 +260,31 @@ Printer3::Printer3() {
   ++numObjects;
 }
 Printer3* Printer3::makePrinter() { return new Printer3; }
+
+void func5() {
+  shared_ptr<FSA> pfsa1(FSA::makeFSA());
+  shared_ptr<FSA> pfsa2(FSA::makeFSA(*pfsa1));
+
+  // 除了用户必须调用伪构造函数，而不是真正的构造函数之外，它们使用Printer类就象使用其他类一样：
+  // Printer3 p1;  // 错误! 缺省构造函数是private
+  Printer3* p2 = Printer3::makePrinter();  // 正确, 间接调用缺省构造函数
+  // Printer3 p3 = *p2;      // 错误!拷贝构造函数是private
+  p2->performSelfTest();  // 所有其它的函数都可以正常调用
+  p2->reset();
+  // delete p2;  // 避免内存泄漏，如果p2是一个auto_ptr，就不需要这步。
+
+  // Printer3* p3 = Printer3::makePrinter();
+  // terminate called after throwing an instance of 'Printer3::TooManyObjects'
+}
+
 // 这种技术很容易推广到限制对象为任何数量上。
 // 我们只需把hard-wired常量值1改为根据某个类而确定的数量，然后消除拷贝对象的约束。
 class Printer4 {
  public:
-  class TooManyObjects {};
+  class TooManyObjects {
+   public:
+    std::string what() const { return "TooManyObjects"; }
+  };
   // 伪构造函数
   static Printer4* makePrinter();
   static Printer4* makePrinter(const Printer4& rhs);
@@ -241,12 +314,33 @@ Printer4* Printer4::makePrinter(const Printer4& rhs) {
   return new Printer4(rhs);
 }
 
+void func6() {
+  Printer4* p1 = Printer4::makePrinter();
+  Printer4* p2 = Printer4::makePrinter();
+  Printer4* p3 = Printer4::makePrinter();
+  Printer4* p4 = Printer4::makePrinter();
+  Printer4* p5 = Printer4::makePrinter();
+  Printer4* p6 = Printer4::makePrinter();
+  Printer4* p7 = Printer4::makePrinter();
+  Printer4* p8 = Printer4::makePrinter();
+  Printer4* p9 = Printer4::makePrinter();
+  Printer4* pa = Printer4::makePrinter();
+  try {
+    Printer4* pb = Printer4::makePrinter();
+  } catch (const Printer4::TooManyObjects& e) {
+    std::cout << e.what() << std::endl;  // TooManyObjects
+  }
+  // terminate called after throwing an instance of 'Printer4::TooManyObjects'}
+}
 // 一个具有对象计数功能的基类
 // 使用计数类模板可以自动生成适当数量的计数器，因为我们能让计数器成为从模板中生成的类的静态成员：
 template <class BeingCounted>
 class Counted {
  public:
-  class TooManyObjects {};  // 用来抛出异常
+  class TooManyObjects {  // 用来抛出异常
+   public:
+    std::string what() const { return "TooManyObjects"; }
+  };
   static int objectCount() { return numObjects; }
 
  protected:
@@ -301,6 +395,23 @@ Printer5* Printer5::makePrinter() { return new Printer5; }
 Printer5* Printer5::makePrinter(const Printer5& rhs) {
   return new Printer5(rhs);
 }
+
+void func7() {
+  Printer5* p1 = Printer5::makePrinter();
+  Printer5* p2 = Printer5::makePrinter();
+  Printer5* p3 = Printer5::makePrinter();
+  Printer5* p4 = Printer5::makePrinter();
+  std::cout << Printer5::objectCount() << endl;  // 4
+  Printer5* p5 = Printer5::makePrinter();
+  std::cout << Printer5::objectCount() << endl;  // 5
+  try {
+    Printer5* p6 = Printer5::makePrinter();
+  } catch (const Printer5::TooManyObjects& e) {
+    std::cout << e.what() << std::endl;  // TooManyObjects
+  }
+  // terminate called after throwing an instance of 'Counted<Printer5>::TooManyObjects'
+}
+
 // Printer使用了Counter模板来跟踪存在多少Printer对象，坦率地说，除了Printer的编写者，没有人关心这个事实。
 // 它的实现细节最好是private，这就是为什么这里使用private继承的原因。
 // 另一种方法是在Printer和counted<Printer>之间使用public继承，但是我们必须给Counted类一个虚拟析构函数。
@@ -321,65 +432,13 @@ Printer5* Printer5::makePrinter(const Printer5& rhs) {
 // 我们知道Counted<Printer>的构造函数总在Printer的前面被调用。
 
 int main() {
-  // CantBeInstantiated c;
-
-  string buffer;
-  thePrinter().reset();
-  thePrinter().submitJob(buffer);
-
-  Printer1::thePrinter().reset();
-  Printer1::thePrinter().submitJob(buffer);
-
-  PrintingStuff::thePrinter().reset();  // PrintingStuff::Printer::reset
-  PrintingStuff::thePrinter().submitJob(buffer);
-  // 也可以使用using声明，以简化键盘输入：
-  using PrintingStuff::thePrinter;
-  thePrinter().reset();  // 现在可以象使用局部命名，覆盖了全局的thePrinter
-  thePrinter().submitJob(buffer);  // 一样，使用thePrinter
-  // PrintingStuff::Printer::reset
-
-  // Printer2 p;
-  // ColorPrinter cp;
-  // terminate called after throwing an instance of 'Printer2::TooManyObjects'
-
-  // CPFMachine m1;  // 运行正常
-  // CPFMachine m2;  // 抛出TooManyObjects异常
-  // terminate called after throwing an instance of 'Printer2::TooManyObjects'
-
-  shared_ptr<FSA> pfsa1(FSA::makeFSA());
-  shared_ptr<FSA> pfsa2(FSA::makeFSA(*pfsa1));
-
-  // 除了用户必须调用伪构造函数，而不是真正的构造函数之外，它们使用Printer类就象使用其他类一样：
-  // Printer3 p1;  // 错误! 缺省构造函数是private
-  Printer3* p2 = Printer3::makePrinter();  // 正确, 间接调用缺省构造函数
-  // Printer3 p3 = *p2;      // 错误!拷贝构造函数是private
-  p2->performSelfTest();  // 所有其它的函数都可以正常调用
-  p2->reset();
-  // delete p2;  // 避免内存泄漏，如果p2是一个auto_ptr，就不需要这步。
-
-  // Printer3* p3 = Printer3::makePrinter();
-  // terminate called after throwing an instance of 'Printer3::TooManyObjects'
-
-  Printer4* p41 = Printer4::makePrinter();
-  Printer4* p42 = Printer4::makePrinter();
-  Printer4* p43 = Printer4::makePrinter();
-  Printer4* p44 = Printer4::makePrinter();
-  Printer4* p45 = Printer4::makePrinter();
-  Printer4* p46 = Printer4::makePrinter();
-  Printer4* p47 = Printer4::makePrinter();
-  Printer4* p48 = Printer4::makePrinter();
-  Printer4* p49 = Printer4::makePrinter();
-  Printer4* p4a = Printer4::makePrinter();
-  // Printer4* p4b = Printer4::makePrinter();
-  // terminate called after throwing an instance of 'Printer4::TooManyObjects'
-
-  Printer5* p51 = Printer5::makePrinter();
-  Printer5* p52 = Printer5::makePrinter();
-  Printer5* p53 = Printer5::makePrinter();
-  Printer5* p54 = Printer5::makePrinter();
-  Printer5* p55 = Printer5::makePrinter();
-  // Printer5* p56 = Printer5::makePrinter();
-  // terminate called after throwing an instance of 'Counted<Printer5>::TooManyObjects'
+  func1();
+  func2();
+  func3();
+  func4();
+  func5();
+  func6();
+  func7();
 
   return 0;
 }
