@@ -1,6 +1,7 @@
 #include "double_circular_linked_list.h"
 
-// 单链表通过首尾连接可以构成单向循环链表，同样，双向链表也可以进行首尾连接，构成双向循环链表。
+// 单链表通过首尾连接可以构成单向循环链表，
+// 同样，双向链表也可以进行首尾连接，构成双向循环链表。
 
 // 双向循环链表的创建
 // 创建双向循环链表，只需在创建完成双向链表的基础上，将其首尾节点进行双向连接即可。
@@ -27,7 +28,8 @@ line* initLine1(line* head) {
 
 void display1(line* head) {
   line* temp = head;
-  // 由于是循环链表，所以当遍历指针temp指向的下一个节点是head时，证明此时已经循环至链表的最后一个节点
+  // 由于是循环链表，所以当遍历指针temp指向的下一个节点是head时，
+  // 证明此时已经循环至链表的最后一个节点
   while (temp->next != head) {
     if (temp->next == NULL) {
       printf("%d\n", temp->data);

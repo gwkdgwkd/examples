@@ -48,7 +48,7 @@ Node* avltree_search(AVLTree x, Type key) {
     return avltree_search(x->right, key);
 }
 
-// (非递归实现)查找"AVL树x"中键值为key的节点
+// (非递归实现)查找AVL树x中键值为key的节点
 Node* iterative_avltree_search(AVLTree x, Type key) {
   while ((x != NULL) && (x->key != key)) {
     if (key < x->key)

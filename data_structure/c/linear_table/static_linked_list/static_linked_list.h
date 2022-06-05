@@ -6,8 +6,8 @@
 #define maxSize 7
 
 // 静态链表存储数据元素也需要自定义数据类型，至少需要包含以下2部分信息：
-//  数据域：用于存储数据元素的值；
-//  游标：其实就是数组下标，表示直接后继元素所在数组中的位置；
+// 1.数据域：用于存储数据元素的值；
+// 2.游标：其实就是数组下标，表示直接后继元素所在数组中的位置；
 typedef struct {
   int data;  // 数据域
   int cur;   // 游标
@@ -17,7 +17,8 @@ typedef struct {
 void reserveArr(component *array);
 // 初始化静态链表
 int initArr(component *array);
-// 向链表中插入数据，body表示链表的头结点在数组中的位置，add表示插入元素的位置，a表示要插入的数据
+// 向链表中插入数据，body表示链表的头结点在数组中的位置，
+// add表示插入元素的位置，a表示要插入的数据
 void insertArr(component *array, int body, int add, char a);
 // 删除链表中含有字符a的结点
 void deletArr(component *array, int body, char a);
