@@ -87,7 +87,7 @@ int NextAdjVex(MGraph G, int v, int w) {
 void visitVex(MGraph G, int v) { printf("%d ", G.vexs[v]); }
 void DFS(MGraph G, int v) {
   visited[v] = true;  // 标记为true
-  visitVex(G, v);     // 访问第v 个顶点
+  visitVex(G, v);     // 访问第v个顶点
   // 从该顶点的第一个边开始，一直到最后一个边，对处于边另一端的顶点调用DFS函数
   for (int w = FirstAdjVex(G, v); w >= 0; w = NextAdjVex(G, v, w)) {
     // 如果该顶点的标记位false，证明未被访问，调用深度优先搜索函数
@@ -113,9 +113,11 @@ void DFSTraverse(MGraph G) {  //
 }
 
 // 广度优先搜索类似于树的层次遍历。
-// 从图中的某一顶点出发，遍历每一个顶点时，依次遍历其所有的邻接点，然后再从这些邻接点出发，同样依次访问它们的邻接点。
+// 从图中的某一顶点出发，遍历每一个顶点时，依次遍历其所有的邻接点，
+// 然后再从这些邻接点出发，同样依次访问它们的邻接点。
 // 按照此过程，直到图中所有被访问过的顶点的邻接点都被访问到。
-// 最后还需要做的操作就是查看图中是否存在尚未被访问的顶点，若有，则以该顶点为起始点，重复上述遍历的过程。
+// 最后还需要做的操作就是查看图中是否存在尚未被访问的顶点，
+// 若有，则以该顶点为起始点，重复上述遍历的过程。
 typedef struct Queue {
   VertexType data;
   struct Queue *next;

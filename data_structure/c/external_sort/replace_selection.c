@@ -20,7 +20,8 @@
 
 // 通过置换选择排序算法得到的初始归并段，其长度并不会受内存容量的限制，
 // 且通过证明得知使用该方法所获得的归并段的平均长度为内存工作区大小的两倍。
-// 若不计输入输出的时间，通过置换选择排序生成初始归并段的所需时间为O(nlogw)（其中n为记录数，w为内存工作区的大小）。
+// 若不计输入输出的时间，通过置换选择排序生成初始归并段的所需时间为O(nlogw)，
+// 其中n为记录数，w为内存工作区的大小。
 
 #define MAXKEY 10000
 #define RUNEND_SYMBOL 10000  // 归并段结束标志
@@ -62,7 +63,7 @@ void Construct_Loser(LoserTree ls, WorkArea wa, FILE *fi) {
   for (i = w - 1; i >= 0; --i) {
     fread(&wa[i].rec, sizeof(RedType), 1, fi);  // 输入一个记录
     wa[i].key = wa[i].rec.key;                  // 提取关键字
-    wa[i].rnum = 1;                             // 其段号为＂1＂
+    wa[i].rnum = 1;                             // 其段号为1
     Select_MiniMax(ls, wa, i);                  // 调整败者树
   }
 }
@@ -107,7 +108,7 @@ void Replace_Selection(LoserTree ls, WorkArea wa, FILE *fi, FILE *fo) {
   // rc指示当前生成的初始归并段的段号，rmax指示wa中关键字所属初始归并段的最大段号
   rc = rmax = 1;
 
-  while (rc <= rmax) {  // ＂rc=rmax+1＂标志输入文件的置换－选择排序已完成
+  while (rc <= rmax) {  // rc=rmax+1标志输入文件的置换－选择排序已完成
     // 求得一个初始归并段
     get_run(ls, wa, rc, &rmax, fi, fo);
     fwrite(&j, sizeof(RedType), 1, fo);  // 将段结束标志写入输出文件
