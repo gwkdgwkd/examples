@@ -9,9 +9,12 @@
 // 而后longlong整形被C99标准（C语言标准之一）采纳，并逐渐被很多编译器支持，
 // 于是C++标准委员会重新决定将long long整形写入C++11标准中。
 
-// 如同long类型整数需明确标注"L"或者"l"后缀一样，要使用longlong类型的整数，也必须标注对应的后缀：
-// 对于有符号longlong整形，后缀用"LL"或者"ll"标识。例如，"10LL"就表示有符号超长整数10；
-// 对于无符号longlong整形，后缀用"ULL"、"ull"、"Ull"或者"uLL"标识。例如，"10ULL"就表示无符号超长整数10；
+// 如同long类型整数需明确标注"L"或者"l"后缀一样，
+// 要使用longlong类型的整数，也必须标注对应的后缀：
+// 对于有符号longlong整形，后缀用"LL"或者"ll"标识。
+// 例如，"10LL"就表示有符号超长整数10；
+// 对于无符号longlong整形，后缀用"ULL"、"ull"、"Ull"或者"uLL"标识。
+// 例如，"10ULL"就表示无符号超长整数10；
 // 如果不添加任何标识，则所有的整数都会默认为int类型。
 
 /*
@@ -53,7 +56,8 @@ int main() {
   // 分别为LLONG_MIN、LLONG_MAX和ULLONG_MIN：
   // LLONG_MIN：代表当前平台上最小的longlong类型整数；
   // LLONG_MAX：代表当前平台上最大的longlong类型整数；
-  // ULLONG_MIN：代表当前平台上最大的unsignedlonglong类型整数（无符号超长整型的最小值为0）；
+  // ULLONG_MIN：代表当前平台上最大的unsignedlonglong类型整数；
+  // 无符号超长整型的最小值为0。
 
   std::cout << "ll min：" << LLONG_MIN << " " << std::hex << LLONG_MIN
             << std::endl;

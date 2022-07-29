@@ -23,7 +23,7 @@
 namespace del {
 // 有时候可能需要限制一些默认函数的生成，例如需要禁止拷贝构造函数的使用。
 // 原来，通过把拷贝构造函数声明为private成员，这样一旦使用编译器就会报错。
-// 而在C++11中，在函数的定义或者声明后面加上”= delete”就能实现这个效果。
+// 而在C++11中，在函数的定义或者声明后面加上= delete就能实现这个效果。
 class NoCopyCator {
  public:
   NoCopyCator() = default;
@@ -46,7 +46,8 @@ void func2() {
   // f('c');
 }
 
-// delete不局限于缺省版本的类成员函数或者全局函数，对于普通的函数也可以通过显式删除来禁止类型转换
+// delete不局限于缺省版本的类成员函数或者全局函数，
+// 对于普通的函数也可以通过显式删除来禁止类型转换。
 void f2(int i) {}
 void f3(char c) = delete;
 void func3() {
@@ -63,7 +64,7 @@ void func4() {
   NoHeapAlloc c2;
 }
 
-// 需要在指定内存位置进行内存分配，并且不需要析构函数来完成一些对象级别的清理
+// 需要在指定内存位置进行内存分配，并且不需要析构函数来完成一些对象级别的清理，
 // 可以通过显示删除析构函数来限制自定义类型在栈上或者静态的构造。
 
 class NoStackAlloc {
@@ -75,6 +76,8 @@ void func5() {
   // static NoStackAlloc c2;
   char p[10];
   new (p) NoStackAlloc();  // placement new, p无需调用析构函数
+
+  NoStackAlloc* ptr = new NoStackAlloc();  // 在堆上创建对象
 }
 
 void testDel() {
@@ -88,7 +91,7 @@ void testDel() {
 
 namespace def1 {
 // 如果实现了这些默认函数的自定义版本后，编译器就不会去生成默认的版本。
-// 有时候我们需要声明带参数的构造函数，此时就不会生成默认的构造函数，
+// 有时候需要声明带参数的构造函数，此时就不会生成默认的构造函数，
 // 这样会导致类不再是POD类型，从而影响类的优化：
 class A {
  public:
@@ -108,7 +111,7 @@ void testDef1() {
 
 namespace def2 {
 // C++11中提供了新的机制来控制默认函数生成来避免这个问题，
-// 在声明时在函数末尾加上”=default”来显式地指示编译器去生成该函数的默认版本，
+// 在声明时在函数末尾加上=default来显式地指示编译器去生成该函数的默认版本，
 // 这样就保证了类还是POD类型：
 class A {
  public:

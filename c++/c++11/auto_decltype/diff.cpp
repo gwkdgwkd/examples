@@ -6,7 +6,8 @@ void func1() {
   int i = 5;
 
   // 语法格式的区别:
-  // auto和decltype都是C++11新增的关键字，都用于自动类型推导，但是它们的语法格式是有区别的，如下所示：
+  // auto和decltype都是C++11新增的关键字，都用于自动类型推导，
+  // 但是它们的语法格式是有区别的，如下所示：
   // auto varname = value;  // auto的语法格式
   auto i1 = i;
   std::cout << i1 << std::endl;  // 5
@@ -22,7 +23,8 @@ void func1() {
   // decltype根据exp表达式推导出变量的类型，跟=右边的value没有关系。
   // 另外，auto要求变量必须初始化，也就是在定义变量的同时必须给它赋值；
   // 而decltype不要求，初始化与否都不影响变量的类型。
-  // 这很容易理解，因为auto是根据变量的初始值来推导出变量类型的，如果不初始化，变量的类型也就无法推导了。
+  // 这很容易理解，因为auto是根据变量的初始值来推导出变量类型的，
+  // 如果不初始化，变量的类型也就无法推导了。
   // auto将变量的类型和初始值绑定在一起，而decltype将变量的类型和初始值分开；
   // 虽然auto的书写更加简洁，但decltype的使用更加灵活。
 }
@@ -37,8 +39,9 @@ void func2() {
   // 在推导变量类型时，auto和decltype对cv限制符的处理是不一样的。
   // 1.decltype会保留cv限定符;
   // 2.auto有可能会去掉cv限定符，以下是auto关键字对cv限定符的推导规则：
-  //   如果表达式的类型不是指针或者引用，auto会把cv限定符直接抛弃，推导成non-const或者non-volatile类型。
-  //   如果表达式的类型是指针或者引用，auto将保留cv限定符。
+  //   (1).如果表达式的类型不是指针或者引用，auto会把cv限定符直接抛弃，
+  //       推导成non-const或者non-volatile类型；
+  //   (2).如果表达式的类型是指针或者引用，auto将保留cv限定符。
 
   // 非指针非引用类型
   const int n1 = 0;
@@ -46,8 +49,7 @@ void func2() {
   // n2赋值成功，说明不带const，也就是const被auto抛弃了，这验证了auto的第一条推导规则
   n2 = 99;  // 非const变量，可以赋值
   decltype(n1) n3 = 20;
-  // 说明decltype不会去掉表达式的const属性
-  // n3 = 5; // const变量，不能赋值
+  // n3 = 5; // const变量，不能赋值。说明decltype不会去掉表达式的const属性。
 
   // 指针类型
   const int *p1 = &n1;
@@ -55,17 +57,15 @@ void func2() {
   // p2赋值失败，说明是带const的，也就是const没有被auto抛弃，这验证了auto的第二条推导规则。
   // *p2 = 66; // 指向const变量的指针，不能修改指向的值
   decltype(p1) p3 = p1;
-  // 说明decltype不会去掉表达式的const属性
-  // *p3 = 19; // 指向const变量的指针，不能修改指向的值
+  // *p3 = 19; // 指向const变量的指针，不能修改指向的值。decltype不会去掉const属性。
 
   // 引用类型
   const int &r1 = n1;
   auto r2 = r1;
-  // r2赋值失败，说明是带const的，也就是说const 没有被auto抛弃，这验证了auto的第二条规则。
+  // r2赋值失败，说明是带const的，也就是说const没有被auto抛弃，这验证了auto的第二条规则。
   // r2 = 5;  // const引用，不能修改
   decltype(r1) r3 = r1;
-  // 说明decltype不会去掉表达式的const属性
-  // r3 = 6;  // const引用，不能修改
+  // r3 = 6;  // const引用，不能修改。说明decltype不会去掉表达式的const属性。
 }
 
 void func3() {
@@ -113,6 +113,7 @@ void testDiff() {
 
 namespace trailingreturntype {
 // 在泛型编程中，可能需要通过参数的运算来得到返回值的类型。
+
 template <typename R, typename T, typename U>
 R add1(T t, U u) {
   return t + u;
@@ -144,7 +145,7 @@ void func2() {
   int a = 1;
   double b = 2.0;
 
-  auto c = add3<decltype(a + b)>(a, b);
+  auto c = add3(a, b);
   std::cout << c << " " << typeid(c).name() << std::endl;  // 3 d
 }
 
@@ -159,7 +160,7 @@ void func3() {
   int a = 1;
   int b = 3;
 
-  auto c = add4<decltype(a + b)>(a, b);
+  auto c = add4(a, b);
   std::cout << c << " " << typeid(c).name() << std::endl;  // 4 i
 }
 
@@ -176,7 +177,7 @@ void func4() {
   double a = 1;
   float b = 3;
 
-  auto c = add5<decltype(a + b)>(a, b);
+  auto c = add5(a, b);
   std::cout << c << " " << typeid(c).name() << std::endl;  // 4 d
 }
 

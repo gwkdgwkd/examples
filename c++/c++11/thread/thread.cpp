@@ -67,25 +67,32 @@ void testCreate() {
 }  // namespace create
 
 namespace joinable {
-// 一旦线程开始运行， 就需要显式的决定是要等待它完成(join)，或者分离它让它自行运行(detach)。
-// 当线程启动后，一定要在和线程相关联的std::thread对象销毁前，对线程运用join()或者detach()方法。
-// 否则程序将会终止，因为std::thread的析构函数会调用std::terminate()，这时再去决定会触发相应异常。
-// join()与detach()都是std::thread类的成员函数，是两种线程阻塞方法，两者的区别是是否等待子线程执行结束。
+// 一旦线程开始运行，就需要显式的决定是要等待它完成(join)，
+// 或者分离它让它自行运行(detach)。
+// 当线程启动后，一定要在和线程相关联的std::thread对象销毁前，
+// 对线程运用join()或者detach()方法。
+// 否则程序将会终止，因为std::thread的析构函数会调用std::terminate()，
+// 这时再去决定会触发相应异常。
+// join()与detach()都是std::thread类的成员函数，
+// 是两种线程阻塞方法，两者的区别是是否等待子线程执行结束。
 // join线程，调用该函数会阻塞当前线程，直到由*this所标示的线程执行完毕join才返回。
-// detach线程,将当前线程对象所代表的执行实例与该线程对象分离，使得线程的执行可以单独进行。
-// 线程执行完毕，资源将会被释放。
+// detach线程,将当前线程对象所代表的执行实例与该线程对象分离，
+// 使得线程的执行可以单独进行，线程执行完毕，资源将会被释放。
 
-// join()函数的另一个任务是回收该线程中使用的资源，会清理线程相关的存储部分，这代表了join()只能调用一次。
+// join()函数的另一个任务是回收该线程中使用的资源，
+// 会清理线程相关的存储部分，这代表了join()只能调用一次。
 // detach()也只能调用一次，一旦detach()后就无法join()了。
 // 使用joinable检查线程是否可被join，检查当前的线程对象是否表示了一个活动的执行线程。
 // 有趣的是，detach()可否调用也是使用joinable()来判断。
 
 // 如果使用detach()，就必须保证线程结束之前可访问数据的有效性，使用指针和引用需要格外谨慎。
-// 主线程并不想等待子线程结束就想结束整个任务，直接删掉t1.join()是不行的，程序会被终止，
-// 析构t1的时候会调用std::terminate，程序会打印terminate called without an active exception。
+// 主线程并不想等待子线程结束就想结束整个任务，直接删掉t1.join()是不行的，
+// 程序会被终止，析构t1的时候会调用std::terminate，
+// 程序会打印terminate called without an active exception。
 // 调用t1.detach()，从而将线程放在后台运行，所有权和控制权被转交给C++运行时库，
 // 以确保与线程相关联的资源在线程退出后能被正确的回收。
-// 参考UNIX的守护进程(daemon process)的概念，这种被分离的线程被称为守护线程(daemon threads)。
+// 参考UNIX的守护进程(daemon process)的概念，
+// 这种被分离的线程被称为守护线程(daemon threads)。
 // 线程被分离之后，即使该线程对象被析构了，线程还是能够在后台运行，
 // 只是由于对象被析构了，主线程不能够通过对象名与这个线程进行通信。
 
@@ -129,7 +136,7 @@ void func6() {
 }
 
 // 如需确保线程在函数之前结束：
-// 使用“资源获取即初始化方式”(RAII，Resource Acquisition Is Initialization)，
+// 使用资源获取即初始化方式(RAII，Resource Acquisition Is Initialization)，
 // 并且提供一个类，在析构函数中使用join()。
 // std::thread支持移动的好处是可以创建thread_guard类的实例，并且拥有其线程所有权。
 // 当thread_guard对象所持有的线程被引用时，移动操作就可以避免很多不必要的麻烦；

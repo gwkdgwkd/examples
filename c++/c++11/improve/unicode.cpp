@@ -3,7 +3,8 @@
 #include <iomanip>
 #include <iostream>
 
-// 在使用不同方式定义不同编码的字符串时，需要注意影响字符串处理和显示的几个因素有编辑器、编译器和输出环境。
+// 在使用不同方式定义不同编码的字符串时，
+// 需要注意影响字符串处理和显示的几个因素有编辑器、编译器和输出环境。
 // 代码编辑器采用何种编码方式决定了字符串最初的编码，比如编辑器如果采用GBK，
 // 那么代码文件中的所有字符都是以GBK编码存储。
 // 当编译器处理字符串时，可以通过前缀来判断字符串的编码类型，如果目标编码与原编码不同，
@@ -13,9 +14,11 @@
 // 正确的处理和显示需要三个因素的共同保障，每一个环节都不能出错。
 
 namespace n1 {
-// 在C++98中，为了支持Unicode字符，使用wchar_t类型来表示“宽字符”，但并没有严格规定位宽，
-// 而是让wchar_t的宽度由编译器实现，GNU C++规定wchar_t为32位，Visual C++规定为16位。
-// 由于wchar_t宽度没有一个统规定，导致使用wchar_t的代码在不同平台间移植时，可能出现问题。
+// 在C++98中，为了支持Unicode字符，使用wchar_t类型来表示“宽字符”，
+// 但并没有严格规定位宽，而是让wchar_t的宽度由编译器实现，
+// GNU C++规定wchar_t为32位，Visual C++规定为16位。
+// 由于wchar_t宽度没有一个统规定，
+// 导致使用wchar_t的代码在不同平台间移植时，可能出现问题。
 
 // 这一状况在C++11中得到了一定的改善，从此Unicode字符的存储有了统一类型：
 // 1.char16_t：用于存储UTF-16编码的Unicode字符。
@@ -46,11 +49,16 @@ namespace n2 {
 // size_t c32rtomb(char* pmb, char32_t c32, mbstate_t* ps);
 // 函数名称中mb表示multi-byte（多字节），rto表示convert to（转换为），c16表示char16_t。
 
-// 实际上C++提供了一个类模板codecvt用于完成Unicode字符串与多字节字符串之间的转换，主要分为4种：
-// codecvt<char,char,mbstate_t>     // performs no conversion
-// codecvt<wchar_t,char,mbstate_t>  // converts between native wide and narrow character sets
-// codecvt<char16_t,char,mbstate_t> // converts between UTF16 and UTF8 encodings, since C++11
-// codecvt<char32_t,char,mbstate_t> // converts between UTF32 and UTF8 encodings,since C++11
+// 实际上C++提供了一个类模板codecvt用于完成Unicode字符串与多字节字符串之间的转换，
+// 主要分为4种：
+// 1.performs no conversion
+// codecvt<char,char,mbstate_t>
+// 2.converts between native wide and narrow character sets
+// codecvt<wchar_t,char,mbstate_t>
+// 3.converts between UTF16 and UTF8 encodings, since C++11
+// codecvt<char16_t,char,mbstate_t>
+// 4.converts between UTF32 and UTF8 encodings,since C++11
+// codecvt<char32_t,char,mbstate_t>
 
 // C++11新增了UTF-16和UTF-32编码的字符类型char16_t和char32_t，
 // 当然少不了对应的字符串类型，分别是u16string与与u32string，

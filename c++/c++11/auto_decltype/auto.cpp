@@ -1,9 +1,11 @@
 #include <iostream>
 #include <vector>
 
-// 在C++11之前的版本（C++98和C++03）中，定义变量或者声明变量之前都必须指明它的类型，比如int、char等；
+// 在C++11之前的版本（C++98和C++03）中，
+// 定义变量或者声明变量之前都必须指明它的类型，比如int、char等；
 // 但是在一些比较灵活的语言中，比如C#、JavaScript、PHP、Python等，
-// 程序员在定义变量时可以不指明具体的类型，而是让编译器（或者解释器）自己去推导，这就让代码的编写更加方便。
+// 程序员在定义变量时可以不指明具体的类型，
+// 而是让编译器（或者解释器）自己去推导，这就让代码的编写更加方便。
 // C++11为了顺应这种趋势也开始支持自动类型推导了！
 // C++11使用auto关键字来支持自动类型推导。
 
@@ -11,7 +13,8 @@
 // auto表示变量是自动存储的，这也是编译器的默认规则，所以写不写都一样，
 // 一般也不写，这使得auto关键字的存在变得非常鸡肋。
 // C++11赋予auto关键字新的含义，使用它来做自动类型推导。
-// 也就是说，使用了auto关键字以后，编译器会在编译期间自动推导出变量的类型，这样就不用手动指明变量的数据类型了。
+// 也就是说，使用了auto关键字以后，编译器会在编译期间自动推导出变量的类型，
+// 这样就不用手动指明变量的数据类型了。
 
 // auto关键字基本的使用语法如下(name是变量的名字，value是变量的初始值)：
 // auto name = value;
@@ -40,11 +43,10 @@ void func1() {
   // 编译器根据第一个子表达式已经推导出auto为int，那后面的m也只能是int，
   // 如果写作m=12.5是错误的，因为12.5是double，和int是冲突的。
   // auto *q = &b, m = 12.5;  // 推导的时候不能有二义性。
-  // error: inconsistent deduction for ‘auto’: ‘int’ and then ‘double’
 }
 
 void func2() {
-  // auto还可以和某些具体类型混合使用，这样auto表示的就是“半个”类型，而不是完整的类型:
+  // auto还可以和某些具体类型混合使用，这样auto表示的就是半个类型，而不是完整的类型:
   int x = 0;
   auto *p1 = &x;  // p1为int*，auto推导为int
   auto p2 = &x;   // p2为int*，auto推导为int*
@@ -90,8 +92,9 @@ void testN1() {
 namespace n2 {
 // auto的限制:
 
-// 2.auto不能在函数的参数中使用。
-// 在定义函数的时候只是对参数进行了声明，指明了参数的类型，但并没有给它赋值，只有在实际调用函数的时候才会给参数赋值；
+// 2.auto不能在函数的参数中使用
+// 在定义函数的时候只是对参数进行了声明，指明了参数的类型，但并没有给它赋值，
+// 只有在实际调用函数的时候才会给参数赋值；
 // 而auto要求必须对变量进行初始化，所以这是矛盾的。
 // void func1(auto i) {}
 
@@ -99,19 +102,35 @@ template <typename T>
 class A {};
 
 void testN2() {
-  // 1.使用auto类型推导的变量必须马上初始化，因为auto在C++11中只是“占位符”，并非如int一样的真正的类型声明。
+  // 1.使用auto类型推导的变量必须马上初始化，因为auto在C++11中只是占位符，
+  //   并非如int一样的真正的类型声明
   // auto i;
 
-  // 3.auto关键字不能定义数组。
+  // 3.auto关键字不能定义数组
   // auto str[] = url; // ‘str’ declared as array of ‘auto’
 
-  // 4.auto 不能作用于模板参数。
+  // 4.auto不能作用于模板参数
   A<int> C1;
   // A<auto> C2 = C1;  // invalid use of ‘auto’
 }
 }  // namespace n2
 
 namespace n3 {
+// auto的应用场景:
+
+// 1.auto的典型应用场景是用来定义STL的迭代器
+void func1() {
+  std::vector<std::vector<int>> v;
+  std::vector<std::vector<int>>::iterator i1 = v.begin();
+  // 使用auto代替具体的类型，auto可以根据表达式v.begin()的类型来推导出变量i的类型。
+  auto i2 = v.begin();
+  if (i1 == i2) {
+    std::cout << "same" << std::endl;
+  }
+  // same
+}
+
+// 2.当不知道变量是什么类型，或者不希望指明具体类型的时候，比如泛型编程中，可以使用auto
 class A {
  public:
   static int get(void) { return 100; }
@@ -125,26 +144,11 @@ void func(void) {
   auto val = T::get();
   std::cout << val << std::endl;
 }
-template <typename T1, typename T2>  // 额外增加一个模板参数T2
+template <typename T1, typename T2>  // 不使用auto，需要额外增加一个模板参数T2
 void func(void) {
   T2 val = T1::get();
   std::cout << val << std::endl;
 }
-
-// auto的应用:
-// 1.auto的一个典型应用场景是用来定义STL的迭代器
-void func1() {
-  std::vector<std::vector<int>> v;
-  std::vector<std::vector<int>>::iterator i1 = v.begin();
-  // 使用auto代替具体的类型，auto可以根据表达式v.begin()的类型来推导出变量i的类型。
-  auto i2 = v.begin();
-  if (i1 == i2) {
-    std::cout << "same" << std::endl;
-  }
-  // same
-}
-
-// 2.auto的另一个应用就是当不知道变量是什么类型，或者不希望指明具体类型的时候，比如泛型编程中
 void func2() {
   // func使用了auto，只需要一个参数
   func<A>();  // 100

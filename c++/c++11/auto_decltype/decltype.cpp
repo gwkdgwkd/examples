@@ -2,8 +2,9 @@
 #include <string>
 #include <vector>
 
-// decltype是C++11新增的一个关键字，它和auto的功能一样，都用来在编译时期进行自动类型推导。
-// decltype是“declare type”的缩写，译为“声明类型”。
+// decltype是C++11新增的一个关键字，它和auto的功能一样，
+// 都用来在编译时期进行自动类型推导。
+// decltype是declare type的缩写，译为声明类型。
 // 既然已经有了auto关键字，为什么还需要decltype关键字呢？
 // 因为auto并不适用于所有的自动类型推导场景，在某些特殊情况下auto用起来非常不方便，
 // 甚至压根无法使用，所以decltype关键字也被引入到C++11中。
@@ -12,6 +13,8 @@
 // auto varname = value;
 // decltype(exp) varname = value;
 // 其中，varname表示变量名，value表示赋给变量的值，exp表示一个表达式。
+
+// decltype推导过程是在编译期完成的，并且不会真正计算表达式的值。
 
 #include <cxxabi.h>
 const std::string GetClearName(const char *name) {
@@ -30,9 +33,10 @@ void printType(T val) {
 }
 
 namespace n1 {
-// decltype推导规则，当程序员使用decltype(exp)获取类型时，编译器将根据以下三条规则得出结果:
-// 1.如果exp是一个不被括号()包围的表达式，或者是一个类成员访问表达式，或者是一个单独的变量，
-//   那么decltype(exp)的类型就和exp一致，这是最普遍最常见的情况。
+// decltype推导规则，当程序员使用decltype(exp)获取类型时，
+// 编译器将根据以下三条规则得出结果:
+// 1.如果exp是一个不被括号()包围的表达式，或者是一个类成员访问表达式，
+//   或者是一个单独的变量，那么decltype(exp)的类型就和exp一致，这是最普遍最常见的情况。
 // 2.如果exp是函数调用，那么decltype(exp)的类型就和函数返回值的类型一致。
 // 3.如果exp是一个左值，或者被括号()包围，那么decltype(exp)的类型就是exp的引用；
 //   假设exp的类型为T，那么decltype(exp)的类型就是T&。
@@ -68,7 +72,7 @@ void func2() {
 
   decltype(i1) i2 = i1;  // i1为int类型，i2被推导为int类型
   i2 = 5;
-  decltype(r1) r2 = i1;  // r1为const int&类型, r2被推导为const int&类型
+  decltype(r1) r2 = i1;  // r1为const int&类型，r2被推导为const int&类型
   // r2 = 5;  // assignment of read-only reference ‘r2’
 
   Student stu;
@@ -125,9 +129,10 @@ void func4() {
   int n = 0, m = 0;
   decltype(n + m) i3 = i;  // n+m得到一个右值，符合规则一，所以推导结果为int
   decltype(n = n + m) i4 = i;  // n=n+m得到一个左值，符号规则三，结果为int&
-  std::cout << i3 << "," << i4 << std::endl;  // 6,6
+  decltype(n) i5 = i;  // 单独的变量，不算是左值，符合规则一，推断结果为int
+  std::cout << i3 << "," << i4 << "," << i5 << std::endl;  // 6,6,6
   i = 7;
-  std::cout << i3 << "," << i4 << std::endl;  // 6,7
+  std::cout << i3 << "," << i4 << "," << i5 << std::endl;  // 6,7,6
 }
 
 void testN1() {
@@ -148,7 +153,8 @@ class Base1 {
   void func(T &container) { m_it = container.begin(); }
 
  private:
-  // 在C++98/03版本下只能想办法把const类型的容器用模板特化单独处理，增加了不少工作量，看起来也非常晦涩。
+  // 在C++98/03版本下只能想办法把const类型的容器用模板特化单独处理，
+  // 增加了不少工作量，看起来也非常晦涩。
   typename T::iterator m_it;  // 注意这里
 };
 template <typename T>
@@ -170,12 +176,13 @@ void testN2() {
 
   const std::vector<int> v2;
   // Base1<const std::vector<int>> obj3;
-  // obj3.func(v1);
-  // 使用Base1类的时候，如果传入一个const类型的容器，编译器马上就会弹出一大堆错误信息。
+  // obj3.func(v2);
+  // 使用Base1类的时候，如果传入一个const类型的容器，
+  // 编译器马上就会弹出一大堆错误信息。
   // 原因就在于，T::iterator并不能包括所有的迭代器类型，
   // 当T是一个const容器时，应当使用const_iterator。
   Base2<const std::vector<int>> obj4;
-  obj4.func(v1);
+  obj4.func(v2);
 }
 }  // namespace n2
 

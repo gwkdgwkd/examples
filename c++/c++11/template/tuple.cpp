@@ -3,8 +3,10 @@
 #include <stdexcept>
 #include <tuple>
 
-// c++11中的tuple看似简单，其实它是简约而不简单，可以说它是c++11中一个既简单又复杂的东东，
-// 关于它简单的一面是它很容易使用，复杂的一面是它内部隐藏了太多细节，要揭开它神秘的面纱时又比较困难。
+// c++11中的tuple看似简单，其实它是简约而不简单，
+// 可以说它是c++11中一个既简单又复杂的东东，
+// 关于它简单的一面是它很容易使用，复杂的一面是它内部隐藏了太多细节，
+// 要揭开它神秘的面纱时又比较困难。
 // tuple是一个固定大小的不同类型值的集合，是泛化的std::pair。
 // 和c#中的tuple类似，但是比c#中的tuple强大得多。
 // 可以把他当做一个通用的结构体来用，不需要创建结构体又获取结构体的特征，
@@ -15,8 +17,9 @@ struct A {
   char* p;
   int len;
 };
-// 用tuple<const char*, int>tp就可以不用创建这个结构体了，而作用是一样的，更简洁直观了：
-std::tuple<const char*, int> tp = std::make_tuple("nihao", 6);  // 构造一个tuple
+// 用tuple<const char*, int>tp就可以不用创建这个结构体了，
+// 而作用是一样的，更简洁直观了：
+std::tuple<const char*, int> tp = std::make_tuple("nihao", 6);
 
 std::tuple<double, char, std::string> get_student(int id) {
   // C++11构建tuple的写法
@@ -30,14 +33,15 @@ std::tuple<double, char, std::string> get_student(int id) {
   throw std::invalid_argument("id");
 }
 
-// 相比较于std::tuple，std::pair如果想要支持多于2个的变量，需要多层嵌套或结合struct使用:
+// 相比较于std::tuple，std::pair如果想要支持多于2个的变量，
+// 需要多层嵌套或结合struct使用:
 std::pair<double, std::pair<char, std::string>> get_student1(int id) {
   return std::pair<double, std::pair<char, std::string>>{3.8,
                                                          {'A', "Lisa Simpson"}};
 }
 // tuple和vector比较：vector只能容纳同一种类型的数据，tuple可以容纳任意类型的数据；
-// tuple和c++17的variant比较：二者都可以容纳不同类型的数据，但是variant的类型个数是固定的，
-// 而tuple的类型个数不是固定的，是变长的，更为强大。
+// tuple和c++17的variant比较：二者都可以容纳不同类型的数据，
+// 但是variant的类型个数是固定的，而tuple的类型个数不是固定的，是变长的，更为强大。
 
 void func1() {
   auto student = get_student(0);
@@ -105,7 +109,8 @@ void testN1() {
 
 namespace n2 {
 // tuple高级用法，模板元编程
-// 因为tuple的参数是变长的，也没有for_each函数，如果想遍历tuple中的每个元素，需要自己写代码实现：
+// 因为tuple的参数是变长的，也没有for_each函数，
+// 如果想遍历tuple中的每个元素，需要自己写代码实现：
 template <class Tuple, std::size_t N>
 struct TuplePrinter {
   static void print(const Tuple& t) {
@@ -143,7 +148,7 @@ void testN2() {
 }  // namespace n2
 
 namespace n3 {
-// 根据tuple元素值获取其对应的索引位置
+// 根据tuple元素值获取其对应的索引位置：
 namespace detail {
 template <int I, typename T, typename... Args>
 struct find_index {
@@ -177,7 +182,8 @@ void testN3() {
 }  // namespace n3
 
 namespace n4 {
-// 展开tuple，并将tuple元素作为函数的参数。这样就可以根据需要对tuple元素进行处理了
+// 展开tuple，并将tuple元素作为函数的参数。
+// 这样就可以根据需要对tuple元素进行处理了：
 template <size_t N>
 struct Apply {
   template <typename F, typename T, typename... A>

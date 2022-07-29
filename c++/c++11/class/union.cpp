@@ -2,8 +2,6 @@
 #include <iostream>
 #include <string>
 
-using namespace std;
-
 // 在C/C++中，联合体（Union）是一种构造数据类型。
 // 在一个联合体内，可以定义多个不同类型的成员，这些成员将会共享同一块内存空间。
 // 老版本的C++为了和C语言保持兼容，对联合体的数据成员的类型进行了很大程度的限制，
@@ -18,7 +16,8 @@ union U {
 };
 
 namespace n1 {
-// C++11标准规定，任何非引用类型都可以成为联合体的数据成员，这种联合体也被称为非受限联合体。例如:
+// C++11标准规定，任何非引用类型都可以成为联合体的数据成员，
+// 这种联合体也被称为非受限联合体。例如:
 class Student {
  public:
   Student(bool g, int a) : gender(g), age(a) {}
@@ -31,7 +30,7 @@ class Student {
 // 这种规定只是C++为了兼容C语言而制定，然而在长期的编程实践中发现，这种规定是没有必要的。
 union T {
   // 含有非POD类型的成员，gcc-5.1.0版本报错
-  Student s;  // member ‘Student T::s’ with constructor not allowed in union
+  Student s;
   char name[10];
 };
 
@@ -61,11 +60,22 @@ class B2 : B1 {  // 有非静态成员，且只有一个仅包含静态成员的
 class B3 : B2 {  // 基类B2有非静态成员，而派生类B3没有非静态成员，也是POD类型
   static int n2;
 };
-// 6.所有非静态数据成员均和其基类也符合上述规则（递归定义），也就是说POD类型不能包含非POD类型的数据。
+// 6.所有非静态数据成员均和其基类也符合上述规则（递归定义），
+//   也就是说POD类型不能包含非POD类型的数据。
 // 7.此外，所有兼容C语言的数据类型都是POD类型（struct、union等不能违背上述规则）。
 
-// placement new是什么？
-// 是new关键字的一种进阶用法，既可以在栈（stack）上生成对象，也可以在堆（heap）上生成对象。
+// 非受限联合体的赋值注意事项:
+// C++11规定，如果非受限联合体内有一个非POD的成员，而该成员拥有自定义的构造函数，
+// 那么这个非受限联合体的默认构造函数将被编译器删除；
+// 其他的特殊成员函数，例如默认拷贝构造函数、拷贝赋值操作符以及析构函数等，也将被删除。
+union U1 {
+  std::string s;
+  int n;
+};
+
+// 解决上面问题的一般需要用到placement new：
+// 是new关键字的一种进阶用法，
+// 既可以在栈（stack）上生成对象，也可以在堆（heap）上生成对象。
 // 相对应地，把常见的new的用法称为operator new，它只能在heap上生成对象。
 // placement new的语法格式如下：
 // new(address) ClassConstruct(...)
@@ -73,23 +83,16 @@ class B3 : B2 {  // 基类B2有非静态成员，而派生类B3没有非静态�
 // ClassConstruct(...)表示调用类的构造函数，如果构造函数没有参数，也可以省略括号。
 // placement_new利用已经申请好的内存来生成对象，它不再为对象分配新的内存，
 // 而是将对象数据放在address指定的内存中。
-
-// 非受限联合体的赋值注意事项:
-// C++11规定，如果非受限联合体内有一个非POD的成员，而该成员拥有自定义的构造函数，
-// 那么这个非受限联合体的默认构造函数将被编译器删除；
-// 其他的特殊成员函数，例如默认拷贝构造函数、拷贝赋值操作符以及析构函数等，也将被删除。
-union U1 {
-  string s;
-  int n;
-};
-// 解决上面问题的一般需要用到placement new
+using namespace std;
 union U2 {
-  string s;
+  std::string s;
   int n;
 
  public:
-  // 构造时，采用placement_new将s构造在其地址&s上，唯一作用只是调用了一下string类的构造函数。
-  U2() { new (&s) string; }
+  // 构造时，采用placement_new将s构造在其地址&s上，
+  // 唯一作用只是调用了一下string类的构造函数。
+  U2() { new (&s) std::string; }
+
   ~U2() { s.~string(); }  // 在析构时还需要调用string类的析构函数。
 };
 
@@ -97,20 +100,23 @@ void testN2() {
   // 因为string类拥有自定义的构造函数，所以U1的构造函数被删除；
   // 定义U1的类型变量u需要调用默认构造函数，所以u也就无法定义成功。
   // U1 u; // use of deleted function ‘U1::U1()’
+
   U2 u;
 }
 }  // namespace n2
 
 namespace n3 {
-// 非受限联合体的匿名声明和“枚举式类”:
+// 非受限联合体的匿名声明和枚举式类：
 // 匿名联合体是指不具名的联合体（也即没有名字的联合体），一般定义如下：
 union U1 {
-  // 联合体U内定义了一个不具名的联合体，该联合体包含一个int类型的成员变量，称这个联合体为匿名联合体。
+  // 联合体U内定义了一个不具名的联合体，
+  // 该联合体包含一个int类型的成员变量，称这个联合体为匿名联合体。
   union {
     int x;
   };
 };
-// 同样的，非受限联合体也可以匿名，而当非受限的匿名联合体运用于类的声明时，这样的类被称为“枚举式类”:
+// 同样的，非受限联合体也可以匿名，而当非受限的匿名联合体运用于类的声明时，
+// 这样的类被称为枚举式类：
 class Student {
  public:
   Student(bool g, int a) : gender(g), age(a) {}
@@ -142,10 +148,11 @@ class Singer {
 
  private:
   Type t;
-  // 使用了一个匿名非受限联合体，它作为类Singer的“变长成员”来使用，
+  // 使用了一个匿名非受限联合体，它作为类Singer的变长成员来使用，
   // 这样的变长成员给类的编写带来了更大的灵活性，这是C++98标准中无法达到的。
   union {
-    Student s;  // member ‘Student T::s’ with constructor not allowed in union
+    // member ‘Student T::s’ with constructor not allowed in union
+    Student s;
     int id;
     char name[10];
   };
