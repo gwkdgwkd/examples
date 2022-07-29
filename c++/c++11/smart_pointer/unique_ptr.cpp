@@ -28,7 +28,7 @@ namespace create {
 void testCreate() {
   // unique_ptr智能指针的创建
   // 1.通过以下2种方式，可以创建出空的unique_ptr指针：
-  std::unique_ptr<A> p1();
+  std::unique_ptr<A> p1();  // 这是函数声明吧
   std::unique_ptr<A> p2(nullptr);
   std::unique_ptr<A> p3 = nullptr;
 
@@ -77,7 +77,6 @@ namespace func {
 //                反之，则该函数会释放当前unique_ptr指针指向的堆内存（如果有），
 //                然后获取p所指堆内存的所有权（p为nullptr）。
 // swap(x) 	      交换当前unique_ptr指针和同类型的x指针。
-
 // 除此之外，C++11标准还支持同类型的unique_ptr指针之间，
 // 以及unique_ptr和nullptr之间，做==，!=，<，<=，>，>=运算。
 
@@ -120,11 +119,17 @@ void func4() {
   std::unique_ptr<A> p2(new A(11));      // create A, i = 11
   std::cout << p1->GetI() << std::endl;  // 10
   std::cout << p2->GetI() << std::endl;  // 11
-  A *tmp = p2.release();                 // delete A
-  p1.reset(tmp);
-  std::cout << p1->GetI() << std::endl;       // 11
-  std::cout << (p2 == nullptr) << std::endl;  // true
-  p1.reset(p1.release());                     // delete A
+
+  std::cout << p2.operator bool() << std::endl;  // true
+  std::cout << (p2 == nullptr) << std::endl;     // false
+  A *tmp = p2.release();
+  std::cout << p2.operator bool() << std::endl;  // false
+  std::cout << (p2 == nullptr) << std::endl;     // true
+
+  p1.reset(tmp);                         // delete A
+  std::cout << p1->GetI() << std::endl;  // 11
+
+  p1.reset(p1.release());  // delete A
 }
 
 void func5() {

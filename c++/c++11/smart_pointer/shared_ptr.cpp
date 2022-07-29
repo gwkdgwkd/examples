@@ -51,7 +51,7 @@ class A {
 };
 
 namespace create {
-// shared_ptr智能指针的创建, shared_ptr<T>类模板中，提供了多种实用的构造函数:
+// shared_ptr智能指针的创建, shared_ptr<T>类模板中，提供了多种实用的构造函数：
 void func1() {
   // 1.构造出shared_ptr<T>类型的空智能指针，
   //   空的shared_ptr指针，其初始引用计数为0，而不是1：
@@ -231,6 +231,7 @@ void func3() {
   p1.swap(p2);
   std::cout << "p1 : " << p1.get()->GetI() << std::endl;
   std::cout << "p2 : " << p2.get()->GetI() << std::endl;
+
   // create A, i = 66
   // create A, i = 77
   // p1 : 66
@@ -319,9 +320,21 @@ void testBadcase() {
 }
 }  // namespace badcase
 
+namespace test {
+A* getA() { return new A(); }
+void func() {
+  std::shared_ptr<A> p1(getA());  // 可以管理指针
+  A* p2 = getA();                 // 内存泄漏
+
+  // create A
+  // create A
+  // delete A
+}
+}  // namespace test
+
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 3]" << std::endl;
+    std::cout << argv[0] << " i [0 - 4]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
@@ -337,6 +350,9 @@ int main(int argc, char* argv[]) {
       break;
     case 3:
       badcase::testBadcase();
+      break;
+    case 4:
+      test::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

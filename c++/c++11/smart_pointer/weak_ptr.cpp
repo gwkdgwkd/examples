@@ -2,7 +2,7 @@
 #include <memory>
 
 // 和shared_ptr、unique_ptr一样，weak_ptr智能指针也是以模板类的方式实现的。
-// weak_ptr<T>（T为指针所指数据的类型）定义在<memory>头文件，并位于std命名空间中。
+// weak_ptr<T>定义在<memory>头文件，并位于std命名空间中。
 
 // C++11标准虽然将weak_ptr定位为智能指针的一种，但通常不单独使用，
 // 只能和shared_ptr类型指针搭配使用。
@@ -111,8 +111,8 @@ void func3() {
 
   std::weak_ptr<int> wp2(p1);
   *(wp2.lock()) = 7;
-  std::cout << wp2.expired() << " " << *(wp2.lock().get())
-            << std::endl;  // false 7
+  std::cout << wp2.expired() << " " << *(wp2.lock().get()) << std::endl;
+  // false 7
 
   p1.reset();
   std::cout << wp2.expired() << std::endl;  // true
