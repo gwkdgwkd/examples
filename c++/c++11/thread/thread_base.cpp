@@ -52,7 +52,7 @@ void ThreadBase::Run() {
       while (pause_flag_) {
         condition_.wait(lck);
       }
-      lck.unlock();
+      lck.unlock();  // 不用这句也可以吧
     }
     Process();
     std::this_thread::sleep_for(std::chrono::nanoseconds(10));

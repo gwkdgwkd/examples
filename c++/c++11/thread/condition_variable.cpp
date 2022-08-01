@@ -5,9 +5,9 @@
 #include <mutex>
 #include <thread>
 
-// 当std::condition_variable对象的某个wait函数被调用的时候，
+// 当std::condition_variable（cv）对象的某个wait函数被调用的时候，
 // 它使用std::unique_lock(通过std::mutex)来锁住当前线程，当前线程会一直被阻塞，
-// 直到另外一个线程在相同的std::condition_variable对象上调用了notification函数来唤醒当前线程。
+// 直到另外一个线程在相同的cv对象上调用了notification函数来唤醒当前线程。
 // condition_variable条件变量可以阻塞（wait、wait_for、wait_until）调用的线程，
 // 直到使用（notify_one或notify_all）通知恢复为止。
 // std::condition_variable对象通常使用std::unique_lock<std::mutex>来等待，
@@ -18,9 +18,10 @@ namespace wait {
 // 第一种只包含unique_lock对象，另外一个还有Predicate对象（等待条件）。
 
 // 这里必须使用unique_lock，因为wait函数的工作原理：
-// 当前线程调用wait()后将被阻塞并且函数会解锁互斥量，如果使用lock_guard则不能调用unlock函数，
-// 所以这里只能使用unique_lock对象，直到另外某个线程调用notify_one或者notify_all唤醒当前线程；
-// 一旦当前线程获得通知(notify)，wait()函数也是自动调用lock()，同理不能使用lock_guard对象。
+// 当前线程调用wait()后将被阻塞并且函数会解锁互斥量，
+// 如果使用lock_guard则不能调用unlock函数，所以这里只能使用unique_lock对象，
+// 直到另外某个线程调用notify_one或者notify_all唤醒当前线程；
+// 一旦当前线程获得通知，wait()函数也是自动调用lock()，同理不能使用lock_guard对象。
 
 // 如果wait没有第二个参数，第一次调用默认条件不成立，直接解锁互斥量并阻塞到本行，
 // 直到某一个线程调用notify_one或notify_all为止，被唤醒后，wait重新尝试获取互斥量，
@@ -31,11 +32,14 @@ namespace wait {
 // 如果表达式为false，wait对互斥量解锁，然后休眠，如果为true，则进行后面的操作。
 // 当前线程调用wait()后将被阻塞(此时当前线程应该获得了锁（mutex）lck)，
 // 直到另外某个线程调用notify_*唤醒了当前线程。
-// 在线程被阻塞时，该函数会自动调用lck.unlock()释放锁，使得其他被阻塞在锁竞争上的线程得以继续执行。
+// 在线程被阻塞时，该函数会自动调用lck.unlock()释放锁，
+// 使得其他被阻塞在锁竞争上的线程得以继续执行。
 // 另外，一旦当前线程获得通知(notified，通常是另外某个线程调用notify_*唤醒了当前线程)，
 // wait()函数也是自动调用lck.lock()，使得lck的状态和wait函数被调用时相同。
-// 在第二种情况下（即设置了Predicate），只有当pred条件为false时调用wait()才会阻塞当前线程，
-// 并且在收到其他线程的通知后只有当pred为true时才会被解除阻塞。类似以下代码：
+// 在第二种情况下（即设置了Predicate），
+// 只有当pred条件为false时调用wait()才会阻塞当前线程，
+// 并且在收到其他线程的通知后只有当pred为true时才会被解除阻塞。
+// 类似以下代码：
 // while (!pred()) wait(lck);
 std::mutex mtx;
 std::condition_variable cv;
@@ -90,7 +94,7 @@ void testWait() {
   // thread 8
 
   std::thread consumer_thread(consume, 10);  // 消费者线程
-  // 主线程为生产者线程, 生产10个物品.
+  // 主线程为生产者线程, 生产10个物品
   for (int i = 0; i < 10; ++i) {
     while (shipment_available()) std::this_thread::yield();
     std::unique_lock<std::mutex> lck(mtx1);
@@ -117,8 +121,11 @@ namespace waitfor {
 // 而一旦超时或者收到了其他线程的通知，wait_for返回，剩下的处理步骤和wait()类似。
 // wait_for的重载版本的最后一个参数pred表示wait_for的预测条件，
 // 只有当pred条件为false时调用wait()才会阻塞当前线程，
-// 并且在收到其他线程的通知后只有当pred为true时才会被解除阻塞。因此相当于如下代码：
-// return wait_until (lck, chrono::steady_clock::now() + rel_time, std::move(pred));
+// 并且在收到其他线程的通知后只有当pred为true时才会被解除阻塞。
+// 因此相当于如下代码：
+// return wait_until (lck,
+//                    chrono::steady_clock::now() + rel_time,
+//                    std::move(pred));
 std::condition_variable cv1;
 int value;
 void do_read_value() {
@@ -144,12 +151,13 @@ void testWaitfor() {
 namespace waituntil {
 // wait_until与wait_for类似，但是wait_until可以指定一个时间点，
 // 在当前线程收到通知或者指定的时间点abs_time超时之前，该线程都会处于阻塞状态。
-// 而一旦超时或者收到了其他线程的通知，wait_until返回，剩下的处理步骤和wait_until()类似。
+// 而一旦超时或者收到了其他线程的通知，wait_until返回，
+// 剩下的处理步骤和wait_until()类似。
 // 另外，wait_until的重载版本的最后一个参数pred表示wait_until的预测条件，
 // 只有当pred条件为false时调用wait()才会阻塞当前线程；
 // 并且在收到其他线程的通知后只有当pred为true时才会被解除阻塞，因此相当于如下代码：
 // while (!pred())
-//   if ( wait_until(lck,abs_time) == cv_status::timeout)
+//   if (wait_until(lck,abs_time) == cv_status::timeout)
 //     return pred();
 // return true;
 
@@ -193,8 +201,10 @@ void testWaituntil() {
 
 namespace notify {
 // notify_one()唤醒某个等待(wait)线程。
-// 如果当前没有等待线程，则该函数什么也不做，如果同时存在多个等待线程，则唤醒某个线程是不确定的。
-// notify_all()唤醒所有的等待(wait)线程。如果当前没有等待线程，则该函数什么也不做。
+// 如果当前没有等待线程，则该函数什么也不做，
+// 如果同时存在多个等待线程，则唤醒某个线程是不确定的。
+// notify_all()唤醒所有的等待(wait)线程，
+// 如果当前没有等待线程，则该函数什么也不做。
 
 std::mutex mtx1;
 std::condition_variable cv1;
@@ -238,6 +248,8 @@ void testNotify() {
   // thread 9
   // thread 3
   // thread 7
+
+  // 每次结构不一样
 }
 }  // namespace notify
 
@@ -270,10 +282,12 @@ void func3() {
 }
 
 // std::cv_status枚举类型
-// cv_status::no_timeout:wait_for或者wait_until没有超时，即在规定的时间段内线程收到了通知。
-// cv_status::timeout:wait_for或者wait_until超时。
+// cv_status::no_timeout：wait_for或者wait_until没有超时，
+// 即在规定的时间段内线程收到了通知。
+// cv_status::timeout：wait_for或者wait_until超时。
 
-// void notify_all_at_thread_exit (condition_variable& cond, unique_lock<mutex> lck);
+// void notify_all_at_thread_exit(condition_variable& cond,
+//                                unique_lock<mutex> lck);
 std::mutex m4;
 std::condition_variable cv4;
 bool ready = false;
@@ -329,6 +343,8 @@ void testOther() {
   // thxxxxx 5
   // thxxxxx 3
   // thxxxxx 8
+
+  // 每次结果都不一样
 }
 }  // namespace other
 
