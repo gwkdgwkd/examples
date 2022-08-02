@@ -2,41 +2,48 @@
 #include <iostream>
 #include <string>  // string类库的头文件
 
-// C++大大增强了对字符串的支持，除了可以使用C风格的字符串，还可以使用内置的string类。
+// C++大大增强了对字符串的支持，除了可以使用C风格的字符串，还可以使用string类。
 // string类处理起字符串来会方便很多，完全可以代替C语言中的字符数组或字符串指针。
 // string变量可以直接通过赋值操作符=进行赋值。
 // string变量也可以用C风格的字符串进行赋值。
 
 // string的内部究竟是什么样的？
 // 在C语言中，有两种方式表示字符串(两种形式总是以\0作为结束标志)：
-// 1.一种是用字符数组来容纳字符串，例如char str[10] = "abc"，这样的字符串是可读写的；
-// 2.一种是使用字符串常量，例如char *str = "abc"，这样的字符串只能读，不能写。
+// 1.一种是用字符数组来容纳字符串，
+//   例如char str[10] = "abc"，这样的字符串是可读写的；
+// 2.一种是使用字符串常量，
+//   例如char *str = "abc"，这样的字符串只能读，不能写。
+
 // C++ string与它们在C语言中的前身截然不同。
 // 首先，也是最重要的不同点，C++ string隐藏了它所包含的字符序列的物理表示。
 // 程序设计人员不必关心数组的维数或\0方面的问题。
 // string在内部封装了与内存和容量有关的信息。
-// 具体地说，C++ string对象知道自己在内存中的开始位置、包含的字符序列以及字符序列长度；
-// 当内存空间不足时，string还会自动调整，让内存空间增长到足以容纳下所有字符序列的大小。
+// C++ string对象知道自己在内存中的开始位置、包含的字符序列以及字符序列长度；
+// 当内存空间不足时，string还会自动调整，增加内存以足以容纳下所有字符。
 // C++ string的这种做法，极大地减少了C语言编程中三种最常见且最具破坏性的错误：
 // 1.数组越界；
-// 2.通过未被初始化或者被赋以错误值的指针来访问数组元紊；
-// 3.释放了数组所占内存，但是仍然保留了“悬空”指针。
-// C++标准没有定义string类的内存布局，各个编译器厂商可以提供不同的实现，但必须保证string的行为一致。
-// 采用这种做法是为了获得足够的灵活性。
+// 2.通过未被初始化或者被赋以错误值的指针来访问数组元素；
+// 3.释放了数组所占内存，但是仍然保留了悬空指针。
+// C++标准没有定义string类的内存布局，各个编译器厂商可以提供不同的实现，
+// 但必须保证string的行为一致，采用这种做法是为了获得足够的灵活性。
 // C++标准没有定义在哪种确切的情况下应该为string对象分配内存空间来存储字符序列。
-// string内存分配规则明确规定：允许但不要求以引用计数（reference counting）的方式实现。
+// string内存分配规则明确规定：
+// 允许但不要求以引用计数（reference counting）的方式实现。
 // 但无论是否采用引用计数，其语义都必须一致。
 // C++的这种做法和C语言不同，在C语言中，每个字符型数组都占据各自的物理存储区。
 // 在C++中，独立的几个string对象可以占据也可以不占据各自特定的物理存储区，
 // 但是，如果采用引用计数避免了保存同一数据的拷贝副本，
 // 那么各个独立的对象必须看起来并表现得就像独占地拥有各自的存储区一样。
-// 只有当字符串被修改的时候才创建各自的拷贝，这种实现方式称为写时复制（copy-on-write）策略。
+// 只有当字符串被修改的时候才创建各自的拷贝，
+// 这种实现方式称为写时复制（copy-on-write）策略。
 // 当字符串只是作为值参数或在其他只读情形下使用，这种方法能够节省时间和空间。
 // 不论一个库的实现是不是采用引用计数，它对string类的使用者来说都应该是透明的。
 // 遗憾的是，情况并不总是这样，在多线程程序中，几乎不可能安全地使用引用计数来实现。
 
-// 字符串是存储在内存的连续字节中的一系列字符。C++处理字符串的方式有两种：
-// 一种来自C语言，常被称为C风格字符串；另一种是基于string类库的字符串处理方式。
+// 字符串是存储在内存的连续字节中的一系列字符。
+// C++处理字符串的方式有两种：
+// 一种来自C语言，常被称为C风格字符串；
+// 另一种是基于string类库的字符串处理方式。
 
 namespace n1 {
 void func1() {
@@ -49,7 +56,8 @@ void func1() {
   std::string s7;
   s7 = s2;  // 赋值操作符
 
-  // string类重载了输入输出运算符，可以像对待普通变量那样对待string变量，也就是用>>进行输入，用<<进行输出
+  // string类重载了输入输出运算符，可以像对待普通变量那样对待string变量，
+  // 也就是用>>进行输入，用<<进行输出：
   std::cout << std::boolalpha << s1.empty() << std::endl;  // true
   std::cout << s2 << std::endl;                            // Hello!
   std::cout << s3 << std::endl;                            // aaaaaaaaaa
@@ -67,14 +75,15 @@ void func2() {
   // 在C语言中，使用strlen函数获取字符串的长度：
   std::cout << strlen(s.c_str()) << std::endl;  // 6
 
-  // 在C++中，可以使用string.size()函数或string.length()函数来获得string对象的长度：
+  // 在C++中，可以使用size函数或length函数来获得string对象的长度：
   std::cout << s.length() << std::endl;  // 6
   std::cout << s.size() << std::endl;    // 6
 
   // lenght()和size()的实现并没有区别。
   // length()方法是C语言习惯保留的，size()方法则是为了兼容STL容器而引入的。
 
-  // 由于string的末尾没有'\0'字符，所以length()返回的是字符串的真实长度，而不是长度+1。
+  // 由于string的末尾没有'\0'字符，
+  // 所以length()返回的是字符串的真实长度，而不是长度+1。
 }
 
 void func3() {
@@ -91,7 +100,8 @@ void func3() {
 void func4() {
   // 在C语言中，使用strcat、strncat函数来进行字符串拼接操作。
   // 在C++中也有多种方法来实现字符串拼接和附加操作。
-  // 再也不需要使用C语言中的strcat()、strcpy()、malloc()来拼接字符串了，再也不用担心空间不够会溢出了。
+  // 再也不需要使用C语言中的strcat()、strcpy()、malloc()来拼接字符串了，
+  // 再也不用担心空间不够会溢出了。
 
   std::string s1 = "hello";
   std::string s2 = "world";
@@ -113,7 +123,8 @@ void func4() {
 }
 
 void func5() {
-  // 可以像C语言中一样，将string对象当做一个数组，然后使用数组下标的方式来访问字符串中的元素；
+  // 可以像C语言中一样，将string对象当做一个数组，
+  // 然后使用数组下标的方式来访问字符串中的元素；
   // 也可以使用string.at(index)的方式来访问元素（索引号0开始）。
   std::string s = "hello";
   std::cout << s[1] << std::endl;     // e
@@ -129,10 +140,11 @@ void func5() {
 }
 
 void func6() {
-  // 可以使用string.substr()函数来获取子串，string.substr()函数的定义如下：
-  // string substr（size_t pos = 0，size_t len = npos）const;
+  // 可以使用string.substr()函数来获取子串，
+  // string.substr()函数的定义如下：
+  // string substr(size_t pos = 0，size_t len = npos) const;
   // 其中，pos是子字符串的起始位置（索引，第一个字符的索引为0），len是子串的长度。
-  // 这个函数的功能是：复制一个string对象中从pos处开始的len个字符到string对象substr中去，并返回substr。
+  // 复制一个string中从pos处开始的len个字符到substr中去，并返回substr。
   std::string s = "hello,world";
   std::cout << s.substr(1, 4) << std::endl;  // ello
 
@@ -164,7 +176,8 @@ void func1() {
   // 在C语言中，使用strcmp、strncmp函数来进行字符串的比较。
   // 在C++中，由于将string对象声明为了简单变量，故而对字符串的比较操作十分简单了，
   // 直接使用关系运算符（==、!=、<、<=、>、>=）即可。
-  // 也可以使用类似strcmp的函数来进行string对象的比较，string类提供的是string.compare()方法。
+  // 也可以使用类似strcmp的函数来进行string对象的比较，
+  // string类提供的是string.compare()方法。
 
   auto compare = [](const std::string &str1, const std::string &str2) {
     if (str1 == str2) {
@@ -240,8 +253,8 @@ void testN3() {
   check(s.find('a', 0));             // find : 1
 
   // string.rfind()与string.find()方法类似，只是查找顺序不一样，
-  // string.rfind()是从指定位置pos（默认为字符串末尾）开始向前查找，直到字符串的首部，
-  // 并返回第一次查找到匹配项时匹配项首字符的索引。
+  // string.rfind()是从指定位置pos（默认为字符串末尾）开始向前查找，
+  // 直到字符串的首部，并返回第一次查找到匹配项时匹配项首字符的索引。
   // 换句话说，就是查找子字符串或字符最后一次出现的位置。
   check(s.rfind(cat));                          // find : 23
   check(s.rfind(cat, s.size() - 1));            // find : 23
@@ -254,20 +267,24 @@ void testN3() {
   check(s.rfind("dog"));                        // find : 51
   check(s.rfind('o', s.length() - 1));          // find : 52
 
-  // string.find_first_of()方法在字符串中从指定位置开始向后查找参数中任何一个字符首次出现的位置：
+  // string.find_first_of()方法在字符串中从指定位置开始，
+  // 向后查找参数中任何一个字符首次出现的位置：
   check(s.find_first_of(",wc"));     // find : 0
   check(s.find_first_of(",wc", 1));  // find : 3
 
-  // string.find_last_of()方法在字符串中查找参数中任何一个字符最后一次出现的位置，从指定位置向前找：
+  // string.find_last_of()方法在字符串中查找参数中，
+  // 任何一个字符最后一次出现的位置，从指定位置向前找：
   check(s.find_last_of("ao"));      // find : 52
   check(s.find_last_of("ao", 0));   // not found
   check(s.find_last_of("ao", 50));  // find : 45
 
-  // string.find_first_not_of()方法在字符串中查找第一个不包含在参数中的字符：
+  // string.find_first_not_of()方法，
+  // 在字符串中查找第一个不包含在参数中的字符：
   check(s.find_first_not_of("cat,"));      // find : 4
   check(s.find_first_not_of("cat,", 10));  // find : 12
 
-  // string.find_last_not_of()方法在字符串中查找最后一个不包含在参数中的字符：
+  // string.find_last_not_of()方法，
+  // 在字符串中查找最后一个不包含在参数中的字符：
   check(s.find_last_not_of("dog"));      // find : 50
   check(s.find_last_not_of("cat", 10));  // find : 6
 }
@@ -281,7 +298,7 @@ void testN4() {
 
   s1.insert(1, s2);              // 在位置pos处插入字符串s
   std::cout << s1 << std::endl;  // ho,!
-  s1.insert(3, s3, 1, 2);  // 在位置pos处插入字符串s的从位置pos处开始的len个字符
+  s1.insert(3, s3, 1, 2);  // 在pos处插入字符串s的从pos处开始的len个字符
   std::cout << s1 << std::endl;  // ho,or!
   s1.insert(3, "w");             // 在位置pos处插入字符串s
   std::cout << s1 << std::endl;  // ho,wor!
@@ -290,7 +307,7 @@ void testN4() {
   s1.insert(1, 2, 'l');          // 在位置pos处插入n个字符c
   std::cout << s1 << std::endl;  // hllo,world!
 
-  // 在p处插入字符c，并返回插入后迭代器的位置
+  // 在p处插入字符c，并返回插入后迭代器的位置：
   auto pos = s1.insert(s1.begin() + 1, 'e');
   std::cout << s1 << std::endl;    // hello,world!
   std::cout << *pos << std::endl;  // e
@@ -305,24 +322,25 @@ namespace n5 {
 void testN5() {
   std::string s = "hello,,,world!";
 
-  // 删除从pos处开始的n个字符
+  // 删除从pos处开始的n个字符：
   std::cout << s.erase(5, 2) << std::endl;  // hello,world!
 
-  // 删除p处的一个字符，并返回删除后迭代器的位置
+  // 删除p处的一个字符，并返回删除后迭代器的位置：
   auto pos = s.erase(s.end() - 1);
   std::cout << s << std::endl;           // hello,world
   std::cout << *(pos - 1) << std::endl;  // d
 
-  // 删除从first到last之间的字符，并返回删除后迭代器的位置
+  // 删除从first到last之间的字符，并返回删除后迭代器的位置：
   pos = s.erase(s.begin() + 2, s.begin() + 4);
   std::cout << s << std::endl;           // heo,world
   std::cout << *(pos - 1) << std::endl;  // e
 
-  // 如果不指明len的话，那么直接删除从pos到字符串结束处的所有字符
+  // 如果不指明len的话，那么直接删除从pos到字符串结束处的所有字符：
   std::cout << s.erase(3) << std::endl;  // heo
 
   // 在pos参数没有越界的情况下，len参数也可能会导致要删除的子字符串越界。
-  // 但实际上这种情况不会发生，erase()函数会从以下两个值中取出最小的一个作为待删除子字符串的长度：
+  // 但实际上这种情况不会发生，
+  // erase()函数会从以下两个值中取出最小的一个作为待删除子字符串的长度：
   // len的值和字符串长度减去pos的值。
   std::cout << s.erase(2, 10) << std::endl;  // he
 

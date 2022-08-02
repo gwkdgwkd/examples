@@ -1,10 +1,13 @@
 #include <iostream>
 
 namespace n1 {
-// 异常必须显式地抛出，才能被检测和捕获到；如果没有显式的抛出，即使有异常也检测不到。
-// 在C++中，我们使用throw关键字来显式地抛出异常，它的用法为：throw exceptionData;
+// 异常必须显式地抛出，才能被检测和捕获到；
+// 如果没有显式的抛出，即使有异常也检测不到。
+// 在C++中，我们使用throw关键字来显式地抛出异常，
+// 它的用法为：throw exceptionData;
 // exceptionData可以包含任意的信息，完全有程序员决定。
-// exceptionData可以是int、float、bool等基本类型，也可以是指针、数组、字符串、结构体、类等聚合类型。
+// exceptionData可以是int、float、bool等基本类型，
+// 也可以是指针、数组、字符串、结构体、类等聚合类型。
 class OutOfRange {
  public:
   OutOfRange() : m_flag(1){};
@@ -113,10 +116,11 @@ void testN1() {
 }  // namespace n1
 
 namespace n2 {
-// throw用作异常规范:
+// throw用作异常规范：
 // throw关键字除了可以用在函数体中抛出异常，
 // 还可以用在函数头和函数体之间，指明当前函数能够抛出的异常类型，
-// 这称为异常规范（Exception specification），有些教程也称为异常指示符或异常列表，
+// 这称为异常规范（Exception specification），
+// 有些教程也称为异常指示符或异常列表，
 // 如果抛出异常列表中没有的异常，try将无法捕获，只能终止程序。
 
 void func1(bool b) throw(int) {  // 只能抛出int类型的异常
@@ -144,7 +148,8 @@ void func3(bool b) throw() {  // 不会抛出任何异常，即使抛出了，tr
 }
 
 // C++规定，派生类虚函数的异常规范必须与基类虚函数的异常规范一样严格，或者更严格。
-// 只有这样，当通过基类指针（或者引用）调用派生类虚函数时，才能保证不违背基类成员函数的异常规范。
+// 只有这样，当通过基类指针（或者引用）调用派生类虚函数时，
+// 才能保证不违背基类成员函数的异常规范。
 class Base {
  public:
   virtual int f1(int) throw();
@@ -158,7 +163,8 @@ class Derived : public Base {
   std::string f3() throw(std::string);  // 对！比throw(int,string)更严格
 };
 
-// C++规定，异常规范在函数声明和函数定义中必须同时指明，并且要严格保持一致，不能更加严格或者更加宽松。
+// C++规定，异常规范在函数声明和函数定义中必须同时指明，
+// 并且要严格保持一致，不能更加严格或者更加宽松。
 // 错！定义中有异常规范，声明中没有:
 // void func1();
 // void func1() throw(int) {}
@@ -169,8 +175,8 @@ class Derived : public Base {
 void func4() throw(float, char *);
 void func4() throw(float, char *) {}
 
-// 异常规范的初衷是好的，它希望让程序员看到函数的定义或声明后，立马就知道该函数会抛出什么类型的异常，
-// 这样程序员就可以使用try-catch来捕获了。
+// 异常规范的初衷是好的，它希望让程序员看到函数的定义或声明后，
+// 立马就知道该函数会抛出什么类型的异常，这样程序员就可以使用try-catch来捕获了。
 // 如果没有异常规范，程序员必须阅读函数源码才能知道函数会抛出什么异常。
 // 不过这有时候也不容易做到，例如：
 // 1.函数可能不会引发异常，但它调用了另外一个函数()，另外的函数可能会引发异常。
