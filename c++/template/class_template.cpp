@@ -3,12 +3,14 @@
 
 namespace n1 {
 // C++除了支持函数模板，还支持类模板（Class Template）。
-// 函数模板中定义的类型参数可以用在函数声明和函数定义中，类模板中定义的类型参数可以用在类声明和类实现中。
+// 函数模板中定义的类型参数可以用在函数声明和函数定义中，
+// 类模板中定义的类型参数可以用在类声明和类实现中。
 // 类模板的目的同样是将数据的类型参数化。
-// 类模板和函数模板都是以template开头（当然也可以使用class，目前来讲它们没有任何区别），后跟类型参数；
+// 类模板和函数模板都是以template开头（class也行），后跟类型参数；
 // 类型参数不能为空，多个类型参数用逗号隔开。
 // 一但声明了类模板，就可以将类型参数用于类的成员函数和成员变量了。
-// 换句话说，原来使用int、float、char等内置类型的地方，都可以用类型参数来代替。
+// 换句话说，原来使用int、float、char等内置类型的地方，
+// 都可以用类型参数来代替。
 // 模板头和类头是一个整体，可以换行，但是中间不能有分号：
 template <typename T1, typename T2>
 class Point {
@@ -26,20 +28,23 @@ class Point {
   T2 m_y;
 };
 
-// 在类外定义成员函数时，仍然需要带上模板头，而且template后面的类型参数要和类声明时的一致：
+// 在类外定义成员函数时，仍然需要带上模板头，
+// 而且template后面的类型参数要和类声明时的一致：
 template <typename T1, typename T2>
 T2 Point<T1, T2>::getY() const {
   return m_y;
 }
-// 除了template关键字后面要指明类型参数，类名Point后面也要带上类型参数，只是不加typename关键字了：
+// 除了template关键字后面要指明类型参数，
+// 类名Point后面也要带上类型参数，只是不加typename关键字了：
 template <typename T1, typename T2>
 void Point<T1, T2>::setY(T2 y) {
   m_y = y;
 }
 
 void testN1() {
-  // 使用类模板创建对象时，需要指明具体的数据类型
-  // 与函数模板不同的是，类模板在实例化时必须显式地指明数据类型，编译器不能根据给定的数据推演出数据类型。
+  // 使用类模板创建对象时，需要指明具体的数据类型：
+  // 与函数模板不同的是，类模板在实例化时必须显式地指明数据类型，
+  // 编译器不能根据给定的数据推演出数据类型。
   Point<int, int> p1(10, 20);
   std::cout << p1.getX() << "," << p1.getY() << std::endl;  // 10,20
   Point<int, float> p2(10, 15.5);
@@ -55,7 +60,8 @@ void testN1() {
   Point<char *, char *> *p5 = new Point<char *, char *>("hello", "world");
   std::cout << p5->getX() << "," << p5->getY() << std::endl;  // hello,world
 
-  // 赋值号两边都要指明具体的数据类型，且要保持一致。下面的写法是错误的：
+  // 赋值号两边都要指明具体的数据类型，且要保持一致。
+  // 下面的写法是错误的：
   // Point<float, float> *p = new Point<float, int>(10.6, 109);
   // Point<float, float> *p = new Point(10.6, 109);
 }
@@ -65,7 +71,8 @@ namespace n2 {  // 类模板中的静态成员
 template <class T>
 class A {
  private:
-  // 类模板中可以定义静态成员，从该类模板实例化得到的所有类都包含同样的静态成员：
+  // 类模板中可以定义静态成员，
+  // 从该类模板实例化得到的所有类都包含同样的静态成员：
   static int count;
 
  public:
@@ -85,7 +92,8 @@ void testN2() {
   A<int> ia;
   A<double> da;
 
-  // 虽然它们都有静态成员变量count，但是显然，A<int>的对象和A<double>的对象不会共享一份count：
+  // 虽然它们都有静态成员变量count，但是显然，
+  // A<int>的对象和A<double>的对象不会共享一份count：
   ia.PrintCount();  // 1
   da.PrintCount();  // 1
 }
@@ -102,7 +110,8 @@ class B {
 template <class T>
 class TC {
   // 类模板实例化时，除了类型参数被替换外，其他所有内容都原样保留，
-  // 因此任何从实例化得到的类都包含这三条友元声明，因而也都会把Func、类A和B::Func当作友元：
+  // 因此任何从实例化得到的类都包含这三条友元声明，
+  // 因而也都会把Func、类A和B::Func当作友元：
   friend void Func();
   friend class A;
   friend void B::Func();
@@ -192,7 +201,8 @@ void testN3() {
 }
 }  // namespace n3
 
-namespace n4 {  // 类模板和类模板之间、类模板和类之间可以互相继承，有四种情况
+namespace n4 {
+// 类模板和类模板之间、类模板和类之间可以互相继承，有四种情况
 namespace test1 {  // 类模板从类模板派生
 template <class T1, class T2>
 class A {
