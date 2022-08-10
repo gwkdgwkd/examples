@@ -22,7 +22,7 @@ void func1() {
   // First element before rotation: one
 }
 void func2() {
-  // 不需要对容器中的全部元素进行旋转:
+  // 不需要对容器中的全部元素进行旋转：
   std::vector<std::string> words{"one", "two",   "three", "four", "five",
                                  "six", "seven", "eight", "nine", "ten"};
   auto start = std::find(words.begin(), std::end(words), "two");
@@ -40,7 +40,8 @@ void func2() {
 // rotate_copy()算法会在新序列中生成一个序列的旋转副本，并保持原序列不变。
 // rotate_copy()的前3个参数和copy()是相同的；
 // 第4个参数是一个输出迭代器，它指向目的序列的第一个元素。
-// 这个算法会返回一个目的序列的输出迭代器，它指向最后一个被复制元素的下一个位置。
+// 这个算法会返回一个目的序列的输出迭代器，
+// 它指向最后一个被复制元素的下一个位置。
 // rotate_copy()返回的迭代器是words_copy中元素的结束迭代器。
 void func3() {
   std::vector<std::string> words{"one", "two",   "three", "four", "five",
@@ -60,7 +61,7 @@ void func3() {
   // five six seven two three four
 }
 void func4() {
-  // rotate_copy()返回的迭代器是words_copy中元素的结束迭代器
+  // rotate_copy()返回的迭代器是words_copy中元素的结束迭代器：
   std::vector<std::string> words{"one", "two",   "three", "four", "five",
                                  "six", "seven", "eight", "nine", "ten"};
   auto start = std::find(std::begin(words), std::end(words), "two");

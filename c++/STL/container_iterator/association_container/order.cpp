@@ -2,21 +2,30 @@
 #include <set>
 
 // 无论关联式容器中存储的是基础类型（如int、double、float等）数据，
-// 还是自定义的结构体变量或类对象（包括string类），都可以使用函数对象的方式为该容器自定义排序规则。
+// 还是自定义的结构体变量或类对象（包括string类），
+// 都可以使用函数对象的方式为该容器自定义排序规则。
 
-// 在STL标准库中，包含几个可供关联式容器使用的排序规则:
-//  std::less<T>    	      底层采用<运算符实现升序排序，各关联式容器默认采用的排序规则。
-//  std::greater<T> 	      底层采用>运算符实现降序排序，同样适用于各个关联式容器。
-//  std::less_equal<T> 	    底层采用<=运算符实现升序排序，多用于multimap和multiset容器。
-//  std::greater_equal<T> 	底层采用>=运算符实现降序排序，多用于multimap和multiset容器。
-// 底层也是采用函数对象的方式实现的，以std::less<T>为例，其底层实现为：
+// 在STL标准库中，包含几个可供关联式容器使用的排序规则：
+// 1.std::less<T>
+//   底层采用<运算符实现升序排序，各关联式容器默认采用的排序规则。
+// 2.std::greater<T>
+//   底层采用>运算符实现降序排序，同样适用于各个关联式容器。
+// 3.std::less_equal<T>
+//   底层采用<=运算符实现升序排序，多用于multimap和multiset容器。
+// 4.std::greater_equal<T>
+//   底层采用>=运算符实现降序排序，多用于multimap和multiset容器。
+// 排序规则底层也是采用函数对象的方式实现的，
+// 以std::less<T>为例，其底层实现为：
 // template <typename T>
 // struct less {
-//   bool operator()(const T &_lhs, const T &_rhs) const { return _lhs < _rhs; }
+//   bool operator()(const T &_lhs, const T &_rhs) const{
+//     return _lhs < _rhs;
+//   }
 // }
 
 namespace n1 {
-// 其定义了一个函数对象类，并在其重载()运算符的方法中自定义了新的排序规则，即按照字符串的长度做升序排序。
+// 定义一个函数对象类，并在其重载()运算符的方法中自定义了新的排序规则，
+// 按照字符串的长度做升序排序：
 class cmp {  // 函数对象类cmp也可以使用struct关键字创建
  public:
   // 重载()运算符
@@ -39,12 +48,13 @@ void test() {
   // EEEE
   // FFFFF
 
-  // 由于是以字符串的长度为准进行排序，因此其无法存储相同长度的多个字符串，没有DDDD
+  // 由于是以字符串的长度为准进行排序，
+  // 因此其无法存储相同长度的多个字符串，没有DDDD
 }
 }  // namespace n1
 
 namespace n2 {
-// 在定义函数对象类时，也可以将其定义为模板类
+// 在定义函数对象类时，也可以将其定义为模板类：
 template <typename T>
 class cmp {
  public:
@@ -104,8 +114,10 @@ void test() {
 }  // namespace n3
 
 namespace n4 {
-// n3以全局函数的形式实现对<运算符的重载，还可以使用成员函数或者友元函数的形式实现。
-// 其中，当以成员函数的方式重载<运算符时，该成员函数必须声明为const类型，且参数也必须为const类型：
+// n3以全局函数的形式实现对<运算符的重载，
+// 还可以使用成员函数或者友元函数的形式实现。
+// 其中，当以成员函数的方式重载<运算符时，
+// 该成员函数必须声明为const类型，且参数也必须为const类型：
 class myString {
  public:
   myString(std::string tempStr) : str(tempStr){};

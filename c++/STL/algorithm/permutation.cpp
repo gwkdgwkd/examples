@@ -5,15 +5,19 @@
 
 // next_permutation()会生成一个序列的重排列，
 // 它是所有可能的字典序中的下一个排列，默认使用<运算符来做这些事情。
-// 它的参数为定义序列的迭代器和一个返回布尔值的函数，这个函数在下一个排列大于上一个排列时返回true，
+// 它的参数为定义序列的迭代器和一个返回布尔值的函数，
+// 这个函数在下一个排列大于上一个排列时返回true，
 // 如果上一个排列是序列中最大的，它返回false，所以会生成字典序最小的排列。
 
 // next_permutation()是按照字典升序的方式生成的排列。
-// 当我们想以降序的方式生成排列时，可以使用prev_permutation()。
-// prev_permutation和next_permutation()一样有两个版本，默认使用<来比较元素。
-// 因为排列是以降序的方式生成的，所以算法大多数时候会返回true。当生成最大排列时，返回false。
+// 当想以降序的方式生成排列时，可以使用prev_permutation()。
+// prev_permutation和next_permutation()一样有两个版本，
+// 默认使用<来比较元素。
+// 因为排列是以降序的方式生成的，所以算法大多数时候会返回true。
+// 当生成最大排列时，返回false。
 
-// is_permutation()算法可以用来检查一个序列是不是另一个序列的排列，如果是，会返回true。
+// is_permutation()算法可以用来检查一个序列是不是另一个序列的排列，
+// 如果是，会返回true。
 
 void func1() {
   std::vector<int> range{1, 2, 3};
@@ -22,8 +26,10 @@ void func1() {
               std::ostream_iterator<int>{std::cout, " "});
     std::cout << std::endl;
   } while (std::next_permutation(std::begin(range), std::end(range)));
-  // 当next_permutation()返回false时，循环结束，表明到达最小排列。
-  // 这样恰好可以生成序列的全部排列，只是因为序列的初始排列为1、2、3，这是排列集合中的第一个排列。
+  // 当next_permutation()返回false时，
+  // 循环结束，表明到达最小排列。
+  // 这样恰好可以生成序列的全部排列，
+  // 只是因为序列的初始排列为1、2、3，这是排列集合中的第一个排列。
 
   // 1 2 3
   // 1 3 2
@@ -50,7 +56,8 @@ void func2() {
 }
 
 void func3() {
-  // 有一种方法可以得到序列的全排列，就是使用next_permutation()得到的最小排列：
+  // 有一种方法可以得到序列的全排列，
+  // 就是使用next_permutation()得到的最小排列：
   std::vector<std::string> words{"one", "two", "three"};
   while (std::next_permutation(std::begin(words), std::end(words)))
     ;
@@ -149,7 +156,8 @@ void func7() {
   // 另一个版本的is_permutation()允许只用开始迭代器指定第二个序列。
   // 在这种情况下，第二个序列可以包含比第一个序列还要多的元素，
   // 但是只会被认为拥有第一个序列中的元素个数。
-  // 然而，并不推荐使用它，因为如果第二个序列包含的元素少于第一个序列，会产生未定义的错误。
+  // 然而，并不推荐使用它，因为如果第二个序列包含的元素少于第一个序列，
+  // 会产生未定义的错误。
   // C++11只有这种方式吧？
   std::vector<double> data1{44.5, 22.0, 15.6, 1.5};
   std::vector<double> data2{1.5, 44.5, 15.6, 22.0, 88.0, 999.0};

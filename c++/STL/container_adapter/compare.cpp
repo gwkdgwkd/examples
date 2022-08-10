@@ -3,18 +3,21 @@
 #include <vector>
 
 // 无论priority_queue中存储的是基础数据类型（int、double等），
-// 还是string类对象或者自定义的类对象，都可以使用函数对象的方式自定义排序规则。
+// 还是string类对象或者自定义的类对象，
+// 都可以使用函数对象的方式自定义排序规则。
 template <typename T>
 class cmp {  // struct也行
  public:
   bool operator()(T a, T b) { return a > b; }
 };
 
-// 当priority_queue容器适配器中存储的数据类型为结构体或者类对象（包括string类对象）时，
+// 当priority_queue容器适配器中存储的数据类型为结构体或者类（包括string）时，
 // 还可以通过重载其>或者<运算符，间接实现自定义排序规则的目的。
 // 此方式仅适用于priority_queue容器中存储的为类对象或者结构体变量，
-// 也就是说，当存储类型为类的指针对象或者结构体指针变量时，此方式将不再适用，而只能使用函数对象的方式。
-// <function>头文件中的std::less<T>和std::greater<T>，各自底层实现采用的都是函数对象的方式。
+// 也就是说，当存储类型为类的指针对象或者结构体指针变量时，
+// 此方式将不再适用，而只能使用函数对象的方式。
+// <function>头文件中的std::less<T>和std::greater<T>，
+// 各自底层实现采用的都是函数对象的方式。
 // 比如，std::less<T>的底层实现代码为：
 //     template <typename T>
 //     struct less {
@@ -49,7 +52,8 @@ bool operator<(const node &a, const node &b) {
 // 也可以以友元函数或者成员函数的方式重载>或者<运算符。
 // 需要注意的是，以成员函数的方式重载>或者<运算符时，
 // 该成员函数必须声明为const类型，且参数也必须为const类型，
-// 至于参数的传值方式是采用按引用传递还是按值传递，都可以（建议采用按引用传递，效率更高）。
+// 至于参数的传值方式是采用按引用传递还是按值传递，
+// 都可以（建议采用按引用传递，效率更高）：
 class node1 {
  public:
   node1(int x = 0, int y = 0) : x(x), y(y) {}
@@ -62,7 +66,7 @@ class node1 {
     return 0;
   }
 };
-// 在以友元函数的方式重载<或者>运算符时，要求参数必须使用const修饰
+// 在以友元函数的方式重载<或者>运算符时，要求参数必须使用const修饰：
 class node2 {
  public:
   node2(int x = 0, int y = 0) : x(x), y(y) {}
@@ -77,9 +81,10 @@ bool operator<(const node2 &a, const node2 &b) {
   return 0;
 }
 
-// 总的来说，以函数对象的方式自定义priority_queue的排序规则，适用于任何情况；
+// 总的来说，以函数对象的方式自定义priority_queue的排序规则，
+// 适用于任何情况；
 // 而以重载>或者<运算符间接实现priority_queue自定义排序的方式，
-// 仅适用于priority_queue中存储的是结构体变量或者类对象（包括string类对象）。
+// 仅适用于priority_queue中存储的是结构体或者类（包括string）。
 
 int main() {
   int a[] = {4, 2, 3, 5, 6};
