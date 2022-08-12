@@ -7,7 +7,8 @@
 
 // 如果容器中包括了通过new创建的指针，切记在容器对象析构前将指针delete掉
 
-// 指针容器在自己被析构时会析构所包含的每个元素，但指针的“析构函数”不做任何事情，当然也不会调用delete。
+// 指针容器在自己被析构时会析构所包含的每个元素，
+// 但指针的析构函数不做任何事情，当然也不会调用delete。
 class Widget {};
 void doSomething() {  // 导致资源泄露
   std::vector<Widget *> vwp;
@@ -42,15 +43,16 @@ void doSomething2() {
   std::for_each(vwp.begin(), vwp.end(), DeleteObject<Widget>());
 }
 
-// 从没有虚析构函数的类进行公有继承是C++的一项重要禁忌
+// 从没有虚析构函数的类进行公有继承是C++的一项重要禁忌：
 class SpecialString : public std::string {};  // string没有虚析构函数
 void doSomething3() {
   std::deque<SpecialString *> dssp;
   std::for_each(dssp.begin(), dssp.end(), DeleteObject<std::string>());
-  // 不确定的行为。通过基类的指针删除派生类对象，而基类又没有虚析构函数
+  // 不确定的行为，通过基类的指针删除派生类对象，而基类又没有虚析构函数
 }
 
-// 通过让编译器推断出传给DeleteObject::operator()的指针的类型，可以消除这个错误
+// 通过让编译器推断出传给DeleteObject::operator()的指针的类型，
+// 可以消除这个错误：
 struct DeleteObject1 {
   template <typename T>
   void operator()(const T *ptr) const {
@@ -64,7 +66,8 @@ void doSomething4() {
   }
   for_each(dssp.begin(), dssp.end(), DeleteObject1());
   // 直接而类型安全，正是我们所希望的方式，仍然不是异常安全的。
-  // 如果在SpecialString被创建而for_each的调用还没有开始时有异常抛出，则会资源泄露。
+  // 如果在SpecialString被创建，
+  // 而for_each的调用还没有开始时有异常抛出，则会资源泄露。
   // 有很多方式类解决这个问题，最简单的是用智能指针代替指针容器。
 }
 
@@ -73,8 +76,9 @@ void doSomething5() {
   for (int i = 0; i < 10; ++i) {
     vwp.push_back(std::shared_ptr<Widget>(new Widget));
   }
-  // 不会有Widget资源泄露，即使上面的代码有异常被抛出
-  // 永远都不要错误的认为：可以通过创建auto_ptr的容器使指针被自动删除。这个想法很可怕，也很危险。
+  // 不会有Widget资源泄露，即使上面的代码有异常被抛出。
+  // 永远都不要认为：可以通过创建auto_ptr的容器使指针被自动删除。
+  // 这个想法是错误的，很可怕，也很危险。
 }
 
 int main() { return 0; }
