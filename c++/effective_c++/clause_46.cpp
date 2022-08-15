@@ -4,7 +4,8 @@ using namespace std;
 
 // 需要类型转换时请为模板定义非成员函数
 
-// 条款24讨论过为什么惟有non-member函数才有能力“在所有实参身上实施隐式类型转换”。
+// 条款24讨论过为什么：
+// 惟有non-member函数才有能力在所有实参身上实施隐式类型转换。
 template <typename T>
 class Rational {
  public:
@@ -27,13 +28,15 @@ class Rational1 {
   Rational1(const T& numerator = 0, const T& denominator = 1) {}
   const T numerator() const;
   const T denominator() const;
-  // template名称可以被用来作为“template和其参数”的间略表达式
+  // template名称可以被用来作为template和其参数的间略表达式：
   friend const Rational1 operator*(const Rational1& lhs, const Rational1& rh);
   // friend const Rational1<T> operator*(const Rational1<T>& lhs,
   //                                     const Rational1<T>& rh); // 也可以
 };
-// 只是在template声明，没有被定义出来。让class外部的operate* template提供定义，行不通。
-// 自己声明了一个函数，就有责任定义那个函数。既然没有提供定义，连接器当然找不到它。
+// 只是在template声明，没有被定义出来。
+// 让class外部的operate* template提供定义，行不通。
+// 自己声明了一个函数，就有责任定义那个函数。
+// 既然没有提供定义，连接器当然找不到它。
 template <typename T>
 const Rational1<T> operator*(const Rational1<T>& lhs, const Rational1<T>& rhs) {
   return lhs;
@@ -71,17 +74,21 @@ const Rational2<T> doMultiply(const Rational2<T>& lhs,
 }
 
 // 请记住：
-// 当我们编写一个class template时，它提供的“与此template相关的”函数支持“所有参数的隐式类型转换”时，
-// 请将那些函数定义为“class template内部的friend函数”。
+// 当我们编写一个class template时，
+// 它提供的与此template相关的函数支持所有参数的隐式类型转换时，
+// 请将那些函数定义为class template内部的friend函数。
 
 int main() {
-  Rational<int> oneHalf(1, 2);  // 条款24的例子，只不过换成来template
+  // 条款24的例子，只不过换成来template：
+  Rational<int> oneHalf(1, 2);
   // Rational<int> result = oneHalf * 2;  // 错误
-  // 编译器知道我们尝试调用什么函数，但不知道我们想调用哪个函数，推导不出来。
+  // 编译器知道尝试调用什么函数，
+  // 但不知道想调用哪个函数，推导不出来。
   // 编译器在实参推到过程中从不将隐式转换函数考虑在内。
 
   Rational1<int> oneHalf1(1, 2);
-  // Rational1<int> result1 = oneHalf1 * 2;  // 可以编译通过，但是连接失败
+  // 可以编译通过，但是链接失败：
+  // Rational1<int> result1 = oneHalf1 * 2;  /
 
   Rational2<int> oneHalf2(1, 2);
   Rational2<int> result2 = oneHalf2 * 2;

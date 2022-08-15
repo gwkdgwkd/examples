@@ -6,14 +6,14 @@ using namespace std;
 // 令class支持隐式类型转换通常是个糟糕的主意，最常见的例外是在建立数值类型时。
 class Rational1 {
  public:
-  // 不为explicit，允许int to Rational1隐式转换。
+  // 没有explicit，允许int to Rational1隐式转换：
   Rational1(int numerator = 0, int denominator = 1)
       : n(numerator), d(denominator) {}
   int numerator() const { return n; };
   int denominator() const { return d; };
   void display() { cout << n << "," << d << endl; }
 
-  // 不确定是member函数、non-member函数或non-member friend函数来实现它们。
+  // 不确定用member、non-member或non-member friend来实现它们：
   const Rational1 operator*(const Rational1& rhs) const {  // member函数
     Rational1 result(this->numerator() * rhs.numerator(),
                      this->denominator() * rhs.denominator());
@@ -41,7 +41,8 @@ class Rational2 {
   int n, d;
 };
 
-// 让operator*成为一个non-member函数，编译器允许每个实参身上执行隐式类型转换：
+// 让operator*成为一个non-member函数，
+// 编译器允许每个实参身上执行隐式类型转换：
 class Rational3 {
  public:
   Rational3(int numerator = 0, int denominator = 1)
@@ -60,11 +61,12 @@ const Rational3 operator*(const Rational3& lhs, const Rational3& rhs) {
 // Rational3的operator*是否应该成为friend函数呢？
 // 对Rational3来说，答案式否定的。
 // 因为operator*完全可以通过Rational3的public接口完成任务。
-// 无论何时如果能避免friend函数就该避免。朋友带来的麻烦往往多个其价值。
+// 无论何时如果能避免friend函数就该避免，朋友带来的麻烦往往多个其价值。
 // 不应该只因为函数不该成为member，就自动让它成为friend。
 
 // 请记住：
-// 如果需要为某个函数的所有参数（包括被this指针所指的哪个隐喻参数）进行类型转换，
+// 如果需要为某个函数的所有参数，
+// 包括被this指针所指的哪个隐喻参数进行类型转换，
 // 那么这个函数必须是个non-member。
 
 int main() {
@@ -74,12 +76,17 @@ int main() {
   Rational1 c1 = a1 * b1;
   c1 = c1 * a1;
   c1.display();  // 8,128
+
   // 尝试混合运算(乘法应该满足交换率)：
   c1 = a1 * 2;  // 很好，result = a1.operator*(2);
-  // c1 = 2 * a1;  // 错误，result = 2.operator*(al); 2没有operator*成员函数
-  // c1 = a1 * 2;发生来隐式类型转换，编译知道正在传递int，
-  // 但函数需要Rational1;也知道调用构造函数就能把int变成Rational1，于是就那样做了。
+
+  // 错误，result = 2.operator*(al); 2没有operator*成员函数：
+  // c1 = 2 * a1;
+
+  // 发生来隐式类型转换，编译知道正在传递int，但函数需要Rational1；
+  // 也知道调用构造函数就能把int变成Rational1，于是就那样做了。
   // 当然，只有non-explicit构造函数，编译器才会这么做。
+  // c1 = a1 * 2;
 
   // 只有当参数被列于参数列内，这个参数才是隐式类型转换的合格参与者。
   // 所以c1 = 2 * a1不能通过编译。

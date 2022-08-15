@@ -5,11 +5,14 @@ using namespace std;
 
 // 确定你的public继承模型是is-a关系
 
-// 以C++进行面向对象编程，最重要的一个规则是：public继承意味着“is-a”的关系。
+// 以C++进行面向对象编程，最重要的一个规则是：
+// public继承意味着is-a的关系。
 // 把这个规则牢牢烙印在心中吧！
-// 基类对象可以出现的地方，public派生类对象一样可以出现，就是所谓的liskov substitution principle。
+// 基类对象可以出现的地方，public派生类对象一样可以出现，
+// 就是所谓的liskov substitution principle。
 
-// 在C++公有继承中，任何函数如果期望获得一个类型为Person（或指针或引用）的实参，
+// 在C++公有继承中，
+// 任何函数如果期望获得一个Person（或指针或引用）的实参，
 // 也都愿意接受一个Student对象（或指针或引用）：
 class Person {};
 class Student : public Person {};
@@ -32,13 +35,14 @@ class FlyingBird1 : public Bird1 {
 class Penguin1 : public Bird1 {};
 
 // 另一个思想派别的想法是，为企鹅重新定义fly函数，令它产生一个运行期错误。
-// 表明“企鹅会飞，但尝试那么做是一种错误”。
-// “企鹅不会飞”这一限制应该由编译器来实施。
+// 表明企鹅会飞，但尝试那么做是一种错误。
+// 企鹅不会飞这一限制应该由编译器来实施。
 class Bird2 {};
 class Penguin2 : public Bird2 {};
-// 应该采取“在编译期拒绝企鹅飞行”的设计，而不是“只在运行期才能检查错误”的设计。
+// 应该采取在编译期拒绝企鹅飞行的设计，而不是只在运行期才能检查错误的设计。
 
-// 正方形应该公有继承矩形么？应该，每个人都知道正方形是一种矩形，反之则不一定。
+// 正方形应该公有继承矩形么？
+// 应该，每个人都知道正方形是一种矩形，反之则不一定。
 class Rectangle {
  public:
   virtual void setHeight(int newHeight) {}
@@ -53,9 +57,11 @@ void makeBigger(Rectangle& r) {
   assert(r.height() == oldHeight);
 }
 class Square : public Rectangle {};
-// 某些可以作用于矩形的方法（单独修改宽度）却不能作用于正方形上。与public继承主张的思想不一致。
+// 某些可以作用于矩形的方法（单独修改宽度）却不能作用于正方形上。
+// 与public继承主张的思想不一致。
 
-// 除is-a（是一个）关系外，还有has-a（有一个）和is-implemented-in-terms-of(根据某物实现出)。
+// 除is-a（是一个）关系外，
+// 还有has-a（有一个）和is-implemented-in-terms-of(根据某物实现出)。
 
 // 请记住：
 // public继承意味is-a。
@@ -74,9 +80,11 @@ int main() {
   // p2.fly();  // 错误
 
   Square square;
-  assert(square.width() == square.height());  // 所有正方形一定为真
+  // 所有正方形一定为真：
+  assert(square.width() == square.height());
   makeBigger(square);  // is-a关系，可以为其增加面积
-  assert(square.width() == square.height());  // 对所有正方形应仍然为真
+  // 对所有正方形应仍然为真：
+  assert(square.width() == square.height());
 
   return 0;
 }

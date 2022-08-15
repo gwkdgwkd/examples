@@ -15,8 +15,8 @@ class WebBrowser {
     removeCookies();
   };
 };
-// 在C++中，比较自然的做法是让clearEverything成为一个non-member函数
-// 并且位于WebBrowser同一个命名空间内（便于客户轻松扩展）
+// 在C++中，比较自然的做法是让clearEverything成为一个non-member函数，
+// 并且位于WebBrowser同一个命名空间内（便于客户轻松扩展）：
 void clearEverything(WebBrowser &wb) {
   wb.clearCache();
   wb.clearHistory();
@@ -24,11 +24,13 @@ void clearEverything(WebBrowser &wb) {
 };
 
 // non-member的clearEverything和member的clearEverything哪个好呢？
-// 面向对象守则要求，数据以及数据的操作应该被捆绑在一起，意味着建议member函数是好的。
+// 面向对象守则要求，数据以及数据的操作应该被捆绑在一起，
+// 意味着建议member函数是好的。
 // 不幸这个建议不正确，这是对面向对象真实意义的一个误解。
 // 面向对象要求数据应该尽可能被封装，然而与直观相反，
 // member的clearEverything带来的封装性比non-member函数低。
-// 此外non-member的clearEverything函数可允许对WebBrowser相关机能有较大的包裹弹性，
+// 此外non-member的clearEverything函数，
+// 可允许对WebBrowser相关机能有较大的包裹弹性，
 // 而那最终导致较低的编译相依度，增加WebBrowser的可延伸性。
 
 // 许多方面non-member做法比member做法好：
@@ -40,8 +42,9 @@ void clearEverything(WebBrowser &wb) {
 // 它使我们能够改变事物而只影响有限客户。
 
 // 作为一种粗超的测量方法，越多函数可以访问对象内部的数据，数据的封装性就越低。
-// non-member和member提供相同功能时，导致较大封装性的是non-member non-friend函数，
-// 因为它并不增加“能够访问class内private成分”的函数数量。
+// non-member和member提供相同功能时，
+// 导致较大封装性的是non-member non-friend函数，
+// 因为它并不增加能够访问class内private成分的函数数量。
 
 // 请记住：
 // 宁可拿non-member、non-friend函数替换member函数。

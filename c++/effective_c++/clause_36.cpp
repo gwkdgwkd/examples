@@ -20,7 +20,8 @@ class E : public B {
 // virtual函数是动态绑定。
 
 // 适用与B对象的每一件事，也适用于D对象，因为每个D对象都是一个B对象；
-// B的derived class一定会继承mf的接口和实现，因为mf是B的一个non-virtual函数。
+// B的derived class一定会继承mf的接口和实现，
+// 因为mf是B的一个non-virtual函数。
 // 如果D重新定义mf，那么设计就会出现矛盾。
 
 // 请记住：
