@@ -24,7 +24,8 @@ class BookEntry {      // 通讯录中的条目
             const string& imageFileName = "",
             const string& audioClipFileName = "");
   ~BookEntry();
-  void addPhoneNumber(const PhoneNumber& number);  // 通过这个函数加入电话号码
+  // 通过这个函数加入电话号码
+  void addPhoneNumber(const PhoneNumber& number);
 
  private:
   string theName;               // 人的姓名
@@ -49,7 +50,8 @@ BookEntry::BookEntry(const string& name, const string& address,
 BookEntry::~BookEntry() {
   // 析构函数负责删除这些指针，确保BookEntry对象不会发生资源泄漏。
   // 因为C++确保删除空指针是安全的，
-  // 所以BookEntry的析构函数在删除指针前不需要检测这些指针是否指向了某些对象。
+  // 所以BookEntry的析构函数在删除指针前，
+  // 不需要检测这些指针是否指向了某些对象。
   delete theImage;
   delete theAudioClip;
 }
@@ -57,8 +59,10 @@ BookEntry::~BookEntry() {
 // 如果BookEntry的构造函数正在执行中，一个异常被抛出，会发生什么情况呢？
 // 一个异常被抛出，可以是因为operator new不能给AudioClip分配足够的内存，
 // 也可以因为AudioClip的构造函数自己抛出一个异常。
-// 不论什么原因，如果在BookEntry构造函数内抛出异常，这个异常将传递到建立BookEntry对象的地方。
-// 现在假设建立theAudioClip对象建立时，一个异常被抛出（而且传递程序控制权到BookEntry构造函数的外面），
+// 不论什么原因，如果在BookEntry构造函数内抛出异常，
+// 这个异常将传递到建立BookEntry对象的地方。
+// 现在假设建立theAudioClip对象建立时，
+// 一个异常被抛出（而且传递程序控制权到BookEntry构造函数的外面），
 // 那么谁来负责删除theImage已经指向的对象呢？
 // 答案显然应该是由BookEntry来做，但是这个想当然的答案是错的。
 // ~BookEntry()根本不会被调用，永远不会。
@@ -81,12 +85,15 @@ void testBookEntryClass() {
 // 这是因为如果new操作没有成功完成，程序不会对pb进行赋值操作。
 // 如果BookEntry的构造函数抛出一个异常，pb将是一个空值，
 // 所以在catch块中删除它除了让你自己感觉良好以外没有任何作用。
-// 用灵巧指针（smart pointer）类auto_ptr<BookEntry>代替raw BookEntry*也不会也什么作用，
+// 用灵巧指针类auto_ptr<BookEntry>代替raw BookEntry*也不会也什么作用，
 // 因为new操作成功完成前，也没有对pb进行赋值操作。
-// C++拒绝为没有完成构造操作的对象调用析构函数是有一些原因的，而不是故意为你制造困难。
+// C++拒绝为没有完成构造操作的对象调用析构函数是有一些原因的，
+// 而不是故意为你制造困难。
 // 原因是：在很多情况下这么做是没有意义的，甚至是有害的。
-// 因为当对象在构造中抛出异常后C++不负责清除对象，所以你必须重新设计你的构造函数以让它们自己清除。
-// 经常用的方法是捕获所有的异常，然后执行一些清除代码，最后再重新抛出异常让它继续转递。
+// 因为当对象在构造中抛出异常后C++不负责清除对象，
+// 所以你必须重新设计你的构造函数以让它们自己清除。
+// 经常用的方法是捕获所有的异常，然后执行一些清除代码，
+// 最后再重新抛出异常让它继续转递。
 // BookEntry::BookEntry(const string& name, const string& address,
 //                      const string& imageFileName,
 //                      const string& audioClipFileName)
@@ -104,15 +111,17 @@ void testBookEntryClass() {
 //     throw;  // 继续传递异常
 //   }
 // }
-// 不用为BookEntry中的非指针数据成员操心，在类的构造函数被调用之前数据成员就被自动地初始化。
+// 不用为BookEntry中的非指针数据成员操心，
+// 在类的构造函数被调用之前数据成员就被自动地初始化。
 // 所以如果BookEntry构造函数体开始执行，
 // 对象的theName,theAddress和thePhones数据成员已经被完全构造好了。
 // 这些数据可以被看做是完全构造的对象，所以它们将被自动释放，不用你介入操作。
 // 当然如果这些对象的构造函数调用可能会抛出异常的函数，
-// 那么那些构造函数必须自己去考虑捕获异常并在继续传递这些异常之前完成必需的清除操作。
+// 那么构造函数必须自己去考虑捕获异常并在继续传递这些异常之前完成必需的清除操作。
 
 // BookEntry构造函数的catch块中的语句与在BookEntry的析构函数的语句几乎一样。
-// 这里的代码重复是绝对不可容忍的，所以最好的方法是把通用代码移入一个私有helper function中，
+// 这里的代码重复是绝对不可容忍的，
+// 所以最好的方法是把通用代码移入一个私有helper function中，
 // 让构造函数与析构函数都调用它。
 class BookEntry1 {
  public:
@@ -145,7 +154,7 @@ BookEntry1::BookEntry1(const string& name, const string& address,
 }
 BookEntry1::~BookEntry1() { cleanup(); }
 
-// 假设我们略微改动一下设计，让theImage和theAudioClip是常量（constant）指针类型：
+// 略微改动一下设计，让theImage和theAudioClip是常量指针类型：
 class BookEntry2 {
  public:
   BookEntry2(const string& name, const string& address = "",
@@ -161,7 +170,8 @@ class BookEntry2 {
   Image* theImage;              // 他们的图像
   AudioClip* theAudioClip;      // 他们的一段声音片段
 };
-// 必须通过BookEntry构造函数的成员初始化表来初始化这样的指针，因为再也没有其它地方可以给const指针赋值。
+// 必须通过BookEntry构造函数的成员初始化表来初始化这样的指针，
+// 因为再也没有其它地方可以给const指针赋值。
 // 通常会这样初始化theImage和theAudioClip：
 BookEntry2::BookEntry2(const string& name, const string& address,
                        const string& imageFileName,
@@ -172,14 +182,17 @@ BookEntry2::BookEntry2(const string& name, const string& address,
       theAudioClip(audioClipFileName != "" ? new AudioClip(audioClipFileName)
                                            : 0) {}
 // 这样做导致我们原先一直想避免的问题重新出现：
-// 如果theAudioClip初始化时一个异常被抛出，theImage所指的对象不会被释放。
-// 而且我们不能通过在构造函数中增加try和catch语句来解决问题，
+// 如果theAudioClip初始化时一个异常被抛出，
+// theImage所指的对象不会被释放。
+// 而且不能通过在构造函数中增加try和catch语句来解决问题，
 // 因为try和catch是语句，而成员初始化表仅允许有表达式。
-// 这也是为什么我们必须在theImage和theAudioClip的初始化中使用?:以代替if-then-else的原因。
+// 这也是为什么必须在theImage和theAudioClip的初始化中，
+// 使用?:以代替if-then-else的原因。
 
 // 无论如何，在异常传递之前完成清除工作的唯一的方法就是捕获这些异常，
-// 所以如果我们不能在成员初始化表中放入try和catch语句，我们把它们移到其它地方。
-// 一种可能是在私有成员函数中，用这些函数返回指针指向初始化过的theImage和theAudioClip对象。
+// 所以如果不能在成员初始化表中放入try和catch语句，把它们移到其它地方。
+// 一种可能是在私有成员函数中，
+// 用这些函数返回指针指向初始化过的theImage和theAudioClip对象。
 class BookEntry3 {
  public:
   BookEntry3(const string& name, const string& address = "",
@@ -223,7 +236,7 @@ AudioClip* BookEntry3::initAudioClip(const string& audioClipFileName) {
   }
 }
 // 上面的程序的确不错，也解决了令我们头疼不已的问题。
-// 不过也有缺点，在原则上应该属于构造函数的代码却分散在几个函数里，这令我们很难维护。
+// 不过也有缺点，在原则上应该属于构造函数的代码却分散在几个函数里，这很难维护。
 
 // 更好的解法决方法是采用条款M9的建议，
 // 把theImage和theAudioClip指向的对象做为一个资源，被一些局部对象管理。
@@ -242,7 +255,7 @@ class BookEntry4 {
   list<PhoneNumber> thePhones;  // 他的电话号码
 };
 // 这样做使得BookEntry的构造函数即使在存在异常的情况下也能做到不泄漏资源，
-// 而且让我们能够使用成员初始化表来初始化theImage和theAudioClip：
+// 而且能够使用成员初始化表来初始化theImage和theAudioClip：
 BookEntry4::BookEntry4(const string& name, const string& address,
                        const string& imageFileName,
                        const string& audioClipFileName)
@@ -251,7 +264,8 @@ BookEntry4::BookEntry4(const string& name, const string& address,
       theImage(imageFileName != "" ? new Image(imageFileName) : 0),
       theAudioClip(audioClipFileName != "" ? new AudioClip(audioClipFileName)
                                            : 0) {}
-// 如果在初始化theAudioClip时抛出异常，theImage已经是一个被完全构造的对象，
+// 如果在初始化theAudioClip时抛出异常，
+// theImage已经是一个被完全构造的对象，
 // 所以它能被自动删除掉，就象theName, theAddress和thePhones一样。
 // 而且因为theImage和theAudioClip现在是包含在BookEntry中的对象，
 // 当BookEntry被删除时它们能被自动地删除。
@@ -259,11 +273,14 @@ BookEntry4::BookEntry4(const string& name, const string& address,
 // 可以这样简化BookEntry的析构函数：
 BookEntry4::~BookEntry4() {}
 
-// 如果你用对应的智能指针对象替代指针成员变量，就可以防止构造函数在存在异常时发生资源泄漏，
-// 你也不用手工在析构函数中释放资源，并且你还能象以前使用非const指针一样使用const指针，给其赋值。
+// 如果你用对应的智能指针对象替代指针成员变量，
+// 就可以防止构造函数在存在异常时发生资源泄漏，
+// 你也不用手工在析构函数中释放资源，
+// 并且你还能象以前使用非const指针一样使用const指针，给其赋值。
 
 // 在对象构造中，处理各种抛出异常的可能，是一个棘手的问题，
 // 但是auto_ptr(或者类似于 auto_ptr 的类)能化繁为简。
-// 它不仅把令人不好理解的代码隐藏起来，而且使得程序在面对异常的情况下也能保持正常运行。
+// 它不仅把令人不好理解的代码隐藏起来，
+// 而且使得程序在面对异常的情况下也能保持正常运行。
 
 int main() { return 0; }

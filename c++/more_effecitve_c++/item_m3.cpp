@@ -32,9 +32,12 @@ class BalancedBST : public BST {
 void printBSTArray(ostream &s, const BST array[], int numElements) {
   for (int i = 0; i < numElements; ++i) {
     // 这里的array[i]只是一个指针算法的缩写：它所代表的是*(array + i)
-    // array是一个指向数组起始地址的指针，但是array中各元素内存地址与数组的起始地址的间隔究竟有多大呢？
-    // 它们的间隔是i*sizeof(一个在数组里的对象)，因为在array数组[0]到[i]间有i个对象。
-    // 编译器为了建立正确遍历数组的执行代码，它必须能够确定数组中对象的大小，这对编译器来说是很容易做到的。
+    // array是一个指向数组起始地址的指针，
+    // 但是array中各元素内存地址与数组的起始地址的间隔究竟有多大呢？
+    // 它们的间隔是i*sizeof(一个在数组里的对象)，
+    // 因为在array数组[0]到[i]间有i个对象。
+    // 编译器为了建立正确遍历数组的执行代码，
+    // 它必须能够确定数组中对象的大小，这对编译器来说是很容易做到的。
     // 参数array被声明为BST类型，所以array数组中每一个元素都是BST类型，
     // 因此每个元素与数组起始地址的间隔是i*sizeof(BST)。
     s << array[i];
@@ -62,7 +65,7 @@ void deleteArray(ostream &logStream, BST1 array[]) {
 // 这实际意味着执行这样的代码肯定不会有什么好结果。
 // 多态和指针算法不能混合在一起来用，所以数组与多态也不能用在一起。
 
-// 如果不从一个具体类（例如 BST）派生出另一个具体类（例如BalancedBST），
+// 如果不从一个具体类（例如BST）派生出另一个具体类（例如BalancedBST），
 // 那么你就不太可能犯这种使用多态性数组的错误。
 
 int main() {
@@ -70,8 +73,10 @@ int main() {
   printBSTArray(cout, BSTArray, 10);  // 1 1 1 1 1 1 1 1 1 1
   BalancedBST bBSTArray[10];
   printBSTArray(cout, bBSTArray, 10);  // 1 2 1 2 1 2 1 2 1 2
-  // 把一个含有BalancedBST对象的数组变量传递给printBSTArray函数，你的编译器就会犯错误。
-  // 编译器原先已经假设数组中元素与BST对象的大小一致，但是现在数组中每一个对象大小却与BalancedBST一致。
+  // 把一个含有BalancedBST对象的数组变量传递给printBSTArray函数，
+  // 你的编译器就会犯错误。
+  // 编译器原先已经假设数组中元素与BST对象的大小一致，
+  // 但是现在数组中每一个对象大小却与BalancedBST一致。
   // 派生类的长度通常都比基类要长。
 
   BalancedBST1 *balTreeArray = new BalancedBST1[4];
