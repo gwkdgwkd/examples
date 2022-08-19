@@ -25,8 +25,8 @@ using namespace std;
 // 把构造函数和析构函数声明为private，这样做副作用太大。
 // 没有理由让这两个函数都是private，
 // 最好让析构函数成为private，让构造函数成为public。
-// 参考条款26，你可以引进一个专用的伪析构函数，用来访问真正的析构函数，
-// 客户端调用伪析构函数释放他们建立的对象。
+// 参考条款26，你可以引进一个专用的伪析构函数，
+// 用来访问真正的析构函数，客户端调用伪析构函数释放他们建立的对象。
 // 注意，异常处理体系要求所有在栈中的对象的析构函数必须声明为公有！
 // 仅仅在堆中建立对象：
 class UPNumber {
@@ -35,7 +35,7 @@ class UPNumber {
   UPNumber(int initValue) {}
   UPNumber(double initValue) {}
   UPNumber(const UPNumber& rhs) {}
-  // 伪析构函数，一个const成员函数，因为即使是const对象也能被释放。
+  // 伪析构函数，const成员函数，使得const对象也能被释放：
   void destroy() const { delete this; }
 
  private:
@@ -51,9 +51,9 @@ class UPNumber {
 // 通过限制访问一个类的析构函数或它的构造函数来阻止建立非堆对象，
 // 但是在条款26已经说过，这种方法也禁止了继承和包容（containment）。
 class NonNegativeUPNumber : public UPNumber {
-  // 错误!析构函数或构造函数不能编译
+  // 错误，析构函数或构造函数不能编译
 };
-class Asset {  // 错误!析构函数或构造函数不能编译
+class Asset {  // 错误，析构函数或构造函数不能编译
  private:
   UPNumber value;
 };
@@ -70,7 +70,7 @@ class UPNumber1 {
  protected:
   ~UPNumber1() {}
 };  // 声明析构函数为protected
-// 现在正确了，派生类能够访问protected成员
+// 现在正确了，派生类能够访问protected成员：
 class NonNegativeUPNumber1 : public UPNumber1 {};
 class Asset1 {
  public:
@@ -99,7 +99,8 @@ class UPNumber2 {
   UPNumber2();
 
  private:
-  static bool onTheHeap;  // 在构造函数内，指示对象是否被构造在堆上
+  // 在构造函数内，指示对象是否被构造在堆上：
+  static bool onTheHeap;
 };
 bool UPNumber2::onTheHeap = false;
 void* UPNumber2::operator new(size_t size) {
@@ -192,27 +193,28 @@ class Asset2 {
 // 因为对于前者我们只需要一个operator new返回的地址集合。
 // 因为我们能自己编写operator new函数:
 void* operator new(size_t size) {
-  // void* p = getMemory(size);  // 调用一些函数来分配内存
-  // 处理内存不够的情况,把p加入到一个被分配地址的集合;
+  // 调用一些函数来分配内存：
+  // void* p = getMemory(size);
+  // 处理内存不够的情况，把p加入到一个被分配地址的集合
   // return p;
 }
 void operator delete(void* ptr) {
   // releaseMemory(ptr);  // return memory to free store
-  // 从被分配地址的集合中移去ptr;
+  // 从被分配地址的集合中移去ptr
 }
 bool isSafeToDelete(const void* address) {
-  // 返回address是否在被分配地址的集合中;
+  // 返回address是否在被分配地址的集合中
 }
 
 // 在实际当中，有三种因素制约着对这种设计方式的使用：
-// 第一是我们极不愿意在全局域定义任何东西，特别是那些已经具有某种含义的函数，
+// 第一是极不愿意在全局域定义任何东西，特别是那些已经具有某种含义的函数，
 // 象operator new和operator delete。
 // 正如我们所知，只有一个全局域，
 // 只有一种具有正常特征形式的operator new和operator delete。
 // 这样做会使得：
 // 软件与其它实现全局版本的operator new和operator delete的软件不兼容。
 // 第二个因素是效率：
-// 如果我们不需要这些，为什么还要为跟踪返回的地址而负担额外的开销呢？
+// 如果不需要这些，为什么还要为跟踪返回的地址而负担额外的开销呢？
 // 最后一点可能有些平常，但是很重要。
 // 实现isSafeToDelete让它总能够正常工作是不可能的。
 // 难点是多继承下来的类或继承自虚基类的类有多个地址，
@@ -223,8 +225,7 @@ bool isSafeToDelete(const void* address) {
 // 幸运的是C++使用一种抽象mixin基类满足了我们的需要。
 // 抽象基类是不能被实例化的基类，也就是至少具有一个纯虚函数的基类。
 // mixin(“mix in”)类提供某一特定的功能，
-// 并可以与其继承类提供的其它功能相兼容。
-// 这种类几乎都是抽象类。
+// 并可以与其继承类提供的其它功能相兼容，这种类几乎都是抽象类。
 // 因此我们能够使用抽象混合（mixin）基类，
 // 给派生类提供判断指针指向的内存是否由operator new分配的能力。
 class HeapTracked {  // 混合类，跟踪从operator new返回的ptr
@@ -247,30 +248,33 @@ void* HeapTracked::operator new(size_t size) {
   return memPtr;
 }
 void HeapTracked::operator delete(void* ptr) {
-  // 得到一个iterator，用来识别list元素包含的ptr；
+  // 得到一个iterator，用来识别list元素包含的ptr：
   list<RawAddress>::iterator it = find(addresses.begin(), addresses.end(), ptr);
-  if (it != addresses.end()) {  // 如果发现一个元素
-    addresses.erase(it);        // 则删除该元素
-    ::operator delete(ptr);     // 释放内存
-  } else {                      // 否则
-    throw MissingAddress();     // ptr就不是用operator new
-  }                             // 分配的，所以抛出一个异常
+  if (it != addresses.end()) {
+    // 如果发现一个元素则删除该元素：
+    addresses.erase(it);
+    ::operator delete(ptr);  // 释放内存
+  } else {
+    // 否则ptr就不是用operator new分配的，所以抛出一个异常：
+    throw MissingAddress();
+  }
 }
 bool HeapTracked::isOnHeap() const {
-  // 得到一个指针，指向*this占据的内存空间的起始处
+  // 得到一个指针，指向*this占据的内存空间的起始处：
   const void* rawAddress = dynamic_cast<const void*>(this);
   // 前面说过带有多继承或虚基类的对象会有几个地址，
   // 这导致编写全局函数isSafeToDelete会很复杂。
   // 这个问题在isOnHeap中仍然会遇到，
   // 但是因为isOnHeap仅仅用于HeapTracked对象中，
-  // 我们能使用dynamic_cast操作符的一种特殊的特性来消除这个问题。
+  // 能使用dynamic_cast操作符的一种特殊的特性来消除这个问题。
   // 只需简单地放入dynamic_cast，
-  // 把一个指针dynamic_cast成void*类型（或const void*或volatile void*），
+  // 把一个指针dynamic_cast成void*类型，
+  // const void*或volatile void*也可以，
   // 生成的指针将指向原指针指向对象内存的开始处。
   // 但是dynamic_cast只能用于指向至少具有一个虚拟函数的对象的指针上。
   // 该死的isSafeToDelete函数可以用于指向任何类型的指针，
   // 所以dynamic_cast也不能帮助它。
-  // isOnHeap更具有选择性（它只能测试指向HeapTracked对象的指针），
+  // isOnHeap更具有选择性，它只能测试指向HeapTracked对象的指针，
   // 所以能把this指针dynamic_cast成const void*，
   // 变成一个指向当前对象起始地址的指针。
   // 如果HeapTracked::operator new为当前对象分配内存，
@@ -354,10 +358,10 @@ class Asset4 {
 // 但是我们什么都不能辨别出来。
 
 int main() {
-  // 错误!在这里合法，但是当它的析构函数被隐式地调用时，就不合法了：
+  // 错误，在这里合法，但是当它的析构函数被隐式地调用时，就不合法了：
   // UPNumber n;
   UPNumber* p = new UPNumber;  // 正常
-  // delete p;      // 错误!试图调用private析构函数
+  // delete p;      // 错误，试图调用private析构函数
   p->destroy();  // 正确
   // NonNegativeUPNumber n;  // 不可以继承
   // Asset a;                // 可以包容
@@ -371,7 +375,8 @@ int main() {
   Asset1 a1(5);             // 可以包容
 
   // UPNumber2* numberArray = new UPNumber2[100];
-  // terminate called after throwing an instance of 'UPNumber2::HeapConstraintViolation'
+  // terminate called after throwing an instance of
+  // 'UPNumber2::HeapConstraintViolation'
 
   // 这个代码有一个内存泄漏，我们先忽略这个泄漏，
   // 这有利于下面对这条表达式的测试，执行它时会发生什么事情：

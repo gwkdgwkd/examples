@@ -5,7 +5,8 @@
 class SpaceShip2 : public GameObject2 {
  public:
   virtual void collide(GameObject2& otherObject);
-  // 和后来的基于虚函数的方法相似，每种碰撞都由一个独立的函数处理，不过不同的是，
+  // 和后来的基于虚函数的方法相似，
+  // 每种碰撞都由一个独立的函数处理，不过不同的是，
   // 这次，这些函数有着不同的名字，而不是都叫collide。
   virtual void hitSpaceShip(GameObject2& spaceShip);
   virtual void hitSpaceStation(GameObject2& spaceStation);
@@ -14,9 +15,11 @@ class SpaceShip2 : public GameObject2 {
  private:
   typedef void (SpaceShip2::*HitFunctionPtr)(GameObject2&);
   // 在SpaceShip::collide中，
-  // 我们需要一个方法来映射参数otherObject的动态类型到一个成员函数指针（指向一个适当的碰撞处理函数）。
+  // 需要一个方法来映射参数otherObject的动态类型，
+  // 到一个成员函数指针（指向一个适当的碰撞处理函数）。
   // 一个简单的方法是创建一个映射表，给定的类名对应恰当的成员函数指针。
-  // 直接使用一个这样的映射表来实现collide是可行的，但如果增加一个中间函数lookup时，将更好理解。
+  // 直接使用一个这样的映射表来实现collide是可行的，
+  // 但如果增加一个中间函数lookup时，将更好理解。
   // lookup函数接受一个GameObject参数，返回相应的成员函数指针。
   static HitFunctionPtr lookup(const GameObject2& whatWeHit);
   typedef map<string, HitFunctionPtr> HitMap;

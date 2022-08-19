@@ -47,20 +47,20 @@ class NewsLetter {
 // 当构造函数需要一些核心的数据结构时，它就从流中读取信息：
 NewsLetter::NewsLetter(istream& str) {
   while (str) {
-    // 从str读取下一个component 对象;
-    // 把对象加入到newsletter的components对象的链表中去;
+    // 从str读取下一个component对象；
+    // 把对象加入到newsletter的components对象的链表中去；
   }
 }
 // 或者，把这种技巧用于另一个独立出来的函数叫做readComponent：
 // NewsLetter::NewsLetter(istream& str) {
 //   while (str) {
 //     // 把readComponent返回的指针添加到components链表的最后，
-//     // "push_back"一个链表的成员函数，用来在链表最后进行插入操作。
+//     // push_back一个链表的成员函数，用来在链表最后进行插入操作。
 //     components.push_back(readComponent(str));
 //   }
 // }
-// 考虑一下readComponent所做的工作，它根据所读取的数据建立了一个新对象，
-// 或是TextBlock或是Graphic。
+// 考虑一下readComponent所做的工作，
+// 它根据所读取的数据建立了一个新对象，或是TextBlock或是Graphic。
 // 因为它能建立新对象，它的行为与构造函数相似，
 // 而且因为它能建立不同类型的对象，我们称它为虚拟构造函数。
 // 虚拟构造函数是指能够根据输入给它的数据的不同而建立不同类型的对象。
@@ -104,12 +104,13 @@ NewsLetter::NewsLetter(const NewsLetter& rhs) {
 // 我们在这里需要一个虚拟构造函数，
 // 因为链表中包含指向NLComponent对象的指针，
 // 但是我们知道其实每一个指针不是指向TextBlock对象就是指向Graphic对象。
-// 无论它指向谁，我们都想进行正确的拷贝操作，虚拟构造函数能够为我们做到这点。
+// 无论它指向谁，都想进行正确的拷贝操作，虚拟构造函数能够做到这点。
 
 // 虚拟化非成员函数
 // 就象构造函数不能真的成为虚拟函数一样，非成员函数也不能成为真正的虚拟函数。
 // 然而，既然一个函数能够构造出不同类型的新对象是可以理解的，
-// 那么同样也存在这样的非成员函数，可以根据参数的不同动态类型而其行为特性也不同。
+// 那么同样也存在这样的非成员函数，
+// 可以根据参数的不同动态类型而其行为特性也不同。
 // 例如，假设你想为TextBlock和Graphic对象实现一个输出操作符。
 // 显而易见的方法是虚拟化这个输出操作符。
 // 但是输出操作符是operator<<，
@@ -143,7 +144,7 @@ inline ostream& operator<<(ostream& s, const NLComponent& c) {
 int main() {
   TextBlock t;
   Graphic g;
-  t << cout;  // 通过virtual operator<<把t打印到cout中。不寻常的语法
+  t << cout;  // 通过virtual operator<<把t打印到cout中，不寻常的语法
   g << cout;
   // 类的使用者得把stream对象放到<<符号的右边，这与输出操作符一般的用发相反。
 

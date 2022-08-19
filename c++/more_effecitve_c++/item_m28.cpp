@@ -3,7 +3,8 @@
 using namespace std;
 
 // 灵巧（smart）指针
-// 灵巧指针是一种外观和行为都被设计成与内建指针相类似的对象，不过它能提供更多的功能。
+// 灵巧指针是一种外观和行为都被设计成与内建指针相类似的对象，
+// 不过它能提供更多的功能。
 // 它们有许多应用的领域，包括资源管理和重复代码任务的自动化。
 // 当你使用灵巧指针替代C++的内建指针（也就是dumb pointer）,
 // 你就能控制下面这些方面的指针的行为：
@@ -180,7 +181,7 @@ T* SmartPtr<T>::operator->() const {
 
 // 测试灵巧指针是否为NULL
 // 有一件我们做不到的事情是发现灵巧指针为NULL，这是一个严重的限制。
-// 在灵巧指针类里加入一个isNull 成员函数是一件很容易的事，
+// 在灵巧指针类里加入一个isNull成员函数是一件很容易的事，
 // 但是没有解决当测试NULL时灵巧指针的行为与dumb pointer不相似的问题。
 // 另一种方法是提供隐式类型转换操作符，允许编译上述的测试。
 // 一般应用于这种目的的类型转换是void*。
@@ -197,7 +198,9 @@ T* SmartPtr<T>::operator->() const {
 template <class T>
 class SmartPtr1 {
  public:
-  bool operator!() const {}  // 当且仅当灵巧指针是空值，返回true。
+  // 当且仅当灵巧指针是空值，返回true：
+  bool operator!() const {}
+
  private:
   T* pointee;  // 灵巧指针所指的对象
 };
@@ -229,7 +232,7 @@ class SmartPtr2 {
 // 并且这个函数也消除了测试空值的问题。
 // 然而，它也有类型转换函数所具有的缺点。
 // 它使得用户能够很容易地直接访问dumb指针，
-// 绕过了类指针（pointer-like）对象所提供的灵巧特性:
+// 绕过了类指针（pointer-like）对象所提供的灵巧特性：
 void processTuple(SmartPtr2<Tuple>& pt) {
   Tuple* rawTuplePtr = pt;  // SmartPtr2<Tuple>转变成Tuple*
   // 使用raw TuplePtr修改tuple;
@@ -319,7 +322,7 @@ class SmartPtr3<CD> {
   CD* pointee;
 };
 void displayAndPlay2(const SmartPtr3<MusicProduct>& pmp, int howMany) {}
-// 这种方法有两个缺点:
+// 这种方法有两个缺点：
 // 1.你必须人为地特化（specialize）SmartPtr类，
 //   所以你加入隐式类型转换操作符也就破坏了模板的通用性。
 // 2.你可能必须添加许多类型转换符，

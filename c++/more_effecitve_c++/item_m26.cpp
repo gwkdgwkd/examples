@@ -6,7 +6,7 @@ using namespace std;
 
 // 限制某个类所能产生的对象数量
 
-// 每次实例化一个对象时，我们很确切地知道一件事情：将调用一个构造函数。
+// 每次实例化一个对象时，很确切地知道一件事情：将调用一个构造函数。
 // 事实确实这样，阻止建立某个类的对象，
 // 最容易的方法就是把该类的构造函数声明在类的private域：
 class CantBeInstantiated {
@@ -14,7 +14,7 @@ class CantBeInstantiated {
   CantBeInstantiated();
   CantBeInstantiated(const CantBeInstantiated&);
 };
-// 这样做以后，每个人都没有权力建立对象，我们能够有选择性地放松这个限制：
+// 这样做以后，每个人都没有权力建立对象，可以有选择性地放松这个限制：
 class PrintJob;
 class Printer {
  public:
@@ -156,7 +156,7 @@ void func3() {
 //   现在再考虑内联意味着什么呢？
 //   从概念上讲，它意味着编译器用函数体替代该对函数的每一个调用，
 //   不过非成员函数还不只这些。
-//   非成员函数还有其它的含义。它还意味着internal linkage（内部链接）。
+//   非成员函数还有其它的含义，它还意味着internal linkage（内部链接）。
 //   通常情况下，你不需要理解这种语言上令人迷惑的东西，你只需记住一件事：
 //   带有内部链接的函数可能在程序内被复制，
 //   也就是说程序的object代码可能包含一个以上的内部链接函数的代码，
@@ -171,13 +171,15 @@ void func3() {
 // 就抛出异常，这样做也许会更好。
 class Printer2 {
  public:
-  class TooManyObjects {};  // 当需要的对象过多时就使用这个异常类
+  // 当需要的对象过多时就使用这个异常类：
+  class TooManyObjects {};
   Printer2();
   ~Printer2();
 
  private:
   static size_t numObjects;
-  Printer2(const Printer2& rhs) {}  // 这里只能有一个printer，所以不允许拷贝
+  // 这里只能有一个printer，所以不允许拷贝：
+  Printer2(const Printer2& rhs) {}
 };
 // 此法的核心思想就是使用numObjects跟踪Pritner对象存在的数量。
 // 当构造类时，它的值就增加，释放类时，它的值就减少。
@@ -188,11 +190,11 @@ Printer2::Printer2() {
   if (numObjects >= 1) {
     throw TooManyObjects();
   }
-  // 继续运行正常的构造函数;
+  // 继续运行正常的构造函数：
   ++numObjects;
 }
 Printer2::~Printer2() {
-  // 进行正常的析构函数处理;
+  // 进行正常的析构函数处理：
   --numObjects;
 }
 // 这种限制建立对象数目的方法有两个较吸引人的优点：
@@ -226,13 +228,13 @@ void func4() {
 // 2.作为其它派生类的基类；
 // 3.被嵌入在更大的对象里。
 // 存在这些不同环境极大地混淆了跟踪存在对象的数目的含义，
-// 因为你心目中的“对象的存在”的含义与编译器不一致。
+// 因为你心目中的对象的存在的含义与编译器不一致。
 
 // 通常你仅会对允许对象本身存在的情况感兴趣，
 // 你希望限制这种实例（instantiation）的数量。
 // 如果你使用最初的Printer类示例的方法，
 // 就很容易进行这种限制，因为Printer构造函数是private，
-// （不存在friend声明）带有private构造函数的类不能作为基类使用，
+// 不存在friend声明的带有private构造函数的类不能作为基类使用，
 // 也不能嵌入到其它对象中。
 // 你不能从带有private构造函数的类派生出新类，
 // 这个事实导致产生了一种阻止派生类的通用方法，
@@ -275,7 +277,8 @@ class Printer3 {
  private:
   static size_t numObjects;
   Printer3();
-  Printer3(const Printer3& rhs);  // 不定义这个函数，因为不允进行拷贝
+  // 不定义这个函数，因为不允进行拷贝：
+  Printer3(const Printer3& rhs);
 };
 size_t Printer3::numObjects = 0;
 Printer3::Printer3() {
@@ -294,17 +297,26 @@ void func5() {
   shared_ptr<FSA> pfsa1(FSA::makeFSA());
   shared_ptr<FSA> pfsa2(FSA::makeFSA(*pfsa1));
 
-  // 除了用户必须调用伪构造函数，而不是真正的构造函数之外，
-  // 它们使用Printer类就象使用其他类一样：
-  // Printer3 p1;  // 错误! 缺省构造函数是private
-  Printer3* p2 = Printer3::makePrinter();  // 正确, 间接调用缺省构造函数
-  // Printer3 p3 = *p2;      // 错误!拷贝构造函数是private
+  // 对于Printer3，除了用户必须调用伪构造函数，
+  // 而不是真正的构造函数之外，它们使用Printer类就象使用其他类一样：
+
+  // 错误，缺省构造函数是private：
+  // Printer3 p1;
+
+  // 正确，间接调用缺省构造函数：
+  Printer3* p2 = Printer3::makePrinter();
+
+  // 错误，拷贝构造函数是private：
+  // Printer3 p3 = *p2;
   p2->performSelfTest();  // 所有其它的函数都可以正常调用
   p2->reset();
-  // delete p2;  // 避免内存泄漏，如果p2是一个auto_ptr，就不需要这步。
+
+  // 避免内存泄漏，如果p2是一个auto_ptr，就不需要这步：
+  // delete p2;
 
   // Printer3* p3 = Printer3::makePrinter();
-  // terminate called after throwing an instance of 'Printer3::TooManyObjects'
+  // terminate called after throwing an instance of
+  // 'Printer3::TooManyObjects'
 }
 
 // 这种技术很容易推广到限制对象为任何数量上。
@@ -361,8 +373,10 @@ void func6() {
   } catch (const Printer4::TooManyObjects& e) {
     std::cout << e.what() << std::endl;  // TooManyObjects
   }
-  // terminate called after throwing an instance of 'Printer4::TooManyObjects'}
+  // terminate called after throwing an instance of
+  // 'Printer4::TooManyObjects'}
 }
+
 // 一个具有对象计数功能的基类
 // 使用计数类模板可以自动生成适当数量的计数器，
 // 因为我们能让计数器成为从模板中生成的类的静态成员：
@@ -377,7 +391,7 @@ class Counted {
 
  protected:
   // 从这个模板生成的类仅仅能被做为基类使用，
-  // 因此构造函数和析构函数被声明为protected。
+  // 因此构造函数和析构函数被声明为protected：
   Counted();
   Counted(const Counted& rhs);
   ~Counted() { --numObjects; }
@@ -403,7 +417,7 @@ void Counted<BeingCounted>::init() {
   if (numObjects >= maxObjects) throw TooManyObjects();
   ++numObjects;
 }
-// 使用Counted模板
+// 使用Counted模板：
 class Printer5 : private Counted<Printer5> {
  public:
   // 伪构造函数
@@ -445,7 +459,8 @@ void func7() {
   } catch (const Printer5::TooManyObjects& e) {
     std::cout << e.what() << std::endl;  // TooManyObjects
   }
-  // terminate called after throwing an instance of 'Counted<Printer5>::TooManyObjects'
+  // terminate called after throwing an instance of
+  // 'Counted<Printer5>::TooManyObjects'
 }
 
 // Printer使用了Counter模板来跟踪存在多少Printer对象，
