@@ -14,17 +14,17 @@ long fsize(FILE *fp) {
   return n;
 }
 
-// 文件复制函数
-// 该函数可以将原文件任意位置的任意长度的内容复制到目标文件的任意位置，非常灵活。
+// 文件复制函数：
+// 该函数可以将原文件任意位置的任意长度的内容复制到目标文件的任意位置。
 /**
-     * 文件复制函数
-     * @param  fSource       要复制的原文件
-     * @param  offsetSource  原文件的位置偏移（相对文件开头），也就是从哪里开始复制
-     * @param  len           要复制的内容长度，小于0表示复制offsetSource后边的所有内容
-     * @param  fTarget       目标文件，也就是将文件复制到哪里
-     * @param  offsetTarget  目标文件的位置偏移，也就是复制到目标文件的什么位置
-     * @return  成功复制的字节数
-    **/
+ * 文件复制函数
+ * @param  fSource       要复制的原文件
+ * @param  offsetSource  原文件相对文件头的偏移，也就是从哪里开始复制
+ * @param  len           要复制的内容长度，小于0表示复制后边的所有内容
+ * @param  fTarget       目标文件，也就是将文件复制到哪里
+ * @param  offsetTarget  目标文件的位置偏移，也就是复制到目标文件的什么位置
+ * @return  成功复制的字节数
+**/
 long fcopy(FILE *fSource, long offsetSource, long len, FILE *fTarget,
            long offsetTarget) {
   int bufferLen = 1024 * 4;                  // 缓冲区长度
@@ -56,15 +56,15 @@ long fcopy(FILE *fSource, long offsetSource, long len, FILE *fTarget,
   return nBytes;
 }
 
-// 文件内容插入函数
+// 文件内容插入函数：
 /**
-     * 向文件中插入内容
-     * @param  fp      要插入内容的文件
-     * @param  buffer  缓冲区，也就是要插入的内容
-     * @param  offset  偏移量（相对文件开头），也就是从哪里开始插入
-     * @param  len     要插入的内容长度
-     * @return  成功插入的字节数
-    **/
+ * 向文件中插入内容
+ * @param  fp      要插入内容的文件
+ * @param  buffer  缓冲区，也就是要插入的内容
+ * @param  offset  偏移量（相对文件开头），也就是从哪里开始插入
+ * @param  len     要插入的内容长度
+ * @return  成功插入的字节数
+**/
 int finsert(FILE *fp, long offset, void *buffer, int len) {
   long fileSize = fsize(fp);
   FILE *fpTemp;                                      // 临时文件
@@ -90,17 +90,18 @@ int finsert(FILE *fp, long offset, void *buffer, int len) {
   return 0;
 }
 
-// 文件内容删除函数
+// 文件内容删除函数：
 int fdelete(FILE *fp, long offset, int len) {
   long fileSize = fsize(fp);
   FILE *fpTemp;
-  if (offset > fileSize || offset < 0 || len < 0) {  //错误
+  if (offset > fileSize || offset < 0 || len < 0) {  // 错误
     return -1;
   }
   fpTemp = tmpfile();
-  fcopy(fp, 0, offset, fpTemp, 0);  // 将前offset字节的数据复制到临时文件
-  fcopy(fp, offset + len, -1, fpTemp,
-        offset);  // 将offset+len之后的所有内容都复制到临时文件
+  // 将前offset字节的数据复制到临时文件：
+  fcopy(fp, 0, offset, fpTemp, 0);
+  // 将offset+len之后的所有内容都复制到临时文件：
+  fcopy(fp, offset + len, -1, fpTemp, offset);
   freopen(FILENAME, "wb+", fp);  // 重新打开文件
   fcopy(fpTemp, 0, -1, fp, 0);
   fclose(fpTemp);
