@@ -502,9 +502,50 @@ void testAsync() {
 }
 }  // namespace async
 
+namespace loop {
+class A {
+ public:
+  static bool func() {
+    static int i = 0;
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    std::cout << "thread func" << std::endl;
+    if (i++ % 2) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  void run() {
+    f_ = std::async(std::launch::async, func);
+    std::cout << "valid:" << std::boolalpha << f_.valid() << std::endl;
+  }
+  void get() {
+    std::cout << std::boolalpha << f_.get() << "," << f_.valid() << std::endl;
+  }
+
+ private:
+  std::future<bool> f_;
+};
+
+void testLoop() {
+  A a;
+  for (int i = 0; i < 2; ++i) {
+    a.run();
+    a.get();
+  }
+
+  // valid:true
+  // thread func
+  // false,false
+  // valid:true
+  // thread func
+  // true,false
+}
+}  // namespace loop
+
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 3]" << std::endl;
+    std::cout << argv[0] << " i [0 - 4]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
@@ -520,6 +561,9 @@ int main(int argc, char* argv[]) {
       break;
     case 3:
       async::testAsync();
+      break;
+    case 4:
+      loop::testLoop();
       break;
     default:
       std::cout << "invalid type" << std::endl;
