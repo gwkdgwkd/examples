@@ -10,7 +10,7 @@
 // __alignof__
 
 namespace n1 {
-// c++11之前，经常这么用:
+// c++11之前，经常这么用：
 struct A1 {
   int a;
   char b;
@@ -38,13 +38,16 @@ struct A4 {
 };
 #pragma pack()
 
-// #pragma(n)和#pragma pack()一起用是在这期间保证n字节对齐，而且要成对存在。
-// #pragma(push)和#pragma(pop)期间不受外接对齐条件影响，而且要成对存在。
+// #pragma(n)和#pragma pack()一起用，
+// 在这期间保证n字节对齐，而且要成对存在。
+// #pragma(push)和#pragma(pop)期间不受外接对齐条件影响，
+// 而且要成对存在。
 
 // 明显这个相当暴力了，如果每个人都这么做，至少3行代码。
-// 为了省事，总容易有人不push和pop，直接改，某人就会在不知情的情况下，
-// 包含了这个头文件，进而受影响。
-// 于是，编译器突破规范，定义了扩展：__declspec(align(n))等，但也是各做各的，不统一。
+// 为了省事，总容易有人不push和pop，直接改，
+// 某人就会在不知情的情况下，包含了这个头文件，进而受影响。
+// 于是，编译器突破规范，定义了扩展：
+// __declspec(align(n))等，但也是各做各的，不统一。
 
 void testN1() {
   std::cout << "A1 " << sizeof(A1) << " " << alignof(A1) << std::endl;  // 12 4
@@ -55,17 +58,21 @@ void testN1() {
 }  // namespace n1
 
 namespace n2 {
-// 基于之前方法的弊端，c++11火速规范化制定了这个标准：alignas和alignof。
-// alignas：用于内存对齐，以替代如GCC的__attribute__((__aligned__((#))))，并且更强大。
-// alignof：获取内存对齐，替代__alignof__。
+// 基于之前方法的弊端，c++11火速规范化制定了这个标准：
+// 1.alignas：用于内存对齐，
+//   以替代如GCC的__attribute__((__aligned__((#))))，
+//   并且更强大。
+// 2.alignof：获取内存对齐，替代__alignof__。
 
 // alignas指定符可应用到变量或非位域类数据成员的声明，
 // 或能应用于class/struct/union或枚举的定义。
 // 它不能应用于函数参数或catch子句的异常参数。
-// 以此声明声明的对象或类型的对齐要求将等于用于声明的所有alignas指定符
-// 最严格（最大）的非零expression，除非这会削弱类型的自然对齐。
+// 以此声明声明的对象或类型的对齐要求，
+// 将等于用于声明的所有alignas指定符最严格（最大）的非零expression，
+// 除非这会削弱类型的自然对齐。
 
-// 若声明上的最严格（最大）alignas弱于假如它无alignas指定符的情况下本应有的对齐，
+// 若声明上的最严格（最大）alignas，
+// 弱于假如它无alignas指定符的情况下本应有的对齐，
 // 即弱于其原生对齐或弱于同一对象或类型的另一声明上的alignas，则错误：
 struct alignas(8) A {};
 struct alignas(1) B {  // 1小于8，alignas不生效
@@ -118,7 +125,7 @@ void testN3() {
 }  // namespace n3
 
 namespace n4 {
-// alignas修饰结构体时，不是对齐结构体每个成员，而是对齐结构体本身
+// alignas修饰结构体时，不是对齐结构体每个成员，而是对齐结构体本身：
 struct alignas(2) A {  // 大小不是4*2=8，是4
   char a;
   char b;
@@ -133,8 +140,9 @@ struct alignas(2) B {  // 再增加一个char成员，则大小6，不是5
   char e;
 };
 
-// 对齐低于结构体成员最大对齐，2小于a的4
-struct alignas(2) C {  // 大小不是6，而是8，因为a已经是4对齐了，所以b会补到8
+// 对齐低于结构体成员最大对齐，2小于a的4，
+// 大小不是6，而是8，因为a已经是4对齐了，所以b会补到8：
+struct alignas(2) C {
   int a;
   char b;
 };
@@ -164,7 +172,7 @@ void testN4() {
 }  // namespace n4
 
 namespace n5 {
-// C++11还新增了几个内存对齐的函数，每个函数有特定作用:
+// C++11还新增了几个内存对齐的函数，每个函数有特定作用：
 // std::alignment_of
 // std::aligned_storage
 // std::max_align_t

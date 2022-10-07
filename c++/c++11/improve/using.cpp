@@ -6,11 +6,12 @@ namespace n1 {
 // 在C++中可以通过typedef重定义一个类型：
 typedef unsigned int uint_t;
 // 被重定义的类型并不是一个新的类型，仅仅只是原有的类型取了一个新的名字。
-// 因此，下面这样将不是合法的函数重载:
+// 因此，下面这样将不是合法的函数重载：
 void func(unsigned int) {}
 // void func(uint_t) {}  // error: redefinition
 
-// 使用typedef重定义类型是很方便的，但它也有一些限制，比如，无法重定义一个模板。
+// 使用typedef重定义类型是很方便的，但它也有一些限制，
+// 比如，无法重定义一个模板。
 // 想要实现下面的功能：
 typedef std::map<std::string, int> map_int_t;
 typedef std::map<std::string, std::string> map_str_t;
@@ -42,13 +43,14 @@ void testN1() {
 namespace n2 {
 // 实际上，using的别名语法覆盖了typedef的全部功能：
 
-// 重定义unsigned int
+// 重定义unsigned int：
 typedef unsigned int uint_t;
 using uint_t = unsigned int;
-// 重定义std::map
+// 重定义std::map：
 typedef std::map<std::string, int> map_int_t;
 using map_int_t = std::map<std::string, int>;
-// 可以看到，在重定义普通类型上，两种使用方法的效果是等价的，唯一不同的是定义语法。
+// 可以看到，在重定义普通类型上，
+// 两种使用方法的效果是等价的，唯一不同的是定义语法。
 
 // typedef的定义方法和变量的声明类似：
 // 像声明一个变量一样，声明一个重定义类型，之后在声明之前加上typedef即可。
@@ -75,20 +77,24 @@ struct func_t1 {
 template <typename T>
 using func_t2 = void (*)(T, T);
 
-// 通过using定义模板别名的语法，只是在普通类型别名语法的基础上增加template的参数列表。
-// 使用using可以轻松地创建一个新的模板别名，而不需要像C++98/03那样使用烦琐的外敷模板。
+// 通过using定义模板别名的语法，
+// 只是在普通类型别名语法的基础上增加template的参数列表。
+// 使用using可以轻松地创建一个新的模板别名，
+// 而不需要像C++98/03那样使用烦琐的外敷模板。
 // func_t2既不是类模板也不是函数模板（函数模板实例化后是一个函数），
 // 而是一种新的模板形式，模板别名。
 // 需要注意的是，using语法和typedef一样，并不会创造新的类型。
 
-// 通过using可以轻松定义任意类型的模板表达方式。比如下面这样：
+// 通过using可以轻松定义任意类型的模板表达方式。
+// 比如下面这样：
 template <typename T>
 using type_t = T;  // type_t实例化后的类型和它的模板参数类型等价
 
 void testN3() {
   func_t1<int>::type xx_1;
+
+  // xx_2并不是一个由类模板实例化后的类，而是void(*)(int,int)的别名：
   func_t2<int> xx_2;
-  // xx_2并不是一个由类模板实例化后的类，而是void(*)(int,int)的别名
 
   type_t<int> i;  // 等价为int
 }

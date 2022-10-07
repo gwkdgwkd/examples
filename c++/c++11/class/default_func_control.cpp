@@ -1,21 +1,21 @@
 #include <iostream>
 
 // C++中声明自定义的类，编译器会默认生成未定义的成员函数：
-//  构造函数
-//  拷贝构造函数
-//  拷贝赋值函数（operator=）
-//  移动构造函数
-//  移动拷贝函数
-//  析构函数
+// 1.构造函数
+// 2.拷贝构造函数
+// 3.拷贝赋值函数（operator=）
+// 4.移动构造函数
+// 5.移动拷贝函数
+// 6.析构函数
 // 编译器还会提供全局默认操作符函数：
-//  operator,
-//  operator &
-//  operator &&
-//  operator *
-//  operator ->
-//  operator ->*
-//  operator new
-//  operator delete
+// 1.operator,
+// 2.operator &
+// 3.operator &&
+// 4.operator *
+// 5.operator ->
+// 6.operator ->*
+// 7.operator new
+// 8.operator delete
 
 // =default修饰的函数为显式缺省函数
 // =delete修饰的函数为删除函数
@@ -23,7 +23,7 @@
 namespace del {
 // 有时候可能需要限制一些默认函数的生成，例如需要禁止拷贝构造函数的使用。
 // 原来，通过把拷贝构造函数声明为private成员，这样一旦使用编译器就会报错。
-// 而在C++11中，在函数的定义或者声明后面加上= delete就能实现这个效果。
+// 而在C++11中，在函数的定义或者声明后面加上=delete就能实现这个效果。
 class NoCopyCator {
  public:
   NoCopyCator() = default;
@@ -64,9 +64,9 @@ void func4() {
   NoHeapAlloc c2;
 }
 
-// 需要在指定内存位置进行内存分配，并且不需要析构函数来完成一些对象级别的清理，
+// 需要在指定内存位置进行内存分配，
+// 并且不需要析构函数来完成一些对象级别的清理，
 // 可以通过显示删除析构函数来限制自定义类型在栈上或者静态的构造。
-
 class NoStackAlloc {
  public:
   ~NoStackAlloc() = delete;
@@ -75,7 +75,7 @@ void func5() {
   // NoStackAlloc c1;
   // static NoStackAlloc c2;
   char p[10];
-  new (p) NoStackAlloc();  // placement new, p无需调用析构函数
+  new (p) NoStackAlloc();  // placement new，p无需调用析构函数
 
   NoStackAlloc* ptr = new NoStackAlloc();  // 在堆上创建对象
 }
@@ -132,8 +132,8 @@ void testDef2() {
 }  // namespace def2
 
 namespace def3 {
-// = default和= delete能够更加精准的控制类的默认函数版本。
-// 其中，= default同样也能在类外的定义中修饰成员函数：
+// =default和=delete能够更加精准的控制类的默认函数版本。
+// 其中，=default同样也能在类外的定义中修饰成员函数：
 class A {
  public:
   A() = default;

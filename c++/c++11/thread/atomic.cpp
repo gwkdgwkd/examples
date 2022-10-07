@@ -8,8 +8,10 @@
 // 原子操作是一个不可分割的操作，这种操作有个特点，要么做完，
 // 要么没做完，在其他线程访问的时候，不能够访问到这种过程的中间态。
 // 通常情况下原子操作可以通过互斥的访问方式来保证，
-// 例如Linux下的互斥锁（mutex），Windows下的临界区（Critical Section）等。
-// 原子类型，是c++11中提供的一类数据类型，这种数据类型，不需要显式使用互斥锁。
+// 例如Linux下的互斥锁（mutex），
+// Windows下的临界区（Critical Section）等。
+// 原子类型，是c++11中提供的一类数据类型，
+// 这种数据类型，不需要显式使用互斥锁。
 // 但是，编译器却可以保证原子类型在线程间被互斥地访问。
 // 可以理解为c++11将原子类型的互斥锁、临界区给抽象化了，
 // 而不需要再去进行相关操作（平台相关）。
@@ -79,7 +81,8 @@ namespace operation {
 // 对于原子操作并非只有成员函数，当然也存在非成员函数，
 // 对于大多数非成员函数只是在原来函数基础上添加atomic_前缀。
 // 他们有两个变种：
-// 一个是没有标签的，一个是添加_explict后缀和额外的参数作为内存顺序的标签。
+// 一个是没有标签的，
+// 一个是添加_explict后缀和额外的参数作为内存顺序的标签。
 
 //                                                   原子类型的可用操作
 // 操作 	                atomic_flag 	atomic<bool> 	atomic<T*> 	atomic<integral-type> 	atomic<othre-type>
@@ -140,9 +143,11 @@ namespace CAS {
 // 现在几乎所有的CPU指令都支持CAS的原子操作。
 // compare_exchange_weak和compare_exchange_strong是著名的CAS。
 // 参数会要求在这里传入期待的数值和新的数值。
-// 它们对比变量的值和期待的值是否一致，如果是，则替换为用户指定的一个新的数值。
+// 它们对比变量的值和期待的值是否一致，
+// 如果是，则替换为用户指定的一个新的数值。
 // 如果不是，则将变量的值和期待的值交换。
-// weak版本的CAS允许偶然出乎意料的返回（比如在字段值和期待值一样的时候却返回了false），
+// weak版本的CAS允许偶然出乎意料的返回，
+// 比如在字段值和期待值一样的时候却返回了false，
 // 不过在一些循环算法中，这是可以接受的。
 // 通常weak比起strong有更高的性能。
 
@@ -152,7 +157,8 @@ class lock_free_stack {  // 栈的底层数据结构采用单向链表实现
  private:
   struct node {
     // 采用shared_ptr管理的好处在于：
-    // 若栈内存放对象pop中return栈顶对象可能拷贝异常，栈内只存储指针还可以提高性能
+    // 若栈内存放对象pop中return栈顶对象可能拷贝异常，
+    // 栈内只存储指针还可以提高性能：
     std::shared_ptr<T> data;
     node* next;
     // 注意make_shared比直接shared_ptr构造的内存开销小
@@ -166,30 +172,36 @@ class lock_free_stack {  // 栈的底层数据结构采用单向链表实现
   void push(T const& data) {
     node* const new_node = new node(data);
     new_node->next = head.load();  // 每次从链表头插入
-    // 若head==new_node->next则更新head为new_node，返回true结束循环，插入成功；
+    // 若head==new_node->next则更新head为new_node，返回true结束循环，
+    // 插入成功；
     // 若head!=new_node->next表明有其它线程在此期间对head操作了，
-    // 将new_node->next更新为新的head，返回false，继续进入下一次while循环。
-    // 采用atomic::compare_exchange_weak比atomic::compare_exchange_strong快，
-    // 因为compare_exchange_weak可能在元素相等的时候返回false所以适合在循环中，
-    // 而atomic::compare_exchange_strong保证了比较的正确性，不适合用于循环。
+    // 将new_node->next更新为新的head，
+    // 返回false，继续进入下一次while循环。
+    // atomic::compare_exchange_weak比strong快，
+    // 因为compare_exchange_weak可能在元素相等的时候，
+    // 返回false所以适合在循环中，
+    // 而atomic::compare_exchange_strong保证了比较的正确性，
+    // 不适合用于循环。
     while (!head.compare_exchange_weak(new_node->next, new_node))
       ;
   }
   std::shared_ptr<T> pop() {
-    // 拿住栈顶元素，但是可能后续被更新，更新发生在head!=old_head时
+    // 拿住栈顶元素，但是可能后续被更新，更新发生在head!=old_head时：
     node* old_head = head.load();
     // 首先要先判断old_head是否为nullptr防止操作空链表，
     // 然后按照compare_exchange_weak语义更新链表头结点。
     // 若head==old_head则更新head为old_head->next并返回true，
     // 结束循环，删除栈顶元素成功;
-    // 若head!=old_head表明有其它线程操作了head，因此更新old_head为新的head，
+    // 若head!=old_head表明有其它线程操作了head，
+    // 因此更新old_head为新的head，
     // 返回false进入下一轮循环，直至删除成功。
     while (old_head && !head.compare_exchange_weak(old_head, old_head->next))
       ;
     // 空链表时返回的是一个空的shared_ptr对象
     return old_head ? old_head->data : std::shared_ptr<T>();
   }
-  // 这只是lock free，由于while可能无限期循环不能在有限步骤内完成，故不是wait free
+  // 这只是lock free，
+  // 由于while可能无限期循环不能在有限步骤内完成，故不是wait free。
 };
 
 void testCAS() {
@@ -200,12 +212,14 @@ void testCAS() {
   std::cout << std::boolalpha << ret << ", ai1:" << ai1 << ",i1:" << i1
             << std::endl;  // false, ai1:10,i1:20
 
-  // 当前值10与期望值(20)不等时，将期望值(20)修改为当前值(10)，返回false
+  // 当前值10与期望值(20)不等时，
+  // 将期望值(20)修改为当前值(10)，返回false：
   ret = ai1.compare_exchange_weak(i1, i2);
   std::cout << std::boolalpha << ret << ", ai1:" << ai1 << ",i1:" << i1
             << std::endl;  // false, ai1:10,i1:10
 
-  // 当前值10与期望值(10)相等时，修改当前值为设定值(30)，返回true
+  // 当前值10与期望值(10)相等时，
+  // 修改当前值为设定值(30)，返回true：
   ret = ai1.compare_exchange_weak(i1, i2);
   // ret = std::atomic_compare_exchange_weak<int>(&ai1, &i1, i2);
   std::cout << std::boolalpha << ret << ", ai1:" << ai1 << ",i1:" << i1
@@ -232,10 +246,12 @@ namespace atomicflag {
 // 所以其他的类型都会有is_lock_free()成员函数来判断是否是无锁的。
 // atomic_flag只支持test_and_set()以及clear()两个成员函数。
 
-// 当一个线程尝试去获取某一把锁的时候，如果这个锁此时已经被别人获取(占用)，
-// 那么此线程就无法获取到这把锁，该线程将会等待，间隔一段时间后会再次尝试获取。
+// 当一个线程尝试去获取某一把锁的时候，
+// 如果这个锁此时已经被别人获取(占用)，那么此线程就无法获取到这把锁，
+// 该线程将会等待，间隔一段时间后会再次尝试获取。
 // 这种采用循环加锁->等待的机制被称为自旋锁（spin lock）。
-// 可以用atomic_flag的成员函数test_and_set()和clear()来实现一个自旋锁：
+// 可以用atomic_flag的成员函数test_and_set()和clear()，
+// 来实现一个自旋锁：
 std::atomic_flag lock = ATOMIC_FLAG_INIT;
 void Lock(std::atomic_flag& lock) {
   while (lock.test_and_set()) {
@@ -257,12 +273,13 @@ void testAtoicflag() {
   std::atomic_flag f = ATOMIC_FLAG_INIT;
   // test_and_set()函数检查std::atomic_flag标志，
   // 如果std::atomic_flag没有被设置，则设置std::atomic_flag；
-  // 如果之前std::atomic_flag已被设置，则test_and_set()返回true，否则返回false。
+  // 如果之前std::atomic_flag已被设置，
+  // 则test_and_set()返回true，否则返回false。
   std::cout << std::boolalpha << f.test_and_set() << std::endl;  // false
   std::cout << std::boolalpha << f.test_and_set() << std::endl;  // true
 
   // 清除std::atomic_flag标志，
-  // 使得下一次调用std::atomic_flag::test_and_set()返回false
+  // 使得下一次调用std::atomic_flag::test_and_set()返回false：
   f.clear();
   std::cout << std::boolalpha << f.test_and_set() << std::endl;  // false
 
@@ -282,17 +299,22 @@ void testAtoicflag() {
 }  // namespace atomicflag
 
 namespace memoryorder {
-// 内存模型通常是硬件上的概念，表示的是机器指令是以什么样的顺序被处理器执行的，
+// 内存模型通常是硬件上的概念，
+// 表示的是机器指令是以什么样的顺序被处理器执行的，
 // 现代的处理器并不是逐条处理机器指令的。
 // 现实中，x86_64以及SPARC（TSO模式）都是采用强顺序内存模型的平台。
-// 在多线程程序中，强顺序类型意味着对于各个线程看到的指令执行顺序是一致的。
+// 在多线程程序中，
+// 强顺序类型意味着对于各个线程看到的指令执行顺序是一致的。
 // 对于处理器而言，内存中的数据被改变的顺序与机器指令中的一致。
-// 相反的，弱顺序就是各个线程看到的内存数据被改变的顺序与机器指令中声明的不一致，
+// 相反的，弱顺序就是：
+// 各个线程看到的内存数据被改变的顺序与机器指令中声明的不一致，
 // 弱顺序内存模型可能会导致程序问题。
-// 为什么有些平台，诸如Alpha、PowerPC、Itanlium、ArmV7等平台会使用这种模型？
+// 为什么有些平台，
+// 诸如Alpha、PowerPC、Itanlium、ArmV7等平台会使用这种模型？
 // 简单地说，这种模型能让处理器有更好的并行性，提高指令执行的效率。
 // 并且，为了保证指令执行的顺序，
-// 通常需要在汇编指令中加入一条内存栅栏（memory barrier）指令，但是会影响处理器性能。
+// 通常需要在汇编指令中加入一条内存栅栏（memory barrier）指令，
+// 但是会影响处理器性能。
 // 比如在PowerPC上，就有一条名为sync的内存栅栏指令。
 // 该指令迫使已经进入流水线中的指令都完成后处理器才会执行sync以后的指令。
 // C++11中的原子操作还可以包含一个参数：
@@ -300,13 +322,15 @@ namespace memoryorder {
 // 让程序员根据实际情况灵活地控制原子类型的执行顺序。
 // 通常情况下，使用该参数将有利于编译器进一步提高并行性。
 
-// 在C++11中一共有7种memory_order枚举值，默认按照memory_order_seq_cst执行：
+// 在C++11中一共有7种memory_order枚举值，
+// 默认按照memory_order_seq_cst执行：
 // typedef enum memory_order {
 //   memory_order_relaxed,  // 不对执行顺序做保证
 //   memory_order_acquire,  // 本线程中，所有后续的读操作必须在本条原子操作完成后执行
 //   memory_order_release,  // 本线程中，所有之前的写操作完成后才能执行本条原子操作
 //   memory_order_acq_rel,  // 同时包含memory_order_acquire和memory_order_release
-//   memory_order_consume,  // 本线程中，所有后续的有关本原子类型的操作，必须在本条原子操作完成之后执行
+//   memory_order_consume,  // 本线程中，所有后续的有关本原子类型的操作，
+//                          // 必须在本条原子操作完成之后执行
 //   memory_order_seq_cst   // 全部存取都按顺序执行
 // } memory_order;
 
@@ -322,9 +346,12 @@ namespace memoryorder {
 // 原子类型提供的一些操作符，比如operator=、operator+=等函数，
 // 都是以memory_order_seq_cst为memory_order的实参的原子操作封装，
 // 所以他们都是顺序一致性的。
-// 如果要指定内存顺序的话，则应该采用store、load、atomic_fetch_add这样的版本。
-// 最后说明一下，std::atomic和std::memory_order只有在多线程无锁编程时才会用到。
-// 在x86_64平台，由于是强顺序内存模型的，为了保险起见，不要使用std::memory_order，
+// 如果要指定内存顺序的话，
+// 则应该采用store、load、atomic_fetch_add这样的版本。
+// 最后说明一下，
+// std::atomic和std::memory_order只有在多线程无锁编程时才会用到。
+// 在x86_64平台，由于是强顺序内存模型的，
+// 为了保险起见，不要使用std::memory_order，
 // 使用std::atmoic默认形式即可，因为std::atmoic默认是强顺序内存模型。
 
 std::atomic<int> a{0};

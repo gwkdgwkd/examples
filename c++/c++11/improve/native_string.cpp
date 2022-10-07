@@ -18,15 +18,17 @@ int main() {
   // Second line.
   // End of message.
 
-  // 一个raw string，'\'不会被转义处理。因此，"\n"表示两个字符：字符反斜杠和字母n。
+  // 一个raw string，'\'不会被转义处理。
+  // 因此，"\n"表示两个字符：字符反斜杠和字母n。
   std::string raw_str = R"(First line.\nSecond line.\nEnd of message.\n)";
   std::cout << raw_str << std::endl;
   // First line.\nSecond line.\nEnd of message.\n
 
-  std::cout << R"foo(Hello, world!)foo" << std::endl;  // 只有括号中的生效
+  // 只有括号中的生效：
+  std::cout << R"foo(Hello, world!)foo" << std::endl;
   // Hello, world!
 
-  // raw string可以跨越多行，其中的空白和换行符都属于字符串的一部分。
+  // raw string可以跨越多行，其中的空白和换行符都属于字符串的一部分：
   std::cout << R"(
                    Hello,
                    world!

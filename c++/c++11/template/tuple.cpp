@@ -9,7 +9,8 @@
 // 要揭开它神秘的面纱时又比较困难。
 // tuple是一个固定大小的不同类型值的集合，是泛化的std::pair。
 // 和c#中的tuple类似，但是比c#中的tuple强大得多。
-// 可以把他当做一个通用的结构体来用，不需要创建结构体又获取结构体的特征，
+// 可以把他当做一个通用的结构体来用，
+// 不需要创建结构体又获取结构体的特征，
 // 在某些情况下可以取代结构体使程序更简洁，直观。
 
 namespace n1 {
@@ -22,10 +23,10 @@ struct A {
 std::tuple<const char*, int> tp = std::make_tuple("nihao", 6);
 
 std::tuple<double, char, std::string> get_student(int id) {
-  // C++11构建tuple的写法
+  // C++11构建tuple的写法：
   if (id == 0) return std::make_tuple(3.8, 'A', "Lisa Simpson");
 
-  // C++17提供了更方便的构建tuple的写法
+  // C++17提供了更方便的构建tuple的写法：
   //if (id == 0) return { 3.8, 'A', "Lisa Simpson" };
 
   if (id == 1) return std::make_tuple(2.9, 'C', "Milhouse Van Houten");
@@ -34,18 +35,20 @@ std::tuple<double, char, std::string> get_student(int id) {
 }
 
 // 相比较于std::tuple，std::pair如果想要支持多于2个的变量，
-// 需要多层嵌套或结合struct使用:
+// 需要多层嵌套或结合struct使用：
 std::pair<double, std::pair<char, std::string>> get_student1(int id) {
   return std::pair<double, std::pair<char, std::string>>{3.8,
                                                          {'A', "Lisa Simpson"}};
 }
-// tuple和vector比较：vector只能容纳同一种类型的数据，tuple可以容纳任意类型的数据；
-// tuple和c++17的variant比较：二者都可以容纳不同类型的数据，
-// 但是variant的类型个数是固定的，而tuple的类型个数不是固定的，是变长的，更为强大。
+// tuple和vector比较：
+// vector只能容纳同一种类型的数据，tuple可以容纳任意类型的数据；
+// tuple和c++17的variant比较：
+// 二者都可以容纳不同类型的数据，但是variant的类型个数是固定的，
+// 而tuple的类型个数不是固定的，是变长的，更为强大。
 
 void func1() {
   auto student = get_student(0);
-  // 通过下标位置获取tuple中对应的元素
+  // 通过下标位置获取tuple中对应的元素：
   std::cout << "ID: 0, "
             << "GPA: " << std::get<0>(student) << ", "
             << "grade: " << std::get<1>(student) << ", "
@@ -55,7 +58,8 @@ void func1() {
 
 void func2() {
   // C++11已经可以有多重返回值了，也就是可以像lua那样这样从函数返回值：
-  // 从要返回多重返回值的函数中，返回一个std::tuple，里面包含多个具体要返回的值，
+  // 从要返回多重返回值的函数中，
+  // 返回一个std::tuple，里面包含多个具体要返回的值，
   // 接收端使用std::tie（会创建一个元组的左值引用）来解包tuple。
   double gpa;
   char grade;
@@ -69,7 +73,8 @@ void func2() {
 }
 
 void func3() {
-  // 解包时，如果只想解某个位置的值时，可以用std::ignore占位符来表示不解某个位置的值。
+  // 解包时，如果只想解某个位置的值时，
+  // 可以用std::ignore占位符来表示不解某个位置的值。
   double gpa;
   char grade;
   std::tie(gpa, grade, std::ignore) = get_student(2);
@@ -78,7 +83,7 @@ void func3() {
             << "grade: " << grade << std::endl;
   // ID: 1, GPA: 2.9, grade: C
 
-  // C++17提供了更方便的解构写法
+  // C++17提供了更方便的解构写法：
   // auto [ gpa2, grade2, name2 ] = get_student(2);
   // std::cout << "ID: 2, "
   //           << "GPA: " << gpa2 << ", "
@@ -122,8 +127,9 @@ template <class Tuple>
 struct TuplePrinter<Tuple, 1> {
   static void print(const Tuple& t) { std::cout << std::get<0>(t); }
 };
+// 打印tuple中的每个元素：
 template <class... Args>
-void PrintTuple(const std::tuple<Args...>& t) {  // 打印tuple中的每个元素
+void PrintTuple(const std::tuple<Args...>& t) {
   std::cout << "(";
   TuplePrinter<decltype(t), sizeof...(Args)>::print(t);
   std::cout << ")" << std::endl;

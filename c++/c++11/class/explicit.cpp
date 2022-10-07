@@ -10,12 +10,14 @@
 // 不能进行自动地隐式类型转换，只能显式地进行类型转换。
 
 // C++中的explicit关键字只能用于修饰只有一个参数的类构造函数，
-// 它的作用是表明该构造函数是显示的，而非隐式的，跟它相对应的另一个关键字是implicit，
-// 意思是隐藏的，类构造函数默认情况下为implicit(隐式)。
-// explicit关键字的作用：禁止隐式调用类内的单参数构造函数，这主要包括如下三层意思：
-// 1.该关键字只能用来修饰类内部的构造函数
-// 2.禁止隐式调用拷贝构造函数
-// 3.禁止类对象之间的隐式转换
+// 它的作用是表明该构造函数是显示的，而非隐式的，
+// 跟它相对应的另一个关键字是implicit，意思是隐藏的，
+// 类构造函数默认情况下为implicit(隐式)。
+// explicit关键字的作用，禁止隐式调用类内的单参数构造函数，
+// 这主要包括如下三层意思：
+// 1.该关键字只能用来修饰类内部的构造函数；
+// 2.禁止隐式调用拷贝构造函数；
+// 3.禁止类对象之间的隐式转换。
 
 // 总结：
 // 1.explicit关键字只需用于类内的单参数构造函数前面。
@@ -30,19 +32,19 @@
 // effective c++中说：
 // 被声明为explicit的构造函数通常比其non-explicit兄弟更受欢迎。
 // 因为它们禁止编译器执行非预期的类型转换，
-// 除非我有一个好理由允许构造函数被用于隐式类型转换，否则把它声明为explicit。
+// 除非有一个好理由允许构造函数被用于隐式类型转换，否则把它声明为explicit。
 
 namespace n1 {
 class Demo {
  public:
-  Demo() { std::cout << "Demo()" << std::endl; };  // 没有参数，无法进行类型转换
-  Demo(double a) {  // 有一个参数，可以进行类型转换
-    std::cout << "Demo(double a)" << std::endl;
-  };
-  Demo(int a, double b) {  // 有两个参数，且无默认值，故无法使用类型转换
-    std::cout << "Demo(int a, double b)" << std::endl;
-  };
-  Demo(int a, int b = 10, double c = 1.6) {  // n-1个有默认值，可以进行隐式转换
+  // 没有参数，无法进行类型转换：
+  Demo() { std::cout << "Demo()" << std::endl; };
+  // 有一个参数，可以进行类型转换：
+  Demo(double a) { std::cout << "Demo(double a)" << std::endl; };
+  // 有两个参数，且无默认值，故无法使用类型转换：
+  Demo(int a, double b) { std::cout << "Demo(int a, double b)" << std::endl; };
+  // n-1个有默认值，可以进行隐式转换：
+  Demo(int a, int b = 10, double c = 1.6) {
     std::cout << "Demo(int a, int b = 10, double c = 1.6)" << std::endl;
   };
   ~Demo(){};
@@ -101,11 +103,14 @@ void printExplicit(const CExplict& cx) {
 }
 
 void testN3() {
-  // 编译器首先会以true构造一个临时对象，在将此临时对象通过赋值构造函数赋值给cx1：
+  // 编译器首先会以true构造一个临时对象，
+  // 在将此临时对象通过赋值构造函数赋值给cx1：
   CExplict cx1{1};
   CExplict cx2 = false;
   // CExplict cx1{1}和printExplicit(false)这种表达形式看着很别扭，
-  // 也很让人费解，将一个bool型的值赋给一个CExplicit类的cx1，使代码的可读性变差。
+  // 也很让人费解，将一个bool型的值赋给一个CExplicit类的cx1，
+  // 使代码的可读性变差。
+
   printExplicit(cx1);    // is_explict=1
   printExplicit(cx2);    // is_explict=0
   printExplicit(false);  // is_explict=0

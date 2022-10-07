@@ -2,47 +2,54 @@
 #include <iostream>
 #include <typeinfo>
 
-// 可变模版参数（variadic templates）是C++11新增的最强大的特性之一，
-// 它对参数进行了高度泛化，它能表示0到任意个数、任意类型的参数。
+// 可变模版参数（variadic templates），
+// 是C++11新增的最强大的特性之一，它对参数进行了高度泛化，
+// 它能表示0到任意个数、任意类型的参数。
 // 相比C++98/03，类模版和函数模版中只能含固定数量的模版参数，
 // 可变模版参数无疑是一个巨大的改进。
 // 然而由于可变模版参数比较抽象，使用起来需要一定的技巧，
 // 所以它也是C++11中最难理解和掌握的特性之一。
-// 虽然掌握可变模版参数有一定难度，但是它却是C++11中最有意思的一个特性。
+// 虽然掌握可变模版参数有一定难度，
+// 但是它却是C++11中最有意思的一个特性。
 
-// variadic template特性本身是一个很自然的需求，它完善了C++的模板设计手段。
-// 原来的模板参数可以使类和函数的参数类型任意化，如果再加上参数个数的任意化，
-// 那么在参数方面的设计手段就基本上齐备了，
+// variadic template特性本身是一个很自然的需求，
+// 它完善了C++的模板设计手段。
+// 原来的模板参数可以使类和函数的参数类型任意化，
+// 如果再加上参数个数的任意化，那么在参数方面的设计手段就基本上齐备了，
 // 有了variadic template显然可以让设计出来的函数或是类有更大的复用性。
 // 因为有很多处理都是与处理对象的个数关系不大的：
-//  比如说打屏（printf）;
-//  比如说比较大小（max，min）；
-//  比如函数绑定子（bind，function要对应各种可能的函数就要能任意参数个数和类型）。
+// 1.比如说打屏（printf）;
+// 2.比如说比较大小（max，min）；
+// 3.比如函数绑定子，bind，
+//   function要对应各种可能的函数就要能任意参数个数和类型。
 
 // 如果不能对应任意个参数，那么就总会有人无法重用已有的实现，
 // 而不得不再重复地写一个自己需要的处理，
 // 而共通库的实现者为了尽可能地让自己写的类（函数）能复用在更多的场景，
-// 也不得不重复地写很多的代码或是用诡异的技巧，宏之类的去实现有限个任意参数的对应。
+// 也不得不重复地写很多的代码或是用诡异的技巧，
+// 宏之类的去实现有限个任意参数的对应。
 
 // C++03只有固定模板参数；
 // C++11加入新的表示法，允许任意个数、任意类别的模板参数，
 // 不必在定义时将参数的个数固定，其标准表示：
 // template<typename... Values> class tuple;
-// 实参的个数也可以是0，所以tuple<> someInstanceName这样的定义也是可以的。
+// 实参的个数也可以是0，
+// 所以tuple<> someInstanceName这样的定义也是可以的。
 // 若不希望产生实参个数为0的变长参数模板，则可以采用以下的定义：
 // template <typename First, typename... Rest> class tuple;
 
 // Values被称为模版参数包(template parameter pack)，
-// 可以理解为多个模版参数类型的集合，只要我们能把这个集合拆开，
+// 可以理解为多个模版参数类型的集合，只要能把这个集合拆开，
 // 拆开为单个单个的元素，那么就可以正常使用了。
 
 // 可变模板参数是有它的局限性的，没有办法直接获取包中每一个元素的类型。
 // 可变长模板参数的偏特化和全特化都是不支持的。
 // 可变模版参数和普通的模版参数语义是一致的，可以应用于函数和类。
-// 函数模版不支持偏特化，所以可变参数函数模版和可变参数类模版展开参数包的方法有所不同。
+// 函数模版不支持偏特化，
+// 所以可变参数函数模版和可变参数类模版展开参数包的方法有所不同。
 
 namespace n1 {
-// 查询参数包的参数个数
+// 查询参数包的参数个数：
 template <typename... Args>
 unsigned int length(Args... args) {
   return sizeof...(args);
@@ -54,10 +61,8 @@ void func1() {
 }
 
 // 展开可变模版参数函数的方法一般有两种：
-// 一种是通过递归函数来展开参数包；
-// 另外一种是通过逗号表达式来展开参数包。
-
-// 1.通过递归函数展开参数包，需要提供一个参数包展开的函数和一个递归终止函数，
+// 1.通过递归函数展开参数包，
+//   需要提供一个参数包展开的函数和一个递归终止函数，
 //   递归终止函数正是用来终止递归的：
 void print1() {  // 递归终止函数
   // 当没有参数时，则调用非模板函数print终止递归过程。
@@ -70,23 +75,25 @@ void print1(T head, Args... rest) {  // 展开函数
   std::cout << "param " << head << " -> ";
   print1(rest...);
 }
-
 void func2() {
-  print1(1, 2, 3, 4);  // param 1 -> param 2 -> param 3 -> param 4 -> empty
-  print1();            // empty
-  print1(1, "hello", "C++");  // param 1 -> param hello -> param C++ -> empty
+  print1(1, 2, 3, 4);
+  // param 1 -> param 2 -> param 3 -> param 4 -> empty
+  print1();
+  // empty
+  print1(1, "hello", "C++");
+  // param 1 -> param hello -> param C++ -> empty
 }
-
-// 2.逗号表达式展开参数包：
-// 递归函数展开参数包是一种标准做法，也比较好理解，
-// 但也有一个缺点，就是必须要一个重载的递归终止函数，
-// 即必须要有一个同名的终止函数来终止递归，这样可能会感觉稍有不便。
-// 有没有一种更简单的方式呢？
-// 其实还有一种方法可以不通过递归方式来展开参数包，
-// 这种方式需要借助逗号表达式和初始化列表。
+// 2.通过逗号表达式展开参数包：
+//   递归函数展开参数包是一种标准做法，也比较好理解，
+//   但也有一个缺点，就是必须要一个重载的递归终止函数，
+//   即必须要有一个同名的终止函数来终止递归，这样可能会感觉稍有不便。
+//   有没有一种更简单的方式呢？
+//   其实还有一种方法可以不通过递归方式来展开参数包，
+//   这种方式需要借助逗号表达式和初始化列表。
 template <class T>
 void printarg(T t) {
-  // printarg不是一个递归终止函数，只是一个处理参数包中每一个参数的函数。
+  // printarg不是一个递归终止函数，
+  // 只是一个处理参数包中每一个参数的函数。
   std::cout << "param " << t << " -> ";
 }
 template <class... Args>
@@ -95,9 +102,11 @@ void print2(Args... args) {
   // 这种就地展开参数包的方式实现的关键是逗号表达式，
   // 逗号表达式会按顺序执行逗号前面的表达式。
   int arr[] = {(printarg(args), 0)...};
-  // (printarg(args), 0)，先执行printarg(args)，再得到逗号表达式的结果0。
-  // 还用到了C++11的另外一个特性，初始化列表，通过初始化列表来初始化一个变长数组：
-  // {(printarg(args),0)...}将会展开成
+  // (printarg(args),0)，
+  // 先执行printarg(args)，再得到逗号表达式的结果0。
+  // 还用到了C++11的另外一个特性，初始化列表，
+  // 通过初始化列表来初始化一个变长数组：
+  // {(printarg(args),0)...}将会展开成，
   // ((printarg(arg1),0),(printarg(arg2),0),etc...)，
   // 最终会创建一个元素值都为0的数组int arr[sizeof...(Args)]。
   // 也就是说在构造int数组的过程中就将参数包展开了，
@@ -106,22 +115,26 @@ void print2(Args... args) {
 }
 
 void func3() {
-  print2(1, 2, 3, 4);         // param 1 -> param 2 -> param 3 -> param 4 ->
-  print2();                   //
-  print2(1, "hello", "C++");  // param 1 -> param hello -> param C++ ->
+  print2(1, 2, 3, 4);
+  // param 1 -> param 2 -> param 3 -> param 4 ->
+  print2();
+  //
+  print2(1, "hello", "C++");
+  // param 1 -> param hello -> param C++ ->
 }
 
-// 再进一步改进一下，将函数作为参数，就可以支持lambda表达式了，
-// 从而可以少写一个递归终止函数了：
+// 再进一步改进一下，将函数作为参数，
+// 就可以支持lambda表达式了，从而可以少写一个递归终止函数了：
 template <class F, class... Args>
 void print3(const F& f, Args&&... args) {
-  // 用到了完美转发
+  // 用到了完美转发：
   std::initializer_list<int>{(f(std::forward<Args>(args)), 0)...};
 }
 
 void func4() {
   print3([](int i) { std::cout << "param " << i << " -> "; }, 1, 2, 3, 4);
-  std::cout << std::endl;  // param 1 -> param 2 -> param 3 -> param 4 ->
+  std::cout << std::endl;
+  // param 1 -> param 2 -> param 3 -> param 4 ->
 }
 
 void testN1() {
@@ -139,30 +152,35 @@ namespace n2 {
 // 可变参数模板类的参数包展开需要通过模板特化和继承方式去展开，
 // 展开方式比可变参数模板函数要复杂。
 
-// 1.模版偏特化和递归方式来展开参数包，可变参数模板类的展开一般需要定义两到三个类，
+// 1.模版偏特化和递归方式来展开参数包，
+//   可变参数模板类的展开一般需要定义两到三个类，
 //   包括类声明和偏特化的模板类。
-// 前向声明，声明这个sum类是一个可变参数模板类
+// 前向声明，声明这个sum类是一个可变参数模板类：
 template <typename... Args>
 struct Sum1;
-// 基本定义，定义了一个部分展开的可变模参数模板类，告诉编译器如何递归展开参数包。
+// 基本定义，定义了一个部分展开的可变模参数模板类，
+// 告诉编译器如何递归展开参数包：
 template <typename First, typename... Rest>
 struct Sum1<First, Rest...> {
   enum { value = Sum1<First>::value + Sum1<Rest...>::value };
 };
-// 递归终止，特化的递归终止类
+// 递归终止，特化的递归终止类：
 template <typename Last>
 struct Sum1<Last> {
   enum { value = sizeof(Last) };
 };
-// 这个前向声明要求sum的模板参数至少有一个，因为可变参数模板中的模板参数可以有0个，
-// 有时候0个模板参数没有意义，就可以通过上面的声明方式来限定模板参数不能为0个。
+// 这个前向声明要求sum的模板参数至少有一个，
+// 因为可变参数模板中的模板参数可以有0个，
+// 有时候0个模板参数没有意义，
+// 就可以通过上面的声明方式来限定模板参数不能为0个。
 
 void func1() {
   std::cout << Sum1<int, double, short>::value << std::endl;        // 14
   std::cout << Sum1<int, double, short, char>::value << std::endl;  // 15
 }
 
-// 上面的这种三段式的定义也可以改为两段式的，可以将前向声明去掉，这样定义：
+// 上面的这种三段式的定义也可以改为两段式的，
+// 可以将前向声明去掉，这样定义：
 template <typename First, typename... Rest>
 struct Sum2 {
   enum { value = Sum2<First>::value + Sum2<Rest...>::value };
@@ -190,37 +208,41 @@ void func3() {
   // std::cout << Sum3<int, double, short>::value << std::endl;        // 14
   // std::cout << Sum3<int, double, short, char>::value << std::endl;  // 15
 }
-// 在展开到最后两个参数时终止。还可以在展开到0个参数时终止：
+// 在展开到最后两个参数时终止，还可以在展开到0个参数时终止：
 // template<>struct sum<> { enum{ value = 0 }; };
 // 还可以使用std::integral_constant来消除枚举定义value。
-// 利用std::integral_constant可以获得编译期常量的特性，可以将前面的sum改为：
-// 前向声明
+// 利用std::integral_constant可以获得编译期常量的特性，
+// 可以将前面的sum改为：
+// 前向声明：
 // template <typename First, typename... Args>
 // struct Sum4;
-// 基本定义
+// 基本定义：
 // template <typename First, typename... Rest>
 // struct Sum4<First, Rest...>
-//     : std::integral_constant<int, Sum4<First>::value + Sum4<Rest...>::value> {};
+//     : std::integral_constant<int,
+//       Sum4<First>::value + Sum4<Rest...>::value> {};
 // 递归终止
 // template <typename Last>
 // struct Sum4<Last> : std::integral_constant<int, sizeof(Last)> {};
 
 // 2.继承方式展开参数包
-// 整型序列的定义
+// 整型序列的定义：
 template <int...>
 struct IndexSeq {};
-// 继承方式，开始展开参数包
+// 继承方式，开始展开参数包：
 template <int N, int... Indexes>
 struct MakeIndexes1 : MakeIndexes1<N - 1, N - 1, Indexes...> {};
-// 模板特化，终止展开参数包的条件
+// 模板特化，终止展开参数包的条件：
 template <int... Indexes>
 struct MakeIndexes1<0, Indexes...> {
   typedef IndexSeq<Indexes...> type;
 };
 // 其中MakeIndexes的作用是为了生成一个可变参数模板类的整数序列，
 // 最终输出的类型是：struct IndexSeq<0,1,2>。
-// MakeIndexes继承于自身的一个特化的模板类，这个特化的模板类同时也在展开参数包，
-// 这个展开过程是通过继承发起的，直到遇到特化的终止条件展开过程才结束。
+// MakeIndexes继承于自身的一个特化的模板类，
+// 这个特化的模板类同时也在展开参数包，
+// 这个展开过程是通过继承发起的，
+// 直到遇到特化的终止条件展开过程才结束。
 // 如果不希望通过继承方式去生成整形序列，则可以通过下面的方式生成：
 template <int N, int... Indexes>
 struct MakeIndexes2 {
@@ -233,7 +255,8 @@ struct MakeIndexes2<0, Indexes...> {
 
 void func4() {
   using T = MakeIndexes1<3>::type;
-  std::cout << typeid(T).name() << std::endl;  // N2n28IndexSeqIJLi0ELi1ELi2EEEE
+  std::cout << typeid(T).name() << std::endl;
+  // N2n28IndexSeqIJLi0ELi1ELi2EEEE
 
   MakeIndexes1<3, 4, 5, 6> a1;
   MakeIndexes2<3, 4, 5, 6> a2;
@@ -248,9 +271,11 @@ void testN2() {
 }  // namespace n2
 
 namespace n3 {
-// 可变参数模版消除重复代码
-// C++11之前如果要写一个泛化的工厂函数，这个工厂函数能接受任意类型的入参，
-// 并且参数个数要能满足大部分的应用需求的话，不得不定义很多重复的模版定义：
+// 可变参数模版消除重复代码：
+// C++11之前如果要写一个泛化的工厂函数，
+// 这个工厂函数能接受任意类型的入参，
+// 并且参数个数要能满足大部分的应用需求的话，
+// 不得不定义很多重复的模版定义：
 template <typename T>
 T* Instance() {
   return new T();
@@ -332,12 +357,16 @@ struct A {
   void Fun2(int i, double j) { std::cout << i + j << std::endl; }
 };
 
-// 使用可变模版参数的这些技巧让人耳目一新，使用可变模版参数的关键是如何展开参数包，
-// 展开参数包的过程是很精妙的，体现了泛化之美、递归之美，正是因为它具有神奇的魔力，
+// 使用可变模版参数的这些技巧让人耳目一新，
+// 使用可变模版参数的关键是如何展开参数包，
+// 展开参数包的过程是很精妙的，
+// 体现了泛化之美、递归之美，正是因为它具有神奇的魔力，
 // 所以可以更泛化的去处理问题，比如用它来消除重复的模版定义，
 // 用它来定义一个能接受任意参数的万能函数等。
-// 其实，可变模版参数的作用远不止文中列举的那些作用，它还可以和其它C++11特性结合起来，
-// 比如type_traits、std::tuple等特性，发挥更加强大的威力，特别是在模板元编程中。
+// 其实，可变模版参数的作用远不止文中列举的那些作用，
+// 它还可以和其它C++11特性结合起来，
+// 比如type_traits、std::tuple等特性，
+// 发挥更加强大的威力，特别是在模板元编程中。
 
 void testN4() {
   A a;
@@ -352,12 +381,13 @@ namespace n5 {
 // c++可变长参数和__VA_ARGS__
 
 // C++11已经支持了C99的变长宏。
-// 变长宏与printf的默契配合使得程序员能够非常容易地派生出printf的变种以支持一些记录。
+// 变长宏与printf的默契配合，
+// 使得程序员能够非常容易地派生出printf的变种以支持一些记录。
 // 而printf则使用C语言的函数变长参数特性，通过使用变长函数，
 // printf的实现能够接受任何长度的参数列表。
 // 不过无论是宏，还是变长参数，都无法获得传递参数的类型。
 
-// _VA_ARGS:
+// _VA_ARGS：
 #define LOG(...) printf(__VA_ARGS__)  // 三个点
 
 // 可变长参数列表：函数的参数是以压栈的方式进行的，从右到左进行压栈。
@@ -373,31 +403,40 @@ double SumofFlot(int count, ...) {
   return sum;
 }
 // 为什么要放一个int count呢?
-// 函数的参数是以压栈的方式来进行存储的，这是一块连续的内存，并且count是首地址。
+// 函数的参数是以压栈的方式来进行存储的，
+// 这是一块连续的内存，并且count是首地址。
 // 那么肯定是需要知道知道栈的地址的，
 // 有了int count就意味着我们有了这一块连续内存的首地址。
-// 并且借助这个地址和下一个元素的类型以及列表的长度就可以完成的遍历参数列表了。
-// 因为如果无法知道，那么就无法一个一个的取出这些可变参数的值了，借助宏可以完成这些功能。
+// 并且借助下面三点，就可以完成的遍历参数列表了：
+// 1.连续内存的首地址；
+// 2.下一个元素的类型；
+// 3.列表的长度。
+// 因为如果无法知道，那么就无法一个一个的取出这些可变参数的值了，
+// 借助宏可以完成这些功能。
 
-// 处理可变参数的标准宏:
-// va_list pvar;
-// 获取可变长参数列表中的元素。
-// va_start(pvar,parM);
-// 让pvar指向参数parM对应的地址，parM应该是最靠近可变长参数列表的元素。
-// va_arg(pvar, type);
-// 提取pvar的值,type指定参数的类型；提取pvar后，指向下一个元素的地址。
-// va_end(pvar);
-// 结束对参数列表的访问。
+// 处理可变参数的标准宏：
+// 1.va_list pvar;
+//   获取可变长参数列表中的元素。
+// 2.va_start(pvar,parM);
+//   让pvar指向参数parM对应的地址，
+//   parM应该是最靠近可变长参数列表的元素。
+// 3.va_arg(pvar, type);
+//   提取pvar的值,type指定参数的类型；
+//   提取pvar后，指向下一个元素的地址。
+// 4.va_end(pvar);
+//   结束对参数列表的访问。
 
 // 使用可变长参数是很有局限性的，其中之一就是：va_arg(var, int)，
 // 需要指定参数的类型才能进行正确的取到下一个参数的内容。
 // 而且无法知道可变参数的长度。
-// 所以必须事先约定好参数的类型和长度，并且需要传递进函数里面去告诉函数，
-// 这样在灵活性上就大打折扣了。
+// 所以必须事先约定好参数的类型和长度，
+// 并且需要传递进函数里面去告诉函数，这样在灵活性上就大打折扣了。
 
-// 变长函数这种实现方式，对于C++这种强调类型的语言来说相当于开了一个不规范的后门。
+// 变长函数这种实现方式，
+// 对于C++这种强调类型的语言来说相当于开了一个不规范的后门。
 // C++需要引入一种更为现代化的变长参数的实现方式，
-// 即类型和变量同时能够传递给变长参数的函数，一种好的方式是充分利用C++的函数模板。
+// 即类型和变量同时能够传递给变长参数的函数，
+// 一种好的方式是充分利用C++的函数模板。
 
 void testN5() {
   LOG("my name is:%s\n", "zhangkai");  // my name is:zhangkai

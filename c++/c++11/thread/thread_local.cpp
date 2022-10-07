@@ -15,22 +15,24 @@
 
 // thread_local关键词只对声明于命名空间作用域的对象、
 // 声明于块作用域的对象及静态数据成员允许，它指示对象拥有线程存储期。
-// 它能与static或extern结合，以分别指定内部或外部链接（除了静态数据成员始终拥有外部链接），
+// 它能与static或extern结合，
+// 以分别指定内部或外部链接（除了静态数据成员始终拥有外部链接），
 // 但附加的static不影响存储期。
 // 线程存储期：
-// 对象的存储在线程开始时分配，而在线程结束时解分配，每个线程拥有其自身的对象实例。
+// 对象的存储在线程开始时分配，而在线程结束时解分配，
+// 每个线程拥有其自身的对象实例。
 // 唯有声明为thread_local的对象拥有此存储期。
 // thread_local能与static或extern一同出现，以调整链接。
 
 // 哪些变量可以被声明为thread_local：
 // 1.命名空间下的全局变量；
 // 2.类的static成员变量；
-// 3.本地变量。
+// 3.本地变量（局部变量）。
 
 std::mutex cout_mutex;
 
 namespace globle {
-// 全局的hread_local变量在每个线程里是分别自加互不干扰的
+// 全局的hread_local变量在每个线程里是分别自加互不干扰的。
 thread_local int g = 1;
 void func(const std::string& thread_name) {
   for (int i = 0; i < 3; ++i) {
@@ -67,7 +69,8 @@ void func(const std::string& thread_name) {
     std::lock_guard<std::mutex> lock(cout_mutex);
     std::cout << "thread[" << thread_name << "]: x = " << x << std::endl;
   }
-  // thread_local虽然改变了变量的存储周期，但是并没有改变变量的使用周期或者说作用域：
+  // thread_local虽然改变了变量的存储周期，
+  // 但是并没有改变变量的使用周期或者说作用域：
   // x++;
   return;
 }
@@ -116,7 +119,8 @@ void func1(const std::string& thread_name) {
 
 // 在函数间或通过函数返回实例也不会创建多个。
 // 虽然create A()看上去被调用了多次，实际上只被调用了一次，
-// 因为thread_local变量只会在每个线程最开始被调用的时候进行初始化，并且只会被初始化一次。
+// 因为thread_local变量只会在每个线程最开始被调用的时候进行初始化，
+// 并且只会被初始化一次。
 A* creatA() { return new A(); }
 void loopin_func(const std::string& thread_name) {
   thread_local A* a = creatA();
@@ -170,11 +174,15 @@ class B {
     std::cout << "create B" << std::endl;
   }
   ~B() {}
+
   // b_key是thread_local，虽然其也是static的，
   // 但是每个线程中有一个，每次线程中的所有调用共享这个变量。
   thread_local static int b_key;
-  // thread_local int b_key;  // storage class specified for ‘b_key’
+  // thread_local int b_key;
+  // storage class specified for ‘b_key’
+
   int b_value = 24;
+
   // b_static是真正的static，全局只有一个，所有线程共享这个变量。
   static int b_static;
 };
@@ -196,6 +204,7 @@ void func(const std::string& thread_name) {
               << ", b_value:" << b.b_value << ", b_static: " << B::b_static
               << std::endl;
   }
+
   return;
 }
 
