@@ -353,6 +353,34 @@ void func() {
 }
 }  // namespace test
 
+namespace polymorphic {
+class B {
+ public:
+  B() { std::cout << "B" << std::endl; }
+  ~B() { std::cout << "~B" << std::endl; }
+  virtual void show() = 0;
+};
+class D1 : public B {
+ public:
+  D1() { std::cout << "D1" << std::endl; }
+  ~D1() { std::cout << "~D1" << std::endl; }
+  void show() { std::cout << "D1::show" << std::endl; }
+};
+class D2 : public B {
+ public:
+  D2() { std::cout << "D2" << std::endl; }
+  ~D2() { std::cout << "~D2" << std::endl; }
+  void show() { std::cout << "D2::show" << std::endl; }
+};
+
+void func() {
+  std::shared_ptr<B> p(new D1);
+  p->show();
+  p = std::make_shared<D2>();
+  p->show();
+}
+}  // namespace polymorphic
+
 int main(int argc, char* argv[]) {
   if (argc < 2) {
     std::cout << argv[0] << " i [0 - 4]" << std::endl;
@@ -374,6 +402,9 @@ int main(int argc, char* argv[]) {
       break;
     case 4:
       test::func();
+      break;
+    case 5:
+      polymorphic::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

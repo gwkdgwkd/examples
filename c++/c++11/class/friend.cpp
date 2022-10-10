@@ -9,15 +9,15 @@ class Poly;
 typedef Poly P;
 
 class LiLei {
-  friend class Poly;  // C++98通过, C++11通过
+  friend class Poly;  // C++98通过，C++11通过
 };
 
 class Jim {
-  friend Poly;  // C++98失败, C++11通过
+  friend Poly;  // C++98失败，C++11通过
 };
 
 class HanMeiMei {
-  friend P;  // C++98失败, C++11通过
+  friend P;  // C++98失败，C++11通过
 };
 // C++98也能编译过，为什么？编译器比较新？
 }  // namespace n1
