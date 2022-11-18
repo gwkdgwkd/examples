@@ -156,7 +156,7 @@ void func3() {
   // char c2 = {x};  // error
   char c3 = y;  // ok
   char c4 = {y};
-  // ok, 由于加了const并且值为1，编译器认为这样的转换是安全的
+  // ok，由于加了const并且值为1，编译器认为这样的转换是安全的
 
   int z = 1;
   char c5 = z;  // ok
