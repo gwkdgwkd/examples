@@ -213,33 +213,41 @@ void func1() {
 }
 
 void func2() {
-  std::shared_ptr<A> p1 = std::make_shared<A>(66);
-  std::shared_ptr<A> p2 = std::make_shared<A>(77);
-  std::shared_ptr<A> p3(p2);
+  std::shared_ptr<A> p1 = std::make_shared<A>(22);
+  std::shared_ptr<A> p2(p1);
   std::cout << p1->GetI() << " (" << p1.use_count() << ")" << std::endl;
-  std::cout << p2->GetI() << " (" << p2.use_count() << ")" << std::endl;
-  std::cout << p3->GetI() << " (" << p3.use_count() << ")" << std::endl;
-  p1.reset();  // p1引用计数减1，p1为nullptr
-  std::cout << std::boolalpha << (p1 == nullptr) << std::endl;
-  p2.reset(new A(88));
-  std::cout << p2->GetI() << " (" << p2.use_count() << ")" << std::endl;
-  std::cout << p3->GetI() << " (" << p3.use_count() << ")" << std::endl;
+  p2.reset();  // p1引用计数减1，p1为nullptr
+  std::cout << std::boolalpha << (p2 == nullptr) << std::endl;
+  std::cout << p1->GetI() << " (" << p1.use_count() << ")" << std::endl;
 
-  // create A, i = 66
-  // create A, i = 77
-  // 66 (1)
-  // 77 (2)
-  // 77 (2)
-  // delete A
+  // create A, i = 22
+  // 22 (2)
   // true
-  // create A, i = 88
-  // 88 (1)
-  // 77 (1)
-  // delete A
+  // 22 (1)
   // delete A
 }
 
 void func3() {
+  std::shared_ptr<A> p1 = std::make_shared<A>(33);
+  std::shared_ptr<A> p2(p1);
+  std::shared_ptr<A> p3 = p1;
+  std::cout << p1->GetI() << " (" << p1.use_count() << ")" << std::endl;
+  std::cout << p2->GetI() << " (" << p2.use_count() << ")" << std::endl;
+  p1.reset(new A(34));
+  std::cout << p1->GetI() << " (" << p1.use_count() << ")" << std::endl;
+  std::cout << p2->GetI() << " (" << p2.use_count() << ")" << std::endl;
+
+  // create A, i = 33
+  // 33 (3)
+  // 33 (3)
+  // create A, i = 34
+  // 34 (1)
+  // 33 (2)
+  // delete A
+  // delete A
+}
+
+void func4() {
   std::shared_ptr<A> p1 = std::make_shared<A>(66);
   std::shared_ptr<A> p2 = std::make_shared<A>(77);
   std::cout << "p1 : " << p1.get()->GetI() << std::endl;
@@ -258,10 +266,25 @@ void func3() {
   // delete A
 }
 
+void func5() {
+  std::shared_ptr<A> p1 = std::make_shared<A>(99);
+  std::shared_ptr<A> p2 = p1;
+  std::cout << p1->GetI() << " (" << p1.use_count()
+            << "), unique : " << p1.unique() << std::endl;
+  p2.reset();
+  std::cout << p1->GetI() << " (" << p1.use_count()
+            << "), unique : " << p1.unique() << std::endl;
+
+  // 99 (2), unique : false
+  // 99 (1), unique : true
+}
+
 void testFunc() {
   func1();
   func2();
   func3();
+  func4();
+  func5();
 }
 }  // namespace func
 
