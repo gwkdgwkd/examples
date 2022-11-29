@@ -32,7 +32,7 @@
 std::mutex cout_mutex;
 
 namespace globle {
-// 全局的hread_local变量在每个线程里是分别自加互不干扰的。
+// 全局的thread_local变量在每个线程里是分别自加互不干扰的。
 thread_local int g = 1;
 void func(const std::string& thread_name) {
   for (int i = 0; i < 3; ++i) {

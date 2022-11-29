@@ -588,5 +588,5 @@ int main(int argc, char *argv[]) {
 }
 
 // GCC默认没有加载pthread库，
-// 据说在后续的版本中可以不用在编译时添加-pthread选项。
+// 据说在后续的版本中可以不用在编译时添加-lpthread选项。
 // g++ -std=c++11 thread.cpp -lpthread

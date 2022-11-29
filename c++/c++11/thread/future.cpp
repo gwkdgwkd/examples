@@ -16,7 +16,7 @@
 
 // std::future_errc继承于C++标准异常体系中的logic_error。
 // broken_promise：0
-// 与该future共享状态相关联的promise对象在设置值或者异常之前一被销毁。
+// 与该future共享状态相关联的promise对象在设置值或者异常之前已被销毁。
 // future_already_retrieved：1
 // 与该future对象相关联的共享状态的值已经被获取了，即调用了get函数。
 // promise_already_satisfied：2
