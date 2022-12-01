@@ -23,12 +23,14 @@ int main() {
 
   // 在C++中，这两个函数仍然可以使用，但是C++又新增了两个关键字，
   // new和delete：new用来动态分配内存，delete用来释放内存。
-  int *p2 = new int;  // new操作符会根据后面的数据类型来推断所需空间的大小
+  // new操作符会根据后面的数据类型来推断所需空间的大小：
+  int *p2 = new int;
   delete p2;
 
   // 分配一组连续的数据，可以使用new[]：
   int *p3 = new int[10];
-  delete[] p3;  // 用new[]分配的内存需要用delete[]释放，它们是一一对应的
+  // 用new[]分配的内存需要用delete[]释放，它们是一一对应的：
+  delete[] p3;
 
   return 0;
 }

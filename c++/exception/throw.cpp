@@ -3,8 +3,8 @@
 namespace n1 {
 // 异常必须显式地抛出，才能被检测和捕获到；
 // 如果没有显式的抛出，即使有异常也检测不到。
-// 在C++中，我们使用throw关键字来显式地抛出异常，
-// 它的用法为：throw exceptionData;
+// 在C++中，使用throw关键字来显式地抛出异常，用法为：
+// throw exceptionData;
 // exceptionData可以包含任意的信息，完全有程序员决定。
 // exceptionData可以是int、float、bool等基本类型，
 // 也可以是指针、数组、字符串、结构体、类等聚合类型。

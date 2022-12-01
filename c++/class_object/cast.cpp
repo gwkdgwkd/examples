@@ -154,7 +154,7 @@ void testN2() {
 namespace n3 {
 // static_cast关键字：
 // static_cast只能用于良性转换，转换风险较低，一般不会发生什么意外，例如：
-// 1.原有的自动类型转换，short转int、int转double、const转非const、向上转型等；
+// 1.原有的自动类型转换，short转int、int转double、非const转const、向上转型等；
 // 2.void指针和具体类型指针之间的转换，例如void*转int*、char*转void*等；
 // 3.有转换构造函数或者类型转换函数的类与其它类型之间的转换，
 //   例如double转Complex（转换构造函数）、Complex转double（类型转换函数）。
@@ -281,7 +281,7 @@ void testN5() {
 }  // namespace n5
 
 namespace n6 {
-// dynamic_cast关键字:
+// dynamic_cast关键字：
 // dynamic_cast用于在类的继承层次之间进行类型转换，
 // 它既允许向上转型（Upcasting），也允许向下转型（Downcasting）。
 // 向上转型是无条件的，不会进行任何检测，所以都能成功；
@@ -289,7 +289,7 @@ namespace n6 {
 
 // dynamic_cast与static_cast是相对的，
 // dynamic_cast是动态转换的意思，static_cast是静态转换的意思。
-// dynamic_cast会在程序运行期间借助RTTI进行类型转换，这就要求基类必须包含虚函数；
+// dynamic_cast会在程序运行期间借助RTTI进行类型转换，要求基类必须包含虚函数；
 // static_cast在编译期间完成类型转换，能够更加及时地发现错误。
 
 // dynamic_cast的语法格式为：

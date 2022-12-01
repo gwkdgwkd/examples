@@ -35,7 +35,8 @@ namespace n2 {
 class A;  // 提前声明，为了B中的函数能使用A类型的指针
 class B {
  public:
-  void print(A *p);  // 只能声明，不能定义，因为A是提前声明，此时不知道A的成员
+  // 只能声明，不能定义，因为A是提前声明，此时不知道A的成员：
+  void print(A *p);
 };
 class A {
  public:
@@ -156,7 +157,7 @@ void A::print(B *p) {
 class C {
  public:
   void print(B *p) { std::cout << p->b2 << std::endl; }
-  // 友元的关系不能传递：：
+  // 友元的关系不能传递：
   void print(A *p) {
     // B是A的友元类，C是B的友元类，不等于C是A的友元类，不能访问A的私有成员：
     // std::cout << p->a << std::endl;

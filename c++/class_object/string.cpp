@@ -1,4 +1,4 @@
-#include <string.h>  // C 风格字符串相关函数的头文件，比如strlen
+#include <string.h>  // C风格字符串相关函数的头文件，比如strlen
 #include <iostream>
 #include <string>  // string类库的头文件
 
@@ -47,12 +47,12 @@
 
 namespace n1 {
 void func1() {
-  std::string s1;            // 创建一个空的string对象
-  std::string s2("Hello!");  // 将string对象初始化为参数指向的字符串
+  std::string s1;             // 创建一个空的string对象
+  std::string s2("Hello!");   // 将string对象初始化为参数指向的字符串
   std::string s3(10, 'a');    // 创建string对象，包含n个字符c
   std::string s4 = "hello!";  // 使用C语言风格来初始化string对象
-  std::string s5(s2);         // 复制构造函数
-  std::string s6 = s2;        // 复制构造函数
+  std::string s5(s2);         // 拷贝构造函数
+  std::string s6 = s2;        // 拷贝构造函数
   std::string s7;
   s7 = s2;  // 赋值操作符
 
@@ -229,7 +229,7 @@ void testN2() {
 
 namespace n3 {
 void testN3() {
-  // 使用string.find()方法查找字符，
+  // 使用string.find()方法查找字符串，
   // 如果找到，则返回该子字符串首次出现时其首字符的索引；
   // 否则，返回string::npos。
   auto check = [](const int &i) {
