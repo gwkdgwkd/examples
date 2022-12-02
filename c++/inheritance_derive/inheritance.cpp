@@ -180,8 +180,8 @@ namespace n3 {
 // 例如将public改为private、将protected改为public。
 // using只能改变基类中public和protected成员的访问权限，
 // 不能改变private成员的访问权限，
-// 因为基类中private成员在派生类中是不可见的，
-// 根本不能使用，所以基类中的private成员在派生类中无论如何都不能访问。
+// 因为基类中private成员在派生类中是不可见的，根本不能使用，
+// 所以基类中的private成员在派生类中无论如何都不能访问。
 
 class B {
  public:
