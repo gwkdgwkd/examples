@@ -11,6 +11,6 @@ class Student {
 
 namespace demo {
 void display(int a);
-// int num; 因为demo1.h中已经声明有同名的变量，取消注释会造成重定义错误
+// int num; 因为demo1.h中已经声明有同名的变量，会造成重定义错误
 }
 #endif
