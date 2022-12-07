@@ -201,7 +201,8 @@ void func3() {
   // 编译器不知道该将T实例化为double还是int，
   // 也不会尝试将int转换为double，
   // 或者将double转换为int，所以调用失败：
-  // fun1(12.5, 30);  // no matching function for call to ‘fun1(double, int)’
+  // fun1(12.5, 30);
+  // no matching function for call to ‘fun1(double, int)’
 
   // name的类型从int[20]换转换为int*，所以T的真实类型为int：
   fun2(name);  // fun2
