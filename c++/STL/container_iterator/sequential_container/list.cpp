@@ -249,7 +249,7 @@
 // 无需经过拷贝就可以直接链接到其它链表中，
 // 且整个过程只需要消耗O(1)的时间复杂度。
 // 考虑到之所以选用list容器，就是看中了其底层存储结构的这一特性。
-// 因此，作为list容器设计者的我们，
+// 因此，作为list容器设计者，
 // 自然也想将splice()方法的时间复杂度设计为O(1)。
 // 这里就产生了一个矛盾，即如果将size()设计为O(1)时间复杂度，
 // 则由于splice()成员方法会修改list容器存储元素的个数，
@@ -288,8 +288,8 @@ void func1() {
   std::list<int> l4{1, 2, 3};
   print(l4);  // 1 2 3 [3]
 
-  // 4.在已有list容器的情况下，通过拷贝该容器可以创建新的list容器：
-  // 采用此方式，必须保证新旧容器存储的元素类型一致。
+  // 4.在已有list容器的情况下，通过拷贝该容器可以创建新的list容器，
+  //   采用此方式，必须保证新旧容器存储的元素类型一致：
   std::list<int> l5(l3);
   std::list<int> l6 = l4;
   print(l5);  // 5 5 5 5 5 5 5 5 5 5 [10]
@@ -312,8 +312,9 @@ void func2() {
   }
   std::cout << std::endl;  // abcde
 
+  // 程序中比较迭代器用的是!=运算符，因为它不支持<等运算符：
   for (std::list<char>::reverse_iterator it = l.rbegin(); it != l.rend();
-       ++it) {  // 程序中比较迭代器用的是!=运算符，因为它不支持<等运算符
+       ++it) {
     std::cout << *it;
   }
   std::cout << std::endl;  // edcba
@@ -344,7 +345,7 @@ void func3() {
   last = 20;
   std::cout << l.front() << " " << l.back() << std::endl;  // 10 20
 
-  // 如果想访问list容存储的其他元素，就只能使用list容器的迭代器
+  // 如果想访问list容存储的其他元素，就只能使用list容器的迭代器：
   auto it = l.begin();
   while (it != l.end()) {
     (*it)++;
@@ -470,7 +471,8 @@ void func7() {
   //   此格式的splice()方法的功能是将x容器[first,last)范围内所有的元素，
   //   移动到当前容器position指明的位置处。
 
-  std::list<int> l1{1, 2, 3, 4}, l2{10, 20, 30};
+  std::list<int> l1{1, 2, 3, 4};
+  std::list<int> l2{10, 20, 30};
   std::list<int>::iterator it = ++l1.begin();
   l1.splice(it, l2);
   print(l1);  // 1 10 20 30 2 3 4 [7]
