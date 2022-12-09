@@ -22,16 +22,17 @@
 // 该容器存储的都是pair<const K,T>类型的键值对元素，
 // 其中K和T分别表示键和值的数据类型。
 
-// template <class Key,                  // 指定键（key）的类型
-//           class T,                    // 指定值（value）的类型
-//           class Compare = less<Key>,  // 指定排序规则
-// class Alloc = allocator<pair<const Key, T>>  // 指定分配器对象的类型
-//           > class map;
+// template <
+//   class Key,                  // 指定键（key）的类型
+//   class T,                    // 指定值（value）的类型
+//   class Compare = less<Key>,  // 指定排序规则
+//   class Alloc = allocator<pair<const Key, T>>  // 指定分配器的类型
+// > class map;
 // map容器模板有4个参数，其中后2个参数都设有默认值。
 // 大多数场景中，只需要设定前2个参数的值，
 // 有些场景可能会用到第3个参数，但最后一个参数几乎不会用到。
 
-// map容器包含的成员方法:
+// map容器包含的成员方法：
 // begin() 	        返回指向容器中排序后的第一个键值对的双向迭代器。
 //                  如果map容器用const限定，
 //                  则该方法返回的是const类型的双向迭代器。
@@ -479,10 +480,9 @@ void func5() {
   std::map<char, int>::iterator it1 = m.begin();
   std::advance(it1, 2);
   std::cout << it1->first << ":" << it1->second << std::endl;  // e:5
-  std::map<char, int>::iterator it2 =
-      m.emplace_hint(it1, std::pair<char, int>({'c', 3}));
+  std::map<char, int>::iterator it2 = m.emplace_hint(it1, 'c', 3);
   std::cout << it2->first << ":" << it2->second << std::endl;  // c:3
-  it2 = m.emplace_hint(it1, std::pair<char, int>({'a', 3}));
+  it2 = m.emplace_hint(it1, 'a', 3);
   std::cout << it2->first << ":" << it2->second << std::endl;  // a:1
   print(m);
   // size:4
@@ -510,13 +510,11 @@ void func5() {
   // A(int)
   // move
   // ~A()
-  m1.emplace_hint(m1.begin(), std::pair<char, A>({3, A(6)}));
+  m1.emplace_hint(m1.begin(), 3, A(6));
   // A(int)
-  // move
   // move
   // ~A()
 
-  // ~A()
   // ~A()
   // ~A()
   // ~A()

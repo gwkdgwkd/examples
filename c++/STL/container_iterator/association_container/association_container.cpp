@@ -19,7 +19,7 @@
 
 // map定义在<map>头文件中，使用该容器存储的数据，
 // 其各个元素的键必须是唯一的（即不能重复），
-// 该容器会根据各元素键的大小，默认进行升序排序（调用 std::less<T>）。
+// 该容器会根据各元素键的大小，默认进行升序排序（调用std::less<T>）。
 // set定义在<set>头文件中，使用该容器存储的数据，各个元素键和值完全相同，
 // 且各个元素的值不能重复（保证了各元素键的唯一性）。
 // 该容器会自动根据各个元素的键的大小进行升序排序（调用std::less<T>）。
@@ -29,8 +29,12 @@
 // multiset容器中存储元素的值可以重复（键也是重复的）。
 
 // C++11还新增了4种哈希容器：
-// unordered_map、unordered_multimap、unordered_set、unordered_multiset。
-// 严格来说，它们也属于关联式容器，但由于哈希容器底层采用的是哈希表，而不是红黑树。
+// 1.unordered_map；
+// 2.unordered_multimap；
+// 3.unordered_set；
+// 4.unordered_multiset。
+// 严格来说，它们也属于关联式容器，
+// 但由于哈希容器底层采用的是哈希表，而不是红黑树。
 
 int main() {
   std::map<std::string, std::string> mymap;
@@ -41,7 +45,7 @@ int main() {
        it != mymap.end(); ++it) {
     std::cout << it->first << " => " << it->second << '\n';
   }
-  // 由于map容器在存储元素时，默认按照升序排序，因此该容器最终存储的元素顺序为：
+  // map存储元素时默认按照升序排序，因此最终存储的元素顺序为：
   // http://c.biancheng.net/c/ => C语言教程
   // http://c.biancheng.net/java/ => Java教程
   // http://c.biancheng.net/python/ => Python教程

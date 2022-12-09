@@ -2,14 +2,15 @@
 #include <utility>
 
 // 考虑到键值对并不是普通类型数据，C++ STL标准库提供了pair类模板，
-// 其专门用来将2个普通元素first和second（基本数据类型、结构体、
-// 类）创建成一个新元素<first,second>。
+// 用来将2个普通元素first和second创建成一个新元素<first,second>，
+// 普通元素可以是基本数据类型、结构体或者类。
 // 通过其构成的元素格式不难看出，
 // 使用pair类模板来创建键值对形式的元素，再合适不过。
 // pair类模板定义在<utility>头文件中。
 
 // 在C++11标准之前，pair类模板中提供了以下3种构造函数：
-// 1.pair();默认构造函数，即创建空的pair对象。
+// 1.pair();
+//   默认构造函数，即创建空的pair对象。
 // 2.pair(const first_type& a, const second_type& b);
 //   直接使用2个元素初始化成pair对象。
 // 3.template<class U, class V> pair(const pair<U,V>& pr);
@@ -76,11 +77,11 @@ int main() {
   std::pair<std::string, int> pair8("STL教程", 20);
   std::pair<std::string, int> pair9("C++教程", 20);
   std::pair<std::string, int> pair10("C++教程", 30);
-  // pair1和pair2的key不同，value相同
+  // pair1和pair2的key不同，value相同：
   if (pair8 != pair9) {
     std::cout << "pair8 != pair9" << std::endl;
   }
-  // pair2和pair3的key相同，value不同
+  // pair2和pair3的key相同，value不同：
   if (pair9 != pair10) {
     std::cout << "pair9 != pair10" << std::endl;
   }

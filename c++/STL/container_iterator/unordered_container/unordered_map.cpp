@@ -14,13 +14,13 @@
 
 // unordered_map定义在<unordered_map>中，并位于std命名空间中。
 // unordered_map容器模板的定义如下所示：
-//  template < class Key,                        // 键值对中键的类型
-//             class T,                          // 键值对中值的类型
-//             class Hash = hash<Key>,           // 容器内部存储键值对所用的哈希函数
-//             class Pred = equal_to<Key>,       // 判断各个键值对键相同的规则
-//             class Alloc =
-//               allocator< pair<const Key,T> >  // 指定分配器对象的类型
-//             > class unordered_map;
+// template < 
+//   class Key,                        // 键值对中键的类型
+//   class T,                          // 键值对中值的类型
+//   class Hash = hash<Key>,           // 容器内部存储键值对所用的哈希函数
+//   class Pred = equal_to<Key>,       // 判断各个键值对键相同的规则
+//   class Alloc = allocator< pair<const Key,T> >  // 指定分配器的类型
+// > class unordered_map;
 // 以上5个参数中，必须显式给前2个参数传值，
 // 并且除特殊情况外，最多只需要使用前4个参数。
 // <key,T> 前2个参数分别用于确定键值对中键和值的类型，也就是存储键值对的类型。

@@ -22,7 +22,7 @@
 // template <class T,                        // 存储元素的类型
 //           class Compare = less<T>,        // 指定容器内部的排序规则
 //           class Alloc = allocator<T> >    // 指定分配器对象的类型
-//          > class multiset;
+// > class multiset;
 // multiset类模板有3个参数，其中后2个参数自带有默认值。
 // 值得一提的是，在实际使用中，最多只需要使用前2个参数即可，第3个参数不会用到。
 

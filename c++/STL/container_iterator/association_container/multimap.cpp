@@ -7,11 +7,12 @@
 // 和map容器的区别在于，multimap容器中可以同时存储多个键相同的键值对。
 // 和map容器一样，实现multimap也定义在<map>头文件，并位于std命名空间中。
 // multimap 容器类模板的定义如下：
-// template < class Key,                                   // 指定键（key）的类型
-//            class T,                                     // 指定值（value）的类型
-//            class Compare = less<Key>,                   // 指定排序规则
-//            class Alloc = allocator<pair<const Key,T> >  // 指定分配器对象的类型
-//            > class multimap;
+// template < 
+//   class Key,                                   // 指定键（key）的类型
+//   class T,                                     // 指定值（value）的类型
+//   class Compare = less<Key>,                   // 指定排序规则
+//   class Alloc = allocator<pair<const Key,T> >  // 指定分配器对象的类型
+// > class multimap;
 // multimap容器模板有4个参数，其中后2个参数都设有默认值。
 // 大多数场景中，只需要设定前2个参数的值，
 // 有些场景可能会用到第3个参数，但最后一个参数几乎不会用到。

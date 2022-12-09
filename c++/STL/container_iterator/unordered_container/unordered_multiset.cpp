@@ -15,11 +15,12 @@
 // 而是和unordered_set容器共用同一个<unordered_set>头文件，
 // 并且也位于std命名空间。
 // unordered_multiset容器类模板的定义如下：
-// template <class Key,                     // 容器中存储元素的类型
-//           class Hash = hash<Key>,        // 确定元素存储位置所用的哈希函数
-//           class Pred = equal_to<Key>,    // 判断各个元素是否相等所用的函数
-//           class Alloc = allocator<Key>   // 指定分配器对象的类型
-//          >class unordered_multiset;
+// template <
+//   class Key,                     // 容器中存储元素的类型
+//   class Hash = hash<Key>,        // 确定元素存储位置所用的哈希函数
+//   class Pred = equal_to<Key>,    // 判断各个元素是否相等所用的函数
+//   class Alloc = allocator<Key>   // 指定分配器对象的类型
+// > class unordered_multiset;
 // 在99%的实际场景中，最多只需要使用前3个参数，最后一个参数保持默认值即可。
 // Key 确定容器存储元素的类型，
 //     如果读者将unordered_multiset看做是存储键和值相同的键值对的容器，
@@ -130,6 +131,17 @@ void func1() {
   print(ums7);  // nihao world [2]
 }
 
+void func2() {
+  std::unordered_multiset<int> ums{1,2,3,4,2,5,2};
+  auto ret = ums.equal_range(2);
+  for(auto it = ret.first; it != ret.second; ++it) {
+    std::cout << *it << std::endl;
+  }
+  // 2
+  // 2
+  // 2
+}
+
 int main(int argc, char* argv[]) {
   if (argc < 2) {
     std::cout << argv[0] << " i [0]" << std::endl;
@@ -139,6 +151,9 @@ int main(int argc, char* argv[]) {
   switch (type) {
     case 0:
       func1();
+      break;
+    case 1:
+      func2();
       break;
     default:
       std::cout << "invalid type" << std::endl;

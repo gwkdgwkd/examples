@@ -14,12 +14,13 @@
 // STL标准库中实现unordered_multimap容器和unordered_map容器一样，
 // 定义在<unordered_map>头文件，且位于std命名空间中。
 // unordered_multimap 容器模板的定义如下所示：
-// template <class Key,                                   // 键（key）的类型
-//           class T,                                     // 值（value）的类型
-//           class Hash = hash<Key>,                      // 底层存储键值对时采用的哈希函数
-//           class Pred = equal_to<Key>,                  // 判断各个键值对的键相等的规则
-//           class Alloc = allocator< pair<const Key,T> > // 指定分配器对象的类型
-//          > class unordered_multimap;
+// template <
+//   class Key,                         // 键（key）的类型
+//   class T,                           // 值（value）的类型
+//   class Hash = hash<Key>,            // 底层存储键值对时采用的哈希函数
+//   class Pred = equal_to<Key>,        // 判断各个键值对的键相等的规则
+//   class Alloc = allocator< pair<const Key,T> > // 指定分配器的类型
+// > class unordered_multimap;
 // 以上5个参数中，必须显式给前2个参数传值，
 // 且除极个别的情况外，最多只使用前4个参数。
 // <key,T>前2个参数分别用于确定键值对中键和值的类型，也就是存储键值对的类型。
@@ -36,7 +37,7 @@
 // 这种情况下，需要我们自定义适用的哈希函数和比较函数，
 // 并分别显式传递给Hash参数和Pred参数。
 
-// unordered_multimap容器的成员方法:
+// unordered_multimap容器的成员方法：
 // begin()	          返回指向容器中第一个键值对的正向迭代器。
 // end()	            返回指向容器中最后一个键值对之后位置的正向迭代器。
 // cbegin()	          和begin()功能相同，只不过在其基础上增加了const属性，

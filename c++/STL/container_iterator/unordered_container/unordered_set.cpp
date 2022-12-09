@@ -16,11 +16,12 @@
 // 实现unordered_set容器的模板类定义在<unordered_set>头文件，
 // 并位于std命名空间中。
 // unordered_set容器的类模板定义如下：
-// template <class Key,                     // 容器中存储元素的类型
-//           class Hash = hash<Key>,        // 确定元素存储位置所用的哈希函数
-//           class Pred = equal_to<Key>,    // 判断各个元素是否相等所用的函数
-//           class Alloc = allocator<Key>   // 指定分配器对象的类型
-//          >class unordered_set;
+// template <
+//   class Key,                     // 容器中存储元素的类型
+//   class Hash = hash<Key>,        // 确定元素存储位置所用的哈希函数
+//   class Pred = equal_to<Key>,    // 判断各个元素是否相等所用的函数
+//   class Alloc = allocator<Key>   // 指定分配器对象的类型
+// > class unordered_set;
 // 以上4个参数中，只有第一个参数没有默认值，
 // 这意味着如果想创建一个unordered_set容器，至少需要手动传递1个参数。
 // 事实上，在99%的实际场景中最多只需要使用前3个参数，最后一个参数保持默认值即可。

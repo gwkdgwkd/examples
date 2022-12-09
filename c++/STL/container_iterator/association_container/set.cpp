@@ -22,10 +22,11 @@
 
 // set容器定义于<set>头文件，并位于std命名空间中。
 // set容器的类模板定义如下：
-// template < class T,                        // 键key和值value的类型
-//            class Compare = less<T>,        // 指定set容器内部的排序规则
-//            class Alloc = allocator<T>      // 指定分配器对象的类型
-//            > class set;
+// template < 
+//   class T,                    // 键key和值value的类型
+//   class Compare = less<T>,    // 指定set容器内部的排序规则
+//   class Alloc = allocator<T>  // 指定分配器对象的类型
+// > class set;
 // 由于set容器存储的各个键值对，其键和值完全相同，
 // 也就意味着它们的类型相同，因此set容器类模板的定义中，
 // 仅有第1个参数用于设定存储数据的类型。

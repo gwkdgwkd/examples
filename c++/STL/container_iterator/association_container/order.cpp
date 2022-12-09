@@ -28,9 +28,9 @@ namespace n1 {
 // 按照字符串的长度做升序排序：
 class cmp {  // 函数对象类cmp也可以使用struct关键字创建
  public:
-  // 重载()运算符
+  // 重载()运算符：
   bool operator()(const std::string &a, const std::string &b) {
-    // 按照字符串的长度，做升序排序(即存储的字符串从短到长)
+    // 按照字符串的长度，做升序排序：
     return (a.length() < b.length());
   }
 };
@@ -38,15 +38,15 @@ class cmp {  // 函数对象类cmp也可以使用struct关键字创建
 void test() {
   // 通过将函数对象类的类名cmp通过set类模板的第2个参数传递给myset容器，
   // 该容器内部排序数据的规则，就改为了以字符串的长度为标准做升序排序。
-  std::set<std::string, cmp> s{"A", "BB", "CCC", "EEEE", "DDDD", "FFFFF"};
+  std::set<std::string, cmp> s{"A", "BB", "FFF", "EEEE", "DDDD", "CCCCC"};
   for (auto iter = s.begin(); iter != s.end(); ++iter) {
     std::cout << *iter << std::endl;
   }
   // A
   // BB
-  // CCC
+  // FFF
   // EEEE
-  // FFFFF
+  // CCCCC
 
   // 由于是以字符串的长度为准进行排序，
   // 因此其无法存储相同长度的多个字符串，没有DDDD
@@ -60,22 +60,22 @@ class cmp {
  public:
   bool operator()(const T &a, const T &b) { return a <= b; }
 };
-// 此方式必须保证T类型元素可以直接使用关系运算符（比如这里的<运算符）做比较。
+// 此方式必须保证T类型元素可以直接使用关系运算符做比较。
 // 当关联式容器中存储的元素类型为结构体指针变量或者类的指针对象时，
 // 只能使用函数对象的方式自定义排序规则，此方法不再适用。
 
 void test() {
-  std::set<std::string, cmp<std::string>> s{"A",    "BB",   "CCC",
-                                            "EEEE", "DDDD", "FFFFF"};
+  std::set<std::string, cmp<std::string>> s{"A",    "BB",   "FFF",
+                                            "EEEE", "DDDD", "CCCCC"};
   for (auto iter = s.begin(); iter != s.end(); ++iter) {
     std::cout << *iter << std::endl;
   }
   // A
   // BB
-  // CCC
+  // CCCCC
   // DDDD
   // EEEE
-  // FFFF
+  // FFF
 }
 }  // namespace n2
 
@@ -122,7 +122,8 @@ class myString {
  public:
   myString(std::string tempStr) : str(tempStr){};
   std::string getStr() const;
-  // 至于参数的传值方式是采用按引用传递还是按值传递，都可以（建议采用按引用传递，效率更高）。
+  // 至于参数的传值方式是采用按引用传递还是按值传递，
+  // 都可以，建议采用按引用传递，效率更高。
   bool operator<(const myString &tempStr) const {
     return this->str.length() < tempStr.str.length();
   }
