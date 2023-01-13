@@ -2,7 +2,7 @@
 #include <queue>
 #include <vector>
 
-// 无论priority_queue中存储的是基础数据类型（int、double等），
+// 无论priority_queue中存储的是基础数据类型int、double等，
 // 还是string类对象或者自定义的类对象，
 // 都可以使用函数对象的方式自定义排序规则。
 template <typename T>

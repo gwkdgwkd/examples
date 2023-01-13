@@ -14,7 +14,7 @@
 // 使用queue容器适配器都是好的选择。
 
 // queue容器适配器以模板类：
-// queue<T,Container=deque<T>>的形式位于<queue>头文件中，并定义在std命名空间里。
+// queue<T,Container=deque<T>>位于<queue>头文件中，并定义在std命名空间里。
 // 其中T为存储元素的类型，Container表示底层容器的类型
 //  empty() 	         如果queue中没有元素的话，返回true。
 //  size() 	           返回queue中元素的个数。
