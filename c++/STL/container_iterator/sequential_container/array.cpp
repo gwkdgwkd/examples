@@ -188,7 +188,8 @@ void test() {
   std::get<4>(a) = 8;
   std::cout << std::get<0>(a) << std::get<1>(a) << std::get<2>(a)
             << std::get<3>(a) << std::get<4>(a) << std::endl;  // 12348
-  // std::get<6>(a);  // get是编译时获取的值，不用[]和at，超限时编译报错
+  // get是编译时获取的值，和[]和at不同，超限时编译报错：
+  // std::get<6>(a);  
 }
 }  // namespace n3
 
@@ -221,7 +222,7 @@ void test() {
   std::cout << c.data() << std::endl;  // nihao
 
   // 容器的迭代器和指针是不能混用的，这可能会引发错误：
-  strcpy(c.begin(), "yyyy");            // 没报错......
+  strcpy(c.begin(), "yyyy");            // 为啥没报错？
   std::cout << c.begin() << std::endl;  // yyyy
 
   std::array<char, 50> addr1{"hello1"};
