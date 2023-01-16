@@ -3,6 +3,7 @@
 #include <iterator>
 #include <list>
 #include <queue>
+#include <algorithm>
 
 // 插入迭代器适配器（insert_iterator），
 // 简称插入迭代器或者插入器，其功能就是向指定容器中插入元素。
@@ -60,7 +61,7 @@
 // 可以快速创建insert_iterator类型迭代器。
 // 如果insert_iterator迭代器的目标容器为关联式容器，
 // 由于该类型容器内部会自行对存储的元素进行排序，
-// 因此我们指定的插入位置只起到一个提示的作用，
+// 因此指定的插入位置只起到一个提示的作用，
 // 即帮助关联式容器从指定位置开始，搜索正确的插入位置。
 // 但是，如果提示位置不正确，会使的插入操作的效率更加糟糕。
 
@@ -70,13 +71,21 @@
 
 int main() {
   std::vector<int> v;
-  std::back_insert_iterator<std::vector<int> > back_it1(v);
-  std::back_insert_iterator<std::vector<int> > back_it2 = std::back_inserter(v);
+  std::back_insert_iterator<std::vector<int>> back_it1(v);
+  std::back_insert_iterator<std::vector<int>> back_it2 = std::back_inserter(v);
   back_it1 = 5;
   back_it2 = 4;
   back_it1 = 3;
   back_it2 = 6;
   for (std::vector<int>::iterator it = v.begin(); it != v.end(); ++it) {
+    std::cout << *it << ' ';
+  }
+  std::cout << std::endl;  // 5 4 3 6
+
+  std::vector<int> v1;
+  std::copy(v.begin(), v.end(),
+            std::back_insert_iterator<std::vector<int>>(v1));
+  for (std::vector<int>::iterator it = v1.begin(); it != v1.end(); ++it) {
     std::cout << *it << ' ';
   }
   std::cout << std::endl;  // 5 4 3 6

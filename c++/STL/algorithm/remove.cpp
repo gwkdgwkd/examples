@@ -5,6 +5,11 @@
 #include <set>
 #include <vector>
 
+// remove
+// remove_copy
+// remove_if
+// remove_copy_if
+
 // 如果不知道具体的场景，即元素保存在什么样的容器中，是不能从序列中移除元素的。
 // 因此，移除元素的算法也无法做到这一点，
 // 它们只会重写被选择的元素或者忽略复制的元素。

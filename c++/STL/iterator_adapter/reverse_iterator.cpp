@@ -43,15 +43,22 @@ int main() {
   std::reverse_iterator<std::vector<int>::iterator> it2(v.end());
   // 反向迭代器是通过操纵内部的基础迭代器实现逆向遍历的，
   // 但是反向迭代器的指向和底层基础迭代器的指向并不相同。
-  // it2其内部的基础迭代器指向的是v容器中元素5之后的位置，
-  // 但是it指向的却是元素5。
-  // 反向迭代器的指向和其底层基础迭代器的指向具有这样的关系，
-  // 即反向迭代器的指向总是距离基础迭代器偏左1个位置；
-  // 反之，基础迭代器的指向总是距离反向迭代器偏右1个位置处。
-  // 其中，begin和end表示基础迭代器，
-  // r(begin)和r(end)分别表示有begin和end获得的反向迭代器。
+  // it2其内部的基础迭代器指向的是v容器中元素8之后的位置，
+  // 但是it指向的却是元素8。
+
   std::cout << *it2 << std::endl;                  // 8
   std::cout << v.end() - it2.base() << std::endl;  // 0
+
+  // 反向迭代器的指向和其底层基础迭代器的指向具有这样的关系，
+  // 即反向迭代器的指向总是距离基础迭代器偏左1个位置；
+  it2++;
+  std::cout << *it2 << " " << *(it2.base()) << std::endl;  // 7 8
+  // 反之，基础迭代器的指向总是距离反向迭代器偏右1个位置处。
+  auto it11 = v.begin() + 1;
+  std::reverse_iterator<std::vector<int>::iterator> it21(it11);
+  std::cout << *it21 << " " << *it11 << std::endl;  // 1 2
+  // 其中，begin和end表示基础迭代器，
+  // r(begin)和r(end)分别表示由begin和end获得的反向迭代器。
 
   // 3.reverse_iterator模板类还提供了一个复制（拷贝）构造函数，
   //   可以实现直接将一个反向迭代器复制给新建的反向迭代器：

@@ -15,10 +15,10 @@
 // unordered_map定义在<unordered_map>中，并位于std命名空间中。
 // unordered_map容器模板的定义如下所示：
 // template < 
-//   class Key,                        // 键值对中键的类型
-//   class T,                          // 键值对中值的类型
-//   class Hash = hash<Key>,           // 容器内部存储键值对所用的哈希函数
-//   class Pred = equal_to<Key>,       // 判断各个键值对键相同的规则
+//   class Key,                      // 键值对中键的类型
+//   class T,                        // 键值对中值的类型
+//   class Hash = hash<Key>,         // 容器内部存储键值对所用的哈希函数
+//   class Pred = equal_to<Key>,     // 判断各个键值对键相同的规则
 //   class Alloc = allocator< pair<const Key,T> >  // 指定分配器的类型
 // > class unordered_map;
 // 以上5个参数中，必须显式给前2个参数传值，
@@ -407,7 +407,7 @@ void func6() {
   // template <class... Args>
   // iterator emplace_hint(const_iterator position, Args&&... args);
   // 和emplace()方法相同，emplace_hint()方法内部会自行构造新键值对，
-  // 因此我们只需向其传递构建该键值对所需的2个元素（第一个作为键，另一个作为值）即可。
+  // 因此只需向其传递构建该键值对所需的2个元素（第一个作为键，另一个作为值）即可。
   // 不同之处在于：
   // emplace_hint()方法的返回值仅是一个迭代器，而不再是pair类型变量。
   //               当该方法将新键值对成功添加到容器中时，

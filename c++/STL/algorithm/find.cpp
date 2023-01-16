@@ -3,6 +3,13 @@
 #include <iostream>
 #include <vector>
 
+// find
+// find_if
+// find_if_not
+// find_end
+// find_first_of
+// adjacent_find
+
 namespace n1 {
 // find()函数本质上是一个模板函数，
 // 用于在指定范围内查找和目标元素值相等的第一个元素。
@@ -265,7 +272,7 @@ namespace n3 {
 // 此时应对==运算符进行重载，使其适用于当前场景。
 // 自定义二元谓词函数，作为find_first_of()函数的匹配规则：
 bool mycomp1(int c1, int c2) { return (c2 % c1 == 0); }
-// 以函数对象的形式定义一个 find_first_of() 函数的匹配规则
+// 以函数对象的形式定义一个find_first_of()函数的匹配规则
 class mycomp2 {
  public:
   bool operator()(const int& c1, const int& c2) { return (c2 % c1 == 0); }

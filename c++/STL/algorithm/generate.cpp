@@ -3,6 +3,9 @@
 #include <iterator>
 #include <string>
 
+// generate
+// generate_n
+
 // 用for_each()算法将一个函数对象应用到序列中的每一个元素上。
 // 函数对象的参数是for_each()的前两个参数所指定序列中元素的引用，
 // 因此它可以直接修改被保存的值。

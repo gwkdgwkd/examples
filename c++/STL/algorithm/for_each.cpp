@@ -3,6 +3,8 @@
 #include <iterator>
 #include <vector>
 
+// for_each
+
 // for_each()函数是C++ STL中的一个遍历函数，函数原型如下：
 // for_each(InputIterator first, InputIterator last,
 //          Function functor);

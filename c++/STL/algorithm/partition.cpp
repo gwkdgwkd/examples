@@ -2,6 +2,11 @@
 #include <iostream>
 #include <vector>
 
+// partition
+// stable_partition
+// partition_copy
+// partition_point
+
 // partition可直译为分组，
 // partition()函数可根据用户自定义的筛选规则，
 // 重新排列指定区域内存储的数据，使其分为2组，

@@ -4,6 +4,9 @@
 #include <iterator>
 #include <vector>
 
+// fill
+// fill_n
+
 // fill()和fill_n()算法提供了一种为元素序列填入给定值的简单方式，
 // fill()会填充整个序列；
 // fill_n()则以给定的迭代器为起始位置，为指定个数的元素设置值。

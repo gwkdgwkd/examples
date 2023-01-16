@@ -3,6 +3,9 @@
 #include <iterator>
 #include <vector>
 
+// merge
+// inplace_merge
+
 // 需要将2个有序序列合并为1个有序序列，
 // 这时就可以借助merge()或者inplace_merge()函数实现。
 // merge()和inplace_merge()函数都定义在<algorithm>头文件中

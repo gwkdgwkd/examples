@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 
+// rotate
+// rotate_copy
+
 // rotate()算法会从左边旋转序列的元素。
 // rotate()的第一个参数是这个序列的开始迭代器；
 // 第二个参数是指向新的第一个元素的迭代器，它必定在序列之内。

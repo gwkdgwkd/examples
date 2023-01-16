@@ -2,6 +2,11 @@
 #include <iostream>
 #include <vector>
 
+// lower_bound
+// upper_bound
+// equal_range
+// binary_search
+
 // find()、find_if()、search()这些函数的底层实现，
 // 都采用的是顺序查找（逐个遍历）的方式，在某些场景中的执行效率并不高。
 // 例如，当指定区域内的数据处于有序状态时，
@@ -40,6 +45,7 @@ class mycomp2 {
 // 此外，该函数还会返回一个正向迭代器，当查找成功时，迭代器指向找到的元素；
 // 反之，如果查找失败，迭代器的指向和last迭代器相同。
 // 再次强调，该函数仅适用于已排好序的序列。
+
 // lower_bound()函数底层实现的参考代码：
 // template <class ForwardIterator, class T>
 // ForwardIterator lower_bound(ForwardIterator first,
@@ -230,7 +236,7 @@ void func3() {
 // 同时，如果binary_search()函数在[first,last)区域内成功找到和val相等的元素，
 // 则返回true；反之则返回false。
 // 需要注意的是，由于binary_search()底层实现采用的是二分查找的方式，
-// 因此该函数仅适用于“已排好序”的序列。
+// 因此该函数仅适用于已排好序的序列。
 // 所谓已排好序，并不是要求[first,last)区域内的数据，
 // 严格按照某个排序规则进行升序或降序排序，只要满足：
 // 所有令element<val成立的元素都位于不成立元素的前面即可，

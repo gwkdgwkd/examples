@@ -6,6 +6,9 @@
 #include <numeric>
 #include <vector>
 
+// transform
+// accumulate
+
 // transform()可以将函数应用到序列的元素上，
 // 并将这个函数返回的值保存到另一个序列中，
 // 它返回的迭代器指向输出序列所保存的最后一个元素的下一个位置。

@@ -2,6 +2,9 @@
 #include <iostream>
 #include <vector>
 
+// search
+// search_n
+
 // find_end()函数用于在序列中查找序列B最后一次出现的位置。
 // 那么，如果想知道序列B在序列中第一次出现的位置，该如何实现呢？
 // 可以借助search()函数。

@@ -4,6 +4,10 @@
 #include <string>
 #include <vector>
 
+// equal
+// mismatch
+// lexicographical_compare
+
 using word_iter = std::vector<std::string>::iterator;
 std::vector<std::string> words1{"one", "two",   "three", "four", "five",
                                 "six", "seven", "eight", "nine"};

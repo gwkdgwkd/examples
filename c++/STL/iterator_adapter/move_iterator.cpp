@@ -65,7 +65,7 @@ void func2() {
   std::cout << std::endl;
   // v1:nihao wohao tahao
   // v2:nihao wohao tahao
-  // v2容器从v1容器中复制了一份数据并存储起来，此过程不会影响myvec容器。
+  // v2容器从v1容器中复制了一份数据并存储起来，此过程不会影响v1容器。
 
   // 那么，如果不想采用复制的方式，
   // 而就是想把容器中存储的元素全部移动到其他容器中，该怎么办呢？
@@ -108,7 +108,7 @@ void func3() {
   std::cout << std::endl;
   // v1:nihao wohao tahao
   // v2:nihao wohao tahao
-  // 通过调用base()成员方法，初始化othvec的方式转变为以复制而非移动的方式，
+  // 通过调用base()成员方法，初始化v2的方式转变为以复制而非移动的方式，
   // 因此myvec容器不会受到影响。
 }
 

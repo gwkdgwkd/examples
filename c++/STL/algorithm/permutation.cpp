@@ -3,6 +3,11 @@
 #include <iterator>
 #include <vector>
 
+// next_permutation
+// prev_permutation
+// is_permutation
+// min_element
+
 // next_permutation()会生成一个序列的重排列，
 // 它是所有可能的字典序中的下一个排列，默认使用<运算符来做这些事情。
 // 它的参数为定义序列的迭代器和一个返回布尔值的函数，

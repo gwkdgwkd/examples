@@ -2,6 +2,12 @@
 #include <iostream>
 #include <vector>
 
+// all_of
+// any_of
+// none_of
+// count
+// count_if
+
 std::vector<int> ages{22, 19, 46, 75, 54, 19, 27, 66, 61, 33, 22, 19};
 
 // algorithm头文件中定义了3种算法，

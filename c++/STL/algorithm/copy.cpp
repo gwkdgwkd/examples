@@ -6,6 +6,12 @@
 #include <unordered_set>
 #include <vector>
 
+// copy
+// copy_n
+// copy_if
+// copy_backward
+// reverse_copy
+
 std::vector<int> v{1, 2, 3, 4, 5, 6, 7};
 std::unordered_set<int> us{8, 9, 10};
 void func1() {  // copy
@@ -48,7 +54,7 @@ void func4() {
   // 输入流迭代器可以作为copy_if()算法的源，
   // 也可以将它用在其他需要输入迭代器的算法上：
   std::unordered_set<std::string> names;
-  std::cout << "Enter names of less than 5 letters. Enter Ctrl+Z on a separate "
+  std::cout << "Enter names of less than 5 letters. Enter Ctrl+D on a separate "
                "line to end:\n";
   std::copy_if(std::istream_iterator<std::string>{std::cin},
                std::istream_iterator<std::string>{},
@@ -80,9 +86,9 @@ void func4() {
 // 这个操作不会成功，因为被复制的元素在复制之前会被重写。
 // 如果想将它们复制到右边，可以使用copy_backward()，
 // 只要目的序列的结束迭代器在源序列的结束迭代器的右边。
-// 在想将元素复制到右边时，copy()算法显然不能如我们所愿，
+// 在想将元素复制到右边时，copy()算法显然不能如愿，
 // 因为一些元素在复制之前会被重写。
-// 在这种情况下，copy_backward()可以做到我们想做的事。
+// 在这种情况下，copy_backward()可以达到目的。
 // 相反在需要将元素复制到序列的左边时，
 // copy()可以做到，但copy_backward()做不到。
 void func5() {  // copy_backward
@@ -90,27 +96,28 @@ void func5() {  // copy_backward
   // 可以通过使用deque的成员函数resize()来增加deque容器的元素个数。
   // copy_backward()算法会将原有的元素复制到向右的两个位置，
   // 保持前两个元素不变：
-  std::deque<std::string> song{"jingle", "bells", "jingle",
-                               "all",    "the",   "way"};
+  std::deque<std::string> song{"1", "2", "3", "4", "5", "6"};
   song.resize(song.size() + 2);  // Add 2 elements
   std::copy_backward(std::begin(song), std::begin(song) + 6, std::end(song));
 
   std::copy(std::begin(song), std::end(song),
             std::ostream_iterator<std::string>{std::cout, " "});
-  std::cout << std::endl;
-  // jingle bells jingle bells jingle all the way
+  std::cout << std::endl;  // 1 2 1 2 3 4 5 6
 }
 void func6() {  // copy
-  std::deque<std::string> song{"jingle", "bells", "jingle",
-                               "all",    "the",   "way"};
+  std::deque<std::string> song{"1", "2", "3", "4", "5", "6"};
   song.resize(song.size() + 2);
-  std::copy(std::begin(song), std::begin(song) + 6, std::end(song));
-
   std::cout << song.size() << std::endl;  // 8
+  std::copy(std::begin(song), std::begin(song) + 6, std::end(song));
+  
   std::copy(std::begin(song), std::end(song),
             std::ostream_iterator<std::string>{std::cout, " "});
-  std::cout << std::endl;
-  // jingle bells jingle all the way
+  std::cout << std::endl;  // 1 2 3 4 5 6
+
+  std::copy(std::begin(song), std::begin(song) + 6, std::begin(song) + 2);
+  std::copy(std::begin(song), std::end(song),
+            std::ostream_iterator<std::string>{std::cout, " "});
+  std::cout << std::endl;  // 1 2 1 2 1 2 1 2
 }
 
 // reverse_copy()算法可以将源序列复制到目的序列中，目的序列中的元素是逆序的。
@@ -119,7 +126,7 @@ void func6() {  // copy
 // 如果序列是重叠的，函数的行为是未定义的。
 // 这个算法会返回一个输出迭代器，它指向目的序列最后一个元素的下一个位置。
 void func7() {
-  // 这个程序会检查一条语句(也可以是很多条语句)是否是回文的。
+  // 这个程序会检查一条或多条语句是否是回文。
   // 回文语句是指正着读或反着读都相同的句子，
   // 前提是忽略一些像空格或标点这样的细节。
   while (true) {
@@ -144,12 +151,12 @@ void func7() {
 
 void func8() {
   // reverse()算法可以在原地逆序它的两个双向迭代器参数所指定序列的元素。
-  // 可以用下面的语句来代替上述程序中的reverse_copy():
+  // 可以用下面的语句来代替上述程序中的reverse_copy()：
   std::string reversed = "123456789";
   std::reverse(std::begin(reversed), std::end(reversed));
   std::copy_n(reversed.begin(), reversed.size(),
               std::ostream_iterator<char>(std::cout, " "));
-  std::cout << std::endl;
+  std::cout << std::endl;  // 9 8 7 6 5 4 3 2 1
 }
 
 int main(int argc, char* argv[]) {
