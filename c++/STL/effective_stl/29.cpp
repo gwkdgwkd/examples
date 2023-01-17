@@ -33,6 +33,8 @@ int main() {
   // 而istreambuf_iterator<char>则直接从流的缓存区中读取下一个字符。
   std::string fileData2((std::istreambuf_iterator<char>(inputFile)),
                         std::istreambuf_iterator<char>());
+  std::string fileData3(std::istreambuf_iterator<char>{inputFile},
+                        std::istreambuf_iterator<char>{});
   // 不用清除skipws标志，因为istreambuf_iterator不会跳过任何字符，
   // 只是简单地取回流缓冲区中的下一个字符，而不管它们是什么字符。
 

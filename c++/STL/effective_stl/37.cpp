@@ -54,8 +54,8 @@ class PointAverage : public std::binary_function<Point, Point, Point> {
 // 用for_each统计某个区间是合法的，但是不如accumulate来得清晰。
 // 其次，accumulate直接返回我们要的统计结果，
 // 而for_each取返回一个函数对象，
-// 必须从这个函数对象中提取出我们所要统计的信息。
-// 在C++中，这意味着我们必须在函数子类中加入一个成员函数，
+// 必须从这个函数对象中提取出所要统计的信息。
+// 在C++中，这意味着必须在函数子类中加入一个成员函数，
 // 以便获得我们想要的统计信息。
 class PointAverage1 : public std::binary_function<Point, Point, Point> {
  public:
