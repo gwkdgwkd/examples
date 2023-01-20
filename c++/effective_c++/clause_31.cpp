@@ -225,9 +225,9 @@ shared_ptr<Person> create(const string& name,
 // 将是严重的错误。
 
 // 请记住：
-// 支持编译依存性最小化的一般构想是：相依于声明，不要相依于定义。
-// 基于此构想的两个手段是handle class和interface class。
-// 程序库头文件应该以完全且仅有声明的形式存在。
-// 这种做法不论是否涉及template都适用。
+// 1.支持编译依存性最小化的一般构想是：相依于声明，不要相依于定义。
+// 2.基于此构想的两个手段是handle class和interface class。
+// 3.程序库头文件应该以完全且仅有声明的形式存在，
+//   这种做法不论是否涉及template都适用。
 
 int main() { return 0; }

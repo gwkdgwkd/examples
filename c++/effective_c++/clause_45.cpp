@@ -22,9 +22,9 @@ class SmartPtr {
 };
 
 // 为了获得class SmartPtr之间的转换能力，必须明确地编写出来。
-// 应该关注如何编写智能指针的构造函数，使其行为能够满足我们的转型需要。
+// 应该关注如何编写智能指针的构造函数，使其行为能够满足转型的需要。
 // 但如果后面扩充来类，BelowBottom，
-// 所以我们永远无法写出我们需要的所有构造函数。
+// 所以永远无法写出我们需要的所有构造函数。
 // 理论上需要的构造函数数量没有尽头，因为template可以被无限量具现化。
 // 因此，需要的不是为class SmartPtr写一个构造函数，
 // 而是为它写一个构造模板member function template，
@@ -41,7 +41,7 @@ class SmartPtr1 {
   // 1.希望根据一个SmartPtr<Bottom>创建一个SmartPtr<Top>，
   //   而不希望根据SmartPtr<Top>创建一个SmartPtr<Bottom>，
   //   对public继承是矛盾的。
-  // 2.也不希望根据SmartPtr<doublie>创建一个SmartPtr<int>，
+  // 2.也不希望根据SmartPtr<double>创建一个SmartPtr<int>，
   //   因为现实中没有将int*转换为double*的隐式转换行为。
   // 所以必成从某方面对member template所创建的成员函数进行筛选。
 };
@@ -79,9 +79,9 @@ class SmartPtr2 {
 // 相同的规则也适用于赋值操作。
 
 // 请记住：
-// 使用member function template生成可接受所有兼容类型的函数。
-// 如果声明member template用于泛化copy构造或泛化assignment操作，
-// 还是需要声明正常的copy构造函数和copy assignmet操作符。
+// 1.使用member function template生成可接受所有兼容类型的函数。
+// 2.如果声明member template用于泛化copy构造或泛化assignment操作，
+//   还是需要声明正常的copy构造函数和copy assignmet操作符。
 
 int main() {
   Top *pt1 = new Middle;

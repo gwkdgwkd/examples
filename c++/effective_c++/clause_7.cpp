@@ -87,10 +87,10 @@ AWOV::~AWOV() {}
 class DD : public AWOV {};
 
 // 请记住：
-// 带多态性质的base class应该声明一个virtual析构函数。
-// 如果class带有任何virtual函数，就应该拥有一个virtual析构函数。
-// class的设计目的如果不是作为base class使用，
-// 或不是为了具备多态，就不该声明virtual析构函数。
+// 1.带多态性质的base class应该声明一个virtual析构函数。
+// 2.如果class带有任何virtual函数，就应该拥有一个virtual析构函数。
+// 3.class的设计目的如果不是作为base class使用，
+//   或不是为了具备多态，就不该声明virtual析构函数。
 
 int main() {
   Base1 *ptr1 = new (Derived1);

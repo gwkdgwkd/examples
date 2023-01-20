@@ -57,8 +57,8 @@ class Derived : public Base {
 // 这样的函数往往是private而且常被命名为init。
 
 // 请记住：
-// copying函数应该确保复制对象内的所有成员变量及所有base class成分。
-// 不要尝试以某个copying函数实现另一个copying函数。
-// 应该将共同机制放进第三个函数中，并由两个copying函数共同调用。
+// 1.copying函数应该确保复制对象内的所有成员变量及所有base class成分。
+// 2.不要尝试以某个copying函数实现另一个copying函数，
+//   应该将共同机制放进第三个函数中，并由两个copying函数共同调用。
 
 int main() { return 0; }

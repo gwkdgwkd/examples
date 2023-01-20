@@ -25,7 +25,7 @@ class E : public B {
 // 如果D重新定义mf，那么设计就会出现矛盾。
 
 // 请记住：
-// 绝对不要重新定义继承而来的non-virtual函数。
+// 1.绝对不要重新定义继承而来的non-virtual函数。
 
 int main() {
   D x;

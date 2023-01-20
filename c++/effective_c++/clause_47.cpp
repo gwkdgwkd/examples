@@ -17,7 +17,7 @@ using namespace std;
 // 2.输出迭代器智能向前移动，一次一步，
 //   客户只能写，不能读，而且只能写一次。
 //   例如ostream_iterator。
-// 3.forward迭代器，可以做前面两种分类所做的每一件事，
+// 3.forward迭代器，可以做前面两种迭代器所做的每一件事，
 //   而且可以读或写一次以上。
 // 4.bidirectional迭代器比上一个威力更大，
 //   除了可以向前，还可以向后移动。
@@ -92,7 +92,8 @@ using namespace std;
 // 有了这些重载版本，advance需要做的就是调用并额外传递一个对象，
 // 后者必须带有适当的迭代器分类。
 // void advance(IterT &iter, DistT d) {
-//     doAdvance(iter,d,typename std::iterator_traits<IterT>::iterator_category());
+//     doAdvance(iter,d,
+//       typename std::iterator_traits<IterT>::iterator_category());
 // }
 
 // 如何使用一个traits class：
@@ -116,9 +117,8 @@ using namespace std;
 // TR1一共为标准C++添加来50个以上的traits class。
 
 // 请记住：
-// traits class使得类型相关信息在编译期可用。
-// 它们以template和template特化完成实现。
-// 整合重载技术后，
-// traits class有可能在编译期对类型执行if...else测试。
+// 1.traits class使得类型相关信息在编译期可用。
+// 2.它们以template和template特化完成实现。
+// 3.整合重载技术后，traits class有可能在编译期对类型执行if...else测试。
 
 int main() { return 0; }

@@ -119,12 +119,12 @@ class HoldsAnInt2 : private Empty {
 // private继承极有可能成为正统的设计策略。
 
 // 请记住：
-// private继承意味着is-implemented-in-terms-of，根据某物实现出。
-// 它通常比复合的成本低。
-// 但当derived class需要访问protected base class的成员，
-// 或需要重新定义继承而来的virtual函数时，这么设计是合理的。
-// 和复合不同，private继承可以造成empty base最优化。
-// 这对致力于对象尺寸最小化的程序库开发者而言，可能很重要。
+// 1.private继承意味着is-implemented-in-terms-of，根据某物实现出。
+//   它通常比复合的成本低。
+// 2.但当derived class需要访问protected base class的成员，
+//   或需要重新定义继承而来的virtual函数时，这么设计是合理的。
+// 3.和复合不同，private继承可以造成empty base最优化。
+//   这对致力于对象尺寸最小化的程序库开发者而言，可能很重要。
 
 int main() {
   Person p;

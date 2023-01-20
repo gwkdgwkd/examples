@@ -53,8 +53,8 @@ class Base {
 class Derived : public Base {};
 
 // 请记住：
-// 编译器可以暗自为class创建default构造函数、
-// copy构造函数、copy assignment操作符，以及析构函数。
+// 1.编译器可以暗自为class创建default构造函数、
+//   copy构造函数、copy assignment操作符，以及析构函数。
 
 int main() {
   // 下面的代码会造成每个默认函数都被编译器产出：

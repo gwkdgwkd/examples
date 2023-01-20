@@ -416,7 +416,6 @@ void func3() {
       std::make_shared<C>(1), std::make_shared<C>(2), std::make_shared<C>(3)};
 
   // std::for_each(v.begin(), v.end(), std::mem_fun(&C::testOdd)); // 编译不过
-
   std::for_each(v.begin(), v.end(), std::mem_fn(&C::testOdd));  // 智能指针
   // 1:true
   // 2:false

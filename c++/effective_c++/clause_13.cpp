@@ -74,10 +74,10 @@ void f1() {
 // 因为vector和string几乎总是可以取代动态分配的数组。
 
 // 请记住：
-// 为防止资源泄露，请使用RAII对象，
-// 它们在构造函数中获得资源并在析构函数中释放资源。
-// 两个常被使用的RAII class分别是shared_ptr和auto_ptr。
-// 前者比较好，copy行为比较直观，后者复制动作会使被复制的对象指向null。
+// 1.为防止资源泄露，请使用RAII对象，
+//   它们在构造函数中获得资源并在析构函数中释放资源。
+// 2.两个常被使用的RAII class分别是shared_ptr和auto_ptr，
+//   前者比较好，copy行为比较直观，后者复制动作会使被复制的对象指向null。
 
 int main() {
   // shared_ptr使用delete而不是delete[]，应该自定义删除器：

@@ -49,9 +49,9 @@ class AccessLevels {
 // private（提供封装）和其他（不提供封装）。
 
 // 请记住：
-// 切记将成员变量声明为private。
-// 这可赋予客户访问数据的一致性、可细微划分访问控制、
-// 允诺约束条件获得保证，并提供class作者充分的弹性。
-// protected并不比public更具封装性。
+// 1.切记将成员变量声明为private。
+// 2.这可赋予客户访问数据的一致性、可细微划分访问控制、
+//   允诺约束条件获得保证，并提供class作者充分的弹性。
+// 3.protected并不比public更具封装性。
 
 int main() { return 0; }

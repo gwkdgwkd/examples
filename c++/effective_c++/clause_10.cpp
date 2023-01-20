@@ -15,7 +15,7 @@ class Widget {
 // 但是string，vector，complex，tr1::shared_ptr都准守这个协议。
 
 // 请记住：
-// 令赋值操作符号返回一个reference to *this。
+// 1.令赋值操作符号返回一个reference to *this。
 
 int main() {
   Widget a, b, c;

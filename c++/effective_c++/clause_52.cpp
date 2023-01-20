@@ -62,8 +62,7 @@ class Derived : public Base {
 // 如果希望这些函数有着平常的行为，
 // 只要令你的class专属版本调用global版本即可。
 
-// 简单的做法是，建立一个base class，
-// 内含所有正常形式的new和delete：
+// 简单的做法是，建立一个base class，内含所有正常形式的new和delete：
 class StandardNewDeleteForms {
  public:
   // normal new/delete
@@ -98,11 +97,11 @@ class Widget3 : public StandardNewDeleteForms {
 };
 
 // 请记住：
-// 当写一个placement operator new，
-// 请确定也出了对应的placement operator delete。
-// 否则程序可能发生隐秘的时断时续的内存泄露。
-// 当声明placement new和placement delete，
-// 请确定不要无意识（非故意）地遮掩了它们的正常版本。
+// 1.当写一个placement operator new时，
+//   请确定也出了对应的placement operator delete，
+//   否则程序可能发生隐秘的时断时续的内存泄露。
+// 2.当声明placement new和placement delete时，
+//   请确定不要无意识（非故意）地遮掩了它们的正常版本。
 
 int main() {
   Widget1* pw = new Widget1;

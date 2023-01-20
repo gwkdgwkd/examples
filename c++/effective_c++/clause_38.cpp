@@ -64,8 +64,8 @@ class Set {
 // Set和list之间是is-implemented-in-terms-of关系。
 
 // 请记住：
-// 复合（composition）的意义和public继承完全不同。
-// 在应用域，复合意味着has-a，有一个。
-// 在实现域，复合意味着is-implemented-in-terms-of，根据某物实现出。
+// 1.复合（composition）的意义和public继承完全不同。
+// 2.在应用域，复合意味着has-a，有一个。
+// 3.在实现域，复合意味着is-implemented-in-terms-of，根据某物实现出。
 
 int main() { return 0; }

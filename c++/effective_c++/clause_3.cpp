@@ -106,12 +106,12 @@ std::size_t TextBlock2::length() const {
 // 不能用const成员函数调用non-const成员函数，这是一种错误行为。
 
 // 请记住：
-// 声明为const可帮助编译器侦测出错误用法。
-// const可被施加于任何作用域内的对象、函数参数、函数返回类型、成员函数本体。
-// 编译器强制实施bitwise constness，
-// 但你编写程序时应该使用概念上的常量性。
-// 当const和non-const成员函数有着实质等价的实现时，
-// 令non-const版本调用const版本可避免代码重复。
+// 1.声明为const可帮助编译器侦测出错误用法。
+//   const可被施加于任何作用域内的对象、函数参数、函数返回类型、成员函数本体。
+// 2.编译器强制实施bitwise constness，
+//   但你编写程序时应该使用概念上的常量性。
+// 3.当const和non-const成员函数有着实质等价的实现时，
+//   令non-const版本调用const版本可避免代码重复。
 
 int main() {
   // 如果不返回一个const对象，那么

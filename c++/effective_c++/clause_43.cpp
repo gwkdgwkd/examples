@@ -52,7 +52,7 @@ class LoggingMsgSender : public MsgSender<Company> {
     // 调用base class函数，这段代码无法通过编译，
     // 编译器抱怨sendClear不存在：
     // sendClear(info);
-    // 我们的眼睛可以看到sendClear在base class内，
+    // 眼睛可以看到sendClear在base class内，
     // 编译器却看不到它们，为什么?
     // 问题在于当编译器遭遇LoggingMsgSender定义时，
     // 并不知道它继承什么样的class。
@@ -141,9 +141,9 @@ class LoggingMsgSender3 : public MsgSender<Company> {
 // 它假设对那些base class的内容毫无所悉的缘故。
 
 // 请记住：
-// 可在derived class template内，
-// 通过this->指向base class template内的成员名称，
-// 或由一个明白写出的base class资格修饰符完成。
+// 1.可在derived class template内，
+//   通过this->指向base class template内的成员名称，
+//   或由一个明白写出的base class资格修饰符完成。
 
 int main() {
   MsgInfo m;

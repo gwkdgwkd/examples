@@ -91,12 +91,12 @@ class SquareMatrix4 : private SquareMatrix3Base<T> {
 // 应该令它们调用另一个操作void*的函数，有后者完成实际工作。
 
 // 请记住：
-// template生成多个class和多个函数，所以任何template代码，
-// 都不该与某个造成膨胀的template参数产生相依关系。
-// 因非类型模板参数而造成的代码膨胀，往往可以消除，
-// 做法是以函数参数或class成员变量替换template参数。
-// 因类型参数而造成的代码膨胀，往往可降低，
-// 做法是让带有完全相同二进制表述的具现类型共享实现码。
+// 1.template生成多个class和多个函数，所以任何template代码，
+//   都不该与某个造成膨胀的template参数产生相依关系。
+// 2.因非类型模板参数而造成的代码膨胀，往往可以消除，
+//   做法是以函数参数或class成员变量替换template参数。
+// 3.因类型参数而造成的代码膨胀，往往可降低，
+//   做法是让带有完全相同二进制表述的具现类型共享实现码。
 
 int main() {
   SquareMatrix1<double, 10> sm1;

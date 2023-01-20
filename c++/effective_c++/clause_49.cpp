@@ -18,15 +18,15 @@ using namespace std;
 // 需要调用set_new_handler函数，声明于<new>的标准程序库函数。
 
 // 请记住：
-// set_new_handler允许客户指定一个函数，在内存分配无法满足时被调用。
-// Nothrow new是一个颇为局限的工具，因为它只适用于内存分配；
-// 后继的构造函数调用还是可能抛出异常。
-// namespace std {
-// 定义一个指针指向函数，该函数没有参数也不返回任何东西：
-// typedef void (*new_handler)();
-//   // 该函数不抛出任何异常：
-//   new_handler set_new_handler(new_handler p) throw();
-// }
+// 1.set_new_handler允许客户指定一个函数，在内存分配无法满足时被调用。
+// 2.Nothrow new是一个颇为局限的工具，因为它只适用于内存分配；
+//   后继的构造函数调用还是可能抛出异常。
+//   namespace std {
+//     定义一个指针指向函数，该函数没有参数也不返回任何东西：
+//     typedef void (*new_handler)();
+//     // 该函数不抛出任何异常：
+//     new_handler set_new_handler(new_handler p) throw();
+//   }
 void outOfMem() {
   cerr << "Unable to satisfy requeset for memory" << endl;
   abort();

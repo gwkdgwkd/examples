@@ -22,7 +22,7 @@ using namespace std;
 // 2.function，此物表示任何可调用物，也就是任何函数或函数对象。
 // 3.bind，它能够做STL绑定器bind1st和bind2nd所做的每一件事，而又更多。
 // 其他TR1组件分为两组，第一组提供彼此互不相干的独立机能：
-// 4.Hash table，用来实现set，multiset，map和multi-map。
+// 4.Hash table，用来实现set，multiset，map和multimap。
 // 5.正则表达式，包括以正则表达式为基础的字符串查找和替换，
 //   或是从某个匹配字符串到另一个匹配字符串的逐一迭代等等。
 // 6.Tuples(变量组)，pair只能持有两个对象，tuple可持有任意个数的对象。
@@ -38,12 +38,11 @@ using namespace std;
 // 14.result_of，这是个template，用来推导函数调用的返回类型。
 
 // 请记住：
-// C++标准程序库的主要机能由STL、iostream、locale组成。
-// 并包括C99标准程序库。
-// TR1添加了智能指针、一般化函数指针、hash-based容器、
-// 正则表达式以及另外10个组件的支持。
-// TR1自身只是一份规范。
-// 为获得TR1提供的好处，你需要一份实物。
-// 一个好的实物来源是Boost。
+// 1.C++标准程序库的主要机能由STL、iostream、locale组成，
+//   并包括C99标准程序库。
+// 2.TR1添加了智能指针、一般化函数指针、hash-based容器、
+//   正则表达式以及另外10个组件的支持。
+// 3.TR1自身只是一份规范，为获得TR1提供的好处，
+//   你需要一份实物，一个好的实物来源是Boost。
 
 int main() { return 0; }

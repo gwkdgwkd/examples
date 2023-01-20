@@ -66,7 +66,7 @@ class ModelB : public Airplane {};  // 使用默认的fly
 class ModelC : public Airplane {};  // 忘记声明fly函数，调用默认的fly
 
 // 问题不在于有缺省行为而在于：
-// ModelC在未明确说明我要的情况下就继承了该缺省行为。
+// ModelC在未明确说明要的情况下就继承了该缺省行为。
 // 切断virtual函数接口和其缺省实现之间的连接的伎俩：
 class Airplane1 {
  public:
@@ -132,11 +132,11 @@ void ModelC2::fly(const Airport& destination) { cout << "ModelC2 fly" << endl; }
 //   某些函数就不该在derived class中被重新定义。
 
 // 请记住：
-// 接口继承和实现继承不同。
-// 在public继承之下，derived class总是继承base class的接口。
-// pure virtual函数只具体指定接口继承。
-// 简朴的（非纯）impure virtual函数具体指定接口继承及缺省实现继承。
-// non-virtual函数具体指定接口继承以及强制性实现继承。
+// 1.接口继承和实现继承不同。
+// 2.在public继承之下，derived class总是继承base class的接口。
+// 3.pure virtual函数只是具体指定接口继承。
+// 4.简朴的（非纯）impure virtual函数具体指定接口继承及缺省实现继承。
+// 5.non-virtual函数具体指定接口继承以及强制性实现继承。
 
 int main() {
   // Shape* ps = new Shape;  // 错误

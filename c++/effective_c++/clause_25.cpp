@@ -44,7 +44,7 @@ class Widget {
 // 要置换Widget对象，其实就是要置换pImpl指针，但缺省的swap算法不知道，
 // 它不止复制三个Widget，还复制三个WidgetImpl，非常缺乏效率。
 
-// 通常我们不被允许改变std命名空间内的任何东西，
+// 通常不允许改变std命名空间内的任何东西，
 // 但允许为标准template制造特化版本，使它属于我们自己的class。
 // 将std::swap针对Widget特化：
 namespace std {
@@ -195,13 +195,13 @@ void doSomething(T& obj1, T& obj2) {
 // 而内置类型上的操作绝不会抛出异常。
 
 // 请记住：
-// 当std::swap对你的类型效率不高时，
-// 提供一个swap成员函数，并确定这个函数不抛出异常。
-// 如果提供一个member swap，也该提供一个non-member swap用来调用前者。
-// 对于class（非template），也请特化std::swap。
-// 调用swap时应该针对std::swap使用using声明式，
-// 然后调用swap并且不带任何命名空间资格修饰。
-// 为用户定义类型进行std template全特化是好的，
-// 但千万不要尝试在std内加入某些对std而言全新的东西。
+// 1.当std::swap对你的类型效率不高时，
+//   提供一个swap成员函数，并确定这个函数不抛出异常。
+// 2.如果提供一个member swap，也该提供一个non-member swap用来调用前者。
+// 3.对于class（非template），也请特化std::swap。
+// 4.调用swap时应该针对std::swap使用using声明式，
+// 5.然后调用swap并且不带任何命名空间资格修饰。
+// 6.为用户定义类型进行std template全特化是好的，
+//   但千万不要尝试在std内加入某些对std而言全新的东西。
 
 int main() { return 0; }

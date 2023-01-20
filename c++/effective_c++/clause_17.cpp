@@ -14,8 +14,8 @@ int priority() {}
 void processWidget(shared_ptr<Widget> pw, int priority) {}
 
 // 请记住：
-// 以独立语句将newed对象存储于（置入）智能指针内。
-// 如果不这样做，一旦异常被抛出，有可能导致难以察觉的资源泄露。
+// 1.以独立语句将newed对象存储于（置入）智能指针内。
+// 2.如果不这样做，一旦异常被抛出，有可能导致难以察觉的资源泄露。
 
 int main() {
   // processWidget(new Widget, priority());  // 编译失败

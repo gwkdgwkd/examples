@@ -65,9 +65,9 @@ const Rational3 operator*(const Rational3& lhs, const Rational3& rhs) {
 // 不应该只因为函数不该成为member，就自动让它成为friend。
 
 // 请记住：
-// 如果需要为某个函数的所有参数，
-// 包括被this指针所指的哪个隐喻参数进行类型转换，
-// 那么这个函数必须是个non-member。
+// 1.如果需要为某个函数的所有参数，
+//   包括被this指针所指的哪个隐喻参数进行类型转换，
+//   那么这个函数必须是个non-member。
 
 int main() {
   // Rational1可以使两个有理数以最轻松的方式相乘：

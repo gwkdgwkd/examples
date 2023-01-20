@@ -74,9 +74,9 @@ const Rational2<T> doMultiply(const Rational2<T>& lhs,
 }
 
 // 请记住：
-// 当我们编写一个class template时，
-// 它提供的与此template相关的函数支持所有参数的隐式类型转换时，
-// 请将那些函数定义为class template内部的friend函数。
+// 1.当编写一个class template时，
+//   它提供的与此template相关的函数支持所有参数的隐式类型转换时，
+//   请将那些函数定义为class template内部的friend函数。
 
 int main() {
   // 条款24的例子，只不过换成来template：
@@ -88,7 +88,7 @@ int main() {
 
   Rational1<int> oneHalf1(1, 2);
   // 可以编译通过，但是链接失败：
-  // Rational1<int> result1 = oneHalf1 * 2;  /
+  // Rational1<int> result1 = oneHalf1 * 2;
 
   Rational2<int> oneHalf2(1, 2);
   Rational2<int> result2 = oneHalf2 * 2;

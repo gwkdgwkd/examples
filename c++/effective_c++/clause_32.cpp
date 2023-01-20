@@ -64,9 +64,9 @@ class Square : public Rectangle {};
 // 还有has-a（有一个）和is-implemented-in-terms-of(根据某物实现出)。
 
 // 请记住：
-// public继承意味is-a。
-// 适用于base class身上的每一件事件一定也适用与derived class身上，
-// 因为每一个derived class对象也都是一个base class对象。
+// 1.public继承意味is-a。
+// 2.适用于base class身上的每一件事件一定也适用与derived class身上，
+//   因为每一个derived class对象也都是一个base class对象。
 
 int main() {
   Person p;

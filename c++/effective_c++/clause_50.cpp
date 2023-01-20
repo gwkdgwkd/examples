@@ -60,7 +60,7 @@ void *operator new(size_t size) throw(bad_alloc) {
 // 7.为了获得非传统的行为
 
 // 请记住：
-// 有许多理由需要写个自定义的new和delete，
-// 包括改善性能、对heap运用错误进行调试、收集heap适用信息。
+// 1.有许多理由需要写个自定义的new和delete，
+//   包括改善性能、对heap运用错误进行调试、收集heap适用信息。
 
 int main() { return 0; }

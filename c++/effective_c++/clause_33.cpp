@@ -37,12 +37,11 @@ class Derived1 : public Base {
     // 1.首先查找local作用域，mf4函数内，没找到任何东西名为mf2。
     // 2.于是查找其外围作用域，也就是class Derived覆盖的作用域。
     //   还是没找到mf2。
-    // 3.于是再往外围移动，Base class，在那找到一个名给mf2的东西了，
-    //   停止查找。
+    // 3.于是再往外围移动，Base class，
+    //   在那找到一个名给mf2的东西了，停止查找。
     mf2();
     // 4.如果Base内还是没有mf2，查找还会继续下去，
-    //   首先是Base所在的namespace，
-    //   再然后是global作用域。
+    //   首先是Base所在的namespace，再然后是global作用域。
   };
 };
 
@@ -81,10 +80,10 @@ class Derived3 : private Base {
 // 有将面对继承名称被遮掩的一个全然不同的形式。
 
 // 请记住：
-// derived class内的名称会遮掩base class内的名称。
-// 在public继承下从来不会有人希望如此。
-// 为了让被遮掩的名称再见天日，
-// 可以使用using声明或转交函数（forwarding functions）。
+// 1.derived class内的名称会遮掩base class内的名称。
+// 2.在public继承下从来不会有人希望如此。
+// 3.为了让被遮掩的名称再见天日，
+//   可以使用using声明或转交函数（forwarding functions）。
 
 int main() {
   int x;

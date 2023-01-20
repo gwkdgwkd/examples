@@ -45,8 +45,8 @@ class HomeForSale1 : private Uncopyable {};
 // 但会被编译器拒绝，因为是私有的。
 
 // 请记住：
-// 为驳回编译器自动提供的能力，可将相应的成员函数声明为private且不实现。
-// 使用uncopyable这样的base class也是一种做法。
+// 1.为驳回编译器自动提供的能力，可将相应的成员函数声明为private且不实现。
+// 2.使用uncopyable这样的base class也是一种做法。
 
 int main() {
   HomeForSale h1, h2;

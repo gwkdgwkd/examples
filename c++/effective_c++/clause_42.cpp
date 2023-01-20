@@ -90,8 +90,8 @@ void workWithIteraror(IterT iter) {
 // 也许会在移植方面带来一些麻烦。
 
 // 请记住：
-// 声明template参数时，前缀关键字class和typename可互换。
-// 请使用关键字typename标识嵌套从属类型名称；
-// 但不得在基类列表或成员初值列表内使用typename。
+// 1.声明template参数时，前缀关键字class和typename可互换。
+// 2.请使用关键字typename标识嵌套从属类型名称；
+//   但不得在基类列表或成员初值列表内使用typename。
 
 int main() { return 0; }

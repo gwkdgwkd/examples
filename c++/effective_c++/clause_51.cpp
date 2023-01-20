@@ -28,12 +28,14 @@ using namespace std;
 //     // 尝试分配
 //     if(分配成功)
 //       return 一个指针，指向分配的内存
-//     // 分配失败
-//     // 没有办法直接取得new-handing函数指针：
-//     new_handler globalHandler = set_new_handler(0);
-//     set_new_handler(globalHandler);
-//     if(globalHandler) (*globalHandler)();
-//     else throw bad_alloc();
+//     else {// 分配失败，没有办法直接取得new-handing函数指针：
+//       new_handler globalHandler = set_new_handler(0);
+//       set_new_handler(globalHandler);
+//       if(globalHandler) 
+//         (*globalHandler)();
+//       else 
+//         throw bad_alloc();
+//     }
 //   }
 // }
 
@@ -84,12 +86,11 @@ void Base::operator delete(void* rawMemory, size_t size) throw() {
 // operator delete可能无法正确运作。
 
 // 请记住：
-// operator new应该内含一个无穷循环，并在其中尝试分配内存，
-// 如果它无法满足内存需求，就应该调用new_handler。
-// 它也应该有能力处理0 byte申请。
-// class专属版本则还应处理比正确大小更大的（错误）申请。
-// operator delete应该在收到null指针时不做任何事情。
-// class专属版本则还应该处理比正确大小更大的（错误）申请。
+// 1.operator new应该内含一个无穷循环，并在其中尝试分配内存，
+//   如果它无法满足内存需求，就应该调用new_handler。
+//   它也应该有能力处理0 byte申请。
+// 2.class专属版本则还应处理比正确大小更大的（错误）申请。
+// 3.operator delete应该在收到null指针时不做任何事情。
 
 int main() {
   // 调用的是Base::operator new：

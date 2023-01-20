@@ -22,8 +22,8 @@ class Derived : public Base {
 };
 
 // 请记住：
-// 在构造和析构函数中不要调用virtual函数，
-// 因为这类调用从不会调用到derived class中的函数。
+// 1.在构造和析构函数中不要调用virtual函数，
+//   因为这类调用从不会调用到derived class中的函数。
 
 int main() {
   Base *b = new Derived();

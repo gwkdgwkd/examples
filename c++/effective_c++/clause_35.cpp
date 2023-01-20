@@ -105,8 +105,8 @@ int loseHealthQuickly1(const GameCharacter3&) {
 // 可声明哪个non-member函数为friend，
 // 或是为其实现的某一部分public访问函数。
 // 运用函数指针替换virtual函数，其优点：
-// (1).每个对象可各自拥有自己的健康计算函数;
-// (2).可在运行期改变计算函数。
+// 1.每个对象可各自拥有自己的健康计算函数;
+// 2.可在运行期改变计算函数。
 // 是否可以弥补缺点（必须降低GameCharacter3的封装性），
 // 是必须根据每个设计情况的不同而抉择的。
 
@@ -190,12 +190,12 @@ class GameCharacter5 {
 // 各有优缺点，要全方面考虑。
 
 // 请记住：
-// virtual函数的替代方案包括NVI手法及Strategy设计模式的多种形式。
-// NVI手法自身是一个特殊形式的Template Method设计模式。
-// 将机能从成员函数移到class外部函数，带来的一个缺点是，
-// 非成员函数无法访问class的non-public成员。
-// function对象的行为就像一般函数指针。
-// 这样的对象可接纳与给定之目标签名式兼容的所有可调用物。
+// 1.virtual函数的替代方案包括NVI手法及Strategy设计模式的多种形式。
+// 2.NVI手法自身是一个特殊形式的Template Method设计模式。
+// 3.将机能从成员函数移到class外部函数，带来的一个缺点是，
+//   非成员函数无法访问class的non-public成员。
+// 4.function对象的行为就像一般函数指针，
+//   这样的对象可接纳与给定之目标签名式兼容的所有可调用物。
 
 int main() {
   EvilBadGuy ebg1(loseHealthQuickly);

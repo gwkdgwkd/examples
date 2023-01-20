@@ -4,7 +4,7 @@ using namespace std;
 
 void f(int a) { cout << a << endl; }
 
-// 尽量以const,enum,inline替换#define
+// 尽量以const，enum，inline替换#define
 
 // 或许可以改为宁可以编译器替换预处理器，因为#define不被视为语言的一部分。
 
@@ -93,8 +93,8 @@ inline void callWithMax(const T& a, const T& b) {
 // 还不到预处理器全面隐退的时候。
 
 // 请记住：
-// 对于单纯常量，最好以const对象或enum替换#define。
-// 对于形似函数的宏，最好改用inline函数替换#define。
+// 1.对于单纯常量，最好以const对象或enum替换#define。
+// 2.对于形似函数的宏，最好改用inline函数替换#define。
 
 int main() {
   int a = 5, b = 0;
