@@ -1,17 +1,13 @@
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
-#include <string>
 
-using namespace std;
+// 关于对象
 
 // 在C语音中，数据和处理数据的操作（函数）是分开声明的，
 // 也就是说，语言本身并没有支持数据和函数之间的关联性。
-// 把这种程序方法称为程序性的，
-// 有一组分布在各个以功能为导向的函数中的算法所驱动，
-// 它们处理的是共同的外部数据。
-// 从软件工程的眼光来看，
-// 一个ADT或class hierarchy的数据封装比在C程序中程序性地使用全局数据好。
+// 把这种由一组分布在各个以功能为导向的函数中的算法所驱动，
+// 称为程序性的，它们处理的是共同的外部数据。
+// 从软件工程来看，一个ADT或class hierarchy的数据封装，
+// 比在C程序中程序性地使用全局数据好。
 
 // 加上封装后，布局成本增加了多少？答案是并没有增加成本。
 // 1.data members直接内含在每一个对象中，就像C的结构体一样。
@@ -26,35 +22,36 @@ using namespace std;
 //   有一个单一而被共享的实体。
 // 此外，还有一些多重继承下的额外负担，
 // 发生在一个derived class和其第二或后继之base class的转换之间。
-// 然后，一般而言，并没有什么天生的理由说C++程序一定比其C兄弟庞大或迟缓。
+// 一般而言，并没有什么天生的理由说C++程序一定比其C兄弟庞大或迟缓。
 
+namespace n1 {
 // 1.1 C++对象模式
 
-// 在C++中有：
+// 在C++的类中有：
 // 两种成员数据：static和nonstatic；
 // 三种成员函数：static、nonstatic和virtual。
+
 // C++对象模型：
-// 1.非静态成员数据被配置于每一个对象之内，
-//   静态成员数据则被存放在所有的对象之外。
+// 1.非静态成员数据被配置于每一个对象之内，静态成员数据则被存放在所有的对象之外。
 // 2.静态和非静态成员函数也被放在所有的对象之外。
 // 3.virtual函数通过以下两个步骤支持：
 //   a.每一个class产生出一堆指向virtual functions的指针，放在表格之中。
 //     这个表格被称为virtual vable（vtbl）。
-//   b.每一个对象被添加一个指针，指向相关的virtual table，
-//     通常这个指针被称为vptr。
+//   b.每一个对象被添加一个指针，指向相关的vtbl，通常这个指针被称为vptr。
 //     vptr的设置和重置都由每一个class的构造、析构和拷贝运算符自动完成。
 //     每一个class所关联的type_info object（用以支持RTTI），
 //     也经由virtual table被指出来，通常放在表格的第一个slot处。
 // 这个模型的主要优点在于它的空间和存取时间的效率。
 // 主要缺点则是，如果应用程序代码本身未曾改变，
-// 但所用到的class objects的非静态成员函数有所修改，
-// 那么应用程序同样得重新编译。
+// 但所用到的class objects的非静态成员函数有所修改，那么应用程序同样得重新编译。
 
 // C++支持单一继承，也支持多重继承，
 // 继承关系也可以指定为虚拟（virtual，也就是共享的意思）。
 // 在虚拟继承的情况下，base class不管在继承串中被派生多少次，
 // 永远只会存在一个实体，被称为subobject。
+}  // namespace n1
 
+namespace n2 {
 // 1.2 关键词所带来的差异
 
 // 如果不是为了努力维护与C直接的兼容性，C++远可以比现在更简单些。
@@ -63,8 +60,7 @@ using namespace std;
 // 2.如果C++丢掉C的声明语法，就不用花脑筋取判断pf是函数调用而不是其声明：
 //   int(*pf)(1024);  // 不知道是声明还是定义，看到常量1024才能决定
 //   int (*pq)();  // 一个声明
-// 3.如果C++并不需要支持C原有的struct，
-//   那么class的观念由关键词class来支持。
+// 3.如果C++并不需要支持C的struct，那么class的观念由关键词class来支持。
 
 // 什么时候应该在C++程序中以struct取代class？
 // 当它让一个人感觉比较好的时候。
@@ -96,23 +92,26 @@ class stumble {
 // 如果是继承而不是组合，
 // 编译器会决定是否应该有额外的数据成员被安插到base struct subobject中。
 
-void func1() {
+void func() {
   // char *str;
   // struct mumble *mpmumb1 =
   // (struct mumble *)malloc(sizeof(struct mumble) + strlen(str) + 1);
   // strcpy(&mumble.pc, str);
 }
+}  // namespace n2
 
+namespace n3 {
 // 1.3 对象的差异
 
 // C++程序设计模型直接支持三种程序设计典范：
-// 1.程序模型，就像C一样，C++当然也支持它。
+// 1.程序模型，就像C一样，C++当然也支持它；
 // 2.抽象数据类型模型（ADT），
 //   该模型所谓抽象是和一组表达式（public接口）一起提供，
-//   而其运算定义仍然隐而未明。
+//   而其运算定义仍然隐而未明；
 // 3.面向对象模型，在此模型中有一些彼此相关的类型，
 //   通过一个抽象base class（用以提供公共接口）被封装起来。
 
+namespace test1 {
 // C++以下列方法支持多态：
 // 1.经由一组隐含的转换操作，
 //   例如把一个derived class指针转换为一个指向其public base type的指针。
@@ -121,36 +120,38 @@ void func1() {
 //   ps->rotate();
 // 3.经由dynamic_cast和typeid运算符。
 //   if(circle *pc = dynamic_cast<circle*>(ps))
-class Base {
+class B {
  public:
-  virtual void d() const { cout << "Base::d" << endl; }
+  virtual void d() const { std::cout << "B::d" << std::endl; }
 };
-class DerivedA : public Base {
+class D1 : public B {
  public:
-  virtual void d() const { cout << "DerivedA::d" << endl; }
+  virtual void d() const { std::cout << "D1::d" << std::endl; }
 };
-class DerivedB : public Base {
+class D2 : public B {
  public:
-  virtual void d() const { cout << "DerivedB::d" << endl; }
+  virtual void d() const { std::cout << "D2::d" << std::endl; }
 };
-void test(Base b, const Base *p, const Base &r) {
+void test(B b, const B *p, const B &r) {
   b.d();
   (*p).d();
   r.d();
 }
-void func2() {
-  DerivedA a;
+void func() {
+  D1 a;
   test(a, &a, a);
-  // Base::d
-  // DerivedA::d
-  // DerivedA::d
-  DerivedB b;
+  // B::d
+  // D1::d
+  // D1::d
+  D2 b;
   test(b, &b, b);
-  // Base::d
-  // DerivedB::d
-  // DerivedB::d
+  // B::d
+  // D2::d
+  // D2::d
 }
+}  // namespace test1
 
+namespace test2 {
 // 需要多少内存才能够表现一个class object？
 // 一般而言有：
 // 1.其非静态数据成员的总和大小；
@@ -158,16 +159,6 @@ void func2() {
 // 3.加上为了支持virtual而由内部产生的任何额外负担。
 
 // 一个指针，不管它指向哪一种数据类型，指针本身所需的内存大小是固定的。
-class ZooAnimal {
- public:
-  ZooAnimal() {}
-  virtual ~ZooAnimal() {}
-  virtual void rotate() { cout << "ZooAnimal::rotate" << endl; }
-
- protected:
-  int loc;
-  string name;
-};
 // 指向不同类型的指针间的差异，既不在其指针表示法不同，
 // 也不在其内容（地址）不同，而是在其所寻址出来的object类型不同。
 // 也就是说，指针类型会教导编译器如何解释某个特定地址中的内存内容及其大小。
@@ -178,61 +169,60 @@ class ZooAnimal {
 // 是因为它们并不引发内存中任何与类型有关的内存委托操作。
 // 改变的只是指向内存的大小和内容解释方式而已。
 
-class Bear : public ZooAnimal {
+class B {
  public:
-  Bear() {}
-  ~Bear() {}
-  void rotate() { cout << "Bear::rotate" << endl; };
-  virtual void dance(){};
+  B() {}
+  virtual ~B() {}
+  virtual void print() { std::cout << "B::print" << std::endl; }
+
+ protected:
+  int i;
+  double d;
+};
+class D : public B {
+ public:
+  D() {}
+  ~D() {}
+  void print() { std::cout << "D::print" << std::endl; };
+  virtual void show(){};
 
  protected:
   enum Dances {};
   Dances dances_known;
-  int cell_block;
+  int a;
 };
 
-void func3() {
-  ZooAnimal za;
-  ZooAnimal *pza = &za;
-  cout << "ZooAnimal pza : " << sizeof(pza) << endl;  // 8
-  int aa;
-  cout << "int aa : " << sizeof(&aa) << endl;  // 8
+void func() {
+  B b;
+  B *pb1 = &b;
+  std::cout << "B pb : " << sizeof(pb1) << std::endl;  // 8
+  int i;
+  std::cout << "int i : " << sizeof(&i) << std::endl;  // 8
 
-  Bear bb;
-  // 内存如下：
-  //  int loc
-  //  String name
-  //  __vptr__ZooAnimal
-  //  Dances dances_known
-  //  int cell_block
-  Bear *pbb = &bb;
-  Bear &rbb = *pbb;
-  cout << "ZooAnimal za : " << sizeof(za) << endl;  // 48
-  cout << "Bear bb : " << sizeof(bb) << endl;       // 56
-  cout << "Bear pbb : " << sizeof(pbb) << endl;     // 8
-  cout << "Bear rbb : " << sizeof(rbb) << endl;     // 56
+  D d;
+  D *pd = &d;
+  D &rd = *pd;
+  std::cout << "B b : " << sizeof(b) << std::endl;  // 24
+  std::cout << "D d : " << sizeof(d) << std::endl;       // 32
+  std::cout << "D pd : " << sizeof(pd) << std::endl;     // 8
+  std::cout << "D rd : " << sizeof(rd) << std::endl;     // 32
 
-  ZooAnimal *pzz = &bb;
-  // pzz和pbb每个都指向Bear对象的第一个byte。
-  // 其间的差别是，pbb所涵盖的地址包含整个Bear对象，
-  // 而pzz所涵盖的地址只包含Bear对象中的ZooAnimal subobject。
-  // pzz->cell_block;
-  // 不合法：cell_block不是ZooAnimal的一个member
-  // ((Bear *)pzz)->cell_block;
-  // ok，经过一个downcast操作就没有问题，但是保护成员编译不过
-  // if(Bear * pb2 = dynamic_cast<Bear*>(pzz)) pb2->cell_block;
-  // 更好，但是成本较高
-  // pbb->cell_block;  // ok
+  B *pb2 = &d;
+  // pb2和pd每个都指向D对象的第一个byte。
+  // 其间的差别是，pd所涵盖的地址包含整个D对象，
+  // 而pb2所涵盖的地址只包含D对象中的B subobject。
 
-  pzz->rotate();  // Bear::rotate
-  // pzz的类型将在编译时决定以下两点：
-  // 1.固定的可用接口，pzz只能调用ZooAnimal的public接口。
-  // 2.该接口的access level是ZooAnimal的一个public member。
-  // 在每一个执行点，pzz所指的object类型可以决定rotate()所调用的实体。
+  pb2->print();  // D::print
+  // pb2的类型将在编译时决定以下两点：
+  // 1.固定的可用接口，pb2只能调用B的public接口。
+  // 2.该接口的access level是B的一个public member。
+  // 在每一个执行点，pb2所指的对象类型可以决定print所调用的实体。
 
-  ZooAnimal zaa = bb;
-  zaa.rotate();  // ZooAnimal::rotate
+  B bb = d;
+  bb.print();  // B::print
 }
+}  // namespace test2
+}  // namespace n3
 
 // 当一个基类对象被直接初始化为一个派生类对象时，
 // 就会别切割，以塞入较小的base type内存中，
@@ -252,9 +242,23 @@ void func3() {
 // 2.空间紧凑则是因为每一个对象不需要负担为了支持virtual机制的额外负荷；
 // 3.不过OB设计比较没有弹性，在弹性（OO）和效率（OB）之间常常存在着取与舍。
 
-int main() {
-  func1();
-  func2();
-  func3();
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    std::cout << argv[0] << " i [0 - 1]" << std::endl;
+    return 0;
+  }
+  int type = atoi(argv[1]);
+  switch (type) {
+    case 0:
+      n3::test1::func();
+      break;
+    case 1:
+      n3::test2::func();
+      break;
+    default:
+      std::cout << "invalid type" << std::endl;
+      break;
+  }
+
   return 0;
 }
