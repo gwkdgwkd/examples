@@ -1,15 +1,16 @@
 #include <iostream>
 
-using namespace std;
+// 站在对象模型的尖端
 
 // 三个著名的C++语言扩充性质，它们都会影响C++对象：
 // template
 // execption handling
-// runtime type identification（RTTI）。
+// runtime type identification（RTTI）
 
+namespace n1 {
 // 7.1 Template
 
-// template是最令程序员有挫败感的一个主题。
+// Template是最令程序员有挫败感的一个主题。
 
 // Template的实例化行为：
 template <class Type>
@@ -39,21 +40,40 @@ class Point {
 //   如果只实例化那些真正用到的成员函数，
 //   template就能够支持那些原本可能会造成编译时期错误的类型。
 //   例如：Point<float> *p = new Point<float>;
-//   只有template的float实例、new运算符、默认构造函数需要被实例化化。
+//   只有template的float实例、new运算符、默认构造函数需要被实例化。
 // 函数在什么时候实例化出来呢？有两种策略：
-// 1.在编译时候，那么函数将实例化与origin和p存在的哪个文件中。
+// 1.在编译时候，那么函数将实例化与origin和p存在的哪个文件中；
 // 2.在链接时候，那么编译器会别一些辅助工具重新激活。
-// template函数实体可能被放在这个文件中，
-// 别的文件中，或一个分离的存储位置上。
+// template函数实体可能被放在这个文件中，别的文件中，或一个分离的存储位置上。
 // 在int和long一致（或double和long double一致）的结构之中，
-// 目前所有的编译器都会产生两个实体。
-// C++标准并未对此有什么强制规定。
+// 目前所有的编译器都会产生两个实体，C++标准并未对此有什么强制规定。
+void func1() {
+  Point<float>::Status s;  // ok
+  // Point::Status s1;  // error
+
+  Point<float>::freeList;  // ok
+  // Point::freeList;  // error
+  // 使用静态成员，会使其一份实体与Point class的float在程序中产生关联。
+
+  Point<float> *ptr = 0;  // 程序什么也没发生。
+  // 因为一个指向对象的指针，本身并不是一个对象，
+  // 编译器不需要知道与该类有关的任何成员数据或对象布局数据。
+  // 所以将Point的一个float实体实例化也就没有必要。
+  // 之前标准没有强制定义，编译器可以自行决定要不要将template实例化出来。
+  // 如今，C++标准已经禁止编译器实例化了。
+
+  const Point<float> &ref = 0;
+  // 换成引用，会实例化出一个Point的float实体来。
+  // 因为引用并不是无物（no object）的代名词。
+  // 0被视为整数，必须被转换为以下类型的一个对象：Point<float>
+  // 如果没有转换的可能，这个定义就是错误的，会在编译时被挑出来。
+}
 
 // Template的错误报告
 
 // Template中的名称决议方式
-// scope of the template definition
-double foo(double) { cout << "double" << endl; }
+// scope of the template definition：
+double foo(double) { std::cout << "double" << std::endl; }
 template <class type>
 class ScopeRules {
  public:
@@ -64,13 +84,13 @@ class ScopeRules {
   int _val;
   type _member;
 };
-// scope of the template instantiantion
-int foo(int) { cout << "int" << endl; }
+// scope of the template instantiantion：
+int foo(int) { std::cout << "int" << std::endl; }
 
 // template之中，对于一个nonmember name的决议结构是根据：
-// 这个name的使用是否与用以实例化出该template的参数类型有关而决定的。
-// 如果互不相关，那么就以scope of the template definition来决定name。
-// 如果互相关联，那么就以scope of the template instantiantion来决定name。
+// 这个name的使用是否与用以实例化出该template的参数类型有关而决定的：
+// 1.如果互不相关，那么就以scope of the template definition来决定name。
+// 2.如果互相关联，那么就以scope of the template instantiantion来决定name。
 // 此外，函数的决议结果只和函数的原型有关，和函数的返回值没有关联。
 // 对于invariant的调用，_member的类型并不会影响哪个foo实体被选中。
 // foo()的调用与template参数毫无关联，
@@ -92,6 +112,11 @@ int foo(int) { cout << "int" << endl; }
 //   用以专注与特定的实体。
 // 编译器的决议算法必须决定哪一个才是适当的scope，
 // 然后在其中搜寻适当的name。
+void func2() {
+  ScopeRules<int> sr;
+  sr.invariant();       // double
+  sr.type_dependent();  // double 怎么不是int？
+}
 
 // Member Function的实例化行为
 // 对于template的支持，最困难的莫过于template function的实例化，
@@ -103,16 +128,20 @@ int foo(int) { cout << "int" << endl; }
 // 1.编译器如何找出函数的定义？
 // 2.编译器如何能够只实例化出程序用到的成员函数？
 // 3.编译器如何阻止成员定义在多个.o文件中被实例化呢？
+}  // namespace n1
 
+namespace n2 {
 // 7.2 异常处理
+}
 
+namespace n3 {
 // 7.3 执行期类型识别
 
 // 在2.0之前，除了析构函数外，
 // 唯一不能被重载的函数就是转换运算符，因为它们不使用参数。
-// 直到引进了const member functions后，转换操作符才能重载成const。
-//  operator char*();
-//  operator char*() const;
+// 直到引进了const member functions后，转换操作符才能重载成const：
+// operator char*();
+// operator char*() const;
 
 // C++被吹毛求疵的一点就是，缺乏一个保证安全的向下转换操作，
 // 只有在类型真的可以被适当转换的情况下，才能执行downcast。
@@ -122,14 +151,13 @@ int foo(int) { cout << "int" << endl; }
 
 // C++的RTTI机制提供一个安全的downcast，但只对展现多态的类型有效。
 // 把类相关的RTTI object地址放进virtual table中，通常放在第一个slot中。
-// 每一个对象只多花一个指针。
-// 这个指针只需被设定一次，它是被编译器静态设定，
-// 而不是在执行期有构造函数设定（vptr才这么设定）。
+// 每一个对象只多花一个指针，这个指针只需被设置一次，它是被编译器静态设置，
+// 而不是在执行期有构造函数设置（vptr才这么设置）。
 
 // dynamic_cast运算符可以在执行期决定真正的类型：
 // 1.如果downcast是安全的（基类指针指向一个派生类对象），
-//   这个运算符会传回被适当转换的指针。
-// 2.如果downcast不是安全的，这个运算符会传回0。
+//   这个运算符会返回被适当转换的指针。
+// 2.如果downcast不是安全的，这个运算符会返回0。
 
 // references并不是pointers
 // 程序中对一个类指针类型执行dynamic_cast运算符，会获得true或false：
@@ -154,7 +182,9 @@ int foo(int) { cout << "int" << endl; }
 // type_info运算符传回一个const reference，类型为type_info。
 // RTTI只适用于多态类，type_info对象也适用于内建类型，
 // 以及非多态的使用者自定类型。
+}  // namespace n3
 
+namespace n4 {
 // 7.4 效率有了，弹性呢？
 
 // 传统的C++对象模型提供了有效率的执行期支持。
@@ -181,32 +211,25 @@ int foo(int) { cout << "int" << endl; }
 // 目前的解决方法是属于程序层面，程序员必须保证让跨进程的共享库有相同的地址。
 // 编译系统层面上的解决方法，
 // 势必得牺牲原本的virtual table实现模型所带来的高效率。
+}
 
-int main() {
-  Point<float>::Status s;  // ok
-  // Point::Status s1;  // error
-
-  Point<float>::freeList;  // ok
-  // Point::freeList;  // error
-  // 使用静态成员，会使其一份实体与Point class的float在程序中产生关联。
-
-  Point<float> *ptr = 0;
-  // 程序什么也没发生。因为一个指向对象的指针，本身并不是一个对象，
-  // 编译器不需要知道与该类有关的任何成员数据或对象布局数据。
-  // 所以将Point的一个float实体实例化也就没有必要。
-  // 在C++标准之前，没有强制定义，
-  // 编译器可以自行决定要不要将template实例化出来。
-  // 如今，C++标准已经禁止编译器实例化了。
-
-  const Point<float> &ref = 0;
-  // 换成引用，会实例化出一个Point的float实体来。
-  // 因为引用并不是无物（no object）的代名词。
-  // 0被视为整数，必须被转换为以下类型的一个对象：Point<float>
-  // 如果没有转换的可能，这个定义就是错误的，会在编译时被挑出来。
-
-  ScopeRules<int> sr0;
-  sr0.invariant();       // double
-  sr0.type_dependent();  // double 怎么不是int？
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    std::cout << argv[0] << " i [0 - 1]" << std::endl;
+    return 0;
+  }
+  int tD1pe = atoi(argv[1]);
+  switch (tD1pe) {
+    case 0:
+      n1::func1();
+      break;
+    case 1:
+      n1::func2();
+      break;
+    default:
+      std::cout << "invalid tD1pe" << std::endl;
+      break;
+  }
 
   return 0;
 }

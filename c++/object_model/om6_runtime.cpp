@@ -1,10 +1,9 @@
-#include <cstdlib>
 #include <iostream>
 
-using namespace std;
+// 执行期语义学
 
+namespace n1 {
 // 6.1 对象的构造和析构
-
 // 一般而言，构造函数和析构函数的安插都如预期一样：
 // {
 //   Point point;
@@ -15,11 +14,11 @@ using namespace std;
 // 如果区段或函数中有一个以上的离开点，情况会很混乱。
 // 析构函数必须放在每一个离开点，比如switch和goto。
 
-class Widget {
+class A {
  public:
-  Widget(int i) : _i(i) { cout << "Widget " << i << endl; }
-  Widget() { cout << "Widget" << endl; }
-  void print() { cout << _i << endl; }
+  A(int i) : _i(i) { std::cout << "A " << i << std::endl; }
+  A() { std::cout << "A" << std::endl; }
+  void print() { std::cout << _i << std::endl; }
 
  private:
   int _i;
@@ -28,8 +27,8 @@ class Widget {
 // 全局对象
 // C++保证，一定会在main()函数中第一次用到全局变量之前，
 // 把全局对象构造出来，而在main()结束之前把全局变量摧毁掉。
-// 全局对象如果构造函数和析构函数的话，
-// 我们说它需要静态的初始化操作和内存释放操作。
+// 全局对象如果有构造函数和析构函数的话，
+// 可以说说它需要静态的初始化操作和内存释放操作。
 // C++程序中的所有全局对象都被放置在程序的data segment中。
 // 如果明确指定了值，对象将以该值为初值，否则，对象的初值为0。
 // 这一点和C不同，C并不自动设置初值，
@@ -58,17 +57,15 @@ class Widget {
 //   这对于被静态调用的构造函数可能是特别无法接受的，因为任何的throw操作，
 //   将必然触发exception handing library默认的terminate()函数。
 // 2.另一个缺点是为了控制需要跨越模块做静态初始化对象的相依顺序而导致的复杂度。
-Widget global(1);
-Widget g;
+A g1(1);
+A g2;
 
 // 局部静态对象
-void test() { static Widget w(5); }
+void test() { static A a(5); }
 // 虽然test可能会被调用多次，但是w的构造函数和析构函数只能执行一次。
 // 编译器的策略之一是：无条件地在程序起始时构造出对象来。
-// 这会导致所有局部静态变量在程序起始时被初始化，
-// 即使它们所在的函数从不曾被调用过。
-// 因此，只有在test调用时才把w构造起来，
-// 是比较好的做法，现在的C++标准已经强制要求这一点。
+// 这会导致所有局部静态变量在程序起始时被初始化，即使它们所在的函数从不曾被调用过。
+// 因此，只有在test调用时才构造，是比较好的做法，现在的C++标准已经强制要求这一点。
 // 新的规则要求编译单位中的静态局部对象必须以构造的相反次序摧毁。
 // 由于这些对象是在需要时才被构造，所以编译时无法预期其集合以及顺序。
 // 为了支持新规则，可能需要对被产生出来的静态局部对象保存一个执行期链表。
@@ -78,15 +75,27 @@ void test() { static Widget w(5); }
 // 默认构造函数和数组
 // 如果想要在程序中取出一个构造函数的地址，这是不可以的。
 
+void func() {
+  // A 1
+  // A
+  std::cout << "enter main" << std::endl;
+  test();  // A 5
+  test();
+  g1.print();  // 1
+  g2.print();  // 0
+  std::cout << "exit main" << std::endl;
+}
+}  // namespace n1
+
+namespace n2 {
 // 6.2 new和delete运算符
 
 // new由两个步骤完成：
 // 1.通过适当的new运算符函数实体，配置所需的内存；
 // 2.给配置得来的对象设立初值，初始化操作应该在内存分配成功后才执行。
 // delete运算符的情况类似，如果操作数是0，C++要求delete运算符不要有操作。
-// new操作符实际上总是以标准的C malloc()完成，
-// 虽然并没有规定一定得这么做不可。
-// delete总是以C free()完成。
+// new操作符实际上总是以标准的C malloc()完成，delete总是以C free()完成。
+// 标准并没有规定一定得这么做不可。
 
 // 针对数组的new语意
 // 主要功能是把默认构造函数执行于对象所组成的数组的每一个元素身上：
@@ -94,60 +103,81 @@ void test() { static Widget w(5); }
 // 最好避免以一个基类指针指向一个派生类对象所组成的数组。
 
 // Placement Operator new的语意
-// Point2w *ptw = new(arena) Point2w;
-// arena指向内存中的一块区块，用以放置新产生出来的Point2我对象。
+// Point *ptw = new(arena) Point;
+// arena指向内存中的一块区块，用以放置新产生出来的Point对象。
 // 除了将获得的指针所指的地址传回外，
-// 还要在arena所值得地址上执行Point2w的构造函数。
+// 还要在arena所值得地址上执行Point的构造函数。
 // 然而有一个轻微的不良行为：
 // 在原已存在的一个对象上构造新的对象，
 // 而该现有的对象有一个析构函数，这个析构函数并不会被调用。
 // 如何知道所指的区域是否需要先析构呢？这个问题在语言层面上并没有解答。
 // 一个习惯是，令执行new的这一端也要负责执行析构的责任。
-// C++标准说，arena要不指向相同的类，
-// 要不就是一块新鲜内存，足够容纳该类型的对象。
-// 1.新鲜的存储空间：char *arena = new char[sizeof(Point2w)];
+// C++标准说，arena要不指向相同的类，要不就是一块新内存，足够容纳该对象。
+// 1.新的存储空间：char *arena = new char[sizeof(Point2w)];
 // 2.相同类型的对象：Point2w *arena = new Point2w;
 // 一般而言，placement new operator并不支持多态。
 // 被交给new的指针，应该适当地指向一块预先配置好的内存。
-// 如果派生类比其基类大，派生类的构造函数将会导致严重的破坏：
-// Point2w *p2w = new(arena) Point 3w;
-
-class Widget1 {
+// 如果派生类比其基类大，派生类的构造函数将会导致严重的破坏。
+class AA {
  public:
-  Widget1() { cout << "Widget1" << endl; }
-  ~Widget1() { cout << "~Widget1" << endl; }
+  AA() { std::cout << "AA" << std::endl; }
+  ~AA() { std::cout << "~AA" << std::endl; }
 };
+void func1() {
+  void *addr = malloc(50);
+  AA *p = new (addr) AA;
+  p = new (addr) AA;
+  delete addr;
+  // AA
+  // AA
+}
+void func2() {
+  void *addr = malloc(50);
+  AA *p = new (addr) AA;  // AA
+
+  // 会释放所指的内存，不是期望的：
+  // delete p;  // ~AA
+
+  // 明确地调用析构函数并保留存储空间：
+  p->~AA();           // ~AA
+  p = new (addr) AA;  // AA
+  p->~AA();           // AA
+}
 
 // placement new operator最隐晦的问题：
 struct Base {
   int j;
-  virtual void f() { cout << "Base::f" << endl; }
+  virtual void f() { std::cout << "Base::f" << std::endl; }
 };
 struct Derived : Base {
-  void f() { cout << "Derived::f" << endl; }
+  void f() { std::cout << "Derived::f" << std::endl; }
 };
 // Base和Derived有相同的大小，
 // 故把派生类对象放在为基类配置的内存中是安全的。
 // 然而，要支持这一点，
 // 或许必须放弃对于经由对象静态调用所有虚函数通常会有的优化处理。
-void func1() {
+void func3() {
   Base b;
-  b.f();
+  b.f();  // Base::f
   b.~Base();
-  new (&b) Derived;
-  b.f();
-  // 上面的程序行为未定义，不确定调用哪个f：
-  // 大部分使用者以为会调用Derived::f()，
-  // 但大部分编译器调用的却是Base::f()。
-}
 
+  // 下面的程序行为未定义，不确定调用哪个f，
+  // 大部分使用者以为会调用Derived::f()，
+  // 但大部分编译器调用的却是Base::f()：
+  new (&b) Derived;
+  b.f();  // Base::f
+}
+}  // namespace n2
+
+namespace n3 {
 // 6.3 临时性对象
+
 struct T {
-  T(int i) : _i(i) { cout << "T " << i << endl; }
-  T() : _i(0) { cout << "T" << endl; }
+  T(int i) : _i(i) { std::cout << "T(int i) " << std::endl; }
+  T() : _i(0) { std::cout << "T()" << std::endl; }
   T(const T &r) {
     _i = r._i;
-    cout << "T copy" << endl;
+    std::cout << "T copy" << std::endl;
   };
   int _i;
 };
@@ -166,7 +196,7 @@ T operator+(const T &rhs, const T &lhs) { return T(rhs._i + lhs._i); }
 // 临时对象的生命并没有明确指定，而是由编译厂商自行决定。
 // 在C++标准下，临时对象被摧毁，
 // 应该是对完整表达式（整个表达式）求值过程中的最后一个步骤。
-// 临时对象的生命规则有两个例外：
+// 临时对象的生命期规则有两个例外：
 // 1.发生在表达式被用来初始化一个对象时。
 //   String s = b ? a + b;
 //   产生临时对象存放加法结果，临时对象必须根据b的测试结果来有条件地析构。
@@ -177,53 +207,20 @@ T operator+(const T &rhs, const T &lhs) { return T(rhs._i + lhs._i); }
 // 2.当一个临时性对象被一个引用绑定时。
 //   const string &space = " ";
 //   如果被销毁，那么引用也就没什么用了。
-//   如果一个临时性对象被绑定与一个引用，对象将残留，
-//   直到被初始化的引用的生命结束，或直到临时对象的生命周期结束，
-//   视哪一种情况先到达而定。
+//   如果一个临时性对象被引用绑定，对象将残留，直到被初始化的引用的生命结束，
+//   或直到临时对象的生命周期结束，视哪一种情况先到达而定。
 
-// 临时性对象的迷思（神话、传说）
-
-int main() {
-  // Widget 1
-  // Widget
-  cout << "enter main" << endl;
-  test();  // Widget 5
-  test();
-  global.print();  // 1
-  g.print();       // 0
-  cout << "exit main" << endl;
-
-  void *xx = malloc(50);
-  Widget1 *pp = new (xx) Widget1;
-  pp = new (xx) Widget1;
-  delete xx;
-  // Widget1
-  // Widget1
-
-  void *xx1 = malloc(50);
-  Widget1 *pp1 = new (xx1) Widget1;
-  // delete pp1;  // 会释放所指的内存，不是期望的
-  pp1->~Widget1();  // 明确地调用析构函数并保留存储空间
-  pp1 = new (xx1) Widget1;
-  pp1->~Widget1();
-  // Widget1
-  // ~Widget1
-  // Widget1
-  // ~Widget1
-
-  func1();
-  // Base::f
-  // Base::f
-
+void func() {
   T x, y;
-  // T
-  // T
-  x + y;  // T 0
+  // T()
+  // T()
+
+  x + y;  // T(int i)
   // 可能会导致一个临时对象，以放置传回的对象。
-  // 是否会导致一个临时对象，
-  // 视编译器的进取性以及上述操作发生时的程序上下文而定。
+  // 是否生成临时对象，视编译器的进取性以及上述操作发生时的程序上下文而定。
   // 此外，视operator+()的定义而定，NRV优化也可能实施起来。
-  T z = x + y;  // T 0  初始化操作
+
+  T z = x + y;  // T(int i)  初始化操作
   // 编译器会产生一个临时性对象，放置x+y的结果，
   // 然后再使用T的拷贝构造函数，把临时性对象当做z的初始值。
   // 比较更可能的转换是直接以拷贝构造函数的方式，将x+y的值放到z中，
@@ -231,19 +228,53 @@ int main() {
   // NRV优化后，将导致直接在z对象中求表达式结果，
   // 避免执行拷贝构造函数和具名对象的析构函数。
   // 三种方式所获得的z对象，结果都一样，其差异在于初始化的成本。
-  z = x + y;  // T 0  z.operator=(x + y);
+  z = x + y;  // T(int i) 0  z.operator=(x + y);
   // 赋值语句，不能忽略临时性对象。
 
   // g++ -fno-elide-constructors runtime.cpp
-  // T
-  // T
-  // T 0
+  // T()
+  // T()
+
+  // T(int i)
   // T copy
-  // T 0
+
+  // T(int i)
   // T copy
   // T copy
-  // T 0
+
+  // T(int i)
   // T copy
+}
+
+// 临时性对象的迷思（神话、传说）
+}  // namespace n3
+
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    std::cout << argv[0] << " i [0 - 4]" << std::endl;
+    return 0;
+  }
+  int tD1pe = atoi(argv[1]);
+  switch (tD1pe) {
+    case 0:
+      n1::func();
+      break;
+    case 1:
+      n2::func1();
+      break;
+    case 2:
+      n2::func2();
+      break;
+    case 3:
+      n2::func3();
+      break;
+    case 4:
+      n3::func();
+      break;
+    default:
+      std::cout << "invalid tD1pe" << std::endl;
+      break;
+  }
 
   return 0;
 }
