@@ -3,18 +3,14 @@
 namespace n1 {
 // 包含纯虚函数的类称为抽象类（Abstract Class）。
 // 之所以说它抽象，是因为它无法实例化，也就是无法创建对象。
-// 原因很明显，纯虚函数没有函数体，不是完整的函数，
-// 无法调用，也无法为其分配内存空间。
+// 因为纯虚函数没有函数体，不是完整的函数，无法调用，也无法为其分配内存空间。
 // 抽象类通常是作为基类，让派生类去实现纯虚函数。
-// 抽象基类除了约束派生类的功能，还可以实现多态。
-// 这或许才是C++提供纯虚函数的主要目的。
+// 抽象基类除了约束派生类还可以实现多态，这或许才是C++提供纯虚函数的主要目的。
 class Interface {
  public:
   // 在C++中，可以将虚函数声明为纯虚函数。
-  // 纯虚函数没有函数体，只有函数声明，
-  // 在虚函数声明的结尾加上=0，表明此函数为纯虚函数。
-  // 最后的=0并不表示函数返回值为0，它只起形式上的作用，
-  // 告诉编译系统这是纯虚函数。
+  // 纯虚函数没有函数体只有声明，在虚函数声明的结尾加上=0，表明为纯虚函数。
+  // =0并不表示函数返回值为0，它只起形式上的作用，告诉编译系统这是纯虚函数。
   virtual void show1() = 0;
   virtual void show2() = 0;
 
@@ -33,50 +29,49 @@ class Interface {
 // 全局函数不能声明为纯虚函数：
 // void show6() = 0;
 
-class D1 : public Interface {
+namespace test1 {
+class D : public Interface {
  public:
-  virtual void show1() { std::cout << "D1::show1" << std::endl; }
+  virtual void show1() { std::cout << "D::show1" << std::endl; }
 };
-
-// 派生类必须实现纯虚函数才能被实例化
-class D2 : public Interface {
- public:
-  // 虽然抽象基类没有完成，但是却强制要求派生类全部完成，
-  // 这就是抽象基类的霸王条款：
-  virtual void show1() { std::cout << "D2::show1" << std::endl; }
-  virtual void show2() { std::cout << "D2::show2" << std::endl; }
-};
-
-void func1() {
+void func() {
   // Interface i;  // 抽象类无法创建对象
   // D1 d1;  // 没有全部实现纯虚函数，也无法创建对象
-  D2 d2;
-  d2.show1();  // D2::show1
-  d2.show2();  // D2::show2
-  d2.show3();  // Interface::show3 5
-  d2.show4();  // Interface::show4 5
 }
-
-class D3 : public Interface {
+}  // namespace test1
+namespace test2 {
+class D : public Interface {  // 派生类必须实现纯虚函数才能被实例化
  public:
-  virtual void show1() { std::cout << "D3::show1" << std::endl; }
-  virtual void show2() { std::cout << "D3::show2" << std::endl; }
-  void show3() { std::cout << "D3::show3 " << i << std::endl; }
-  void show4() { std::cout << "D3::show4 " << i << std::endl; }
+  // 虽然抽象基类没定义，却强制要求派生类全部定义，这就是抽象基类的霸王条款：
+  virtual void show1() { std::cout << "D::show1" << std::endl; }
+  virtual void show2() { std::cout << "D::show2" << std::endl; }
+};
+void func() {
+  D d;
+  d.show1();  // D::show1
+  d.show2();  // D::show2
+  d.show3();  // Interface::show3 5
+  d.show4();  // Interface::show4 5
+}
+}  // namespace test2
+
+namespace test3 {
+class D : public Interface {
+ public:
+  virtual void show1() { std::cout << "D::show1" << std::endl; }
+  virtual void show2() { std::cout << "D::show2" << std::endl; }
+  void show3() { std::cout << "D::show3 " << i << std::endl; }
+  void show4() { std::cout << "D::show4 " << i << std::endl; }
 };
 
-void func2() {
-  D3 d;
-  d.show1();  // D3::show1
-  d.show2();  // D3::show2
-  d.show3();  // D3::show3 5
-  d.show4();  // D3::show4 5
+void func() {
+  D d;
+  d.show1();  // D::show1
+  d.show2();  // D::show2
+  d.show3();  // D::show3 5
+  d.show4();  // D::show4 5
 }
-
-void testN1() {
-  func1();
-  func2();
-}
+}  // namespace test3
 }  // namespace n1
 
 namespace n2 {
@@ -159,25 +154,26 @@ void func() {
   std::cout << pb2->get() << std::endl;  // 2
 }
 }  // namespace test2
-
-void testN2() {
-  test1::func();
-  test2::func();
-}
 }  // namespace n2
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 1]" << std::endl;
+    std::cout << argv[0] << " i [0 - 3]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::test2::func();
       break;
     case 1:
-      n2::testN2();
+      n1::test3::func();
+      break;
+    case 2:
+      n2::test1::func();
+      break;
+    case 3:
+      n2::test2::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

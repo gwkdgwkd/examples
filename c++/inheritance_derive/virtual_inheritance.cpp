@@ -24,8 +24,8 @@
 // 它不会影响派生类本身。
 // C++标准库中的iostream类就是一个虚继承的实际应用案例：
 // iostream从istream和ostream直接继承而来，
-// 而istream和ostream又都继承自一个共同的名为base_ios的类，是典型的菱形继承。
-// 此时 istream和ostream必须采用虚继承，
+// 而istream和ostream又都继承自一个共同的base_ios的类，是典型的菱形继承。
+// 此时，istream和ostream必须采用虚继承，
 // 否则将导致iostream类中保留两份base_ios类的成员。
 // 因为在虚继承的最终派生类中只保留了一份虚基类的成员，
 // 所以该成员可以被直接访问，不会产生二义性。
@@ -60,12 +60,10 @@ class D : public B, public C {
   int d = 4;
 };
 
-void testN1() {
+void func() {
   D obj;
   std::cout << sizeof(obj) << std::endl;  // 20
 
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
   std::cout << &obj << std::endl;  // 0x7fffae6cfa00
   // std::cout << d.a << std::endl;  // 有两个a，产生歧义
   std::cout << &(obj.B::a) << std::endl;  // 0x7fffae6cfa00
@@ -96,41 +94,29 @@ class D : public B, public C {
 void func1() {
   A obj;
   std::cout << sizeof(obj) << std::endl;  // 4
-
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;      // 0x7fff0e1be5b4
-  std::cout << &(obj.a) << std::endl;  // 0x7fff0e1be5b4
+  std::cout << &obj << std::endl;         // 0x7fff0e1be5b4
+  std::cout << &(obj.a) << std::endl;     // 0x7fff0e1be5b4
 }
 
 void func2() {
   B obj;
   std::cout << sizeof(obj) << std::endl;  // 16
-
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;      // 0x7fff0e1be5a0
-  std::cout << &(obj.b) << std::endl;  // 0x7fff0e1be5a8
-  std::cout << &(obj.a) << std::endl;  // 0x7fff0e1be5ac
+  std::cout << &obj << std::endl;         // 0x7fff0e1be5a0
+  std::cout << &(obj.b) << std::endl;     // 0x7fff0e1be5a8
+  std::cout << &(obj.a) << std::endl;     // 0x7fff0e1be5ac
 }
 
 void func3() {
   C obj;
   std::cout << sizeof(obj) << std::endl;  // 16
-
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;      // 0x7fff0e1be5a0
-  std::cout << &(obj.c) << std::endl;  // 0x7fff0e1be5a8
-  std::cout << &(obj.a) << std::endl;  // 0x7fff0e1be5ac
+  std::cout << &obj << std::endl;         // 0x7fff0e1be5a0
+  std::cout << &(obj.c) << std::endl;     // 0x7fff0e1be5a8
+  std::cout << &(obj.a) << std::endl;     // 0x7fff0e1be5ac
 }
 
 void func4() {
   D obj;
   std::cout << sizeof(obj) << std::endl;  // 40
-
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
   std::cout << &obj << std::endl;         // 0x7fff0e1be590
   std::cout << &(obj.b) << std::endl;     // 0x7fff0e1be598
   std::cout << &(obj.c) << std::endl;     // 0x7fff0e1be5a8
@@ -138,12 +124,6 @@ void func4() {
   std::cout << &(obj.a) << std::endl;     // 0x7fff0e1be5b0
   std::cout << &(obj.B::a) << std::endl;  // 0x7fff0e1be5b0
   std::cout << &(obj.C::a) << std::endl;  // 0x7fff0e1be5b0
-}
-void testN2() {
-  func1();
-  func2();
-  func3();
-  func4();
 }
 }  // namespace n2
 
@@ -204,25 +184,25 @@ class D : public B, public C {
   int m_d;
 };
 
-void testN3() {
+void func() {
   B b(10, 20);
-  b.display();
   // A constructors
   // B constructors
+  b.display();
   // m_a=10, m_b=20
 
   C c(30, 40);
-  c.display();
   // A constructors
   // C constructors
+  c.display();
   // m_a=30, m_c=40
 
   D d(50, 60, 70, 80);
-  d.display();
   // A constructors
   // B constructors
   // C constructors
   // D constructors
+  d.display();
   // m_a=50, m_b=60, m_c=70, m_d=80
 }
 }  // namespace n3
@@ -243,12 +223,9 @@ namespace n4 {
 // 即基类成员变量始终在派生类成员变量的前面，
 // 而且不管继承层次有多深，它相对于派生类对象顶部的偏移量是固定的。
 // 编译器在知道对象首地址的情况下，通过计算偏移来存取成员变量。
-// 对于普通继承，基类成员变量的偏移是固定的，
-// 不会随着继承层级的增加而改变，存取起来非常方便。
-// 而对于虚继承，恰恰和普通继承相反，
-// 大部分编译器会把基类成员变量放在派生类成员变量的后面，
-// 这样随着继承层级的增加，基类成员变量的偏移就会改变，
-// 就得通过其他方案来计算偏移量。
+// 普通继承基类成员变量的偏移是固定的，不会随着继承层级的增加而改变，存取非常方便。
+// 虚继承恰恰和普通继承相反，大部分编译器会把基类成员变量放在派生类成员变量的后面，
+// 这样随着继承层级的增加，基类成员变量的偏移就会改变，就得通过其他方案来计算偏移量。
 // 虚继承时的派生类对象被分成了两部分：
 // 1.不会随着继承层次的增加而改变，称为固定部分；
 // 2.偏移量会随着继承层次的增加而改变，称为共享部分。
@@ -263,8 +240,7 @@ namespace n4 {
 // 并把共享部分放在最后，几乎所有的编译器都在这一点上达成了共识。
 // 主要的分歧就是如何计算共享部分的偏移，可谓是百花齐放，没有统一标准。
 // 早期的cfront编译器会在派生类对象中安插一些指针，
-// 每个指针指向一个虚基类的子对象，要存取继承来的成员变量，
-// 可以使用指针间接完成。
+// 每个指针指向一个虚基类的子对象，要存取继承来的成员变量，可以使用指针间接完成。
 // 通过上面的分析可以发现，这种方案的一个缺点就是，随着虚继承层次的增加，
 // 访问顶层基类需要的间接转换会越来越多，效率越来越低。
 // 这种方案另外的一个缺点是：
@@ -273,8 +249,7 @@ namespace n4 {
 // 编译器就会在派生类对象中安插一个指针，指向虚基类表。
 // 虚基类表其实就是一个数组，数组中的元素存放的是各个虚基类的偏移。
 // 虚继承表中保存的是所有虚基类（包括直接继承和间接继承到的）相对于当前对象的偏移，
-// 这样通过派生类指针访问虚基类的成员变量时，
-// 不管继承层次都多深，只需要一次间接转换就可以。
+// 这样通过派生类指针访问虚基类成员变量时，不管继承层次多深，只需一次间接转换就可以。
 // 另外，这种方案还可以避免有多个虚基类时让派生类对象额外背负过多的指针。
 namespace test1 {
 class A {
@@ -296,49 +271,44 @@ class D : public C {
 
 void func1() {
   A obj;  // 内存布局： a
-  std::cout.setf(std::ios::dec);
-  std::cout << sizeof(obj) << std::endl;  // 4
 
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;      // 0x7ffe22396f04
-  std::cout << &(obj.a) << std::endl;  // 0x7ffe22396f04
+  std::cout << sizeof(obj) << std::endl;  // 4
+  std::cout << &obj << std::endl;         // 0x7ffe22396f04
+  std::cout << &(obj.a) << std::endl;     // 0x7ffe22396f04
 }
 void func2() {
   B obj;  // 内存布局： A(a) b
-  std::cout.setf(std::ios::dec);
-  std::cout << sizeof(obj) << std::endl;  // 8
 
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;      // 0x7ffe22396f00
-  std::cout << &(obj.a) << std::endl;  // 0x7ffe22396f00
-  std::cout << &(obj.b) << std::endl;  // 0x7ffe22396f04
+  std::cout << sizeof(obj) << std::endl;  // 8
+  std::cout << &obj << std::endl;         // 0x7ffe22396f00
+  std::cout << &(obj.a) << std::endl;     // 0x7ffe22396f00
+  std::cout << &(obj.b) << std::endl;     // 0x7ffe22396f04
 }
 void func3() {
   C obj;  // 内存布局： B(A(a) b) c
-  std::cout.setf(std::ios::dec);
-  std::cout << sizeof(obj) << std::endl;  // 12
 
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;      // 0x7ffe22396efc
-  std::cout << &(obj.a) << std::endl;  // 0x7ffe22396efc
-  std::cout << &(obj.b) << std::endl;  // 0x7ffe22396f00
-  std::cout << &(obj.c) << std::endl;  // 0x7ffe22396f04
+  std::cout << sizeof(obj) << std::endl;  // 12
+  std::cout << &obj << std::endl;         // 0x7ffe22396efc
+  std::cout << &(obj.a) << std::endl;     // 0x7ffe22396efc
+  std::cout << &(obj.b) << std::endl;     // 0x7ffe22396f00
+  std::cout << &(obj.c) << std::endl;     // 0x7ffe22396f04
 }
 void func4() {
   D obj;  // 内存布局： C(B(A(a) b) c) d
-  std::cout.setf(std::ios::dec);
-  std::cout << sizeof(obj) << std::endl;  // 16
 
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
-  std::cout << &obj << std::endl;      // 0x7ffe22396ef0
-  std::cout << &(obj.a) << std::endl;  // 0x7ffe22396ef0
-  std::cout << &(obj.b) << std::endl;  // 0x7ffe22396ef4
-  std::cout << &(obj.c) << std::endl;  // 0x7ffe22396ef8
-  std::cout << &(obj.d) << std::endl;  // 0x7ffe22396efc
+  std::cout << sizeof(obj) << std::endl;  // 16
+  std::cout << &obj << std::endl;         // 0x7ffe22396ef0
+  std::cout << &(obj.a) << std::endl;     // 0x7ffe22396ef0
+  std::cout << &(obj.b) << std::endl;     // 0x7ffe22396ef4
+  std::cout << &(obj.c) << std::endl;     // 0x7ffe22396ef8
+  std::cout << &(obj.d) << std::endl;     // 0x7ffe22396efc
+}
+
+void func() {
+  func1();
+  func2();
+  func3();
+  func4();
 }
 }  // namespace test1
 
@@ -370,11 +340,7 @@ class D : public B, public C {
 
 void func1() {
   A obj;  // 内存布局： a
-  std::cout.setf(std::ios::dec);
   std::cout << sizeof(obj) << std::endl;
-
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
   std::cout << &obj << std::endl;
   std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;
 
@@ -384,99 +350,77 @@ void func1() {
 }
 void func2() {
   B obj;  // 内存布局： vbptr b A(a)
-  std::cout.setf(std::ios::dec);
+  long** pbptr = (long**)&obj;
   std::cout << sizeof(obj) << " " << std::endl;
-
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
   std::cout << &obj << std::endl;
-  std::cout << (int*)&obj << ": " << *(long*)(*(long*)&obj) << std::endl;
+  std::cout << pbptr << ": " << *(pbptr[0] - 3) << std::endl;
   std::cout << &(obj.b) << " (" << obj.b << ")" << std::endl;
   std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;
 
   // 16
-  // 0x7fffa746bae0
-  // 0x7fffa746bae0: 94109290195024
-  // 0x7fffa746bae8 (2)
-  // 0x7fffa746baec (1)
+  // 0x7ffc0ff45ae0
+  // 0x7ffc0ff45ae0: 12
+  // 0x7ffc0ff45ae8 (2)
+  // 0x7ffc0ff45aec (1)
 }
 void func3() {
   C obj;  // 内存布局： vbptr c A(a)
-  std::cout.setf(std::ios::dec);
+  long** pbptr = (long**)&obj;
   std::cout << sizeof(obj) << std::endl;
-
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
   std::cout << &obj << std::endl;
-  std::cout << (int*)&obj << ": " << *(long*)(*(long*)&obj) << std::endl;
+  std::cout << pbptr << ": " << std::endl;
+  std::cout << " slot -3 : " << *(pbptr[0] - 3) << std::endl;
+  std::cout << " slot -2 : " << *(pbptr[0] - 2) << std::endl;
   std::cout << &(obj.c) << " (" << obj.c << ")" << std::endl;
   std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;
 
   // 16
-  // 0x7fffa746bae0
-  // 0x7fffa746bae0: 94109290194992
-  // 0x7fffa746bae8 (3)
-  // 0x7fffa746baec (1)
+  // 0x7ffcf5fb05a0
+  // 0x7ffcf5fb05a0:
+  //  slot -3 : 12
+  //  slot -2 : 0
+  // 0x7ffcf5fb05a8 (3)
+  // 0x7ffcf5fb05ac (1)
 }
 void func4() {
   D obj;  // 内存布局： vbptrB B(b) vbptrC C(c) d A(a)
-  std::cout.setf(std::ios::dec);
-  std::cout << sizeof(obj) << std::endl;
-
-  std::cout.setf(std::ios::hex);
-  std::cout.setf(std::ios_base::showbase);
+  long** pbptr1 = (long**)&obj;
+  long** pbptr2 = (long**)((char*)&obj + sizeof(B));
+  std::cout << "A size : " << sizeof(A) << std::endl;
+  std::cout << "B size : " << sizeof(B) << std::endl;
+  std::cout << "C size : " << sizeof(C) << std::endl;
+  std::cout << "D size : " << sizeof(obj) << std::endl;
   std::cout << &obj << std::endl;
-  std::cout << (long*)&obj << std::endl;
-  std::cout << "  [0]:" << *(long*)(*(long*)&obj) << std::endl;
-  std::cout << "  [1]:" << *(((long*)(*(long*)&obj)) + 1) << std::endl;
+  std::cout << pbptr1 << ": " << std::endl;
+  std::cout << " slot -3 : " << *(pbptr1[0] - 3) << std::endl;
+  std::cout << " slot -2 : " << *(pbptr1[0] - 2) << std::endl;
   std::cout << &(obj.b) << " (" << obj.b << ")" << std::endl;
-  std::cout << (long*)((char*)&obj + sizeof(B)) << ": "
-            << *(long*)((char*)&obj + sizeof(B)) << std::endl;
+  std::cout << pbptr2 << ": " << std::endl;
+  std::cout << " slot -3 : " << *(pbptr2[0] - 3) << std::endl;
+  std::cout << " slot -2 : " << *(pbptr2[0] - 2) << std::endl;
   std::cout << &(obj.c) << " (" << obj.c << ")" << std::endl;
   std::cout << &(obj.d) << " (" << obj.d << ")" << std::endl;
   std::cout << &(obj.a) << " (" << obj.a << ")" << std::endl;
 
-  // 40
-  // 0x7ffe37fb6b00
-  // 0x7ffe37fb6b00
-  //   [0]:16
-  //   [1]:-16
-  // 0x7ffe37fb6b08 (2)
-  // 0x7ffe37fb6b10: 93991712532720
-  // 0x7ffe37fb6b18 (3)
-  // 0x7ffe37fb6b1c (4)
-  // 0x7ffe37fb6b20 (1)
+  // A size : 4
+  // B size : 16
+  // C size : 16
+  // D size : 40
+  // 0x7ffe272113e0
+  // 0x7ffe272113e0:
+  //  slot -3 : 32
+  //  slot -2 : 0
+  // 0x7ffe272113e8 (2)
+  // 0x7ffe272113f0:
+  //  slot -3 : 16
+  //  slot -2 : -16
+  // 0x7ffe272113f8 (3)
+  // 0x7ffe272113fc (4)
+  // 0x7ffe27211400 (1)
 }
-}  // namespace test2
 
-namespace test3 {
-class A {
- public:
-  int dataA;
-};
-
-class B : virtual public A {
- public:
-  int dataB;
-};
-
-class C : virtual public A {
- public:
-  int dataC;
-};
-
-class D : public B, public C {
- public:
-  int dataD;
-};
-
-void func() {
+void func5() {
   D* d = new D;
-  d->dataA = 10;
-  d->dataB = 100;
-  d->dataC = 1000;
-  d->dataD = 10000;
-
   B* b = d;  // 转化为基类B
   C* c = d;  // 转化为基类C
   A* fromB = (B*)d;
@@ -487,72 +431,58 @@ void func() {
   std::cout << "c address    : " << c << std::endl;
   std::cout << "fromB address: " << fromB << std::endl;
   std::cout << "fromC address: " << fromC << std::endl;
-  // d address    : 0x562543e392c0
-  // b address    : 0x562543e392c0
-  // c address    : 0x562543e392d0
-  // fromB address: 0x562543e392e0
-  // fromC address: 0x562543e392e0
-
-  std::cout << "vbptr address: " << (long*)d << std::endl;
-  std::cout << "    [0] => " << *(long*)(*(long*)d) << std::endl;
-  std::cout << "    [1] => " << *(((long*)(*(long*)d)) + 1) << std::endl;
-  std::cout << "dataB value  : " << (int*)((long*)d + 1) << ","
-            << *(int*)((long*)d + 1) << std::endl;
-  std::cout << "vbptr address: " << ((long*)d + 2) << std::endl;
-  std::cout << "    [0] => " << *(long*)(*((long*)d + 2)) << std::endl;
-  std::cout << "    [1] => " << *((long*)(*((long*)d + 2)) + 1) << std::endl;
-  std::cout << "dataC value  : " << (int*)((long*)d + 3) << ","
-            << *(int*)((long*)d + 3) << std::endl;
-  std::cout << "dataD value  : " << (int*)((int*)d + 7) << ","
-            << *(int*)((int*)d + 7) << std::endl;
-  std::cout << "dataA value  : " << (int*)((int*)d + 8) << ","
-            << *(int*)((int*)d + 8) << std::endl;
-  // vbptr address: 0x562543e392c0
-  //     [0] => 16
-  //     [1] => -16
-  // dataB value  : 0x562543e392c8,100
-  // vbptr address: 0x562543e392d0
-  //     [0] => 94718024296536
-  //     [1] => 94718024296616
-  // dataC value  : 0x562543e392d8,1000
-  // dataD value  : 0x562543e392dc,10000
-  // dataA value  : 0x562543e392e0,10
+  
+  // d address    : 0x563286aafeb0
+  // b address    : 0x563286aafeb0
+  // c address    : 0x563286aafec0
+  // fromB address: 0x563286aafed0
+  // fromC address: 0x563286aafed0
 }
-}  // namespace test3
-
-void testN4() {
-  test1::func1();
-  test1::func2();
-  test1::func3();
-  test1::func4();
-
-  test2::func1();
-  test2::func2();
-  test2::func3();
-  test2::func4();
-
-  test3::func();
-}
+}  // namespace test2
 }  // namespace n4
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 4]" << std::endl;
+    std::cout << argv[0] << " i [0 - 11]" << std::endl;
     return 0;
   }
-  int type = argv[1][0] - '0';
+  int type = atoi(argv[1]);
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func1();
       break;
     case 2:
-      n3::testN3();
+      n2::func2();
       break;
     case 3:
-      n4::testN4();
+      n2::func3();
+      break;
+    case 4:
+      n2::func4();
+      break;
+    case 5:
+      n3::func();
+      break;
+    case 6:
+      n4::test1::func();
+      break;
+    case 7:
+      n4::test2::func1();
+      break;
+    case 8:
+      n4::test2::func2();
+      break;
+    case 9:
+      n4::test2::func3();
+      break;
+    case 10:
+      n4::test2::func4();
+      break;
+    case 11:
+      n4::test2::func5();
       break;
     default:
       std::cout << "invalid type" << std::endl;
