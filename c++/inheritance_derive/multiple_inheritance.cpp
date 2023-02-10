@@ -25,63 +25,68 @@ class B {
   ~B() { std::cout << "~B" << std::endl; }
 };
 
-class C1 : public A, public B {
+namespace test1 {
+class C : public A, public B {
  public:
-  C1() : B(), A() { std::cout << "C1" << std::endl; }
-  C1(int) : A(), B() { std::cout << "C1" << std::endl; }
-  ~C1() { std::cout << "~C1" << std::endl; }
+  C() : B(), A() { std::cout << "C" << std::endl; }
+  C(int) : A(), B() { std::cout << "C" << std::endl; }
+  ~C() { std::cout << "~C" << std::endl; }
 };
-
-class C2 : public B, public A {
- public:
-  C2() : B(), A() { std::cout << "C2" << std::endl; }
-  C2(int) : A(), B() { std::cout << "C2" << std::endl; }
-  ~C2() { std::cout << "~C2" << std::endl; }
-};
-
 void func1() {
-  C1 c;
+  C c;
   // A
   // B
-  // C1
-  // ~C1
+  // C
+  // ~C
   // ~B
   // ~A
 }
 void func2() {
-  C1 c(5);
+  C c(5);
   // A
   // B
-  // C1
-  // ~C1
+  // C
+  // ~C
   // ~B
   // ~A
 }
-void func3() {
-  C2 c;
-  // B
-  // A
-  // C2
-  // ~C2
-  // ~A
-  // ~B
-}
-void func4() {
-  C2 c(5);
-  // B
-  // A
-  // C2
-  // ~C2
-  // ~A
-  // ~B
-}
-
-void testN1() {
+void func() {
   func1();
   func2();
-  func3();
-  func4();
 }
+}  // namespace test1
+
+namespace test2 {
+class C : public B, public A {
+ public:
+  C() : B(), A() { std::cout << "C" << std::endl; }
+  C(int) : A(), B() { std::cout << "C" << std::endl; }
+  ~C() { std::cout << "~C" << std::endl; }
+};
+
+void func1() {
+  C c;
+  // B
+  // A
+  // C
+  // ~C
+  // ~A
+  // ~B
+}
+void func2() {
+  C c(5);
+  // B
+  // A
+  // C
+  // ~C
+  // ~A
+  // ~B
+}
+void func() {
+  func1();
+  func2();
+}
+}  // namespace test2
 }  // namespace n1
 
 namespace n2 {
@@ -111,7 +116,7 @@ class C : public A, public B {
   }
 };
 
-void testN2() {
+void func() {
   C c;
   // std::cout << c.a << std::endl;
   std::cout << c.A::a << std::endl;  // 1
@@ -136,22 +141,23 @@ class B {
   int b = 3;
   int c = 4;
 };
-class C1 : public A, public B {
+namespace test1 {
+class C : public A, public B {
  public:
   void display() {
     std::cout << "A::a=" << A::a << ", A::b=" << A::b << std::endl;
     std::cout << "B::b=" << B::b << ", B::c=" << B::c << std::endl;
-    std::cout << "C1::a=" << C1::a << ", C1::c=" << C1::c << ", C1::d=" << d
+    std::cout << "C::a=" << C::a << ", C::c=" << C::c << ", C::d=" << d
               << std::endl;
     std::cout.setf(std::ios::hex);
     std::cout.setf(std::ios_base::showbase);
-    std::cout << "A::m_a : " << &(A::a) << std::endl;
-    std::cout << "A::m_b : " << &(A::b) << std::endl;
-    std::cout << "B::m_b : " << &(B::b) << std::endl;
-    std::cout << "B::m_c : " << &(B::c) << std::endl;
-    std::cout << "C::m_a : " << &(C1::a) << std::endl;
-    std::cout << "C::m_c : " << &(C1::c) << std::endl;
-    std::cout << "C::m_d : " << &(C1::d) << std::endl;
+    std::cout << "A::a : " << &(A::a) << std::endl;
+    std::cout << "A::b : " << &(A::b) << std::endl;
+    std::cout << "B::b : " << &(B::b) << std::endl;
+    std::cout << "B::c : " << &(B::c) << std::endl;
+    std::cout << "C::a : " << &(C::a) << std::endl;
+    std::cout << "C::c : " << &(C::c) << std::endl;
+    std::cout << "C::d : " << &(C::d) << std::endl;
   }
 
  private:
@@ -160,38 +166,41 @@ class C1 : public A, public B {
   int d = 7;
 };
 
-void func1() {
-  C1 c;
+void func() {
+  C c;
   c.display();
+
   // A::a=1, A::b=2
   // B::b=3, B::c=4
-  // C1::a=5, C1::c=6, C1::d=7
-  // A::m_a : 0x7fff0934e510
-  // A::m_b : 0x7fff0934e514
-  // B::m_b : 0x7fff0934e518
-  // B::m_c : 0x7fff0934e51c
-  // C::m_a : 0x7fff0934e520
-  // C::m_c : 0x7fff0934e524
-  // C::m_d : 0x7fff0934e528
+  // C::a=5, C::c=6, C::d=7
+  // A::a : 0x7ffcd9605d20
+  // A::b : 0x7ffcd9605d24
+  // B::b : 0x7ffcd9605d28
+  // B::c : 0x7ffcd9605d2c
+  // C::a : 0x7ffcd9605d30
+  // C::c : 0x7ffcd9605d34
+  // C::d : 0x7ffcd9605d38
 }
+}  // namespace test1
 
-class C2 : public B, public A {
+namespace test2 {
+class C : public B, public A {
  public:
   void display() {
     std::cout.setf(std::ios::dec);
     std::cout << "A::a=" << A::a << ", A::b=" << A::b << std::endl;
     std::cout << "B::b=" << B::b << ", B::c=" << B::c << std::endl;
-    std::cout << "C2::a=" << C2::a << ", C2::c=" << C2::c << ", C2::d=" << d
+    std::cout << "C::a=" << C::a << ", C::c=" << C::c << ", C::d=" << d
               << std::endl;
     std::cout.setf(std::ios::hex);
     std::cout.setf(std::ios_base::showbase);
-    std::cout << "B::m_b : " << &(B::b) << std::endl;
-    std::cout << "B::m_c : " << &(B::c) << std::endl;
-    std::cout << "A::m_a : " << &(A::a) << std::endl;
-    std::cout << "A::m_b : " << &(A::b) << std::endl;
-    std::cout << "C::m_a : " << &(C2::a) << std::endl;
-    std::cout << "C::m_c : " << &(C2::c) << std::endl;
-    std::cout << "C::m_d : " << &(C2::d) << std::endl;
+    std::cout << "B::b : " << &(B::b) << std::endl;
+    std::cout << "B::c : " << &(B::c) << std::endl;
+    std::cout << "A::a : " << &(A::a) << std::endl;
+    std::cout << "A::b : " << &(A::b) << std::endl;
+    std::cout << "C::a : " << &(C::a) << std::endl;
+    std::cout << "C::c : " << &(C::c) << std::endl;
+    std::cout << "C::d : " << &(C::d) << std::endl;
   }
 
  private:
@@ -200,42 +209,45 @@ class C2 : public B, public A {
   int d = 7;
 };
 
-void func2() {
-  C2 c;
+void func() {
+  C c;
   c.display();
+
   // A::a=1, A::b=2
   // B::b=3, B::c=4
-  // C2::a=5, C2::c=6, C2::d=7
-  // B::m_b : 0x7fff0934e510
-  // B::m_c : 0x7fff0934e514
-  // A::m_a : 0x7fff0934e518
-  // A::m_b : 0x7fff0934e51c
-  // C::m_a : 0x7fff0934e520
-  // C::m_c : 0x7fff0934e524
-  // C::m_d : 0x7fff0934e528
+  // C::a=5, C::c=6, C::d=7
+  // B::b : 0x7ffd7f1f87d0
+  // B::c : 0x7ffd7f1f87d4
+  // A::a : 0x7ffd7f1f87d8
+  // A::b : 0x7ffd7f1f87dc
+  // C::a : 0x7ffd7f1f87e0
+  // C::c : 0x7ffd7f1f87e4
+  // C::d : 0x7ffd7f1f87e8
 }
-
-void testN3() {
-  func1();
-  func2();
-}
+}  // namespace test2
 }  // namespace n3
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 2]" << std::endl;
+    std::cout << argv[0] << " i [0 - 4]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::test1::func();
       break;
     case 1:
-      n2::testN2();
+      n1::test2::func();
       break;
     case 2:
-      n3::testN3();
+      n2::func();
+      break;
+    case 3:
+      n3::test1::func();
+      break;
+    case 4:
+      n3::test2::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

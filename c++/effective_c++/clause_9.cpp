@@ -1,7 +1,5 @@
 #include <iostream>
 
-using namespace std;
-
 // 绝不在构造和析构函数中调用virtual函数
 
 // base class构造期间virtual函数不会调用derived class版本。
@@ -15,14 +13,14 @@ class Base {
  public:
   Base() { display(); }
   ~Base() { display(); }
-  virtual void display() { cout << "Base display" << endl; }
+  virtual void display() { std::cout << "Base display" << std::endl; }
 };
 class Derived : public Base {
-  virtual void display() { cout << "Derived display" << endl; }
+  virtual void display() { std::cout << "Derived display" << std::endl; }
 };
 
 // 请记住：
-// 1.在构造和析构函数中不要调用virtual函数，
+// 1.在基类构造和析构函数中不要调用virtual函数，
 //   因为这类调用从不会调用到derived class中的函数。
 
 int main() {

@@ -313,14 +313,10 @@ void func() {
 }  // namespace test1
 
 namespace test2 {
-// 为什么B、C和D的第二个虚基类表中的内容都不对？
-// D的第一个虚基类表中的16和-16是怎么来的？
-
 // 通过虚基类表指针往正负两个方向寻址，
 // 可以获得不同偏移值，也就是说有两个功能一样的虚函数表。
 // 不过在实际应用的时候，不知道虚基类表是否真的有用。
 // 发现编译器可能做了优化，根本就没有用虚基类表来寻址虚基类实例。
-
 class A {
  public:
   int a = 1;
@@ -431,7 +427,7 @@ void func5() {
   std::cout << "c address    : " << c << std::endl;
   std::cout << "fromB address: " << fromB << std::endl;
   std::cout << "fromC address: " << fromC << std::endl;
-  
+
   // d address    : 0x563286aafeb0
   // b address    : 0x563286aafeb0
   // c address    : 0x563286aafec0

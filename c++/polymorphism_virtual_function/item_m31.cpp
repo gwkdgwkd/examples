@@ -372,7 +372,7 @@ class DB : public B {
     (*phm)["N2n32DCE"] = &DB::showDC;
     return phm;
   }
-};  // namespace n3
+};
 class DC : public B {
  public:
   virtual void show(B &b) {

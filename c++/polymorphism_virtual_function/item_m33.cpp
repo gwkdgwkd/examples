@@ -63,7 +63,7 @@ void func() {
 }  // namespace n1
 
 namespace n2 {
-// 一个解决方法是将赋值运算申明为虚函数：
+// 一个解决方法是将赋值运算声明为虚函数：
 class Base {
  public:
   Base() { a = 0; }
@@ -401,8 +401,7 @@ class AbstractBase {
 
   // 要实现功能，AbstractBase类必须是抽象类，它必须至少有一个纯虚函数。
   // 大部分情况下，带一个这样的函数是没问题的，但在极少见的情况下，
-  // 会发现需要创一个如AbstractBase这样的类，
-  // 没有哪个成员函数是自然的纯虚函数。
+  // 会发现AbstractBase这样的类，没有哪个成员函数是自然的纯虚函数。
   // 此时，传统方法是将析构函数申明为纯虚函数。
   virtual ~AbstractBase() = 0;
 

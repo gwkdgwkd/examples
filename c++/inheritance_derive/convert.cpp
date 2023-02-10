@@ -8,20 +8,16 @@
 // 3.将派生类引用赋值给基类引用。
 // 这在C++中称为向上转型（Upcasting）。
 // 相应地，将基类赋值给派生类称为向下转型（Downcasting）。
-// 向上转型非常安全，可以由编译器自动完成；
-// 向下转型有风险，需要程序员手动干预。
-// 向上转型和向下转型是面向对象编程的一种通用概念，
-// 它们也存在于Java、C#等编程语言中。
+// 向上转型非常安全，可以由编译器自动完成，向下转型有风险，需要手动干预。
+// 向上转型和向下转型是面向对象编程的一种通用概念，它们也存在于Java、C#中。
 // 向上转型后通过基类的对象、指针、引用只能访问从基类继承过去的成员，
 // 不能访问派生类新增的成员。
 
-// 赋值的本质是将现有的数据写入已分配好的内存中，
-// 对象的内存只包含了成员变量，所以对象之间的赋值是成员变量的赋值，
-// 成员函数不存在赋值问题。
+// 赋值的本质是将现有的数据写入已分配好的内存中，对象的内存只包含了成员变量，
+// 所以对象之间的赋值是成员变量的赋值，成员函数不存在赋值问题。
 // 对象之间的赋值不会影响成员函数，也不会影响this指针。
 // 将派生类对象赋值给基类对象时，会舍弃派生类新增的成员，也就是大材小用。
-// 这种转换关系是不可逆的，只能用派生类对象给基类对象赋值，
-// 而不能用基类对象给派生类对象赋值。
+// 只能用派生类对象给基类对象赋值，反过来不行，不能用基类对象给派生类对象赋值。
 // 理由很简单，基类不包含派生类的成员变量，无法对派生类的成员变量赋值。
 // 同理，同一基类的不同派生类对象之间也不能赋值。
 
@@ -42,30 +38,25 @@ class D : public B {
 
 void func1() {  // 将派生类对象赋值给基类对象
   D d;
-  d.display();
   // B()
   // D()
-  // D::display
+  d.display();   // D::display
+  d.display1();  // D::display1
 
-  B b = d;
-  b.display();
-  // B(B&)
-  // B::display
-
+  B b = d;      // B(B&)
+  b.display();  // B::display
   // b.display1(); // 不能调用派生类对象
 }
 
 void func2() {  // 将派生类指针赋值给基类指针
   D *pd = new D();
-  pd->display();
   // B()
   // D()
-  // D::display
+  pd->display();  // D::display
+  pd->display1();
 
   B *pb = pd;
-  pb->display();
-  // B::display
-
+  pb->display();  // B::display
   // pb->display1();  // 不能调用派生类对象
 
   delete pd;
@@ -73,21 +64,14 @@ void func2() {  // 将派生类指针赋值给基类指针
 
 void func3() {  // 将派生类引用赋值给基类引用
   D d;
-  d.display();
   // B()
   // D()
-  // D::display
+  d.display();   // D::display
+  d.display1();  // D::display1
 
   B &b = d;
-  b.display();
-  // B::display
-
+  b.display();  // B::display
   // b.display1();  // 不能调用派生类对象
-}
-void testN1() {
-  func1();
-  func2();
-  func3();
 }
 }  // namespace n1
 
@@ -107,7 +91,6 @@ class A {
  protected:
   int m_a;
 };
-
 class B : public A {
  public:
   B(int a, int b) : A(a), m_b(b) {}
@@ -118,7 +101,6 @@ class B : public A {
  protected:
   int m_b;
 };
-
 class C {
  public:
   C(int c) : m_c(c) {}
@@ -128,10 +110,10 @@ class C {
   int m_c;
 };
 
-// class D : public C, public B {
-class D1 : public B, public C {
+namespace test1 {
+class D : public B, public C {
  public:
-  D1(int a, int b, int c, int d) : B(a, b), C(c), m_d(d) {}
+  D(int a, int b, int c, int d) : B(a, b), C(c), m_d(d) {}
   void display() {
     std::cout << "Class D: m_a=" << m_a << ", m_b=" << m_b << ", m_c=" << m_c
               << ", m_d=" << m_d << std::endl;
@@ -145,26 +127,25 @@ void func1() {
   A *pa = new A(1);
   B *pb = new B(2, 20);
   C *pc = new C(3);
-  D1 *pd = new D1(4, 40, 400, 4000);
+  D *pd = new D(4, 40, 400, 4000);
 
   pa = pd;
   pa->display();  // Class A: m_a=4
-  // 调用display()函数时虽然使用了派生类的成员变量，
-  // 但是display()函数本身却是基类的。
-  // pa本来是基类A的指针，现在指向了派生类D的对象，这使得隐式指针this发生了变化，
-  // 也指向了D1类的对象，所以最终在display()内部使用的是D1类对象的成员变量。
+  // 调用display()函数时虽然使用了派生类的成员变量，但函数本身却是基类的。
+  // pa本来是基类A的指针，现在指向了派生类D的对象，这使得this指针发生了变化，
+  // 也指向了D类的对象，所以最终在display()内部使用的是D类对象的成员变量。
   // 编译器虽然通过指针的指向来访问成员变量，但是却不通过指针的指向来访问成员函数：
   // 编译器通过指针的类型来访问成员函数。
   // 对于pa，它的类型是A，不管它指向哪个对象，使用的都是A类的成员函数。
 
   pb = pd;
   pb->display();  // Class B: m_a=4, m_b=40
-  pc = pd;        // 执行pc = pd;语句后，pc和pd的值并不相等。
+  pc = pd;        // 执行pc = pd;语句后，pc和pd的值并不相等
   pc->display();  // Class C: m_c=400
-  std::cout << "pa=" << pa << std::endl;           // pa=0x5647e4fd1f10
-  std::cout << "pb=" << pb << std::endl;           // pb=0x5647e4fd1f10
-  std::cout << "pc=" << pc << std::endl;           // pc=0x5647e4fd1f18
-  std::cout << "pd=" << pd << std::endl;           // pd=0x5647e4fd1f10
+  std::cout << "pa =" << pa << std::endl;          // pa =0x5647e4fd1f10
+  std::cout << "pb =" << pb << std::endl;          // pb =0x5647e4fd1f10
+  std::cout << "pc =" << pc << std::endl;          // pc =0x5647e4fd1f18
+  std::cout << "pd =" << pd << std::endl;          // pd =0x5647e4fd1f10
   std::cout << "m_d=" << &(pd->m_d) << std::endl;  // m_d=0x5647e4fd1f1c
   // 将最终派生类的指针pd分别赋值给了基类指针pa、pb、pc，
   // 按理说它们的值应该相等，都指向同一块内存，但是运行结果却有力地反驳了这种推论，
@@ -188,43 +169,8 @@ void func1() {
   // (C *)(reinterpret_cast<long>(pd) + sizeof(B)) = 0x5647e4fd1f18
 }
 
-// 把B、C类的继承顺序调整一下，让C在B前面：
-class D2 : public C, public B {
- public:
-  D2(int a, int b, int c, int d) : B(a, b), C(c), m_d(d) {}
-
- public:
-  int m_d;
-};
 void func2() {
-  A *pa = new A(1);
-  B *pb = new B(2, 20);
-  C *pc = new C(3);
-  D2 *pd = new D2(4, 40, 400, 4000);
-
-  std::cout << "pa=" << pa << std::endl;  // pa=0x5647e4fd2340
-  std::cout << "pb=" << pb << std::endl;  // pb=0x5647e4fd2360
-  std::cout << "pc=" << pc << std::endl;  // pc=0x5647e4fd2380
-  std::cout << "pd=" << pd << std::endl;  // pd=0x5647e4fd23a0
-
-  pa = pd;
-  pb = pd;
-  pc = pd;
-  std::cout << "pc=" << pc << std::endl;           // pc=0x5647e4fd23a0
-  std::cout << "pd=" << pd << std::endl;           // pd=0x5647e4fd23a0
-  std::cout << "pa=" << pa << std::endl;           // pa=0x5647e4fd23a4
-  std::cout << "pb=" << pb << std::endl;           // pb=0x5647e4fd23a4
-  std::cout << "m_d=" << &(pd->m_d) << std::endl;  // m_d=0x5647e4fd23ac
-
-  // pd的内存模型： (pc pd)    (pa pb)
-  //                 C(m_c)     B(A(m_a) m_b)   m_d
-  std::cout << "pd + sizeof(C) = "
-            << (B *)(reinterpret_cast<long>(pd) + sizeof(C)) << std::endl;
-  // pd + sizeof(C) = 0x5647e4fd23a4
-}
-
-void func3() {
-  D1 d(4, 40, 400, 4000);
+  D d(4, 40, 400, 4000);
   A &ra = d;
   B &rb = d;
   C &rc = d;
@@ -235,11 +181,15 @@ void func3() {
   // ra、rb、rc都是基类引用，引用派生类对象d，但调用的都是基类display()函数。
 }
 
-void func4() {
+void func3() {
   A a(1);
   B b(2, 20);
   C c(3);
-  D1 d(4, 40, 400, 4000);
+  D d(4, 40, 400, 4000);
+  a.display();  // Class A: m_a=1
+  b.display();  // Class B: m_a=2, m_b=20
+  c.display();  // Class C: m_c=3
+  d.display();  // Class D: m_a=4, m_b=40, m_c=400, m_d=4000
 
   a = d;
   b = d;
@@ -249,13 +199,44 @@ void func4() {
   c.display();  // Class C: m_c=400
   d.display();  // Class D: m_a=4, m_b=40, m_c=400, m_d=4000
 }
+}  // namespace test1
 
-void testN2() {
-  func1();
-  func2();
-  func3();
-  func4();
+namespace test2 {
+// 把B、C类的继承顺序调整一下，让C在B前面：
+class D : public C, public B {
+ public:
+  D(int a, int b, int c, int d) : B(a, b), C(c), m_d(d) {}
+
+ public:
+  int m_d;
+};
+void func() {
+  A *pa = new A(1);
+  B *pb = new B(2, 20);
+  C *pc = new C(3);
+  D *pd = new D(4, 40, 400, 4000);
+
+  std::cout << "pa=" << pa << std::endl;  // pa=0x5647e4fd2340
+  std::cout << "pb=" << pb << std::endl;  // pb=0x5647e4fd2360
+  std::cout << "pc=" << pc << std::endl;  // pc=0x5647e4fd2380
+  std::cout << "pd=" << pd << std::endl;  // pd=0x5647e4fd23a0
+
+  pa = pd;
+  pb = pd;
+  pc = pd;
+  std::cout << "pc =" << pc << std::endl;          // pc =0x5647e4fd23a0
+  std::cout << "pd =" << pd << std::endl;          // pd =0x5647e4fd23a0
+  std::cout << "pa =" << pa << std::endl;          // pa =0x5647e4fd23a4
+  std::cout << "pb =" << pb << std::endl;          // pb =0x5647e4fd23a4
+  std::cout << "m_d=" << &(pd->m_d) << std::endl;  // m_d=0x5647e4fd23ac
+
+  // pd的内存模型： (pc pd)    (pa pb)
+  //                 C(m_c)     B(A(m_a) m_b)   m_d
+  std::cout << "pd + sizeof(C) = "
+            << (B *)(reinterpret_cast<long>(pd) + sizeof(C)) << std::endl;
+  // pd + sizeof(C) = 0x5647e4fd23a4
 }
+}  // namespace test2
 }  // namespace n2
 
 int main(int argc, char *argv[]) {
@@ -266,10 +247,25 @@ int main(int argc, char *argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func1();
       break;
     case 1:
-      n2::testN2();
+      n1::func2();
+      break;
+    case 2:
+      n1::func3();
+      break;
+    case 3:
+      n2::test1::func1();
+      break;
+    case 4:
+      n2::test1::func2();
+      break;
+    case 5:
+      n2::test1::func3();
+      break;
+    case 6:
+      n2::test2::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

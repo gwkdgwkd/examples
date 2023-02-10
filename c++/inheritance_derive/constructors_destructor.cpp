@@ -2,7 +2,7 @@
 
 // 基类的成员函数可以被继承，可以通过派生类的对象访问，
 // 但这仅仅指的是普通的成员函数，类的构造函数不能被继承。
-// 构造函数不能被继承是有道理的，因为即使继承了，它的名字和派生类的名字也不一样，
+// 构造函数不能被继承是有道理的，因为它的名字和派生类的名字也不一样，
 // 不能成为派生类的构造函数，当然更不能成为普通的成员函数。
 
 // 和构造函数类似，析构函数也不能被继承。
@@ -13,8 +13,8 @@
 // A --> B --> C
 // A类构造函数 --> B类构造函数 --> C类构造函数
 // 构造函数的调用顺序是按照继承的层次自顶向下、从基类再到派生类的。
-// C++这样规定是有道理的，因为在C中调用了B的构造函数，B又调用了A的构造函数，
-// 相当于C间接地（或者说隐式地）调用了A的构造函数，
+// C++这样规定是有道理的，因为在C中调用了B的构造函数，
+// B又调用了A的构造函数，相当于C间接地（或者说隐式地）调用了A的构造函数，
 // 如果再在C中显式地调用A的构造函数，那么A的构造函数就被调用了两次，
 // 相应地，初始化工作也做了两次，这不仅是多余的，还会浪费CPU时间以及内存，
 // 毫无益处，所以C++禁止在C中显式地调用A的构造函数。
@@ -31,6 +31,10 @@ namespace n1 {
 // 基类构造函数总是被优先调用，这说明创建派生类对象时，
 // 会先调用基类构造函数，再调用派生类构造函数。
 
+struct A {
+  A() { std::cout << "A()" << std::endl; }
+  A(const A& a) { std::cout << "A(const A& a)" << std::endl; }
+};
 class B {
  public:
   B(int i) : i_(i) { std::cout << "B(int)" << std::endl; }
@@ -41,27 +45,31 @@ class B {
 
 class D1 : public B {
  public:
-  D1(int i, int j) : B(i), j_(i) { std::cout << "D1(int, int)" << std::endl; }
+  D1(int i, A& a) : B(i), a_(a) { std::cout << "D1(int, int)" << std::endl; }
 
  private:
-  int j_;
+  A a_;
 };
 
 class D2 : public B {
  public:
-  D2(int i, int j) : j_(i), B(i) { std::cout << "D2(int, int)" << std::endl; }
+  D2(int i, A& a) : a_(a), B(i) { std::cout << "D2(int, int)" << std::endl; }
 
  private:
-  int j_;
+  A a_;
 };
 
-void testN1() {
-  D1 d1(4, 5);
+void func() {
+  A a;  // A()
+
+  D1 d1(4, a);
   // B(int)
+  // A(const A& a)
   // D1(int, int)
 
-  D2 d2(7, 8);
+  D2 d2(7, a);
   // B(int)
+  // A(const A& a)
   // D2(int, int)
 
   // 基类构造函数永远是先执行的，与在初始化列表中的顺序无关
@@ -95,7 +103,6 @@ class D : public B {
 };
 
 // 基类没有默认构造函数，派生类又没指定调用B(int)构造函数，编译失败：
-// no matching function for call to ‘n2::test2::B::B()’
 // class B {
 //  public:
 //   B(int i) : i_(i) { std::cout << "B(int)" << std::endl; }
@@ -109,7 +116,7 @@ class D : public B {
 //   int j_;
 // };
 
-void testN2() {
+void func() {
   D d1;
   // B()
   // D()
@@ -131,7 +138,7 @@ void testN2() {
 namespace n3 {
 // 析构函数的执行顺序和构造函数的执行顺序也刚好相反：
 // 1.创建派生类对象时，构造函数的执行顺序和继承顺序相同，
-//   即先执行基类构造函数，再执行派生类构造函数。
+//   即先执行基类构造函数，再执行派生类构造函数；
 // 2.而销毁派生类对象时，析构函数的执行顺序和继承顺序相反，
 //   即先执行派生类析构函数，再执行基类析构函数。
 
@@ -151,7 +158,7 @@ class C : public B {
   ~C() { std::cout << "C destructor" << std::endl; }
 };
 
-void testN3() {
+void func() {
   C c;
   // A constructor
   // B constructor
@@ -162,7 +169,7 @@ void testN3() {
 }
 }  // namespace n3
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   if (argc < 2) {
     std::cout << argv[0] << " i [0 - 2]" << std::endl;
     return 0;
@@ -170,13 +177,13 @@ int main(int argc, char *argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     case 2:
-      n3::testN3();
+      n3::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

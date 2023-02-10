@@ -13,13 +13,13 @@
 // private继承 	      private 	  private 	     不可见
 // 规律：
 // 1.基类成员在派生类中的访问权限不得高于继承方式中指定的权限。
-//   也就是说，继承方式中的public、protected、private是用
-//   来指明基类成员在派生类中的最高访问权限的。
-// 2.不管继承方式如何，基类中的private成员在派生类中始终不能
-//   使用（不能在派生类的成员函数中访问或调用）。
+//   也就是说，继承方式中的public、protected、private，
+//   是用来指明基类成员在派生类中的最高访问权限的；
+// 2.不管继承方式如何，基类中的private成员在派生类中始终不能使用，
+//   不能在派生类的成员函数中访问或调用；
 // 3.如果希望基类的成员能够被派生类继承并且毫无障碍地使用，
-//   那么这些成员只能声明为public或protected；
-//   只有那些不希望在派生类中使用的成员才声明为private。
+//   那么这些成员只能声明为public或protected，
+//   只有那些不希望在派生类中使用的成员才声明为private；
 // 4.如果希望基类的成员既不向外暴露（不能通过对象访问），
 //   还能在派生类中使用，那么只能声明为protected。
 
@@ -38,7 +38,8 @@ class B {
   int c = 3;
 };
 
-class D1 : public B {
+namespace test1 {
+class D : public B {
  public:
   void display() {
     std::cout << "display:" << a << std::endl;
@@ -47,7 +48,7 @@ class D1 : public B {
   }
 };
 
-class DD1 : public D1 {
+class DD : public D {
  public:
   void display() {
     std::cout << "display:" << a << std::endl;
@@ -56,8 +57,8 @@ class DD1 : public D1 {
   }
 };
 
-void func1() {
-  D1 d;
+void func() {
+  D d;
   d.display();
   std::cout << "d.a:" << d.a << std::endl;
   // std::cout << "d.b:" << d.b << std::endl;
@@ -67,13 +68,15 @@ void func1() {
   // display:2
   // d.a:1
 
-  DD1 dd;
+  DD dd;
   dd.display();
   // display:1
   // display:2
 }
+}  // namespace test1
 
-class D2 : protected B {
+namespace test2 {
+class D : protected B {
  public:
   void display() {
     std::cout << "display:" << a << std::endl;
@@ -81,7 +84,7 @@ class D2 : protected B {
     // std::cout << "display:" << c << std::endl;
   }
 };
-class DD2 : public D2 {
+class DD : public D {
  public:
   void display() {
     std::cout << "display:" << a << std::endl;
@@ -90,8 +93,8 @@ class DD2 : public D2 {
   }
 };
 
-void func2() {
-  D2 d;
+void func() {
+  D d;
   d.display();
   // std::cout << "d.a:" << d.a << std::endl;
   // std::cout << "d.b:" << d.b << std::endl;
@@ -100,13 +103,15 @@ void func2() {
   // display:1
   // display:2
 
-  DD2 dd;
+  DD dd;
   dd.display();
   // display:1
   // display:2
 }
+}  // namespace test2
 
-class D3 : private B {
+namespace test3 {
+class D : private B {
  public:
   void display() {
     std::cout << "display:" << a << std::endl;
@@ -114,7 +119,7 @@ class D3 : private B {
     // std::cout << "display:" << c << std::endl;
   }
 };
-class DD3 : public D3 {
+class DD : public D {
  public:
   void display() {
     // std::cout << "display:" << a << std::endl;
@@ -123,8 +128,8 @@ class DD3 : public D3 {
   }
 };
 
-void func3() {
-  D3 d;
+void func() {
+  D d;
   d.display();
   // std::cout << "d.a:" << d.a << std::endl;
   // std::cout << "d.b:" << d.b << std::endl;
@@ -132,20 +137,18 @@ void func3() {
 
   // display:1
   // display:2
-}
 
-void testN1() {
-  func1();
-  func2();
-  func3();
+  DD dd;
+  dd.display();
 }
+}  // namespace test3
 }  // namespace n1
 
 namespace n2 {
-// 基类的private成员不能在派生类中使用，并没有说基类的private成员不能被继承。
-// 实际上，基类的private成员是能够被继承的，并且会占用派生类对象的内存，
+// 基类的private成员不能在派生类中使用，并没有说不能被继承。
+// 实际上，基类的private成员是被继承的，并且会占用派生类对象的内存，
 // 它只是在派生类中不可见，导致无法使用罢了。
-// 在派生类中访问基类private成员的唯一方法就是借助基类的非private成员函数，
+// 派生类访问基类private成员的唯一方法是借助基类非private成员函数，
 // 如果基类没有非private成员函数，那么该成员在派生类中将无法访问。
 
 class B {
@@ -164,7 +167,7 @@ class D : public B {
   int d = 8;
 };
 
-void testN2() {
+void func() {
   // 派生类继承来基类的私有数据成员：
   std::cout << sizeof(B) << std::endl;  // 4
   std::cout << sizeof(D) << std::endl;  // 8
@@ -204,25 +207,25 @@ class D : public B {
   using B::c;  // 将public改为private
 };
 
-void testN3() {
-  B objB;
-  std::cout << objB.a << std::endl;  // 1
-  std::cout << objB.b << std::endl;  // 2
-  std::cout << objB.c << std::endl;  // 3
+void func() {
+  B b;
+  std::cout << b.a << std::endl;  // 1
+  std::cout << b.b << std::endl;  // 2
+  std::cout << b.c << std::endl;  // 3
+  // std::cout << b.d << std::endl;
 
-  D objD;
-  std::cout << objD.a << std::endl;  // 1
-  std::cout << objD.d << std::endl;  // 4
-  // std::cout << objD.c << std::endl;  // 3
+  D d;
+  std::cout << d.a << std::endl;  // 1
+  std::cout << d.d << std::endl;  // 4
+  // std::cout << d.c << std::endl;
 }
 }  // namespace n3
 
 namespace n4 {
 // 如果派生类中的成员（包括成员变量和成员函数）和基类中的成员重名，
 // 那么就会遮蔽从基类继承过来的成员。
-// 所谓遮蔽，就是在派生类中使用该成员时，
-// 包括在定义派生类时使用，也包括通过派生类对象访问该成员，
-// 实际上使用的是派生类新增的成员，而不是从基类继承来的。
+// 所谓遮蔽，就是在派生类中使用该成员时，包括在定义派生类时使用，
+// 也包括通过派生类对象访问该成员，实际上使用的是派生类新增而不是继承来的。
 // 基类成员函数和派生类成员函数不构成重载：
 // 基类成员和派生类成员的名字一样时会造成遮蔽，这句话对于成员变量很好理解，
 // 对于成员函数要引起注意，不管函数的参数如何，只要名字一样就会造成遮蔽。
@@ -231,6 +234,7 @@ namespace n4 {
 class B {
  public:
   void show() { std::cout << "B::show()" << std::endl; }
+  int a = 1;
 };
 
 class D1 : public B {
@@ -238,46 +242,57 @@ class D1 : public B {
   void show() { std::cout << "D1::show()" << std::endl; }
   void show(int) { std::cout << "D1::show(int)" << std::endl; }
   void show(float) { std::cout << "D1::show(float)" << std::endl; }
+  int a = 2;
 };
 
 class D2 : public B {
  public:
   void show(int) { std::cout << "D2::show(int)" << std::endl; }
+  int a = 3;
 };
 
-void testN4() {
+void func() {
   B b;
-  b.show();  // B::show()
+  b.show();                       // B::show()
+  std::cout << b.a << std::endl;  // 1
 
   D1 d1;
-  d1.show();      // D1::show()
-  d1.show(5);     // D1::show(int)
-  d1.show(3.4f);  // D1::show(float)
+  d1.show();                       // D1::show()
+  d1.show(5);                      // D1::show(int)
+  d1.show(3.4f);                   // D1::show(float)
+  std::cout << d1.a << std::endl;  // 2
 
   D2 d2;
   // d2.show();  // no matching function for call to ‘n4::D2::show()’
-  d2.show(1);  // D2::show(int)
+  d2.show(1);                      // D2::show(int)
+  std::cout << d2.a << std::endl;  // 3
 }
 }  // namespace n4
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 3]" << std::endl;
+    std::cout << argv[0] << " i [0 - 5]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::test1::func();
       break;
     case 1:
-      n2::testN2();
+      n1::test2::func();
       break;
     case 2:
-      n3::testN3();
+      n1::test3::func();
       break;
     case 3:
-      n4::testN4();
+      n2::func();
+      break;
+    case 4:
+      n3::func();
+      break;
+    case 5:
+      n4::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;
