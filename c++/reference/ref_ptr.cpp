@@ -1,16 +1,16 @@
 #include <iostream>
 
-// 引用虽然是基于指针实现的，但它比指针更加易用，通过指针获取数据时需要加*，
+// 引用是基于指针实现的，但它比指针更加易用，通过指针获取数据时需要加*，
 // 书写麻烦，而引用不需要，它和普通变量的使用方式一样。
 // C++的发明人Bjarne Stroustrup也说过，
-// 他在C++中引入引用的直接目的是为了让代码的书写更加漂亮，
+// 在C++中引入引用的直接目的是为了让代码的书写更加漂亮，
 // 尤其是在运算符重载中，不借助引用有时候会使得运算符的使用很麻烦。
 
 namespace n1 {
 // 引用和指针的其他区别：
 
 // 1.引用必须在定义时初始化，并且以后也要从一而终，不能再指向其他数据；
-//   而指针没有这个限制，指针在定义时不必赋值，以后也能指向任意数据。
+//   而指针没有这个限制，指针在定义时不必赋值，以后也能指向任意数据：
 void func1() {
   int i = 4;
   int *p;
@@ -18,9 +18,10 @@ void func1() {
 
   // int &r;  // ‘r’ declared as reference but not initialized
   int &r = i;
+  r = i;  // 能编译过，但是修该的是引用的值，不是修改引用的指向
 }
 
-// 2.可以有const指针，但是没有const引用。
+// 2.可以有const指针，但是没有const引用：
 void func2() {
   int i = 6;
 
@@ -61,7 +62,7 @@ void func4() {
   std::cout << *p << "," << r << std::endl;  // 6,5
 }
 
-void testN1() {
+void func() {
   func1();
   func2();
   func3();
@@ -84,9 +85,9 @@ class A {
  public:
   A();
   void show() {
-    std::cout << "n addr: " << std::hex << std::showbase << &n << std::endl;
-    std::cout << "r addr: " << std::hex << std::showbase << &r << std::endl;
-    std::cout << "p addr: " << std::hex << std::showbase << p << std::endl;
+    std::cout << "n addr: " << &n << std::endl;
+    std::cout << "r addr: " << &r << std::endl;
+    std::cout << "p addr: " << p << std::endl;
   }
 
  private:
@@ -98,7 +99,7 @@ A::A() : n(0), r(num), p(&num) {}
 void func2() {
   A *a = new A();
   std::cout << sizeof(A) << std::endl;
-  std::cout << "a addr: " << std::hex << std::showbase << a << std::endl;
+  std::cout << "a addr: " << a << std::endl;
   std::cout << "num addr: " << &num << std::endl;
   a->show();
 
@@ -111,9 +112,8 @@ void func2() {
 
   // 从运行结果可以看出：
   // 1.r是占用内存的，如果不占用的话，sizeof(A)的结果应该为16;
-  // 2.r与num地址是一样的。
-  //   使用&r取地址时，编译器会对代码进行隐式的转换，
-  //   使得代码输出的是r的内容（a的地址），而不是r的地址，
+  // 2.r与num地址是一样的，使用&r取地址时，编译器会对代码进行隐式的转换，
+  //   使得代码输出的是r引用的内容的地址，而不是r的地址，
   //   这就是为什么获取不到引用变量的地址的原因。
   //   也就是说，不是变量r不占用内存，而是编译器不让获取它的地址。
 
@@ -124,7 +124,7 @@ void func2() {
   // 当引用作为形参时，也会有类似的转换。
 }
 
-void testN2() {
+void func() {
   func1();
   func2();
 }
@@ -138,10 +138,10 @@ int main(int argc, char *argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;
