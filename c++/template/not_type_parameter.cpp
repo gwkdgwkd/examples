@@ -3,10 +3,9 @@
 #include <iostream>
 #include <iterator>
 
-// 模板是一种泛型技术，目的是将数据的类型参数化，
-// 以增强C++语言（强类型语言）的灵活性。
+// 模板是一种泛型技术，目的是将数据的类型参数化，以增强C++语言的灵活性。
 // C++对模板的支持非常自由，除了可以包含类型参数，还可以包含非类型参数。
-// 类型参数和非类型参数都可以用在函数体或者类体中。
+// 类型参数和非类型参数都可以用在函数或者类中。
 // 当调用一个函数模板或者通过一个类模板创建对象时，
 // 非类型参数会被用户提供的、或者编译器推断出的值所取代。
 
@@ -16,9 +15,11 @@
 //   或者由编译器推导出的实参必须是一个常量表达式，
 //   例如10、2*30、18+23-4等，但不能是n、n+10、n+m等（n和m都是变量）。
 // 2.当非类型参数是一个指针（引用）时，
-//   绑定到该指针的实参必须具有静态的生存期；
+//   绑定到该指针的实参必须具有静态的生存期，
 //   换句话说，实参必须存储在虚拟地址空间中的静态数据区。
 //   局部变量位于栈区，动态创建的对象位于堆区，它们都不能用作实参。
+// 非类型模板参数，就是用一个常量作为类或函数模板的一个参数，
+// 在类或函数模板中可将该参数当成常量来使用。
 
 namespace n1 {
 int a[5] = {1, 2, 3, 4, 5};
@@ -31,13 +32,15 @@ void Swap(T a[], T b[], int len) {
   // 而sizeof只能通过数组名求得数组长度，不能通过数组指针求得数组长度。
   std::cout << "sizeof : " << sizeof(*a) << "," << sizeof(a) << std::endl;
   std::cout << "len : " << len << std::endl;
-  // sizeof : 4,8
-  // len : 5
+
 }
 void func1() {
   // 形参len用来指明要交换的数组的长度，
   // 调用Swap()函数之前必须先通过sizeof求得数组长度再传递给它：
   Swap(a, b, sizeof(a) / sizeof(int));
+
+  // sizeof : 4,8
+  // len : 5
 }
 
 // 多出来的形参len给编码带来了不便，可以借助模板中的非类型参数将它消除：
@@ -63,7 +66,8 @@ void printArray(T (&arr)[N]) {
 void func2() {
   printArray(a);  // 1, 2, 3, 4, 5
   printArray(b);  // 10, 20, 30, 40, 50
-  Swap(a, b);  // 编译器用int数组来代替类型参数T，使用长度来代替非类型参数N
+  // 编译器用int数组来代替类型参数T，使用长度来代替非类型参数N：
+  Swap(a, b);  
   printArray(a);  // 1, 2, 3, 4, 5
   printArray(b);  // 10, 20, 30, 40, 50
 
@@ -71,12 +75,8 @@ void func2() {
   // cin >> len;
   // int a[len];
   // int b[len];
-  // Swap(a, b);  // 错误编译器推导出来的实参是len，是一个变量，而不是常量
-}
-
-void test() {
-  func1();
-  func2();
+  // 编译器推导出来的实参是len，是一个变量，而不是常量：
+  // Swap(a, b);  // 错误
 }
 }  // namespace n1
 
@@ -152,7 +152,7 @@ bool Array<T, N>::capacity(int n) {
   }
 }
 
-void test() {
+void func() {
   Array<int, 5> arr;
   auto print = [&arr]() {
     for (int i = 0, len = arr.length(); i < len; i++) {
@@ -183,16 +183,19 @@ void test() {
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 1]" << std::endl;
+    std::cout << argv[0] << " i [0 - 2]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::test();
+      n1::func1();
       break;
     case 1:
-      n2::test();
+      n1::func2();
+      break;
+    case 2:
+      n2::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

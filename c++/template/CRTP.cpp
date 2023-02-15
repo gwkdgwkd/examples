@@ -61,10 +61,9 @@ void func1() {
 template <typename DerivedClass>
 void helperFunc(Base<DerivedClass>& d) {  // 辅助函数
   // 模板类或模板函数在调用时才会实例化。
-  // 因此当Base<Derived1>::func()被调用时，
-  // Base<Derived1>已经知道Derived1::op()的存在。
-  d.func();  // 不明白
-  // d.op();    // 报错
+  // 因此当基类的Base<Derived1>::func()被调用时，
+  // Base<Derived1>已经知道Derived1::op()的存在：
+  d.func(); 
 }
 void func2() {
   Derived1 c1_1;

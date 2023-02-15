@@ -14,11 +14,11 @@
 // 并且对这些类型使用的算法都是一样的（函数体或类体一样）。
 // 但是现在希望改变这种游戏规则，
 // 让模板能够针对某种具体的类型使用不同的算法（函数体或类体不同），
-// 这在C++中是可以做到的，
-// 这种技术称为模板的显示具体化（Explicit Specialization）。
-// 函数模板和类模板都可以显示具体化。
+// 这在C++中这种技术称为模板的显式具体化（Explicit Specialization）。
+// 函数模板和类模板都可以显式具体化。
 
-namespace n1 {  // 函数模板的显式具体化
+namespace n1 {  
+// 函数模板的显式具体化
 template <class T>
 const T& Max(const T& a, const T& b) {
   std::cout << "template:";
@@ -30,7 +30,7 @@ typedef struct {
   int age;
   float score;
 } STU;
-template <>  // 函数模板针对STU类型的显示具体化
+template <>  // 函数模板针对STU类型的显式具体化
 // const STU& Max<STU>(const STU& a, const STU& b) {
 // Max<STU>中的STU是可选的，因为函数的形参已经表明，
 // 这是STU类型的一个具体化，编译器能够逆推出T的具体类型：
@@ -42,9 +42,16 @@ std::ostream& operator<<(std::ostream& out, const STU& stu) {
   out << stu.name << "," << stu.age << "," << stu.score;
   return out;
 }
+void func1() {
+  std::cout << Max(4, 5) << std::endl;      // template:5
+  std::cout << Max('a', 'c') << std::endl;  // template:c
+  STU s1{"hello", 18, 80};
+  STU s2 = {"word", 20, 90};
+  std::cout << Max(s1, s2) << std::endl;  // explicit STU:world,20,90
+}
 
 // 对于给定的函数名，可以有非模板函数、模板函数、
-// 显示具体化模板函数以及它们的重载版本：
+// 显式具体化模板函数以及它们的重载版本：
 const double Max(const double& a, const double& b) {
   std::cout << "func:";
   return a > b ? a : b;
@@ -60,24 +67,11 @@ const float& Max<>(const float& a, const float& b) {
   return a > b ? a : b;
 }
 
-void func1() {
-  std::cout << Max(4, 5) << std::endl;      // template:5
-  std::cout << Max('a', 'c') << std::endl;  // template:c
-  STU s1{"hello", 18, 80};
-  STU s2 = {"word", 20, 90};
-  std::cout << Max(s1, s2) << std::endl;  // explicit STU:world,20,90
-}
-
 void func2() {
-  // 在调用函数时，显示具体化优先于常规模板：
+  // 在调用函数时，显式具体化优先于常规模板：
   std::cout << Max(4.3f, 2.5f) << std::endl;  // explicit float:4.3
-  // 而非模板函数优先于显示具体化和常规模板：
+  // 而非模板函数优先于显式具体化和常规模板：
   std::cout << Max(4.3, 2.5) << std::endl;  // func:4.3
-}
-
-void test() {
-  func1();
-  func2();
 }
 }  // namespace n1
 
@@ -105,7 +99,7 @@ void Point<T1, T2>::display() const {
   std::cout << "x=" << m_x << ",y=" << m_y << std::endl;
 }
 
-// 类模板针对字符串类型的显示具体化：
+// 类模板针对字符串类型的显式具体化：
 template <>
 class Point<char*, char*> {
  public:
@@ -152,7 +146,7 @@ template <typename T2>
 void Point<char*, T2>::display() const {
   std::cout << "x=" << m_x << "!y=" << m_y << std::endl;
 }
-void test() {
+void func() {
   (new Point<int, int>(10, 20))->display();            // x=10,y=20
   (new Point<int, char*>(10, "xxx"))->display();       // x=10,y=xxx
   (new Point<char*, int>("yyy", 10))->display();       // x=yyy!y=10
@@ -162,16 +156,19 @@ void test() {
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 1]" << std::endl;
+    std::cout << argv[0] << " i [0 - 2]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::test();
+      n1::func1();
       break;
     case 1:
-      n2::test();
+      n1::func2();
+      break;
+    case 2:
+      n2::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;
