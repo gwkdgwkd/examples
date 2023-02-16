@@ -10,15 +10,14 @@
 // C++异常处理机制会涉及try、catch、throw三个关键字。
 
 // 开发程序是一项烧脑的工作，程序员不但要经过长期的知识学习和思维训练，
-// 还要做到一丝不苟，注意每一个细节和边界。
-// 即使这样，也不能防止程序出错。
-// 程序的错误大致可以分为三种，分别是语法错误、逻辑错误和运行时错误：
+// 还要做到一丝不苟，注意每一个细节和边界，即使这样，也不能防止程序出错。
+// 程序的错误大致可以分为三种：
 // 1.语法错误在编译和链接阶段就能发现，
 //   只有100%符合语法规则的代码才能生成可执行程序。
 //   语法错误是最容易发现、最容易定位、最容易排除的错误，
-//   程序员最不需要担心的就是这种错误。
-// 2.逻辑错误是说我们编写的代码思路有问题，
-//   不能够达到最终的目标，这种错误可以通过调试来解决。
+//   程序员最不需要担心的就是这种错误；
+// 2.逻辑错误是说编写的代码思路有问题，不能够达到最终的目标，
+//   这种错误可以通过调试来解决；
 // 3.运行时错误是指程序在运行期间发生的错误，
 //   例如除数为0、内存分配失败、数组越界、文件不存在等。
 //   C++异常（Exception）机制就是为解决运行时错误而引入的。
@@ -26,7 +25,7 @@
 // 终止程序运行，也就是常说的程序崩溃（Crash）。
 // C++提供了异常（Exception）机制，能够捕获运行时错误，
 // 给程序一次起死回生的机会，或者至少告诉用户发生了什么再终止程序。
-// 所谓抛出异常，就是报告一个运行时错误，程序员可以根据错误信息来进一步处理。
+// 抛出异常就是报告运行时错误，程序员可以根据错误信息来进一步处理。
 
 // 可以借助C++异常机制来捕获上面的异常，避免程序崩溃。
 // 捕获异常的语法为：
@@ -36,12 +35,9 @@
 //   处理异常的语句
 // }
 // try和catch都是C++中的关键字，后跟语句块，不能省略{}。
-// try中包含可能会抛出异常的语句，一旦有异常抛出就会被后面的catch捕获。
+// try中包含可能会抛出异常的语句，一旦有异常抛出就会被catch捕获。
 // try只是检测语句块有没有异常，如果没有发生异常，它就检测不到。
-// catch是抓住的意思，用来捕获并处理try检测到的异常；
-// 如果try语句块没有检测到异常（没有异常抛出），那么就不会执行catch中的语句。
-// 这就好比，catch告诉try：
-// 你去检测一下程序有没有错误，有错误的话就告诉我，我来处理，没有的话就不要理我！
+// 如果try语句块没有检测到异常，那么就不会执行catch中的语句。
 // catch后面的exceptionType variable，
 // 指明了当前catch可以处理的异常类型以及具体的出错信息。
 // 换句话说，发生异常时必须将异常明确地抛出，try才能检测到；
@@ -55,7 +51,7 @@ namespace n1 {
 // 这些异常，都可以被try检测到。
 // throw关键字用来抛出一个异常，这个异常会被try检测到，进而被catch捕获。
 // 发生异常后，程序的执行流会沿着函数的调用链往前回退，直到遇见try才停止。
-// 回退过程中，调用链中剩下的代码（函数中未被执行的代码）都会被跳过，没有执行的机会了。
+// 回退过程中，调用链中剩下的代码都会被跳过，没有执行的机会了。
 void func1(bool b) {
   if (b) {
     throw "func1 Unknown Exception";  // 抛出异常
@@ -80,7 +76,7 @@ void func3(bool b) {
   }
 }
 
-void testN1() {
+void func() {
   func3(false);
   // [1]This statement will not be executed.
   // [2]This statement will not be executed.
@@ -92,15 +88,14 @@ void testN1() {
 }  // namespace n1
 
 namespace n2 {
-// C++语言本身或者标准库抛出的异常都是exception的子类，
-// 称为标准异常（Standard Exception）。
+// C++语言本身或者标准库抛出的异常都是exception的子类，称为标准异常。
 // try {
 //   可能抛出异常的语句
 // } catch(exception &e) {
 //   处理异常的语句
 // }
-// 之所以使用引用，是为了提高效率。
-// 如果不使用引用，就要经历一次对象拷贝（要调用拷贝构造函数）的过程。
+// 之所以使用引用，是为了提高效率，如果不使用引用，
+// 就要经历一次对象拷贝（要调用拷贝构造函数）的过程。
 
 class A {
  public:
@@ -113,6 +108,10 @@ void func1() {
   } catch (A) {
     std::cout << "catch exception A" << std::endl;
   }
+
+  // A
+  // A copy
+  // catch exception A
 }
 void func2() {
   try {
@@ -120,11 +119,13 @@ void func2() {
   } catch (A&) {
     std::cout << "catch exception A&" << std::endl;
   }
+
+  // A
+  // catch exception A&
 }
 
-// what()函数返回一个能识别异常的字符串，
-// 正如它的名字what一样，可以粗略地告诉你这是什么异常。
-// 不过C++标准并没有规定这个字符串的格式，
+// what()函数返回一个能识别异常的字符串，正如它的名字what一样，
+// 可以粗略地告诉这是什么异常，不过C++标准并没有规定这个字符串的格式，
 // 各个编译器的实现也不同，所以what()的返回值仅供参考。
 void func3() {
   try {
@@ -132,6 +133,8 @@ void func3() {
   } catch (std::exception e) {
     std::cout << e.what() << std::endl;
   }
+
+  // std::exception
 }
 
 // exception类的继承层次：
@@ -161,7 +164,6 @@ void func4() {
   // at()是string类的一个成员函数，它会根据下标来返回字符串的一个字符。
   // 与[]不同，at()会检查下标是否越界，如果越界就抛出一个异常；
   // 而[]不做检查，不管下标是多少都会照常访问。
-
   std::string str = "http://c.biancheng.net";
   try {
     char ch3 = str[100];
@@ -175,36 +177,32 @@ void func4() {
   } catch (std::exception& e) {
     std::cout << "[2]out of bound!" << std::endl;
   }
-}
 
-void testN2() {
-  func1();
-  // A
-  // A copy
-  // catch exception A
-
-  func2();
-  // A
-  // catch exception A&
-
-  func3();  // std::exception
-
-  func4();  // [2]out of bound!
+  // [2]out of bound!
 }
 }  // namespace n2
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 2]" << std::endl;
+    std::cout << argv[0] << " i [0 - 4]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func1();
+      break;
+    case 2:
+      n2::func2();
+      break;
+    case 3:
+      n2::func3();
+      break;
+    case 4:
+      n2::func4();
       break;
     default:
       std::cout << "invalid type" << std::endl;

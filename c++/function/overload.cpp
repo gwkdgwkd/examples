@@ -36,7 +36,7 @@ void func(int n) { std::cout << "#2" << std::endl; }
 void func(long m) { std::cout << "#3" << std::endl; }
 void func(double f) { std::cout << "#4" << std::endl; }
 
-void testN1() {
+void func() {
   short s = 99;
   float f = 84.6;
 
@@ -51,14 +51,13 @@ namespace n2 {
 void func(char ch) { std::cout << "#1" << std::endl; }
 void func(long m) { std::cout << "#3" << std::endl; }
 void func(double f) { std::cout << "#4" << std::endl; }
-void testN2() {
+void func() {
   short s = 99;
   float f = 84.6;
 
   func('a');  // #1
   func(f);    // #4
-  // 没有void func(int n)，下面两个调用可以匹配重载函数中的任何一个，
-  // 编译器不知道如何抉择：
+  // 没有void func(int n)，下面两个都可以匹配函数，编译器不知道如何抉择：
   // func(s);
   // func(49);
 
@@ -110,14 +109,13 @@ void func(char c, long l, double d) {
   std::cout << "#3: " << c << "," << l << "," << d << std::endl;
 }
 
-void testN3() {
+void func() {
   short n = 99;
 
   func('@', n, 99);  // #2: @,99,99
   // 重载决议：
   // 1.#1只有两个参数，不匹配，从#2和#3中选择；
-  // 2.如果只考虑第一个实参'@'，#2和#3都能够精确匹配，
-  //   谁也不比谁优秀，是平等的；
+  // 2.如果只考虑第一个实参'@'，#2和#3都能够精确匹配，是平等的；
   // 3.如果只考虑第二个实参n，对于#2需要把short提升为int（类型提升），
   //   对于#3需要把short转换为long（类型转换）,
   //   类型提升的优先级高于类型转换，所以#2胜出；
@@ -130,24 +128,15 @@ void testN3() {
   // func('@', n, 99.5);
   // 重载决议：
   // 1.#1只有两个参数，不匹配，从#2和#3中选择；
-  // 2.如果只考虑第一个实参'@'，#2和#3都能够精确匹配，
-  //   谁也不比谁优秀，是平等的；
+  // 2.如果只考虑第一个实参'@'，#2和#3都能够精确匹配，是平等的；
   // 3.如果只考虑第二个实参n，#2胜出；
   // 4.如果只考虑第三个参数，#3是精确匹配，#3胜出；
-  // 5.从整体上看，它们最终打成了平手，分不清孰优孰劣，
-  //   所以编译器不知道如何抉择，会产生二义性错误。
+  // 5.从整体看，它们最终打成了平手，分不清孰优孰劣，编译器产生二义性错误。
 }
 }  // namespace n3
 
 namespace n4 {
-// 在一个项目中，能否既包含C++程序又包含C程序呢？
-// 换句话说，C++和C可以进行混合编程吗？
-// 在C++出现之前，很多实用的功能都是用C语言开发的，
-// 很多底层的库也是用C语言编写的。
-// 这意味着，如果能在C++代码中兼容C语言代码，
-// 无疑能极大地提高C++程序员的开发效率。
-// C++和C可以进行混合编程。
-// 但需要注意的是，由于C++和C在程序的编译、
+// C++和C可以进行混合编程，但需要注意的是，由于C++和C在程序的编译、
 // 链接等方面都存在一定的差异，而这些差异往往会导致程序运行失败。
 // C++支持函数的重载，是因为C++会在程序的编译阶段对函数的函数名进行再次重命名。
 // 但是，C语言是不支持函数重载的，它不会在编译阶段对函数的名称做较大的改动。
@@ -157,33 +146,28 @@ namespace n4 {
 // 这也就意味着，使用C和C++进行混合编程时，考虑到对函数名的处理方式不同，
 // 势必会造成编译器在程序链接阶段无法找到函数具体的实现，导致链接失败。
 
-// 幸运的是，C++给出了相应的解决方案，即借助extern "C"，
-// 就可以轻松解决C++和C在处理代码方式上的差异性。
+// 借助extern "C"可以轻松解决C++和C在处理代码方式上的差异性。
 // extern是C和C++的一个关键字，但对于extern "C"，
 // 大可以将其看做一个整体，和extern毫无关系。
-// extern "C"既可以修饰一句C++代码，也可以修饰一段C++代码，
-// 可以让编译器以处理C语言的方式来处理C++代码。
-// myfun.h：
-// #ifdef __cplusplus
-// extern "C" void display();
-// #else
-// void display();
-// #endif
-// 无论display()函数位于C++程序还是C语言程序，
-// 都保证了display()函数可以按照C语言的标准来处理。
-// 解决C++和C混合编程的问题，通常在头文件中使用如下格式：
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
-// void display();
-// #ifdef __cplusplus
-// }
-// #endif
-
 // extern "C"大致有2种用法:
 // 1.当仅修饰一句C++代码时，直接将其添加到该函数代码的开头即可；
+#ifdef __cplusplus
+extern "C" void display();
+#else
+void display();
+#endif
 // 2.如果用于修饰一段C++代码，只需为extern "C"添加一对大括号{}，
 //   并将要修饰的代码囊括到括号内即可。
+//   解决C++和C混合编程的问题，通常在头文件中使用如下格式：
+#ifdef __cplusplus
+extern "C" {
+#endif
+// 无论函数位于C++程序还是C语言程序，都保证了可以按照C语言的标准来处理：
+void display1(); 
+void display2();
+#ifdef __cplusplus
+}
+#endif
 }  // namespace n4
 
 int main(int argc, char *argv[]) {
@@ -194,13 +178,13 @@ int main(int argc, char *argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     case 2:
-      n3::testN3();
+      n3::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

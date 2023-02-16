@@ -91,7 +91,7 @@ void printArray(Array &arr) {
   }
 }
 
-void testN1() {
+void func() {
   Array nums;
   for (int i = 0; i < 10; i++) {
     nums.push(i);
@@ -100,16 +100,14 @@ void testN1() {
   try {
     std::cout << nums[20] << std::endl;
   } catch (OutOfRange &e) {
-    e.what();
-    // Error: out of range( array length 10, access index 20 )
+    e.what();  // Error: out of range( array length 10, access index 20 )
   }
   try {
     for (int i = 0; i < 20; i++) {
       nums.pop();
     }
   } catch (OutOfRange &e) {
-    e.what();
-    // Error: empty array, no elements to pop.
+    e.what();  // Error: empty array, no elements to pop.
   }
   printArray(nums);  // Empty array! No elements to print.
 }
@@ -123,14 +121,35 @@ namespace n2 {
 // 有些教程也称为异常指示符或异常列表，
 // 如果抛出异常列表中没有的异常，try将无法捕获，只能终止程序。
 
-void func1(bool b) throw(int) {  // 只能抛出int类型的异常
+namespace test1 {
+void Func(bool b) throw(int) {  // 只能抛出int类型的异常
   if (b) {
     throw 8;
   } else {
     throw std::exception();
   }
 }
-void func2(int i) throw(int, char, std::exception) {  // 抛出多种异常用逗号隔开
+void func1() {
+  try {
+    Func(true);
+  } catch (int &i) {
+    std::cout << "Exception type: int " << i << std::endl;
+  }
+  // Exception type: int 8
+}
+void func2() {
+  try {
+    Func(false);
+  } catch (int &i) {
+    std::cout << "Exception type: int " << i << std::endl;
+  }
+  // terminate called after throwing an instance of 'std::exception'
+  //   what():  std::exception
+}
+}  // namespace test1
+
+namespace test2 {
+void Func(int i) throw(int, char, std::exception) {  // 抛出多种异常用逗号隔开
   if (0 == i) {
     throw 7;
   } else if (1 == i) {
@@ -138,15 +157,58 @@ void func2(int i) throw(int, char, std::exception) {  // 抛出多种异常用�
   } else if (2 == i) {
     throw std::exception();
   } else {
-    throw 2.34;
+    throw 2.34f;
   }
 }
-void func3(bool b) throw() {  // 不会抛出任何异常，即使抛出了，try也检测不到
+void func() {
+  try {
+    Func(0);
+  } catch (int &i) {
+    std::cout << "Exception type: int " << i << std::endl;
+  }
+  // Exception type: int 7
+
+  try {
+    Func(1);
+  } catch (char &c) {
+    std::cout << "Exception type: char " << c << std::endl;
+  }
+  // Exception type: char a
+
+  try {
+    Func(2);
+  } catch (std::exception &e) {
+    std::cout << "Exception type: exception " << e.what() << std::endl;
+  }
+  // Exception type: exception std::exception
+
+  try {
+    Func(3);
+  } catch (float &f) {
+    std::cout << "Exception type: float " << f << std::endl;
+  }
+  // terminate called after throwing an instance of 'float'
+}
+}  // namespace test2
+
+namespace test3 {
+void Func(bool b) throw() {  // 不会抛出任何异常，即使抛出了，try也检测不到
   if (b) {
     throw 2;
   }
 }
+void func() {
+  try {
+    Func(true);
+  } catch (int &i) {
+    std::cout << "Exception type: int " << i << std::endl;
+  }
+  // terminate called after throwing an instance of 'int'
+}
+}  // namespace test3
+}  // namespace n2
 
+namespace n3 {
 // C++规定，派生类虚函数的异常规范必须与基类虚函数的异常规范一样严格，或者更严格。
 // 只有这样，当通过基类指针（或者引用）调用派生类虚函数时，
 // 才能保证不违背基类成员函数的异常规范。
@@ -165,102 +227,51 @@ class Derived : public Base {
 
 // C++规定，异常规范在函数声明和函数定义中必须同时指明，
 // 并且要严格保持一致，不能更加严格或者更加宽松。
-// 错！定义中有异常规范，声明中没有:
+// 错！定义中有异常规范，声明中没有：
 // void func1();
 // void func1() throw(int) {}
-// 错！定义和声明中的异常规范不一致:
+// 错！定义和声明中的异常规范不一致：
 // void func2() throw(int);
 // void func2() throw(int, bool) {}
-// 对！定义和声明中的异常规范严格一致:
-void func4() throw(float, char *);
-void func4() throw(float, char *) {}
+// 对！定义和声明中的异常规范严格一致：
+void func3() throw(float, char *);
+void func3() throw(float, char *) {}
+}  // namespace n3
 
 // 异常规范的初衷是好的，它希望让程序员看到函数的定义或声明后，
-// 立马就知道该函数会抛出什么类型的异常，这样程序员就可以使用try-catch来捕获了。
+// 立马就知道该函数会抛出什么类型的异常，这样就可以使用try-catch来捕获了。
 // 如果没有异常规范，程序员必须阅读函数源码才能知道函数会抛出什么异常。
 // 不过这有时候也不容易做到，例如：
-// 1.函数可能不会引发异常，但它调用了另外一个函数()，另外的函数可能会引发异常。
-// 2.编写的函数调用了老式的库函数，此时不会引发异常，但是库更新以后这个函数却引发了异常。
-// 总之，异常规范的初衷实现起来有点困难，所以大家达成的一致意见是，最好不要使用异常规范。
-// 异常规范是C++98新增的一项功能，但是后来的C++11已经将它抛弃了，不再建议使用。
+// 1.函数可能不会引发异常，但它调用的其他函数可能会引发异常；
+// 2.调用了老式的库函数，此时没有异常，但是库更新以后这个函数却引发了异常。
+// 总之，异常规范的初衷实现起来有点困难，所以最好不要使用异常规范。
+// 异常规范是C++98新增的，但是后来的C++11已经将它抛弃了，不再建议使用。
 // 另外，各个编译器对异常规范的支持也不一样，比如，抛出异常规范中没有的异常：
-// 1.在GCC下，try-catch将捕获不到异常，只能交给系统处理，终止程序。
+// 1.在GCC下，try-catch将捕获不到异常，只能交给系统处理，终止程序；
 // 2.在Visual C++中使用异常规范虽然没有语法错误，但是也没有任何效果，
 //   会直接忽略异常规范的限制，函数可以抛出任何类型的异常。
 
-void testN2() {
-  try {
-    func1(true);
-
-    // func1(false);
-    // terminate called after throwing an instance of 'std::exception'
-  } catch (int &i) {
-    std::cout << "Exception type: int " << i << std::endl;
-  }
-  // Exception type: int 8
-
-  try {
-    // func1(false);
-  } catch (int &i) {
-    std::cout << "Exception type: int " << i << std::endl;
-  }
-  // terminate called after throwing an instance of 'std::exception'
-
-  try {
-    func2(0);
-  } catch (int &i) {
-    std::cout << "Exception type: int " << i << std::endl;
-  }
-  // Exception type: int 7
-
-  try {
-    func2(1);
-  } catch (char &c) {
-    std::cout << "Exception type: char " << c << std::endl;
-  }
-  // Exception type: char a
-
-  try {
-    func2(2);
-  } catch (std::exception &e) {
-    std::cout << "Exception type: exception " << e.what() << std::endl;
-  }
-  // Exception type: exception std::exception
-
-  try {
-    // func2(3);
-  } catch (std::exception &e) {
-    std::cout << "Exception type: exception " << e.what() << std::endl;
-  }
-  // terminate called after throwing an instance of 'double'
-
-  try {
-    func3(false);
-  } catch (std::exception &e) {
-    std::cout << "Exception type: exception " << e.what() << std::endl;
-  }
-
-  try {
-    // func3(true);
-  } catch (std::exception &e) {
-    std::cout << "Exception type: exception " << e.what() << std::endl;
-  }
-  // terminate called after throwing an instance of 'int'
-}
-}  // namespace n2
-
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 2]" << std::endl;
+    std::cout << argv[0] << " i [0 - 4]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::test1::func1();
+      break;
+    case 2:
+      n2::test1::func2();
+      break;
+    case 3:
+      n2::test2::func();
+      break;
+    case 4:
+      n2::test3::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;
