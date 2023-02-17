@@ -41,7 +41,7 @@ void func1() {
 }
 
 // 在C++中，const也可以用来修饰对象，称为常对象。
-// 一旦将对象定义为常对象之后，不管是哪种形式，该对象就只能访问被const修饰的成员了，
+// 一旦将对象定义为常对象之后，该对象就只能访问被const修饰的成员了，
 // 因为非const成员可能会修改对象的数据（编译器也会这样假设），C++禁止这样做。
 // 非const对象可以访问const成员函数。
 void func2() {
@@ -65,24 +65,20 @@ void func2() {
   // const char* s = p2->Str();
   std::cout << p3->Str() << std::endl;  // nihao
 }
-
-void testN1() {
-  func1();
-  func2();
-}
 }  // namespace n1
-
-namespace n2 {}  // namespace n2
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 0]" << std::endl;
+    std::cout << argv[0] << " i [0 - 1]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func1();
+      break;
+    case 1:
+      n1::func2();
       break;
     default:
       std::cout << "invalid type" << std::endl;
