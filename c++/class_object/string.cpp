@@ -8,11 +8,11 @@
 // string变量也可以用C风格的字符串进行赋值。
 
 // string的内部究竟是什么样的？
-// 在C语言中，有两种方式表示字符串(两种形式总是以\0作为结束标志)：
-// 1.一种是用字符数组来容纳字符串，
-//   例如char str[10] = "abc"，这样的字符串是可读写的；
-// 2.一种是使用字符串常量，
-//   例如char *str = "abc"，这样的字符串只能读，不能写。
+// 在C语言中，有两种方式表示字符串（两种形式总是以\0作为结束标志）：
+// 1.一种是用字符数组来容纳字符串，这样的字符串是可读写的：
+//   char str[10] = "abc";
+// 2.一种是使用字符串常量，这样的字符串只能读，不能写：
+//   char *str = "abc";
 
 // C++ string与它们在C语言中的前身截然不同。
 // 首先，也是最重要的不同点，C++ string隐藏了它所包含的字符序列的物理表示。
@@ -42,13 +42,13 @@
 
 // 字符串是存储在内存的连续字节中的一系列字符。
 // C++处理字符串的方式有两种：
-// 一种来自C语言，常被称为C风格字符串；
-// 另一种是基于string类库的字符串处理方式。
+// 1.来自C语言，常被称为C风格字符串；
+// 2.基于string类库的字符串处理方式。
 
 namespace n1 {
 void func1() {
-  std::string s1;             // 创建一个空的string对象
-  std::string s2("Hello!");   // 将string对象初始化为参数指向的字符串
+  std::string s1;            // 创建一个空的string对象
+  std::string s2("Hello!");  // 将string对象初始化为参数指向的字符串
   std::string s3(10, 'a');    // 创建string对象，包含n个字符c
   std::string s4 = "hello!";  // 使用C语言风格来初始化string对象
   std::string s5(s2);         // 拷贝构造函数
@@ -79,8 +79,9 @@ void func2() {
   std::cout << s.length() << std::endl;  // 6
   std::cout << s.size() << std::endl;    // 6
 
-  // lenght()和size()的实现并没有区别。
-  // length()方法是C语言习惯保留的，size()方法则是为了兼容STL容器而引入的。
+  // lenght()和size()的实现并没有区别：
+  // 1.length()方法是C语言习惯保留的；
+  // 2.size()方法则是为了兼容STL容器而引入的。
 
   // 由于string的末尾没有'\0'字符，
   // 所以length()返回的是字符串的真实长度，而不是长度+1。
@@ -140,10 +141,9 @@ void func5() {
 }
 
 void func6() {
-  // 可以使用string.substr()函数来获取子串，
-  // string.substr()函数的定义如下：
+  // 可以使用string.substr()函数来获取子串，定义如下：
   // string substr(size_t pos = 0，size_t len = npos) const;
-  // 其中，pos是子字符串的起始位置（索引，第一个字符的索引为0），len是子串的长度。
+  // 其中，pos是子字符串的起始位置，len是子串的长度。
   // 复制一个string中从pos处开始的len个字符到substr中去，并返回substr。
   std::string s = "hello,world";
   std::cout << s.substr(1, 4) << std::endl;  // ello
@@ -161,7 +161,7 @@ void func6() {
   }
 }
 
-void testN1() {
+void func() {
   func1();
   func2();
   func3();
@@ -174,7 +174,7 @@ void testN1() {
 namespace n2 {
 void func1() {
   // 在C语言中，使用strcmp、strncmp函数来进行字符串的比较。
-  // 在C++中，由于将string对象声明为了简单变量，故而对字符串的比较操作十分简单了，
+  // 在C++中，由于将string对象声明为了简单变量，比较操作十分简单了，
   // 直接使用关系运算符（==、!=、<、<=、>、>=）即可。
   // 也可以使用类似strcmp的函数来进行string对象的比较，
   // string类提供的是string.compare()方法。
@@ -220,7 +220,7 @@ void func3() {
   std::cout << s << std::endl;
 }
 
-void testN2() {
+void func() {
   func1();
   func2();
   func3();
@@ -228,7 +228,7 @@ void testN2() {
 }  // namespace n2
 
 namespace n3 {
-void testN3() {
+void func() {
   // 使用string.find()方法查找字符串，
   // 如果找到，则返回该子字符串首次出现时其首字符的索引；
   // 否则，返回string::npos。
@@ -291,7 +291,7 @@ void testN3() {
 }  // namespace n3
 
 namespace n4 {
-void testN4() {
+void func() {
   std::string s1 = "h!";
   std::string s2 = "o,";
   std::string s3 = "xoryyy";
@@ -319,7 +319,7 @@ void testN4() {
 }  // namespace n4
 
 namespace n5 {
-void testN5() {
+void func() {
   std::string s = "hello,,,world!";
 
   // 删除从pos处开始的n个字符：
@@ -361,19 +361,19 @@ int main(int argc, char *argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     case 2:
-      n3::testN3();
+      n3::func();
       break;
     case 3:
-      n4::testN4();
+      n4::func();
       break;
     case 4:
-      n5::testN5();
+      n5::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

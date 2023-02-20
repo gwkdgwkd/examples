@@ -28,7 +28,7 @@ class Demo {
 // static成员变量的内存既不是在声明类时分配，
 // 也不是在创建对象时分配，而是在（类外）初始化时分配。
 // 静态成员变量必须初始化，而且只能在类体外进行。
-// 被private、protected、public修饰的静态成员变量都可以用这种方式初始化。
+// 被private、protected、public修饰的静态成员变量都可以这样初始化。
 // 静态成员初始化时可以赋初值，也可以不赋值。
 // 全局数据区的变量都有默认的初始值0，
 // 而动态数据区（堆区、栈区）变量的默认值是不确定的，一般认为是垃圾值。
@@ -84,7 +84,7 @@ void func2() {
   std::cout << "Demo(" << d2.d_ << ").a = " << d2.b << std::endl;  // 9
 }
 
-void testN1() {
+void func() {
   func1();
   func2();
 }
@@ -93,8 +93,7 @@ void testN1() {
 namespace n2 {
 // 静态成员函数与普通成员函数的根本区别在于：
 // 1.普通成员函数有this指针，可以访问类中的任意成员；
-// 2.而静态成员函数没有this指针，只能访问静态成员，
-//   包括静态成员变量和静态成员函数。
+// 2.而静态成员函数没有this指针，只能访问静态成员变量和静态成员函数。
 
 class A {
  public:
@@ -103,8 +102,7 @@ class A {
   // 在类中，static除了可以声明静态成员变量，还可以声明静态成员函数：
   static void f1() {
     std::cout << "static f1" << std::endl;
-    // 静态成员函数只能访问静态成员
-    f3();
+    f3();  // 静态成员函数只能访问静态成员
     std::cout << s << std::endl;
 
     // f4();
@@ -126,10 +124,10 @@ class A {
   void f4() { std::cout << "member f4" << std::endl; }
 };
 int A::s = 9;
-// 和静态成员变量类似，静态成员函数在声明时要加static，在定义时不能加static：
+// 和静态成员变量类似，静态成员函数声明要加static，定义时不能加static：
 void A::f3() { std::cout << "static f3" << std::endl; }
 
-void testN2() {
+void func() {
   // 静态成员函数可以通过类来直接调用，编译器不会为它增加形参this，
   // 它不需要当前对象的地址，所以不管有没有创建对象，都可以调用静态成员函数。
   // 普通成员变量占用对象的内存，静态成员函数没有this指针，
@@ -140,8 +138,7 @@ void testN2() {
   // static f3
   // 9
 
-  // 编译器在编译一个普通成员函数时，会隐式地增加一个形参this，
-  // 并把当前对象的地址赋值给this，
+  // 编译器对待普通成员函数时，会隐式增加形参this，并把当前对象的地址给this，
   // 所以普通成员函数只能在创建对象后通过对象来调用，因为它需要当前对象的地址。
   A a;
   a.f2();
@@ -167,10 +164,10 @@ int main(int argc, char *argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

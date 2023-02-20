@@ -1,15 +1,15 @@
 #include <iostream>
 #include <string>
 
-using namespace std;
-
 // 了解C++默默编写并调用哪些函数
 
-// 什么时候空类不再是个空类呢？当C++处理之后。
-// 如果没有声明，编译器会声明一个copy构造函数、
-// 一个copy assignment操作符和一个析构函数（non-virtual）。
-// 如果没有声明任何构造函数，编译器也会声明一个default构造函数。
+// 当C++处理之后空类不再是个空类，编译器会声明：
+// 1.一个copy构造函数；
+// 2.一个copy assignment操作符；
+// 3.一个析构函数（non-virtual）；
+// 4.如果没有声明任何构造函数，编译器也会声明一个default构造函数。
 // 所有这些函数都是public且inline的。
+
 // class Empty{}; 等价于：
 class Empty {
  public:
@@ -29,14 +29,14 @@ class Empty {
 template <class T>
 class NamedObject {
  public:
-  NamedObject(string& name, const T& value)
+  NamedObject(std::string& name, const T& value)
       : nameValue(name), objectValue(value) {}
 
  private:
   // 1.C++并不允许让引用改指向不同的对象。
   //   如果打算在一个内含引用成员的class内支持赋值操作，
   //   必须自己定义copy assignment操作符。
-  string& nameValue;
+  std::string& nameValue;
   // 2.内含const成员也一样，更改const成员是不合法的，
   //   所以编译器不知道如何生成默认的赋值函数面对它们，也要自己定义。
   const T objectValue;
@@ -44,8 +44,7 @@ class NamedObject {
 // 3.如果某个base class将copy assignment操作符声明为private，
 //   编译器拒绝为其derived class生成一个copy assignment操作符。
 //   毕竟编译器为derived class所生成的copy assignment操作符，
-//   想象中可以处理base class成分，但当无法调用时，
-//   就不生成，也就不允许赋值操作。
+//   预期可以处理基类成分，但当无法调用时，就不生成，也就不允许赋值操作。
 class Base {
  private:
   Base& operator=(const Base& rhs) {}
@@ -62,8 +61,8 @@ int main() {
   Empty e2(e1);
   e2 = e1;
 
-  string newDog("P");
-  string oldDog("Q");
+  std::string newDog("P");
+  std::string oldDog("Q");
   NamedObject<int> p(newDog, 2);
   NamedObject<int> q(oldDog, 36);
   // p = q;  // C++并不允许让引用改指向不同的对象
