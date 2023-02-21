@@ -2,25 +2,21 @@
 #include <vector>
 
 // 在C++11之前的版本（C++98和C++03）中，
-// 定义变量或者声明变量之前都必须指明它的类型，比如int、char等；
+// 定义变量或者声明变量之前都必须指明它的类型，比如int、char等。
 // 但是在一些比较灵活的语言中，比如C#、JavaScript、PHP、Python等，
-// 程序员在定义变量时可以不指明具体的类型，
-// 而是让编译器（或者解释器）自己去推导，这就让代码的编写更加方便。
-// C++11为了顺应这种趋势也开始支持自动类型推导了！
+// 定义时可以不指明类型，而是让编译器去推导，这就让代码的编写更加方便。
+// C++11为了顺应这种趋势也开始支持自动类型推导了，
 // C++11使用auto关键字来支持自动类型推导。
 
-// 在C++11以前，auto关键字用来指明变量的存储类型，它和static关键字是相对的。
-// auto表示变量是自动存储的，这也是编译器的默认规则，
-// 所以写不写都一样，一般也不写，这使得auto关键字的存在变得非常鸡肋。
+// 在C++11以前，auto用来指明变量的存储类型，它和static关键字是相对的。
+// auto表示变量是自动存储的，这也是默认规则，所以使得auto变得非常鸡肋。
 // C++11赋予auto关键字新的含义，使用它来做自动类型推导。
-// 也就是说，使用了auto关键字以后，编译器会在编译期间自动推导出变量的类型，
-// 这样就不用手动指明变量的数据类型了。
 
 // auto关键字基本的使用语法如下：
 // auto name = value;
 // name是变量的名字，value是变量的初始值。
 // auto仅仅是一个占位符，在编译器期间它会被真正的类型所替代。
-// 或者说，C++中的变量必须是有明确类型的，只是这个类型是由编译器自己推导出来的。
+// C++中的变量必须是有明确类型的，只是这个类型是由编译器自己推导出来的。
 
 namespace n1 {
 void func1() {
@@ -40,22 +36,20 @@ void func1() {
 
   // 可以连续定义多个变量：
   int b = 20;
+  // 编译器根据第一个子表达式已经推导出auto为int，那后面的m也只能是int：
   auto *q = &b, m = 99;
-  // 编译器根据第一个子表达式已经推导出auto为int，那后面的m也只能是int，
-  // 如果写作m=12.5是错误的，因为12.5是double，和int是冲突的。
-  // auto *q = &b, m = 12.5;  // 推导的时候不能有二义性。
+  // auto *q = &b, m = 12.5;  // 报错，12.5是double，和int有歧义
 }
 
 void func2() {
-  // auto可以和某些具体类型混合使用，
-  // 这样auto表示的就是半个类型，而不是完整的类型：
+  // auto可以和某些具体类型混合使用，表示半个类型，而不是完整的类型：
   int x = 0;
   auto *p1 = &x;  // p1为int*，auto推导为int
   auto p2 = &x;   // p2为int*，auto推导为int*
   auto &r1 = x;   // r1为int&，auto推导为int
-  // r1是int&类型，当=右边的表达式是一个引用类型时，
-  // auto会把引用抛弃，直接推导出它的原始类型：
-  auto r2 = r1;  // r2为int，auto推导为int。
+
+  // 当=右边是引用类型时，auto会把引用抛弃，直接推导出它的原始类型：
+  auto r2 = r1;  // r2为int，auto推导为int
 
   std::cout << typeid(p1).name() << std::endl;  // Pi
   std::cout << typeid(p2).name() << std::endl;  // Pi
@@ -65,17 +59,14 @@ void func2() {
 
 void func3() {
   // auto和const的结合：
-  // 当类型不为引用时，auto的推导结果将不保留表达式的const属性；
-  // 当类型为引用时，auto的推导结果将保留表达式的const属性。
+  // 1.当类型不为引用时，auto的推导结果将不保留表达式的const属性；
+  // 2.当类型为引用时，auto的推导结果将保留表达式的const属性。
 
   int x = 0;
-  // 当=右边的表达式带有const属性时，auto不会使用const属性，
-  // 而是直接推导出non-const类型：
   const auto n = x;  // n为const int，auto被推导为int
-  auto f = n;        // n为const int，auto被推导为int
+  auto f = n;        // n为const int且不是引用，去掉const，f为int
   f = 5;
 
-  // 当const和引用结合时，auto的推导将保留表达式的const类型：
   const auto &r1 = x;  // r1为const int&类型，auto被推导为int
   auto &r2 = r1;  // r1为const int&类型，auto被推导为const int类型
   // r2 = 5;         // assignment of read-only reference ‘r2’
@@ -86,7 +77,7 @@ void func3() {
   std::cout << typeid(r2).name() << std::endl;  // i
 }
 
-void testN1() {
+void func() {
   func1();
   func2();
   func3();
@@ -96,18 +87,17 @@ void testN1() {
 namespace n2 {
 // auto的限制：
 
-// 2.auto不能在函数的参数中使用
-//   在定义函数的时候只是对参数进行了声明，指明了参数的类型，
-//   但并没有给它赋值，只有在实际调用函数的时候才会给参数赋值；
-//   而auto要求必须对变量进行初始化，所以这是矛盾的。
+// 2.auto不能在函数的参数中使用，在定义函数的时候只是对参数进行了声明，
+//   指明了参数的类型，但并没有给它赋值，只有在实际调用时才会给参数赋值，
+//   而auto要求必须对变量进行初始化，所以这是矛盾的：
 // void func1(auto i) {}
 
 template <typename T>
 class A {};
 
-void testN2() {
-  // 1.使用auto类型推导的变量必须马上初始化，
-  //   因为auto在C++11中只是占位符，并非如int一样的真正的类型声明：
+void func() {
+  // 1.使用auto推导的变量必须马上初始化，因为auto只是占位符，
+  //   并非如int一样的真正的类型声明：
   // auto i;
 
   // 3.auto关键字不能定义数组：
@@ -165,7 +155,7 @@ void func2() {
   func<B, const char *>();  // http://c.biancheng.net/cplus
 }
 
-void testN3() {
+void func() {
   func1();
   func2();
 }
@@ -179,13 +169,13 @@ int main(int argc, char *argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     case 2:
-      n3::testN3();
+      n3::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

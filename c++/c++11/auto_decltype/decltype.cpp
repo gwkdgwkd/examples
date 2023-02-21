@@ -2,12 +2,10 @@
 #include <string>
 #include <vector>
 
-// decltype是C++11新增的一个关键字，
-// 它和auto的功能一样，都用来在编译时期进行自动类型推导。
-// decltype是declare type的缩写，译为声明类型。
+// decltype是C++11新增的一个关键字，它和auto的功能一样，
+// 都用来在编译时期进行自动类型推导，是declare type的缩写。
 // 既然已经有了auto关键字，为什么还需要decltype关键字呢？
-// 因为auto并不适用于所有的自动类型推导场景，
-// 在某些特殊情况下auto用起来非常不方便，
+// 因为auto并不适用于所有的自动类型推导场景，在某些情况下auto非常不方便，
 // 甚至压根无法使用，所以decltype关键字也被引入到C++11中。
 
 // auto和decltype关键字都可以自动推导出变量的类型，但它们是有区别的：
@@ -34,15 +32,14 @@ void printType(T val) {
 }
 
 namespace n1 {
-// decltype推导规则，当程序员使用decltype(exp)获取类型时，
-// 编译器将根据以下三条规则得出结果：
-// 1.如果exp是一个不被括号()包围的表达式，
-//   或者是一个类成员访问表达式，或者是一个单独的变量，
-//   那么decltype(exp)的类型就和exp一致，这是最普遍最常见的情况。
-// 2.如果exp是函数调用，那么decltype(exp)的类型就和函数返回值的类型一致。
-// 3.如果exp是一个左值，或者被括号()包围，
-//   那么decltype(exp)的类型就是exp的引用；
-//   假设exp的类型为T，那么decltype(exp)的类型就是T&。
+// 当使用decltype(exp)获取类型时，根据以下三条规则得出结果：
+// 1.如果exp是以下3个中的一个：
+//   a.不被括号()包围的表达式；
+//   b.一个类成员访问表达式；
+//   c.一个单独的变量；
+//   那么decltype(exp)的类型就和exp一致，这是最普遍最常见的情况；
+// 2.如果exp是函数调用，那么decltype(exp)的类型就和函数返回值的类型一致；
+// 3.如果exp是左值，或者被括号()包围，那么decltype(exp)的类型是exp的引用。
 
 // decltype能够根据变量、字面量、带有运算符的表达式推导出变量的类型：
 void func1() {
@@ -52,8 +49,6 @@ void func1() {
 
   // auto根据=右边的初始值value推导出变量的类型，
   // 而decltype根据exp表达式推导出变量的类型，跟=右边的value没有关系。
-  // auto是根据变量的初始值来推导出变量类型的，
-  // 如果不初始化，变量的类型也就无法推导了。
   decltype(d1 + 100) d2;  // d2被推导成了double，没有初始化
 
   printType(i2);  // i int
@@ -147,7 +142,7 @@ void func4() {
   std::cout << i3 << "," << i4 << "," << i5 << std::endl;  // 6,7,6
 }
 
-void testN1() {
+void func() {
   func1();
   func2();
   func3();
@@ -157,10 +152,11 @@ void testN1() {
 
 namespace n2 {
 // decltype的实际应用：
+namespace test1 {
 // auto只能用于类的静态成员，不能用于类的非静态成员（普通成员），
 // 如果想推导非静态成员的类型，这个时候就必须使用decltype了：
 template <typename T>
-class Base1 {
+class Base {
  public:
   void func(T &container) { m_it = container.begin(); }
 
@@ -169,8 +165,22 @@ class Base1 {
   // 增加了不少工作量，看起来也非常晦涩：
   typename T::iterator m_it;
 };
+void func() {
+  std::vector<int> v1;
+  Base<std::vector<int>> b1;
+  b1.func(v1);
+
+  const std::vector<int> v2;
+  Base<const std::vector<int>> b2;
+  // b2.func(v2);
+  // T::iterator并不能包括所有的迭代器类型，
+  // 当T是一个const容器时，应当使用const_iterator。
+}
+}  // namespace test1
+
+namespace test2 {
 template <typename T>
-class Base2 {
+class Base {
  public:
   void func(T &container) { m_it = container.begin(); }
 
@@ -178,23 +188,20 @@ class Base2 {
   // 有了C++11的decltype关键字，就可以直接这样写：
   decltype(T().begin()) m_it;
 };
-
-void testN2() {
+void func() {
   std::vector<int> v1;
-  Base1<std::vector<int>> obj1;
-  obj1.func(v1);
-  Base2<std::vector<int>> obj2;
-  obj2.func(v1);
+  Base<std::vector<int>> b1;
+  b1.func(v1);
 
   const std::vector<int> v2;
-  // Base1<const std::vector<int>> obj3;
-  // obj3.func(v2);
-  // 使用Base1类的时候，如果传入一个const类型的容器，
-  // 编译器马上就会弹出一大堆错误信息。
-  // 原因就在于，T::iterator并不能包括所有的迭代器类型，
-  // 当T是一个const容器时，应当使用const_iterator。
-  Base2<const std::vector<int>> obj4;
-  obj4.func(v2);
+  Base<const std::vector<int>> b2;
+  b2.func(v2);
+}
+}  // namespace test2
+
+void func() {
+  test1::func();
+  test2::func();
 }
 }  // namespace n2
 
@@ -206,10 +213,10 @@ int main(int argc, char *argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;
