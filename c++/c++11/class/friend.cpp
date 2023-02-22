@@ -42,7 +42,7 @@ class B {
   int m_b;
 };
 
-void testN2() {
+void func() {
   A a(6);
   B b;
   b.access(a);  // 6
@@ -74,7 +74,7 @@ class B {
   void access(A& obj) { std::cout << obj.m_a << std::endl; }
 };
 
-void testN3() {
+void func() {
   A a(8);
   B<int> b1;
   b1.access(a);  // 8
@@ -86,8 +86,7 @@ void testN3() {
 
 namespace n4 {
 // 3.普通类A的模板类B友元（一对多友好关系）：
-//   普通类class A的友元是模板class B，
-//   而不是某一个具体实例化的class B<>，
+//   普通类class A的友元是模板class B，而不是某一个具体实例化的class B<>，
 //   即只要是这个模板实例化出来的B都是A的友元。
 class A {
  public:
@@ -104,7 +103,7 @@ class B {
   void access(A& obj) { std::cout << obj.m_a << std::endl; }
 };
 
-void testN4() {
+void func() {
   A a(5);
   B<int> b1;
   b1.access(a);  // 5
@@ -140,7 +139,7 @@ class B {
   void access(A<U>& obj) { std::cout << obj.m_a << std::endl; }
 };
 
-void testN5() {
+void func() {
   A<int> a1(3);
   B<int> b1;
   b1.access(a1);  // 3
@@ -174,7 +173,7 @@ class B {
   void access(A<U>& obj) { std::cout << obj.m_a << std::endl; }
 };
 
-void testN6() {
+void func() {
   A<int> a1(2);
   A<int> a2(3);
 
@@ -208,7 +207,7 @@ class B {
   void access(A<U>& obj) { std::cout << obj.m_a << std::endl; }
 };
 
-void testN7() {
+void func() {
   A<int> a1(5);
   A<int> a2(6);
   B<int> b1;
@@ -234,22 +233,22 @@ int main(int argc, char* argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n2::testN2();
+      n2::func();
       break;
     case 1:
-      n3::testN3();
+      n3::func();
       break;
     case 2:
-      n4::testN4();
+      n4::func();
       break;
     case 3:
-      n5::testN5();
+      n5::func();
       break;
     case 4:
-      n6::testN6();
+      n6::func();
       break;
     case 5:
-      n7::testN7();
+      n7::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

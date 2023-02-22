@@ -7,11 +7,11 @@
 // 一方面是简化使用过程，另一方面可以实现功能函数版本迭代。
 
 // 内联命名空间使用inline关键词前缀：
-// 1.内联命名空间兼具普通命名空间的使用特点。
+// 1.内联命名空间兼具普通命名空间的使用特点；
 // 2.内联命名空间可以将自身名字导入父命名空间，
-//   其它子命名空间可以通过父命名空间进行调用。
-// 3.名字访问是命名空间加标识符。
-// 4.不同命名空间内名字可以相同，不管他们是否是同类型。
+//   其它子命名空间可以通过父命名空间进行调用；
+// 3.名字访问是命名空间加标识符；
+// 4.不同命名空间内名字可以相同，不管他们是否是同类型；
 // 5.命名空间可以实现功能的版本迭代。
 
 namespace n1 {
@@ -46,7 +46,7 @@ void print() {
 }  // namespace test_5
 }  // namespace test_1
 
-void testN1() {
+void func() {
   std::cout << test_1::test_2::num << std::endl;         // 1
   std::cout << test_1::test_3::a::one << std::endl;      // 1
   std::cout << test_1::test_3::num::three << std::endl;  // 3
@@ -80,7 +80,7 @@ void child_fun_v1() { std::cout << "child_fun_v2" << std::endl; }
 }  // namespace child_fun_implement_v2
 }  // namespace child_fun1
 
-void testN2() {
+void func() {
   child_fun::child_fun_implement_v1::child_fun_v1();
   // child_fun_v1
 
@@ -96,8 +96,7 @@ void testN2() {
 
 namespace n3 {
 // 随着软件开发规模的扩大，类名，函数名重复的可能性也越来越大。
-// 最朴素的解决办法就是改名，
-// 这种方法在向已经存在的类库中添加代码时问题不大，
+// 最朴素的解决办法就是改名，这种方法在向已经存在的类库中添加代码时问题不大，
 // 但是如果是将两个从未谋面的代码库结合在一起时就不再适用了。
 namespace x1 {
 class A {
@@ -139,7 +138,7 @@ void func4() {
   // A a;  // reference to ‘A’ is ambiguous
 }
 
-void testN3() {
+void func() {
   func1();
   func2();
   func3();
@@ -148,8 +147,7 @@ void testN3() {
 
 namespace n4 {
 // 内联命名空间特点就是：
-// 不需要使用using就可以直接在外层命名空间使用该命名空间内的内容，
-// 而且无需使用前缀。
+// 不需要使用using就可以直接在外层使用该命名空间内的内容，而且无需使用前缀。
 namespace inline_test {
 // 第一次使用了inline关键字，这叫显式内联；
 inline namespace yyy {
@@ -161,8 +159,7 @@ class B1 {
 
 // 第二次没有使用inline关键字，但由于第一次已经声明了inline，
 // 声明的还是内联命名空间，这种情况称为隐式内联。
-// 两处声明的命名空间同名，它们同属一个命名空间，
-// 这是C++命名空间本来就有的特性。
+// 两处声明的命名空间同名，它们同属一个命名空间，这是C++命名空间本来就有的特性。
 namespace yyy {
 class B2 {
  public:
@@ -170,8 +167,7 @@ class B2 {
 };
 }  // namespace yyy
 
-// 内联命名空间声明之后，
-// 就可以在外层命名空间不适用前缀而直接使用它们了：
+// 内联命名空间声明之后，就可以在外层命名空间不适用前缀而直接使用它们了：
 void func1() {  // 位于yyy的外层，所以可以直接使用B1和B2
   B1 b1;
   b1.iv = 1;
@@ -183,8 +179,7 @@ void func1() {  // 位于yyy的外层，所以可以直接使用B1和B2
 }
 }  // namespace inline_test
 
-// 处在yyy更外层，
-// 这时也只是需要使用外层命名空间inline_test前缀即可，
+// 处在yyy更外层，这时也只是需要使用外层命名空间inline_test前缀即可，
 // 看起来inline_namespace就像不存在一样：
 void func2() {
   inline_test::B1 b1;
@@ -196,15 +191,14 @@ void func2() {
   std::cout << b2.dv << std::endl;  // 6
 }
 
-void testN4() {
+void func() {
   inline_test::func1();
   func2();
 }
 }  // namespace n4
 
 namespace n5 {
-// 内联命名空间就像不存在一样，
-// 那么就产生了一个严肃的问题，它有什么用？
+// 内联命名空间就像不存在一样，那么就产生了一个严肃的问题，它有什么用？
 class A1 {
  public:
   void fun1() { std::cout << "A1 fun1" << std::endl; }
@@ -254,7 +248,7 @@ class C2 {
 // 由于隐式内联语法的存在，将来出现ver3的时候，
 // 只要将唯一的inline关键字移动到第一次出现的ver3定义之前就可以了。
 
-void testN5() {
+void func() {
   A1 a1;
   a1.fun1();  // A1 fun1
   B1 b1;
@@ -286,19 +280,19 @@ int main(int argc, char* argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     case 2:
-      n3::testN3();
+      n3::func();
       break;
     case 3:
-      n4::testN4();
+      n4::func();
       break;
     case 4:
-      n5::testN5();
+      n5::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

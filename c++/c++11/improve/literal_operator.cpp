@@ -38,16 +38,14 @@
 // 4.如果目标字面量为char，那么字面量操作符函数只可接受一个char为参数。
 
 // 此外需要额外注意的是：
-// operator "" _X中的_X中下划线不是标准规定的，
-// 但是为避免混乱，下划线最好带上。
+// operator "" _X中的_X中下划线不是标准规定的，但是为避免混乱，下划线最好带上。
 
 namespace n1 {
 // C++11允许用户自定义字面量后缀：
 long double operator"" _cm(long double x) { return x * 10; }
 long double operator"" _m(long double x) { return x * 1000; }
 long double operator"" _mm(long double x) { return x; }
-// 定义了一个用户自定义的新的类型的操作符，
-// 称为字面量操作符literal operator。
+// 一个用户自定义的新的类型的操作符，称为字面量操作符literal operator。
 
 auto height = 3.0_cm;  // height = 30.0
 auto length = 1.23_m;  // length = 1230.0
@@ -56,10 +54,11 @@ auto length = 1.23_m;  // length = 1230.0
 // 如果希望在编译时就调用字面量后缀函数，则需要把函数定义为constexpr：
 constexpr long double operator"" _km(long double x) { return x * 1000000; }
 
-void testN1() {
+void func() {
   std::cout << 1.0_cm << std::endl;           // 10
   std::cout << 1.0_m << std::endl;            // 1000
   std::cout << 1.0_mm << std::endl;           // 1
+  std::cout << 1.0_km << std::endl;           // 1e+06
   std::cout << length / height << std::endl;  // 41
 }
 }  // namespace n1
@@ -79,9 +78,8 @@ namespace n2 {
 // int a = 12;
 // double b = 3.14;
 // func(a, b);
-// 这便是字面量的威力，
-// 可以直接更加直观的字符串信息进行隐式的类型转换和函数调用，
-// 从而使得逻辑更为直观。
+// 这便是字面量的威力，使得逻辑更为直观，
+// 可以直接更加直观的字符串信息进行隐式的类型转换和函数调用。
 // 那么用户自定义的类是否也可以实现这种通过字面量直接进行参数传递的效果呢？
 // 答案在C++11是肯定的，这便是operator "" _X字面量操作符函数的引入。
 
@@ -140,7 +138,7 @@ void blend(RGBA& col1, RGBA& col2) {
   std::cout << col1 << col2 << std::endl;
 }
 
-void testN2() {
+void func() {
   // 传统逻辑下，需要至少三行代码才能搞定一次blend测试：
   RGBA col1(255, 240, 155);
   RGBA col2(15, 255, 10, 7);
@@ -167,10 +165,10 @@ int main(int argc, char* argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

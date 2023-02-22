@@ -18,7 +18,7 @@
 // 并且它的值往往就是字面量0（#define NULL 0）。
 
 // C++中将NULL定义为字面常量0，虽然能满足大部分场景的需要，
-// 但个别情况下，它会导致程序的运行和我们的预期不符:
+// 但个别情况下，它会导致程序的运行和预期不符:
 void isnull(void *c) { std::cout << "void *c" << std::endl; }
 void isnull(int n) { std::cout << "int n" << std::endl; }
 
@@ -39,8 +39,7 @@ int main() {
 
   // nullptr是nullptr_t类型的右值常量，专用于初始化空类型指针。
   // nullptr_t是C++11新增加的数据类型，可称为指针空值类型。
-  // 也就是说，nullpter仅是该类型的一个实例对象，
-  // 已经定义好，可以直接使用，
+  // 也就是说，nullpter仅是该类型的一个实例对象，已经定义好，可以直接使用，
   // 如果需要完全定义出多个同nullptr完全一样的实例对象。
 
   // nullptr可以被隐式转换成任意的指针类型：
@@ -53,11 +52,9 @@ int main() {
   // 通过将指针初始化为nullptr，可以很好地解决NULL遗留的问题：
   // isnull(NULL);  // int n
   isnull(nullptr);  // void *c
-  // 由于nullptr无法隐式转换为整形，
-  // 而可以隐式匹配指针类型，因此执行结果和预期相符。
+  // 由于nullptr无法隐式转换为整形，而可以隐式匹配指针类型，结果符合预期。
 
-  // 总之在C++11标准下，相比NULL和0，
-  // 使用nullptr初始化空指针可以令程序更加健壮。
+  // 在C++11中，相比NULL和0，使用nullptr初始化空指针可以令程序更加健壮。
 
   return 0;
 }

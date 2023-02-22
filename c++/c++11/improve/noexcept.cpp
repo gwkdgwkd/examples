@@ -1,7 +1,6 @@
 #include <iostream>
 
-// 在C语言中，如果程序的运行出现异常、错误，
-// 想提供方案处理这些异常时，面临许多问题，如：
+// 在C语言中，如果程序的运行出现异常、错误，想处理这些异常时，面临许多问题，如：
 // 1.C语言没有提供统一（标准）的方式来处理错误；
 // 2.无法保证错误会被正确的处理；
 // 3.错误的传播无法控制，特别是在函数的嵌套调用时。
@@ -15,26 +14,21 @@ void func3() throw(char *, double);  // 只可以抛出char*和double类型异�
 // 从功能上来说，C++98中的异常处理机制完全能满足需要，正确的处理异常。
 // 然而，编译器为了遵守C++语言标准，在编译时，只检查部分函数的异常规格：
 void func4(void) throw(std::out_of_range) { func1(); }
-// 程序在运行时，如果func1()抛出一个异常，
-// 但是它的类型不是std::out_of_range，
+// 程序在运行时，如果func1()抛出一个异常，但不是std::out_of_range，
 // 异常处理机制将调用std::unexpected()（也可能抛出异常），
 // 默认情况下会调用std::teminate()。
 
-// 编译器在编译时能过做的检测非常有限，
-// 因此在C++11中异常声明被简化为以下两种情况：
+// 编译器在编译时能过做的检测非常有限，因此在C++11中异常声明被简化为两种：
 // 1.函数可以抛出任何异常(和之前的默认情况相同)；
 // 2.函数不可以抛出任何异常。
 
 // 在C++11中，声明一个函数不可以抛出任何异常使用关键字noexcept：
 void func5() noexcept;
-// does not throw any exception.
 
 // func5和func2它们的区别在于程序运行时的行为和编译器优化的结果：
-// 使用throw()，如果函数抛出异常，
-// 异常处理机制会进行栈回退，寻找(一个或多个）catch语句。
-// 此时，检测catch可以捕捉的类型，如果没有匹配的类型，
-// std::unexpected()会被调用。
-// 但是std::unexpected()本身也可能抛出异常。
+// 使用throw()，如果函数抛出异常，异常处理会进行栈回退，寻找catch语句。
+// 此时，匹配catch捕捉的类型，如果没有，std::unexpected()会被调用。
+// 但是std::unexpected()本身也可能抛出异常，
 // 如果std::unexpected()抛出的异常对于当前的异常规格是有效的，
 // 异常传递和栈回退会像以前那样继续进行。
 // 这意味着，如果使用throw，编译器几乎没有机会做优化。
@@ -44,23 +38,18 @@ void func5() noexcept;
 // 3.编译器可能引入新的传播栅栏（propagation barriers）、
 //   引入新的异常表入口，使得异常处理的代码变得更庞大；
 // 4.内联函数的异常规格（exception specification）可能无效的。
-// 当使用noexcept时，std::teminate()函数会被立即调用，
-// 而不是调用std::unexpected();
-// 因此，在异常处理的过程中，编译器不会回退栈，
-// 这为编译器的优化提供了更大的空间。
-// 简而言之，如果你知道你的函数绝对不会抛出任何异常，
-// 应该使用noexcept，而不是throw()。
+// 用noexcept时，std::teminate()会被立即调用，而不调用std::unexpected();
+// 因此，在异常处理的过程中，编译器不会回退栈，这为编译器的优化提供了更大的空间。
+// 简而言之，如果知道函数绝不会抛出任何异常，应该使用noexcept，而不是throw()。
 
-void testN1() { func4(); }
+void func() { func4(); }
 }  // namespace n1
 
 namespace n2 {
 // constexpr initializer_list() noexcept : _M_array(0), _M_len(0) {}
-// noexcept该关键字告诉编译器，函数中不会发生异常，
-// 这有利于编译器对程序做更多的优化。
-// 如果在运行时，noexecpt函数向外抛出了异常，
-// 程序会直接终止，调用std::terminate()函数，
-// 该函数内部会调用std::abort()终止程序。
+// noexcept告诉编译器，函数中不会发生异常，这有利于编译器对程序做更多的优化。
+// 如果运行时noexecpt函数抛出了异常，程序会直接终止，
+// 调用std::terminate()函数，该函数内部会调用std::abort()终止程序。
 // 如果函数内部捕捉了异常并完成处理，这种情况不算抛出异常。
 
 // 单独使用noexcept，表示其所限定的swap函数绝对不发生异常。
@@ -68,11 +57,9 @@ namespace n2 {
 // void swap(Type& x, Type& y) noexcept(noexcept(x.swap(y))) {
 //   x.swap(y);
 // }
-// 如果操作x.swap(y)不发生异常，
-// 那么函数swap(Type& x, Type& y)一定不发生异常。
+// 如果x.swap(y)不发生异常，那么swap(Type& x, Type& y)一定不发生异常。
 // std::pair中的移动分配函数（move assignment），
-// 如果类型T1和T2的移动分配（move assign）过程中不发生异常，
-// 那么该移动构造函数就不会发生异常：
+// 如果类型T1和T2的移动分配过程中不发生异常，那么该移动构造函数就不会发生异常：
 // pair& operator=(pair&& __p) noexcept(
 //     __and_<is_nothrow_move_assignable<_T1>,
 //            is_nothrow_move_assignable<_T2>>::value) {
@@ -91,7 +78,7 @@ void func3(bool b) noexcept(noexcept(func1())) {
   }
 }
 
-void testN2() {
+void func() {
   try {
     func3(true);
   } catch (int e) {
@@ -131,7 +118,7 @@ struct A3 {
   ~A3() throw(int){};
 };
 
-void testN3() {
+void func() {
   A1 a1;
   static_assert(noexcept(a1.~A1()), "A1 Ouch!");
   A2 a2;
@@ -157,7 +144,7 @@ class U {
 };
 class V {};
 
-void testN4() {
+void func() {
   T t;
   U u;
   V v;
@@ -198,16 +185,16 @@ int main(int argc, char *argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     case 2:
-      n3::testN3();
+      n3::func();
       break;
     case 3:
-      n4::testN4();
+      n4::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

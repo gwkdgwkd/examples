@@ -17,7 +17,7 @@ int main() {
   People p;
   // C++98中通过，C++11中通过：
   std::cout << sizeof(p.hand) << std::endl;  // 4
-  //  C++98中通过，C++11中通过：
+  // C++98中通过，C++11中通过：
   std::cout << sizeof(People::all) << std::endl;  // 8
   // C++98中错误，C++11中通过：
   std::cout << sizeof(People::hand) << std::endl;  // 4
@@ -28,12 +28,8 @@ int main() {
   // 强制转换0为一个People类的指针，继而通过指针的解引用获得其成员变量，
   // 并用sizeof求得该成员变量的大小。
 
-  // 在C++11中，无需这样的技巧，
-  // 因为sizeof可以作用的表达式包括了类成员表达式。
-  // 如下代码：
+  // 在C++11中，无需这样的技巧，因为sizeof可以作用在类成员表达式：
   std::cout << sizeof(People::hand) << std::endl;  // 4
-  // 可以看到，无论从代码的可读性还是编写的便利性，
-  // C++11的规则都比强制指针转换的方案更胜一筹。
 
   return 0;
 }

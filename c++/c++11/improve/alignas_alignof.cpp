@@ -38,18 +38,15 @@ struct A4 {
 };
 #pragma pack()
 
-// #pragma(n)和#pragma pack()一起用，
-// 在这期间保证n字节对齐，而且要成对存在。
-// #pragma(push)和#pragma(pop)期间不受外接对齐条件影响，
-// 而且要成对存在。
+// #pragma(n)和#pragma pack()一起用，在这期间保证n字节对齐，要成对存在。
+// #pragma(push)和#pragma(pop)期间不受外接对齐条件影响，而且要成对存在。
 
 // 明显这个相当暴力了，如果每个人都这么做，至少3行代码。
-// 为了省事，总容易有人不push和pop，直接改，
-// 某人就会在不知情的情况下，包含了这个头文件，进而受影响。
+// 为了省事，有人不push和pop，直接改，其他人包含了这个头文件，进而受影响。
 // 于是，编译器突破规范，定义了扩展：
 // __declspec(align(n))等，但也是各做各的，不统一。
 
-void testN1() {
+void func() {
   std::cout << "A1 " << sizeof(A1) << " " << alignof(A1) << std::endl;  // 12 4
   std::cout << "A2 " << sizeof(A2) << " " << alignof(A2) << std::endl;  // 10 2
   std::cout << "A3 " << sizeof(A3) << " " << alignof(A3) << std::endl;  // 12 4
@@ -60,19 +57,17 @@ void testN1() {
 namespace n2 {
 // 基于之前方法的弊端，c++11火速规范化制定了这个标准：
 // 1.alignas：用于内存对齐，
-//   以替代如GCC的__attribute__((__aligned__((#))))，
-//   并且更强大。
+//   以替代如GCC的__attribute__((__aligned__((#))))，并且更强大；
 // 2.alignof：获取内存对齐，替代__alignof__。
 
 // alignas指定符可应用到变量或非位域类数据成员的声明，
-// 或能应用于class/struct/union或枚举的定义。
+// 或能应用于class/struct/union或枚举的定义，
 // 它不能应用于函数参数或catch子句的异常参数。
 // 以此声明声明的对象或类型的对齐要求，
 // 将等于用于声明的所有alignas指定符最严格（最大）的非零expression，
 // 除非这会削弱类型的自然对齐。
 
-// 若声明上的最严格（最大）alignas，
-// 弱于假如它无alignas指定符的情况下本应有的对齐，
+// 若声明上的最严格alignas，弱于假如它无alignas指定符的情况下本应有的对齐，
 // 即弱于其原生对齐或弱于同一对象或类型的另一声明上的alignas，则错误：
 struct alignas(8) A {};
 struct alignas(1) B {  // 1小于8，alignas不生效
@@ -85,7 +80,7 @@ struct alignas(0) D {};  // 始终忽略alignas(0)
 
 // 忽略在同一声明上弱于另一alignas的合法的非零对齐。
 
-void testN2() {
+void func() {
   std::cout << "A " << sizeof(A) << " " << alignof(A) << std::endl;  // 8 8
   std::cout << "B " << sizeof(B) << " " << alignof(B) << std::endl;  // 8 8
   std::cout << "C " << sizeof(C) << " " << alignof(C) << std::endl;  // 1 1
@@ -114,7 +109,7 @@ struct A {
   int c;
 };
 
-void testN3() {
+void func() {
   std::cout << "char             : " << alignof(char) << std::endl;     // 1
   std::cout << "pointer          : " << alignof(int *) << std::endl;    // 8
   std::cout << "class Foo        : " << alignof(Foo) << std::endl;      // 4
@@ -161,7 +156,7 @@ struct F {
   A d;
 };
 
-void testN4() {
+void func() {
   std::cout << "A " << sizeof(A) << " " << alignof(A) << std::endl;  // 4 2
   std::cout << "B " << sizeof(B) << " " << alignof(B) << std::endl;  // 6 2
   std::cout << "C " << sizeof(C) << " " << alignof(C) << std::endl;  // 8 4
@@ -188,16 +183,16 @@ int main(int argc, char *argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     case 2:
-      n3::testN3();
+      n3::func();
       break;
     case 3:
-      n4::testN4();
+      n4::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

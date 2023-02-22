@@ -27,7 +27,7 @@ namespace n1 {
 // 3.至于UTF-8编码的Unicode数据，
 //   C++11还是使用了8bits宽度的char类型数组来表示。
 
-void testN1() {
+void func() {
   // C++98中有两种定义字符串的方式：
   auto s1 = "hello";   // 直接使用双引号定义多字节字符串
   auto s2 = L"hello";  // 通过前缀L表示wchar_t字符串（宽字符串）
@@ -170,7 +170,7 @@ void func5() {
   std::cout << std::endl;  // 4F60 597D 554A
 }
 
-void testN2() {
+void func() {
   func1();
   func2();
   func3();
@@ -178,11 +178,6 @@ void testN2() {
   func5();
 }
 }  // namespace n2
-
-namespace n3 {
-
-void testN3() {}
-}  // namespace n3
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
@@ -192,10 +187,10 @@ int main(int argc, char* argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

@@ -10,8 +10,7 @@ typedef unsigned int uint_t;
 void func(unsigned int) {}
 // void func(uint_t) {}  // error: redefinition
 
-// 使用typedef重定义类型是很方便的，但它也有一些限制，
-// 比如，无法重定义一个模板。
+// 使用typedef是很方便的，但它也有一些限制，比如，无法重定义一个模板。
 // 想要实现下面的功能：
 typedef std::map<std::string, int> map_int_t;
 typedef std::map<std::string, std::string> map_str_t;
@@ -29,7 +28,7 @@ using str_map_t = std::map<std::string, Val>;
 // 比起前面使用外敷模板加typedef构建的str_map，
 // 它完全就像是一个新的map类模板，因此，简洁了很多。
 
-void testN1() {
+void func() {
   str_map<int>::type mi = {{"one", 1}, {"two", 2}};
   str_map<float>::type mf = {{"one", 1.0}, {"two", 2.0}};
   str_map<std::string>::type ms = {{"one", "11"}, {"two", "22"}};
@@ -90,25 +89,31 @@ using func_t2 = void (*)(T, T);
 template <typename T>
 using type_t = T;  // type_t实例化后的类型和它的模板参数类型等价
 
-void testN3() {
+void func() {
   func_t1<int>::type xx_1;
+  std::cout << typeid(xx_1).name() << std::endl;  // PFviiE
 
   // xx_2并不是一个由类模板实例化后的类，而是void(*)(int,int)的别名：
   func_t2<int> xx_2;
+  std::cout << typeid(xx_2).name() << std::endl;  // PFviiE
 
-  type_t<int> i;  // 等价为int
+  type_t<int> i;                               // 等价为int
+  std::cout << typeid(i).name() << std::endl;  // i
 }
 }  // namespace n3
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 0]" << std::endl;
+    std::cout << argv[0] << " i [0 - 1]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
+      break;
+    case 1:
+      n3::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

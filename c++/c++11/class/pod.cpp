@@ -14,16 +14,17 @@
 #include <vector>
 
 // POD全称Plain Old Data，普通旧数据类型，是C++中的一种数据类型概念。
-// 通俗的讲，一个类或结构体通过二进制拷贝后还能保持其数据不变，
-// 那么它就是一个POD类型。
-// 1.可以用memset()初始化，memcopy()进行复制。
-// 2.提供了对C内存兼容，C++程序可以与C函数进行相互操作。
+// 一个类或结构体通过二进制拷贝后还能保持其数据不变，那么它就是一个POD类型：
+// 1.可以用memset()初始化，memcopy()进行复制；
+// 2.提供了对C内存兼容，C++程序可以与C函数进行相互操作；
 // 3.保证了静态初始化的安全有效。
 // POD类型与C编程语言中使用的类型兼容，POD数据类型可以使用C库函数进行操作，
 // 也可以使用std::malloc创建，可以使用std::memmove等进行复制，
 // 并且可以使用C语言库直接进行二进制形式的数据交换。
 
-// 当一个数据类型满足了平凡的定义和标准布局，则认为它是一个POD数据。
+// 当一个数据类型满足了下面两条则认为它是一个POD数据：
+// 1.平凡的定义；
+// 2.标准布局。
 // 可以通过std::is_pod来判断一个类型是否为POD类型。
 
 namespace n1 {
@@ -37,9 +38,8 @@ namespace n1 {
 // 7.不能包含虚函数；
 // 8.不能包含虚基类；
 // 好处：
-// 1.支持静态初始化，
-//   就是C-style array，struct和array<int>使用{}的初始化方式，
-//   vector等的初始化列表不属于静态初始化。
+// 1.支持静态初始化，就是C-style array，struct和array<int>使用{}的初始化方式，
+//   vector等的初始化列表不属于静态初始化；
 // 2.是拷贝不变的（trivially copyable）的class，
 //   可以使用memcpy，memmove不改变它的语义。
 
@@ -64,12 +64,13 @@ class F {  // 有不平凡的析构函数
 class G {  // 有虚函数
   virtual void foo() = 0;
 };
-class H : G {};  // 有虚基类
-class I {        // 平凡的类，相关的平凡函数都没有定义
+class H : G {};          // 有虚基类
+class I : virtual G {};  // 有虚继承
+class J {                // 平凡的类，相关的平凡函数都没有定义
   int i;
 };
 
-void testN1() {
+void func() {
   std::cout << std::is_trivial<A>::value << std::endl;  // 0
   std::cout << std::is_trivial<B>::value << std::endl;  // 0
   std::cout << std::is_trivial<C>::value << std::endl;  // 0
@@ -78,21 +79,22 @@ void testN1() {
   std::cout << std::is_trivial<F>::value << std::endl;  // 0
   std::cout << std::is_trivial<G>::value << std::endl;  // 0
   std::cout << std::is_trivial<H>::value << std::endl;  // 0
-  std::cout << std::is_trivial<I>::value << std::endl;  // 1
+  std::cout << std::is_trivial<I>::value << std::endl;  // 0
+  std::cout << std::is_trivial<J>::value << std::endl;  // 1
 }
 }  // namespace n1
 
 namespace n2 {
-// 标准布局的(standard_layout):
+// 标准布局的(standard_layout)：
 // 1.所有非静态成员有相同的访问权限；
 // 2.继承树中最多只能有一个类有非静态数据成员；
 // 3.子类的第一个非静态成员不可以是基类类型；
 // 4.没有虚函数；
 // 5.没有虚基类；
-// 6.所有非静态成员都符合标准布局类型；
+// 6.所有非静态成员都符合标准布局类型。
 // 好处：
 // 1.它对语言间交互很有用，这是因为C++ standard-layout类型，
-//   和C中struct或union类型有相同的内存布局。
+//   和C中struct或union类型有相同的内存布局；
 // 2.但是，它不满足trival的两个好处。
 
 class A {  // 违反定义1，成员a和b具有不同的访问权限
@@ -108,7 +110,7 @@ class B1 {
 class B2 {
   int x2;
 };
-class B3 : B1, B2 {  // 违反定义2，继承树有两个(含)以上的类有非静态成员
+class B3 : B1, B2 {  // 违反定义2，继承树有两个（含）以上的类有非静态成员
   int x;
 };
 class C1 {};
@@ -118,18 +120,20 @@ class C2 : C1 {  // 违反定义3，第一个非静态成员是基类类型
 class D {  // 违反定义4，有虚函数
   virtual void foo() = 0;
 };
-class E : D {};  // 违反定义5，有虚基类
-class F {        // 违反定义6，非静态成员x不符合标准布局类型
+class E : D {};          // 违反定义5，有虚基类
+class F : virtual D {};  // 有虚继承，也违反定义5么？
+class G {  // 违反定义6，非静态成员x不符合标准布局类型
   A x;
 };
 
-void testN2() {
+void func() {
   std::cout << std::is_standard_layout<A>::value << std::endl;   // 0
   std::cout << std::is_standard_layout<B3>::value << std::endl;  // 0
   std::cout << std::is_standard_layout<C2>::value << std::endl;  // 0
   std::cout << std::is_standard_layout<D>::value << std::endl;   // 0
   std::cout << std::is_standard_layout<E>::value << std::endl;   // 0
   std::cout << std::is_standard_layout<F>::value << std::endl;   // 0
+  std::cout << std::is_standard_layout<G>::value << std::endl;   // 0
 }
 }  // namespace n2
 
@@ -141,7 +145,7 @@ class A {
   double y;
 };
 
-void testN3() {
+void func() {
   // C++中判断数据类型是否为POD的函数：is_pod(C++11)
   if (std::is_pod<A>::value) {
     A a;
@@ -165,16 +169,14 @@ void testN3() {
 }  // namespace n3
 
 namespace n4 {
-// 1.内置类型(如：int，float)，array<int>是POD类型。
-// 2.POD类型是递归的，array<string>就不是POD类型，因为string不是。
+// 1.内置类型(如：int，float)，array<int>是POD类型；
+// 2.POD类型是递归的，array<string>就不是POD类型，因为string不是；
 // 3.pair(tuple)，vector，list，deque，set，map，unordered_set，
 //   unordered_map，shared_ptr，unique_ptr都满足is_standard_layout，
-//   但是不满足is_trivial，因此也不满足is_pod类型。
-// 4.unique_ptr具有和普通指针一样大小，
-//   大多数时候应该使用它（如unique性能更好等等），
-//   而不是shared_ptr。
+//   但是不满足is_trivial，因此也不满足is_pod类型；
+// 4.unique_ptr具有和普通指针一样大小，大多数时候应该使用它，而不是shared_ptr。
 
-void testN4() {
+void func() {
   using namespace std;
 
   cout.setf(ios_base::boolalpha);
@@ -339,16 +341,16 @@ int main(int argc, char *argv[]) {
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func();
       break;
     case 1:
-      n2::testN2();
+      n2::func();
       break;
     case 2:
-      n3::testN3();
+      n3::func();
       break;
     case 3:
-      n4::testN4();
+      n4::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;

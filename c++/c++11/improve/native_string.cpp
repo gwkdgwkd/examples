@@ -18,8 +18,7 @@ int main() {
   // Second line.
   // End of message.
 
-  // 一个raw string，'\'不会被转义处理。
-  // 因此，"\n"表示两个字符：字符反斜杠和字母n。
+  // 一个raw string，'\'不会被转义处理，"\n"表示两个字符：字符反斜杠和字母n。
   std::string raw_str = R"(First line.\nSecond line.\nEnd of message.\n)";
   std::cout << raw_str << std::endl;
   // First line.\nSecond line.\nEnd of message.\n

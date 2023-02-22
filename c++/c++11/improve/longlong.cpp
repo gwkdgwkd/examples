@@ -54,11 +54,10 @@ unsigned long long int（C++11）
 */
 
 int main() {
-  // 对于longlong类型来说，
-  // 可以使用<climits>头文件中与longlong整形相关的3个宏：
+  // 对于longlong类型来说，可以使用<climits>中与longlong整形相关的3个宏：
   // 1.LLONG_MIN：代表当前平台上最小的longlong类型整数；
   // 2.LLONG_MAX：代表当前平台上最大的longlong类型整数；
-  // 3.ULLONG_MIN：代表当前平台上最大的unsignedlonglong类型整数；
+  // 3.ULLONG_MAX：代表当前平台上最大的unsignedlonglong类型整数；
   //   无符号超长整型的最小值为0。
 
   std::cout << "ll min：" << LLONG_MIN << " " << std::hex << LLONG_MIN
