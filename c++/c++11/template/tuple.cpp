@@ -4,13 +4,12 @@
 #include <tuple>
 
 // c++11中的tuple看似简单，其实它是简约而不简单，
-// 可以说它是c++11中一个既简单又复杂的东东，
-// 关于它简单的一面是它很容易使用，复杂的一面是它内部隐藏了太多细节，
-// 要揭开它神秘的面纱时又比较困难。
+// 可以说它既简单又复杂，关于它简单的一面是它很容易使用，
+// 复杂的一面是它内部隐藏了太多细节，要揭开它神秘的面纱时又比较困难。
+
 // tuple是一个固定大小的不同类型值的集合，是泛化的std::pair。
 // 和c#中的tuple类似，但是比c#中的tuple强大得多。
-// 可以把他当做一个通用的结构体来用，
-// 不需要创建结构体又获取结构体的特征，
+// 可以当做一个通用的结构体来用，不需要创建结构体又获取结构体的特征，
 // 在某些情况下可以取代结构体使程序更简洁，直观。
 
 namespace n1 {
@@ -18,10 +17,8 @@ struct A {
   char* p;
   int len;
 };
-// 用tuple<const char*, int>tp就可以不用创建这个结构体了，
-// 而作用是一样的，更简洁直观了：
+// 用tuple<const char*, int>tp就可以不用创建这个结构体了：
 std::tuple<const char*, int> tp = std::make_tuple("nihao", 6);
-
 std::tuple<double, char, std::string> get_student(int id) {
   // C++11构建tuple的写法：
   if (id == 0) return std::make_tuple(3.8, 'A', "Lisa Simpson");
@@ -34,12 +31,12 @@ std::tuple<double, char, std::string> get_student(int id) {
   throw std::invalid_argument("id");
 }
 
-// 相比较于std::tuple，std::pair如果想要支持多于2个的变量，
-// 需要多层嵌套或结合struct使用：
-std::pair<double, std::pair<char, std::string>> get_student1(int id) {
-  return std::pair<double, std::pair<char, std::string>>{3.8,
-                                                         {'A', "Lisa Simpson"}};
-}
+// std::pair如果想要支持多于2个的变量，需要多层嵌套或结合struct使用：
+// std::pair<double, std::pair<char, std::string>> get_student(int id) {
+//   return std::pair<double,
+//                    std::pair<char, std::string>>{3.8,{'A', "Lisa Simpson"}};
+// }
+
 // tuple和vector比较：
 // vector只能容纳同一种类型的数据，tuple可以容纳任意类型的数据；
 // tuple和c++17的variant比较：
@@ -57,8 +54,7 @@ void func1() {
 }
 
 void func2() {
-  // C++11已经可以有多重返回值了，也就是可以像lua那样这样从函数返回值：
-  // 从要返回多重返回值的函数中，
+  // C++11已经可以像lua那样返回多重返回值：
   // 返回一个std::tuple，里面包含多个具体要返回的值，
   // 接收端使用std::tie（会创建一个元组的左值引用）来解包tuple。
   double gpa;
@@ -73,22 +69,21 @@ void func2() {
 }
 
 void func3() {
-  // 解包时，如果只想解某个位置的值时，
-  // 可以用std::ignore占位符来表示不解某个位置的值。
+  // 解包时，可以用std::ignore占位符来表示不解某个位置的值。
   double gpa;
   char grade;
   std::tie(gpa, grade, std::ignore) = get_student(2);
   std::cout << "ID: 2, "
             << "GPA: " << gpa << ", "
             << "grade: " << grade << std::endl;
-  // ID: 1, GPA: 2.9, grade: C
+  // ID: 2, GPA: 1.7, grade: D
 
   // C++17提供了更方便的解构写法：
-  // auto [ gpa2, grade2, name2 ] = get_student(2);
+  // auto [ gpa, grade, name ] = get_student(2);
   // std::cout << "ID: 2, "
-  //           << "GPA: " << gpa2 << ", "
-  //           << "grade: " << grade2 << ", "
-  //           << "name: " << name2 << '\n';
+  //           << "GPA: " << gpa << ", "
+  //           << "grade: " << grade << ", "
+  //           << "name: " << name << '\n';
 }
 
 void func4() {
@@ -102,13 +97,6 @@ void func4() {
             << "grade: " << grade << ", "
             << "name: " << name << std::endl;
   // ID: 2, GPA: 1.7, grade: D, name: Ralph Wiggum
-}
-
-void testN1() {
-  func1();
-  func2();
-  func3();
-  func4();
 }
 }  // namespace n1
 
@@ -135,7 +123,7 @@ void PrintTuple(const std::tuple<Args...>& t) {
   std::cout << ")" << std::endl;
 }
 
-void testN2() {
+void func() {
   std::tuple<int, std::string, float> t1(11, "Test", 3.14);
   int n = 7;
   auto t2 = std::tuple_cat(t1, std::make_pair("Foo", "bar"), t1, std::tie(n));
@@ -179,7 +167,7 @@ int find_index(std::tuple<Args...> const& t, T&& val) {
   return 0;
 }
 
-void testN3() {
+void func() {
   std::tuple<int, std::string, int> tp(1, "Test", 5);
   // std::cout << find_index(tp, 1) << std::endl;
   // std::cout << find_index(tp, "Test") << std::endl;
@@ -226,7 +214,7 @@ int func2(int i) {
   return i;
 }
 
-void testN4() {
+void func() {
   std::tuple<int, double> tup(23, 4.5);
   apply(func1, tup);
   int d = apply(func2, std::make_tuple(2));
@@ -238,22 +226,31 @@ void testN4() {
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    std::cout << argv[0] << " i [0 - 3]" << std::endl;
+    std::cout << argv[0] << " i [0 - 6]" << std::endl;
     return 0;
   }
   int type = argv[1][0] - '0';
   switch (type) {
     case 0:
-      n1::testN1();
+      n1::func1();
       break;
     case 1:
-      n2::testN2();
+      n1::func2();
       break;
     case 2:
-      n3::testN3();
+      n1::func3();
       break;
     case 3:
-      n4::testN4();
+      n1::func4();
+      break;
+    case 4:
+      n2::func();
+      break;
+    case 5:
+      n3::func();
+      break;
+    case 6:
+      n4::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;
