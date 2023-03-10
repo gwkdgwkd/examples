@@ -468,8 +468,6 @@ namespace n4 {
 //   异步任务将会在共享状态被访问时调用，相当与按需调用，即延迟调用。
 //   也就是说只有当调用future.get()时子线程才会被创建以执行任务。
 
-
-
 void func1() {
   std::future<bool> f = std::async(
       [](int x) -> bool {
@@ -539,6 +537,34 @@ void func5() {
   // timeout
   // ready, value:5
 }
+
+void func6() {
+  auto print = [](std::string s) {
+    std::time_t tt =
+        std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    struct std::tm* ptm = std::localtime(&tt);
+    std::cout << s << " time: " << std::put_time(ptm, "%X") << std::endl;
+  };
+
+  print("before");
+  // std::future对象的析构需要等待std::async执行完毕，也就是说下面代码并不能并发。
+  // 原因在于std::async的返回的std::future对象无人接收，是个临时变量，
+  // 临时变量的析构会阻塞，直至std::async异步任务执行完成。
+  std::async(std::launch::async,
+             [] { std::this_thread::sleep_for(std::chrono::seconds(5)); });
+  print("after");
+  // before time: 17:50:18
+  // after time: 17:50:23
+
+  print("before");
+  // 使用static变量接收future，after不阻塞，实现并发，但程序退出时还会等async执行完成。
+  static auto f = std::async(std::launch::async, [] {
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+  });
+  print("after");
+  // before time: 17:50:23
+  // after time: 17:50:23
+}
 }  // namespace n4
 
 namespace n5 {
@@ -580,7 +606,7 @@ void func() {
   // thread func
   // true,false
 }
-}  // namespace loop
+}  // namespace n5
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
@@ -635,6 +661,9 @@ int main(int argc, char* argv[]) {
       n4::func5();
       break;
     case 15:
+      n4::func6();
+      break;
+    case 16:
       n5::func();
       break;
     default:
