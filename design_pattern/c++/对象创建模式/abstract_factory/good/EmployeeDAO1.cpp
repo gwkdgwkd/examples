@@ -34,6 +34,7 @@ class SqlDataReaderFactory : public IDataReaderFactory {};
 class OracleConnection : public IDBConnection {};
 class OracleCommand : public IDBCommand {};
 class OracleDataReader : public IDataReader {};
+
 class EmployeeDAO {
   IDBConnectionFactory* dbConnectionFactory;
   IDBCommandFactory* dbCommandFactory;
