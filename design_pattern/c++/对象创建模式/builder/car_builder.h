@@ -1,5 +1,5 @@
-#ifndef CAR_BUILDER_H_
-#define CAR_BUILDER_H_
+#ifndef CAR_BUILDER_H
+#define CAR_BUILDER_H
 
 #include "car.h"
 

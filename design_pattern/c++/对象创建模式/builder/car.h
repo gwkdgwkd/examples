@@ -1,5 +1,5 @@
-#ifndef CAR_H_
-#define CAR_H_
+#ifndef CAR_H
+#define CAR_H
 
 #include <iostream>
 #include <string>

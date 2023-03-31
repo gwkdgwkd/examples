@@ -1,5 +1,5 @@
-#ifndef AUDI_BUILDER_H_
-#define AUDI_BUILDER_H_
+#ifndef AUDI_BUILDER_H
+#define AUDI_BUILDER_H
 
 #include "car_builder.h"
 
