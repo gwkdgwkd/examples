@@ -3,7 +3,7 @@
 
 #include "double_linked_list.h"
 
-line* initLine1(line* head);
-void display1(line* head);
+line* initLine(line* head);
+void display(line* head);
 
 #endif  // _DOUBLE_CIRCULAR_LINKED_LIST_

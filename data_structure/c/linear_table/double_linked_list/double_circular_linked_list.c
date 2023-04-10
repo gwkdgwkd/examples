@@ -5,7 +5,7 @@
 
 // 双向循环链表的创建
 // 创建双向循环链表，只需在创建完成双向链表的基础上，将其首尾节点进行双向连接即可。
-line* initLine1(line* head) {
+line* initLine(line* head) {
   head = (line*)malloc(sizeof(line));
   head->prior = NULL;
   head->next = NULL;
@@ -26,7 +26,7 @@ line* initLine1(line* head) {
   return head;
 }
 
-void display1(line* head) {
+void display(line* head) {
   line* temp = head;
   // 由于是循环链表，所以当遍历指针temp指向的下一个节点是head时，
   // 证明此时已经循环至链表的最后一个节点

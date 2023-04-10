@@ -1,17 +1,16 @@
 #include "static_linked_list.h"
 
-// 是否存在一种存储结构，可以融合顺序表和链表各自的优点，
-// 从而既能快速访问元素，又能快速增加或删除数据元素。
-// 静态链表，也是线性存储结构的一种，它兼顾了顺序表和链表的优点于一身，
-// 可以看做是顺序表和链表的升级版。
+// 是否存在一种存储结构，可以融合顺序表和链表各自的优点，从而既能快速访问元素，
+// 又能快速增加或删除数据元素，静态链表它兼顾了顺序表和链表的优点于一身，
+// 也是线性存储结构的一种，可以看做是顺序表和链表的升级版。
 // 使用静态链表存储数据，数据全部存储在数组中（和顺序表一样），但存储位置是随机的，
-// 数据之间一对一的逻辑关系通过一个整形变量（称为游标，和指针功能类似）维持（和链表类似）。
-// 静态链表中，除了数据本身通过游标组成的链表外，还需要有一条连接各个空闲位置的链表，称为备用链表。
-// 备用链表的作用是回收数组中未使用或之前使用过（目前未使用）的存储空间，留待后期使用。
-// 也就是说，静态链表使用数组申请的物理空间中，存有两个链表，一条连接数据，另一条连接数组中未使用的空间。
-// 静态链表中设置备用链表的好处是，可以清楚地知道数组中是否有空闲位置，以便数据链表添加新数据时使用。
+// 数据之间一对一的逻辑关系通过一个整形变量（称为游标，类似指针）维持（和链表类似）。
+// 静态链表中，除了数据本身通过游标组成的链表外，还需要有一条连接各个空闲位置的链表，
+// 称为备用链表，作用是回收数组中未使用或之前使用过（目前未使用）的存储空间，留待后期使用。
+// 即静态链表使用数组申请的物理空间中有两个链表，一条连接数据，另一条连接数组中未使用的空间。
+// 设置备用链表的好处是，可以清楚地知道数组中是否有空闲位置，以便数据链表添加新数据时使用。
 
-// 静态链表和动态链表的共同点是，数据之间一对一的逻辑关系都是依靠指针（静态链表中称游标）来维持，仅此而已。
+// 静态链表和动态链表相同的是数据之间一对一的逻辑关系都是依靠指针（静态链表中称游标）来维持。
 // 1.静态链表：
 //   使用静态链表存储数据，需要预先申请足够大的一整块内存空间，
 //   也就是说，静态链表存储数据元素的个数从其创建的那一刻就已经确定，后期无法更改。
@@ -19,30 +18,30 @@
 //   数据的存储个数就不能超过10个，否则程序就会发生错误。
 //   不仅如此，静态链表是在固定大小的存储空间内随机存储各个数据元素，
 //   这就造成了静态链表中需要使用另一条链表（通常称为备用链表）来记录空间存储空间的位置，
-//   以便后期分配给新添加元素使用。
-//   这意味着，如果你选择使用静态链表存储数据，你需要通过操控两条链表，
-//   一条是存储数据，另一条是记录空闲空间的位置。
+//   以便后期分配给新添加元素使用，这意味着，如果你选择使用静态链表存储数据，
+//   需要通过操控两条链表，一条是存储数据，另一条是记录空闲空间的位置。
 // 2.动态链表
 //   使用动态链表存储数据，不需要预先申请内存空间，而是在需要的时候才向内存申请。
 //   也就是说，动态链表存储数据元素的个数是不限的，想存多少就存多少。
 //   同时，使用动态链表的整个过程，你也只需操控一条存储数据的链表。
-//   当表中添加或删除数据元素时，你只需要通过malloc或free函数来申请或释放空间即可，实现起来比较简单。
+//   当表中添加或删除数据元素时，只需要通过malloc或free函数来申请或释放即可，实现简单。
 
 // 创建备用链表
 void reserveArr(component *array) {
   for (int i = 0; i < maxSize; i++) {
-    array[i].cur = i + 1;  // 将每个数组分量链接到一起
+    array[i].next = i + 1;  // 将每个数组分量链接到一起
     array[i].data = ' ';
   }
-  array[maxSize - 1].cur = 0;  // 链表最后一个结点的游标值为0
+  array[maxSize - 1].next = 0;  // 链表最后一个结点的游标值为0
 }
 
 // 提取分配空间
 int mallocArr(component *array) {
-  // 若备用链表非空，则返回分配的结点下标，否则返回0（当分配最后一个结点时，该结点的游标值为0）
-  int i = array[0].cur;
-  if (array[0].cur) {
-    array[0].cur = array[i].cur;
+  // 若备用链表非空，则返回分配的结点下标，否则返回0，
+  // 当分配最后一个结点时，该结点的游标值为0。
+  int i = array[0].next;
+  if (array[0].next) {
+    array[0].next = array[i].next;
   }
   return i;
 }
@@ -55,21 +54,21 @@ int initArr(component *array) {
   int tempBody = body;
   for (int i = 1; i < 5; i++) {
     int j = mallocArr(array);  // 从备用链表中拿出空闲的分量
-    array[tempBody].cur = j;  // 将申请的空线分量链接在链表的最后一个结点后面
+    array[tempBody].next = j;  // 将申请的空线分量链接在链表的最后一个结点后面
     array[j].data = 'a' + i - 1;  // 给新申请的分量的数据域初始化
     tempBody = j;  // 将指向链表最后一个结点的指针后移
   }
-  array[tempBody].cur = 0;  // 新的链表最后一个结点的指针设置为0
+  array[tempBody].next = 0;  // 新的链表最后一个结点的指针设置为0
   return body;
 }
 
 void displayArr(component *array, int body) {
   int tempBody = body;  // tempBody准备做遍历使用
-  while (array[tempBody].cur) {
-    printf("%c,%d ", array[tempBody].data, array[tempBody].cur);
-    tempBody = array[tempBody].cur;
+  while (array[tempBody].next) {
+    printf("%c,%d ", array[tempBody].data, array[tempBody].next);
+    tempBody = array[tempBody].next;
   }
-  printf("%c,%d\n", array[tempBody].data, array[tempBody].cur);
+  printf("%c,%d\n", array[tempBody].data, array[tempBody].next);
 }
 
 // 静态链表添加元素
@@ -79,34 +78,34 @@ void insertArr(component *array, int body, int add, char a) {
   int tempBody = body;  // tempBody做遍历结构体数组使用
   // 找到要插入位置的上一个结点在数组中的位置
   for (int i = 1; i < add; i++) {
-    tempBody = array[tempBody].cur;
+    tempBody = array[tempBody].next;
   }
   int insert = mallocArr(array);  // 申请空间，准备插入
   array[insert].data = a;
   // 新插入结点的游标等于其直接前驱结点的游标
-  array[insert].cur = array[tempBody].cur;
+  array[insert].next = array[tempBody].next;
   // 直接前驱结点的游标等于新插入结点所在数组中的下标
-  array[tempBody].cur = insert;
+  array[tempBody].next = insert;
 }
 
 // 静态链表删除元素
 // 静态链表中删除指定元素，只需实现以下2步操作：
 // 1.将存有目标元素的节点从数据链表中摘除；
-// 2.将摘除节点添加到备用链表，以便下次再用；
+// 2.将摘除节点添加到备用链表，以便下次再用。
 // 提示：若问题中涉及大量删除元素的操作，
 // 建议读者在建立静态链表之初创建一个带有头节点的静态链表，
 // 方便实现删除链表中第一个数据元素的操作。
 // 备用链表回收空间的函数，其中array为存储数据的数组，k表示未使用节点所在数组的下标
 void freeArr(component *array, int k) {
-  array[k].cur = array[0].cur;
-  array[0].cur = k;
+  array[k].next = array[0].next;
+  array[0].next = k;
 }
 // 删除结点函数，a表示被删除结点中数据域存放的数据
 void deletArr(component *array, int body, char a) {
   int tempBody = body;
   // 找到被删除结点的位置
   while (array[tempBody].data != a) {
-    tempBody = array[tempBody].cur;
+    tempBody = array[tempBody].next;
     // 当tempBody为0时，表示链表遍历结束，说明链表中没有存储该数据的结点
     if (tempBody == 0) {
       printf("链表中没有此数据");
@@ -117,11 +116,11 @@ void deletArr(component *array, int body, char a) {
   int del = tempBody;
   tempBody = body;
   // 找到该结点的上一个结点，做删除操作
-  while (array[tempBody].cur != del) {
-    tempBody = array[tempBody].cur;
+  while (array[tempBody].next != del) {
+    tempBody = array[tempBody].next;
   }
   // 将被删除结点的游标直接给被删除结点的上一个结点
-  array[tempBody].cur = array[del].cur;
+  array[tempBody].next = array[del].next;
   // 回收被摘除节点的空间
   freeArr(array, del);
 }
@@ -133,11 +132,11 @@ void deletArr(component *array, int body, char a) {
 int selectElem(component *array, int body, char elem) {
   int tempBody = body;
   // 当游标值为0时，表示链表结束
-  while (array[tempBody].cur != 0) {
+  while (array[tempBody].next != 0) {
     if (array[tempBody].data == elem) {
       return tempBody;
     }
-    tempBody = array[tempBody].cur;
+    tempBody = array[tempBody].next;
   }
   return -1;  // 返回-1，表示在链表中没有找到该元素
 }

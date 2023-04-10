@@ -10,7 +10,7 @@
 // 2.游标：其实就是数组下标，表示直接后继元素所在数组中的位置；
 typedef struct {
   int data;  // 数据域
-  int cur;   // 游标
+  int next;   // 游标
 } component;
 
 // 将结构体数组中所有分量链接到备用链表中
