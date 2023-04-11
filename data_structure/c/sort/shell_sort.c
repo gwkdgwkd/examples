@@ -56,8 +56,8 @@ void ShellSort(int *nums, int size) {
 }
 
 int main(int argc, const char *argv[]) {
-  // int a[] = {35, 33, 42, 10, 14, 19, 27, 44};
-  int a[] = {5, 2, 3, 1};
+  int a[] = {35, 33, 42, 10, 14, 19, 27, 44};
+  // int a[] = {5, 2, 3, 1};
   ShellSort(a, sizeof(a) / sizeof(int));
   // 4: 14 33 42 10 35 19 27 44
   // 4: 14 19 42 10 35 33 27 44

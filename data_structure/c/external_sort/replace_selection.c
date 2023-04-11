@@ -2,12 +2,11 @@
 
 // 增加k-路归并排序中的k值来提高外部排序效率的方法，而除此之外，
 // 还有另外一条路可走，即减少初始归并段的个数，也就是减小m的值。
-// m的求值方法为：m=⌈n/l⌉（n表示为外部文件中的记录数，l表示初始归并段中包含的记录数）
-// 如果要想减小m的值，在外部文件总的记录数n值一定的情况下，只能增加每个归并段中所包含的记录数l。
+// m的求值方法为：m=⌈n/l⌉，其中n表示为外部文件中的记录数，l表示初始归并段中包含的记录数。
+// 如果要想减小m，在外部文件总的记录数n一定的情况下，只能增加每个归并段中所包含的记录数l。
 // 而对于初始归并段的形成，就不能再采用上一章所介绍的内部排序的算法，
-// 因为所有的内部排序算法正常运行的前提是所有的记录都存在于内存中，
-// 而内存的可使用空间是一定的，如果增加l的值，内存是盛不下的。
-// 所以要另想它法，探索一种新的排序方法：置换—选择排序算法。
+// 因为所有的内部排序算法正常运行的前提是所有的记录都存在于内存中，而内存的可使用空间是一定的，
+// 如果增加l的值，内存是盛不下的，所以要另想它法，探索一种新的排序方法，置换—选择排序算法。
 
 // 置换—选择排序算法的具体操作过程为：
 // 1.首先从初始文件中输入6个记录到内存工作区中；
@@ -34,9 +33,9 @@ typedef struct {
 } RedType;
 typedef int LoserTree[w];  // 败者树是完全二叉树且不含叶子，可采用顺序存储结构
 typedef struct {
-  RedType rec; /* 记录 */
-  KeyType key; /* 从记录中抽取的关键字 */
-  int rnum;    /* 所属归并段的段号 */
+  RedType rec;  // 记录
+  KeyType key;  // 从记录中抽取的关键字
+  int rnum;     // 所属归并段的段号
 } RedNode, WorkArea[w];
 // 从wa[q]起到败者树的根比较选择MINIMAX记录，并由q指示它所在的归并段
 void Select_MiniMax(LoserTree ls, WorkArea wa, int q) {
@@ -44,7 +43,7 @@ void Select_MiniMax(LoserTree ls, WorkArea wa, int q) {
   // ls[t]为q的双亲节点，p作为中介
 
   for (t = (w + q) / 2, p = ls[t]; t > 0; t = t / 2, p = ls[t]) {
-    // 段号小者 或者 段号相等且关键字更小的为胜者
+    // 段号小者或者段号相等且关键字更小的为胜者
     if (wa[p].rnum < wa[q].rnum ||
         (wa[p].rnum == wa[q].rnum && wa[p].key < wa[q].key)) {
       s = q;
@@ -54,7 +53,7 @@ void Select_MiniMax(LoserTree ls, WorkArea wa, int q) {
   }
   ls[0] = q;  // 最后的冠军
 }
-// 输入w个记录到内存工作区wa,建得败者树ls,选出关键字最小的记录，并由s指示其在wa中的位置。
+// 输入w个记录到内存工作区wa，建得败者树ls，选出关键字最小的记录，并由s指示其在wa中的位置。
 void Construct_Loser(LoserTree ls, WorkArea wa, FILE *fi) {
   int i;
   for (i = 0; i < w; ++i) {
@@ -125,10 +124,11 @@ int main() {
   LoserTree ls;   // 败者树
   WorkArea wa;    // 内存工作区
   int i, k;
-  fo = fopen("ori", "wb");  // 准备对ori文本文件进行写操作
-                            // 将数组a写入大文件ori
-  fwrite(a, sizeof(RedType), N, fo);
-  fclose(fo);               // 关闭指针fo表示的文件
+
+  fo = fopen("ori", "wb");            // 准备对ori文本文件进行写操作
+  fwrite(a, sizeof(RedType), N, fo);  // 将数组a写入大文件ori
+  fclose(fo);                         // 关闭指针fo表示的文件
+
   fi = fopen("ori", "rb");  // 准备对ori文本文件进行读操作
   printf("文件中的待排序记录为:\n");
   for (i = 1; i <= N; i++) {
@@ -137,13 +137,14 @@ int main() {
     print(b);
   }
   printf("\n");
-  // 使fi的指针重新返回大文件ori的起始位置，以便重新读入内存，产生有序的子文件。
-  rewind(fi);
+
+  rewind(fi);  // 使fi的指针重新返回起始位置，以便重新读入内存，产生有序的子文件
   fo = fopen("out", "wb");
   // 用置换－选择排序求初始归并段
   Replace_Selection(ls, wa, fi, fo);
   fclose(fo);
   fclose(fi);
+
   fi = fopen("out", "rb");
   printf("初始归并段各为:\n");
   do {
