@@ -19,7 +19,7 @@ QNode* initQueue() {
 // 链队队列中，当有新的数据元素入队，只需进行以下3步操作：
 // 1.将该数据元素用节点包裹，例如新节点名称为elem；
 // 2.与rear指针指向的节点建立逻辑关系，即执行rear->next=elem；
-// 3.最后移动rear指针指向该新节点，即rear=elem；
+// 3.最后移动rear指针指向该新节点，即rear=elem。
 // 由此，新节点就入队成功了。
 QNode* enQueue(QNode* rear, int data) {
   // 1、用节点包裹入队元素
