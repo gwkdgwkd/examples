@@ -51,5 +51,5 @@ void SecondOptimal(BiTree T, ElemType R[], float sw[], int low, int high) {
     SecondOptimal(T->rchild, R, sw, i + 1, high);  // 构造右子树
 }
 
-// 由于使用次优查找树和最优查找树的性能差距很小，构造次优查找树的算法的时间复杂度为O(nlogn)，
+// 次优查找树和最优查找树的性能差距很小，但构造次优查找树的时间复杂度为O(nlogn)，
 // 因此可以使用次优查找树表示概率不等的查找表对应的静态查找表（又称为静态树表）。
