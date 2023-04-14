@@ -29,42 +29,41 @@ int main() {
   bind(serv_sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
   // UDP不像TCP，无需在连接状态下交换数据，因此基于UDP的服务器端和客户端也无需经过连接过程。
-  // 也就是说，不必调用listen()和accept()函数。
-  // UDP中只有创建套接字的过程和数据交换的过程。
+  // 也就是说，不必调用listen()和accept()函数，UDP中只有创建套接字的过程和数据交换的过程。
 
   // TCP中，套接字是一对一的关系。
   // 如要向10个客户端提供服务，那么除了负责监听的套接字外，还需要创建10套接字。
   // 但在UDP中，不管是服务器端还是客户端都只需要1个套接字。
 
-  // 创建好TCP套接字后，传输数据时无需再添加地址信息，因为TCP套接字将保持与对方套接字的连接。
-  // 换言之，TCP套接字知道目标地址信息。
-  // 但UDP套接字不会保持连接状态，每次传输数据都要添加目标地址信息，这相当于在邮寄包裹前填写收件人地址。
+  // 创建好TCP套接字后，传输数据时无需再添加地址信息，
+  // 因为TCP套接字将保持与对方套接字的连接，换言之，TCP套接字知道目标地址信息。
+  // 但UDP套接字不会保持连接状态，每次传输数据都要添加目标地址信息，这相当于填写收件人地址。
   // 发送数据使用sendto()函数：
   // ssize_t sendto(int sock, void *buf, size_t nbytes, int flags, struct
   //                sockaddr *to, socklen_t addrlen);  // Linux
   // int sendto(SOCKET sock, const char *buf, int nbytes, int flags,
   //            const struct sockadr *to, int addrlen);  // Windows
   // Linux和Windows下的sendto()函数类似，下面是详细参数说明：
-  // 1.sock：用于传输 UDP 数据的套接字；
-  // 2.buf：保存待传输数据的缓冲区地址；
-  // 3.nbytes：带传输数据的长度（以字节计）；
-  // 4.flags：可选项参数，若没有可传递0；
-  // 5.to：存有目标地址信息的sockaddr结构体变量的地址；
-  // 6.addrlen：传递给参数to的地址值结构体变量的长度。
+  // 1.sock，用于传输UDP数据的套接字；
+  // 2.buf，保存待传输数据的缓冲区地址；
+  // 3.nbytes，带传输数据的长度（以字节计）；
+  // 4.flags，可选项参数，若没有可传递0；
+  // 5.to，存有目标地址信息的sockaddr结构体变量的地址；
+  // 6.addrlen，传递给参数to的地址值结构体变量的长度。
 
-  // UDP发送函数sendto()与TCP发送函数write()/send()的最大区别在于，sendto()函数需要向他传递目标地址信息。
+  // UDP发送函数sendto()与TCP发送函数write()/send()最大的区别是，sendto()需要目标地址信息。
   // 接收数据使用recvfrom()函数：
   // ssize_t recvfrom(int sock, void *buf, size_t nbytes, int flags, struct
   //                  sockadr *from, socklen_t *addrlen);  // Linux
   // int recvfrom(SOCKET sock, char *buf, int nbytes, int flags,
   //              const struct sockaddr *from, int *addrlen);  // Windows
   // 由于UDP数据的发送端不定，所以recvfrom()函数定义为可接收发送端信息的形式，具体参数如下：
-  // 1.sock：用于接收UDP数据的套接字；
-  // 2.buf：保存接收数据的缓冲区地址；
-  // 3.nbytes：可接收的最大字节数（不能超过buf缓冲区的大小）；
-  // 4.flags：可选项参数，若没有可传递0；
-  // 5.from：存有发送端地址信息的sockaddr结构体变量的地址；
-  // 6.addrlen：保存参数from的结构体变量长度的变量地址值。
+  // 1.sock，用于接收UDP数据的套接字；
+  // 2.buf，保存接收数据的缓冲区地址；
+  // 3.nbytes，可接收的最大字节数（不能超过buf缓冲区的大小）；
+  // 4.flags，可选项参数，若没有可传递0；
+  // 5.from，存有发送端地址信息的sockaddr结构体变量的地址；
+  // 6.addrlen，保存参数from的结构体变量长度的变量地址值。
 
   // 需要注意的是，UDP不同于TCP，不存在请求连接和受理过程，
   // 因此在某种意义上无法明确区分服务器端和客户端，只是因为其提供服务而称为服务器端。

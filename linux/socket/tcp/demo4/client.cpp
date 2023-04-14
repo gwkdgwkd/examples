@@ -30,11 +30,11 @@ int main() {
   char buffer[BUF_SIZE] = {0};
   int count = 0;
   // Client端如何判断文件接收完毕，也就是何时结束while循环。
-  // 最简单的结束while循环的方法当然是文件接收完毕后让read()函数返回0，那么，如何让read()返回0呢？
+  // 最简单的结束while循环的方法是文件接收完毕后让read()函数返回0，那么，如何让read()返回0呢？
   // read()返回0的唯一时机就是收到FIN包时，也就是EOF。
-  // FIN包表示数据传输完毕，计算机收到FIN包后就知道对方不会再向自己传输数据，当调用read()/recv()函数时，
-  // 如果缓冲区中没有数据，就会返回0，表示读到了socket文件的末尾。
-  // 这里Server调用shutdown()来发送FIN包。
+  // FIN包表示数据传输完毕，计算机收到FIN包后就知道对方不会再向自己传输数据，
+  // 当调用read()/recv()函数时，如果缓冲区中没有数据，就会返回0，表示读到了socket文件的末尾。
+  // 这里server调用shutdown()来发送FIN包。
   // server端直接调用close()/closesocket()会使输出缓冲区中的数据失效，
   // 文件内容很有可能没有传输完毕连接就断开了，而调用shutdown()会等待输出缓冲区中的数据传输完毕。
   while ((count = read(sock, buffer, BUF_SIZE)) > 0) {

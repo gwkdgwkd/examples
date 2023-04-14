@@ -9,14 +9,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// 当需要同时监听多个文件描述符时，
-// 就需要I/O复用函数，I/O复用函数有select、poll、epoll。
+// 当需要同时监听多个文件描述符时，就需要I/O复用函数，有select、poll、epoll。
 
-// poll()接受一个指向结构struct pollfd列表的指针，
-// 其中包括了你想测试的文件描述符和事件。
+// poll()接受一个指向结构struct pollfd列表的指针，包括了想测试的文件描述符和事件。
 // 事件由一个在结构中事件域的比特掩码确定。
 // 当前的结构在调用后将被填写并在事件发生后返回。
-// 通过传入的events的类型去判断返回的类型是否一致，如果一致就该干事了。
+// 通过传入的events的类型去判断返回的类型是否一致，如果一致就该干工作了。
 
 // int poll(struct pollfd *fds, nfds_t nfds, int timeout);
 // struct pollfd {

@@ -18,7 +18,7 @@ int main() {
   serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
   serv_addr.sin_port = htons(1234);
 
-  // server.cpp中没有使用listen()函数，client.cpp中也没有使用connect()函数，因为UDP不需要连接。
+  // server中没有使用listen()，client中也没有使用connect()，因为UDP不需要连接。
 
   struct sockaddr from_addr;
   socklen_t from_addr_size = sizeof(from_addr);
