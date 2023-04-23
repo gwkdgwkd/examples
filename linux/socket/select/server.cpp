@@ -56,7 +56,7 @@ int main() {
   int maxfd, listenfd, connfd, sockfd;
   // FD_SETSIZE=1024，定义数组clientnt来储存已连接描述符，最多1023个：
   int nready, clientnt[FD_SETSIZE - 1];
-  char buf[BUFSIZ], str;
+  char buf[BUFSIZ], str[20];
 
   struct sockaddr_in client_addr, serv_addr;
   socklen_t client_addr_len;
@@ -109,7 +109,7 @@ int main() {
       // 打印该客户端的IP地址和端口号：
       printf(
           "received from %s at port %d\n",
-          inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, &str, sizeof(str)),
+          inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, str, sizeof(str)),
           ntohs(client_addr.sin_port));
       // 将connfd赋值给clientnt数组中第一个为-1的元素位置：
       for (i = 0; i < FD_SETSIZE; i++) {
