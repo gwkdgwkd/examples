@@ -47,8 +47,6 @@ void func1() {
   decltype(i1) i2 = 1;      // i2被推导成了int
   decltype(10.8) d1 = 5.5;  // d1被推导成了double
 
-  // auto根据=右边的初始值value推导出变量的类型，
-  // 而decltype根据exp表达式推导出变量的类型，跟=右边的value没有关系。
   decltype(d1 + 100) d2;  // d2被推导成了double，没有初始化
 
   printType(i2);  // i int

@@ -77,9 +77,11 @@ void func5() {
   // NoStackAlloc c1;
   // static NoStackAlloc c2;
   char p[10];
-  new (p) NoStackAlloc();  // placement new，p无需调用析构函数
+  // placement new，无需调用析构函数：
+  NoStackAlloc* ptr1 = new (p) NoStackAlloc();
 
-  NoStackAlloc* ptr = new NoStackAlloc();  // 在堆上创建对象
+  // 在堆上创建对象：
+  NoStackAlloc* ptr2 = new NoStackAlloc();
 }
 
 void func() {
@@ -93,24 +95,24 @@ void func() {
 
 namespace n2 {
 namespace test1 {
-  // 如果实现了这些默认函数的自定义版本后，编译器就不会去生成默认的版本。
-  // 有时候需要声明带参数的构造函数，此时就不会生成默认的构造函数，
-  // 这样会导致类不再是POD类型，从而影响类的优化：
-  class A {
-   public:
-    A(int i) : data(i) {}
+// 如果实现了这些默认函数的自定义版本后，编译器就不会去生成默认的版本。
+// 有时候需要声明带参数的构造函数，此时就不会生成默认的构造函数，
+// 这样会导致类不再是POD类型，从而影响类的优化：
+class A {
+ public:
+  A(int i) : data(i) {}
 
-   private:
-    int data;
-  };
-  void func() {
-    // A a;
-    std::cout.setf(std::ios_base::boolalpha);
-    std::cout << std::is_standard_layout<A>::value << std::endl;  // true
-    std::cout << std::is_trivial<A>::value << std::endl;          // false
-    std::cout << std::is_pod<A>::value << std::endl;              // false
-  }
-}  // namespace n2
+ private:
+  int data;
+};
+void func() {
+  // A a;
+  std::cout.setf(std::ios_base::boolalpha);
+  std::cout << std::is_standard_layout<A>::value << std::endl;  // true
+  std::cout << std::is_trivial<A>::value << std::endl;          // false
+  std::cout << std::is_pod<A>::value << std::endl;              // false
+}
+}  // namespace test1
 
 namespace test2 {
 // C++11中提供了新的机制来控制默认函数生成来避免这个问题，

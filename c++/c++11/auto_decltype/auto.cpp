@@ -1,12 +1,10 @@
 #include <iostream>
 #include <vector>
 
-// 在C++11之前的版本（C++98和C++03）中，
-// 定义变量或者声明变量之前都必须指明它的类型，比如int、char等。
+// C++11之前，在98和03中，定义变量或声明变量都必须指明类型，比如int、char等。
 // 但是在一些比较灵活的语言中，比如C#、JavaScript、PHP、Python等，
 // 定义时可以不指明类型，而是让编译器去推导，这就让代码的编写更加方便。
-// C++11为了顺应这种趋势也开始支持自动类型推导了，
-// C++11使用auto关键字来支持自动类型推导。
+// C++11为了顺应这种趋势也开始支持自动类型推导了，使用auto关键字来支持自动类型推导。
 
 // 在C++11以前，auto用来指明变量的存储类型，它和static关键字是相对的。
 // auto表示变量是自动存储的，这也是默认规则，所以使得auto变得非常鸡肋。
@@ -34,11 +32,10 @@ void func1() {
   std::cout << typeid(p).name() << std::endl;    // Pi
   std::cout << typeid(url).name() << std::endl;  // PKc
 
-  // 可以连续定义多个变量：
   int b = 20;
-  // 编译器根据第一个子表达式已经推导出auto为int，那后面的m也只能是int：
-  auto *q = &b, m = 99;
-  // auto *q = &b, m = 12.5;  // 报错，12.5是double，和int有歧义
+  // 可以连续定义多个变量，但不能有歧义：
+  auto *q = &b, m = 99;  // 根据第一个子表达式推导出int，后面的m也只能是int
+  // auto *q = &b, m = 12.5;  // 报错，12.5是double，与int有歧义
 }
 
 void func2() {
@@ -96,8 +93,7 @@ template <typename T>
 class A {};
 
 void func() {
-  // 1.使用auto推导的变量必须马上初始化，因为auto只是占位符，
-  //   并非如int一样的真正的类型声明：
+  // 1.使用auto推导的变量必须初始化，因为auto只是占位符，并非如int一样类型声明：
   // auto i;
 
   // 3.auto关键字不能定义数组：

@@ -17,7 +17,7 @@ union U {
 
 namespace n1 {
 // C++11标准规定，任何非引用类型都可以成为联合体的数据成员，
-// 这种联合体也被称为非受限联合体。例如：
+// 这种联合体也被称为非受限联合体，例如：
 class Student {
  public:
   Student(bool g, int a) : gender(g), age(a) {}

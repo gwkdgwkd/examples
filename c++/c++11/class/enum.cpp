@@ -54,10 +54,9 @@ enum class Enumeration { VAL1, VAL2, VAL3 = 100, VAL4 };
 //   比如Enumeration::VAL4==10;会触发编译错误；
 // 3.可以指定底层类型，强类型枚举默认的底层类型是int，
 //   但也可以显示地指定底层类型，具体方法是在枚举名称后面加上:type，
-//   type可以是除wchar_t以外的任何整型：
+//   type可以是除wchar_t以外的任何整型，既可以节省空间，又可以指定符号：
 enum class Enumeration1 : char { VAL1, VAL2, VAL3 = 50, VAL4 };
 enum class Enumeration2 : unsigned int { VAL1 = 0xFFFFFFFF };
-//   既可以节省空间，又可以指定符号。
 void func1() {
   std::cout << static_cast<int>(Enumeration::VAL3) << std::endl;   // 100
   std::cout << static_cast<int>(Enumeration1::VAL3) << std::endl;  // 50
