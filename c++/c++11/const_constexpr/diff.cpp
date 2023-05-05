@@ -24,7 +24,7 @@ void func() { func(5); }
 // 1.保留了const表示只读的语义；
 // 2.将常量的语义划分给了新添加的constexpr关键字。
 // 因此C++11建议将const和constexpr的功能区分开，
-// 即凡是表达只的场景都使用const，表达常量的场景都用constexpr。
+// 即凡是表达只读的场景都使用const，表达常量的场景都用constexpr。
 }  // namespace n1
 
 namespace n2 {

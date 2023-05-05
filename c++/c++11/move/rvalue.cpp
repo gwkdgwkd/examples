@@ -127,7 +127,7 @@ void func4() {  // 常量右值引用
   // const int &&crr1 = l;
   // const int &&crr2 = cl;
   const int &&crr3 = 5;
-  // const int &&crr4 = r;  // 这个怎么不行？
+  // const int &&crr4 = cr;  // 这个怎么不行？
 }
 
 void func() {

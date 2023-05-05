@@ -27,7 +27,6 @@ class C {
 // 3.直接初始化（direct-initialization）：
 int j(0);
 C c2(123);
-
 }  // namespace n1
 
 namespace n2 {

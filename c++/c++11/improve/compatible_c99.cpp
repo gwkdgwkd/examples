@@ -95,6 +95,10 @@ extern "C" {
 #error "should use C++11 implementation"
 #endif
 
+void func() {
+  std::cout << __cplusplus << std::endl;  // 201103
+}
+
 // _Pragma操作符：
 // _Pragma(字符串字面值)，下面3中方法，都能保证头文件只被包含一次：
 // _Pragma("once")      // 1
@@ -107,10 +111,6 @@ extern "C" {
 // 在之前char转换为wchar_t是UB；
 // C++11标准中，char字符串和wchar_t字符串连接，
 // 会先将char转换为wchar_t，再连接字符串。
-
-void func() {
-  std::cout << __cplusplus << std::endl;  // 201103
-}
 }  // namespace n4
 
 int main(int argc, char *argv[]) {

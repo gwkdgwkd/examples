@@ -169,13 +169,10 @@ void func2() {
 
 // 4.基于关联式容器（包括哈希容器）底层存储机制的限制。
 void func3() {
-  // 不允许修改map、unordered_map、
-  // multimap以及unordered_multimap容器存储的键的值；
-  // 不允许修改set、unordered_set、
-  // multiset以及unordered_multiset容器中存储的元素的值。
+  // 不允许修改map、unordered_map、multimap以及unordered_multimap存储的键的值；
+  // 不允许修改set、unordered_set、multiset以及unordered_multiset存储的元素的值。
   // 如果修改了键值会导致程序的执行出现各种Bug。
-  // 另外，基于范围的for循环完成对容器的遍历，
-  // 其底层也是借助容器的迭代器实现的：
+  // 另外，基于范围的for循环完成对容器的遍历，其底层也是借助容器的迭代器实现的：
   std::vector<int> arr = {1, 2, 3, 4, 5};
   for (auto val : arr) {
     std::cout << val << ' ';

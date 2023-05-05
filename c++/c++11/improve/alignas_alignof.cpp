@@ -56,13 +56,11 @@ void func() {
 
 namespace n2 {
 // 基于之前方法的弊端，c++11火速规范化制定了这个标准：
-// 1.alignas：用于内存对齐，
-//   以替代如GCC的__attribute__((__aligned__((#))))，并且更强大；
-// 2.alignof：获取内存对齐，替代__alignof__。
+// 1.alignas用于内存对齐，以替代如GCC的__attribute__((__aligned__((#))))并且更强大；
+// 2.alignof获取内存对齐，替代__alignof__。
 
 // alignas指定符可应用到变量或非位域类数据成员的声明，
-// 或能应用于class/struct/union或枚举的定义，
-// 它不能应用于函数参数或catch子句的异常参数。
+// 或能应用于class/struct/union或枚举的定义，它不能应用于函数参数或catch子句的异常参数。
 // 以此声明声明的对象或类型的对齐要求，
 // 将等于用于声明的所有alignas指定符最严格（最大）的非零expression，
 // 除非这会削弱类型的自然对齐。

@@ -43,7 +43,6 @@ void func() {
 }  // namespace n1
 
 namespace n2 {
-// constexpr修饰函数
 // constexpr还可以用于修饰函数的返回值，这样的函数又称为常量表达式函数。
 
 // 注意，constexpr并非可以修饰任意函数的返回值。
