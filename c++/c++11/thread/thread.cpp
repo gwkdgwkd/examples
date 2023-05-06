@@ -29,7 +29,7 @@ void func() {
   std::thread t2(func1);
   t2.join();
 
-  // 拷贝构造函数(被禁用)，意味着std::thread对象不可拷贝构造：
+  // 拷贝构造函数被禁用，意味着std::thread对象不可拷贝构造：
   // std::thread t3 = t2;
   // std::thread t4(t2);
 
@@ -138,12 +138,12 @@ void func() {
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
   std::cout << "before join : " << std::boolalpha << t.joinable() << std::endl;
   t.join();
-  std::cout << "after join:" << std::boolalpha << t.joinable() << std::endl;
+  std::cout << "after join : " << std::boolalpha << t.joinable() << std::endl;
 
   // f start
   // before join : true
   // f end
-  // after join:false
+  // after join : false
 }
 }  // namespace test3
 namespace test4 {
@@ -401,7 +401,7 @@ void func() {
   // 2.使用lambda表达式也能避免这个问题：
   std::thread t11([] { std::cout << "lamda " << std::endl; });
   t11.join();
-  // lamda
+  // lambda
 }
 }  // namespace n4
 
@@ -525,7 +525,7 @@ void f(int num) {
 void func() {
   // native_handle：返回与std::thread具体实现相关的线程句柄。
   // std::thread的实现和操作系统相关，
-  // 在符合Posix标准的平台下（如Unix/Linux）是Pthread库：
+  // 在符合Posix标准的平台下（如Unix/Linux）是pthread库：
   std::thread t1(f, 1), t2(f, 2);
   sched_param sch;
   int policy;

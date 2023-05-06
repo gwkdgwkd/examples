@@ -9,9 +9,9 @@
 // 保护共享数据结构的最基本的方式，是使用C++标准库提供的互斥量。
 // mutex（互斥量）的种类:
 // 1.std::mutex，最基本的mutex类，提供了独占所有权的特性，
-//   即不支持递归地对std::mutex对象上锁。
-// 2.std::recursive_mutex，递归mutex类。
-// 3.std::time_mutex，定时mutex类。
+//   即不支持递归地对std::mutex对象上锁；
+// 2.std::recursive_mutex，递归mutex类；
+// 3.std::time_mutex，定时mutex类；
 // 4.std::recursive_timed_mutex，定时递归mutex类。
 
 namespace n1 {
@@ -22,7 +22,7 @@ namespace n1 {
 //   b.如果当前互斥量被其他线程锁住，则当前的调用线程被阻塞住；
 //   c.如果当前互斥量被当前调用线程锁住，则会产生死锁(deadlock)。
 // 2.unlock()，解锁，释放对互斥量的所有权；
-// 3.try_lock()，尝试锁住互斥量，如果被其他线程占有，当前线程也不会被阻塞。
+// 3.try_lock()，尝试锁住互斥量，如果被其他线程占有，当前线程也不会被阻塞，
 //   线程调用该函数也会出现下面3种情况：
 //   a.如果当前互斥量没有被其他线程占有，则该线程锁住互斥量，
 //     直到该线程调用unlock释放互斥量；
@@ -523,10 +523,10 @@ namespace test4 {
 // 实际上once_flag相当于锁，使用它的线程都会等待，仅仅有一个线程会运行。
 // 假设该线程抛出异常，那么从等待中的线程中选择一个。
 // once_flag的生命期必需要比使用它的线程的要长，通常定义成全局变量。
-std::once_flag falg;
+std::once_flag flag;
 void f() {
   std::cout << "Call Before!" << std::endl;
-  std::call_once(falg, []() { std::cout << "Calling...!" << std::endl; });
+  std::call_once(flag, []() { std::cout << "Calling...!" << std::endl; });
   std::cout << "Call After!" << std::endl;
 }
 void func() {

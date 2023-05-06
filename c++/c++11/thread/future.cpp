@@ -24,7 +24,7 @@
 // std::future_status类型主要用在std::future，
 // 或std::shared_future的wait_for和wait_until两个函数中的。
 // ready：0
-// wait_for(或wait_until)因为共享状态的标志变为ready而返回。
+// wait_for或wait_until因为共享状态的标志变为ready而返回。
 // timeout：1
 // 超时，即wait_for(或wait_until)因为在指定的时间段（或时刻）内，
 // 共享状态的标志依然没有变为ready而返回。
@@ -127,8 +127,6 @@ void get(std::future<std::string>& f) {
       << "waited for "
       << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count()
       << " milliseconds, value：" << f.get() << std::endl;
-
-  // waited for 675 milliseconds, value：set future by fun
 }
 
 void func() {
@@ -138,6 +136,8 @@ void func() {
   std::thread t2(get, std::ref(f));
   t1.join();
   t2.join();
+
+  // waited for 675 milliseconds, value：set future by fun
 }
 }  // namespace test3
 
@@ -306,8 +306,10 @@ void func() {
   std::thread t2(f3, std::ref(f));
   t1.join();
   t2.join();
+  
   // please,enter an integer value = 1
   // value = 1
+
   // please,enter an integer value = sdf
   // [exception caught >> basic_ios::clear: iostream error]
 }
