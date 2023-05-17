@@ -66,7 +66,7 @@ class G {  // 有虚函数
 };
 class H : G {};          // 有虚基类
 class I : virtual G {};  // 有虚继承
-class J {                // 平凡的类，相关的平凡函数都没有定义
+class J {                // 平凡的类，相关的不平凡函数都没有定义
   int i;
 };
 

@@ -45,7 +45,7 @@ class ConvType {
 void f1(ConvType ct) {}
 void func2() {
   // ConvType c = 'a';
-  // f('c');
+  // f1('c');
 }
 
 // delete不局限于缺省版本的类成员函数或者全局函数，
