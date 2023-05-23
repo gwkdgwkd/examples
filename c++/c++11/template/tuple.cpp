@@ -17,7 +17,7 @@ struct A {
   char* p;
   int len;
 };
-// 用tuple<const char*, int>tp就可以不用创建这个结构体了：
+// 用tuple<const char*, int>就可以不用创建这个结构体了：
 std::tuple<const char*, int> tp = std::make_tuple("nihao", 6);
 std::tuple<double, char, std::string> get_student(int id) {
   // C++11构建tuple的写法：

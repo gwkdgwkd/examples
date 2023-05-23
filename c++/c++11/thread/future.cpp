@@ -23,13 +23,10 @@
 
 // std::future_status类型主要用在std::future，
 // 或std::shared_future的wait_for和wait_until两个函数中的。
-// ready：0
-// wait_for或wait_until因为共享状态的标志变为ready而返回。
-// timeout：1
-// 超时，即wait_for(或wait_until)因为在指定的时间段（或时刻）内，
-// 共享状态的标志依然没有变为ready而返回。
-// deferred 2
-// 共享状态包含了deferred函数。
+// ready：0，wait_for或wait_until因为共享状态的标志变为ready而返回。
+// timeout：1，超时，即wait_for(或wait_until)因为在指定的时间段（或时刻）内，
+//         共享状态的标志依然没有变为ready而返回。
+// deferred：2，共享状态包含了deferred函数。
 
 namespace n1 {
 // future表示的是一个异步操作，通过其成员函数能够获悉异步操作的情况。
@@ -337,7 +334,7 @@ namespace n3 {
 
 // std::packaged_task::operator()(Args... args)，
 // 调用该packaged_task对象所包装的对象，
-// 通常为函数指针，函数对象，lambda 表达式等，传入的参数为args。
+// 通常为函数指针，函数对象，lambda表达式等，传入的参数为args。
 // 调用该函数一般会发生两种情况：
 // 1.如果调用包装的对象成功，如果被包装的对象有返回值的话，
 //   则返回值被保存在packaged_task的共享状态中；

@@ -20,14 +20,14 @@ namespace n1 {
 //   a.如果该互斥量当前没有被锁住，则调用线程将该互斥量锁住，
 //     直到调用unlock之前，该线程一直拥有该锁；
 //   b.如果当前互斥量被其他线程锁住，则当前的调用线程被阻塞住；
-//   c.如果当前互斥量被当前调用线程锁住，则会产生死锁(deadlock)。
+//   c.如果当前互斥量被当前调用线程锁住，则会产生死锁deadlock。
 // 2.unlock()，解锁，释放对互斥量的所有权；
-// 3.try_lock()，尝试锁住互斥量，如果被其他线程占有，当前线程也不会被阻塞，
-//   线程调用该函数也会出现下面3种情况：
+// 3.try_lock()，尝试锁住互斥量，如果被其他线程占有，
+//   当前线程也不会被阻塞，线程调用该函数也会出现下面3种情况：
 //   a.如果当前互斥量没有被其他线程占有，则该线程锁住互斥量，
 //     直到该线程调用unlock释放互斥量；
 //   b.如果当前互斥量被其他线程锁住，则当前调用线程返回false，而并不会被阻塞；
-//   c.如果当前互斥量被当前调用线程锁住，则会产生死锁(deadlock)。
+//   c.如果当前互斥量被当前调用线程锁住，则会产生死锁deadlock。
 
 void func1() {
   std::mutex m1;  // 默认构造函数，处于unlocked状态
@@ -399,16 +399,16 @@ namespace test4 {
 // 同样，可以使用std::defer_lock设置初始化的时候不进行默认的上锁操作。
 void func() {
   // 虽然创建了unique_lock，但此时是unlock状态：
-  std::unique_lock<std::mutex> guard(mtx, std::defer_lock);
+  std::unique_lock<std::mutex> unique(mtx, std::defer_lock);
   // do something 1
-  guard.lock();
+  unique.lock();
   // do something protected
-  guard.unlock();  // 临时解锁
+  unique.unlock();  // 临时解锁
   // do something 2
-  guard.lock();  // 继续上锁
+  unique.lock();  // 继续上锁
   // do something protected
 
-  // 结束时析构guard会解锁
+  // 结束时析构unique会解锁
 }
 }  // namespace test4
 namespace test5 {
