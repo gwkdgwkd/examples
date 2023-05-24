@@ -7,8 +7,7 @@
 // 2.线程执行过程中遇到了pthread_exit()或者return，也会终止执行；
 // 3.线程执行过程中，接收到其它线程发送的终止执行的信号，然后终止执行。
 
-// 在C语言中，return关键字用于终止函数执行，
-// 必要时还能将函数的执行结果反馈给调用者。
+// 在C中，return关键字用于终止函数执行，必要时还能将函数的执行结果反馈给调用者。
 // return关键字不仅可以用于普通函数，线程函数中也可以使用它。
 // <pthread.h>中，提供了一个和return功能相同的pthread_exit()函数。
 // 和之前不同，pthread_exit()函数只适用于线程函数，而不能用于普通函数。
@@ -55,8 +54,7 @@ void func1() {
 //   return的含义是返回，它不仅可以用于线程执行的函数，普通函数也可以使用；
 //   pthread_exit()函数的含义是线程退出，它专门用于结束某个线程的执行。
 // 2.pthread_exit()函数还会自动调用线程清理程序，
-//   本质是一个由pthread_cleanup_push()指定的自定义函数，
-//   而return不具备这个能力。
+//   本质是一个由pthread_cleanup_push()指定的自定义函数，而return不具备这个能力。
 // 总之，如果实际场景中想终止某个子线程，强烈建议大家使用pthread_exit()函数。
 // 终止主线程时，return和pthread_exit()函数发挥的功能不同，可以根据需要选择。
 void *ThreadFun2(void *arg) {
@@ -78,8 +76,7 @@ void func2() {
   return;
   // 主线程执行速度很快，主线程最后执行的return语句不仅会终止主线程执行，
   // 还会终止其它子线程执行。
-  // 也就是说，myThread2线程还没有执行输出语句就被终止了，
-  // 所以只有下面的打印：
+  // 也就是说，myThread2线程还没有执行输出语句就被终止了，所以只有下面的打印：
 
   // C语言中文网
 #else
@@ -98,8 +95,7 @@ void func2() {
 // int pthread_cancel(pthread_t thread);
 // 参数thread用于接收Cancel信号的目标线程。
 
-// 如果pthread_cancel()函数成功地发送了Cancel信号，
-// 返回数字0，否则返回非零数。
+// 如果pthread_cancel()函数成功地发送了Cancel信号，返回数字0，否则返回非零数。
 // 对于因未找到目标线程导致的信号发送失败，函数返回ESRCH宏，
 // 定义在<errno.h>头文件中，该宏的值为整数3。
 

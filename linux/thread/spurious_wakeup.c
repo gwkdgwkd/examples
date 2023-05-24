@@ -2,15 +2,12 @@
 #include <stdio.h>
 #include <unistd.h>
 
-// Linux中帮助中提到：
-// 在多核处理器下，当一个线程调用pthread_cond_signal()后，
-// 可能会激活多于一个阻塞在条件变量上线程，
-// 多个调用pthread_cond_wait()或pthread_cond_timedwait()的线程返回。
-// 这种效应成为虚假唤醒。
+// Linux中帮助中提到，在多核处理器下，当一个线程调用pthread_cond_signal()后，
+// 可能会激活多于一个阻塞在条件变量上线程，多个调用pthread_cond_wait()的线程返回，
+// 调用pthread_cond_timedwait()的线程也会返回，这种效应称为虚假唤醒。
 // 调用pthread_cond_broadcast会唤醒所有等待线程，也会出现虚拟唤醒情况。
-// 虽然虚假唤醒在pthread_cond_wait函数中可以解决，
-// 为了发生概率很低的情况而降低边缘条件，效率是不值得的，
-// 纠正这个问题会降低对所有基于它的所有更高级的同步操作的并发度。
+// 虽然虚假唤醒在pthread_cond_wait函数中可以解决，为了发生概率很低的情况而降低边缘条件，
+// 效率是不值得的，纠正这个问题会降低对所有基于它的所有更高级的同步操作的并发度。
 // 所以pthread_cond_wait的实现上没有去解决它。
 // 添加while检查的做法被认为是增加了程序的健壮性，
 // 在IEEE Std 1003.1-2001中认为spurious wakeup是允许的。
