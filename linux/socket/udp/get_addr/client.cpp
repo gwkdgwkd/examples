@@ -7,11 +7,11 @@
 
 #define BUF_SIZE 100
 
-// UDP分为链接和没有链接2种(这个到UDP与connect可以找到相关内容）
-
-// 没有链接的UDP不能调用getpeername，但是可以调用getsockname,和TCP一样，他的地址和端口不是在调用socket就指定了，而是在第一次调用sendto函数以后
-
-// 已经链接的UDP，在调用connect以后，这2个函数都是可以用的（同样，getpeername也没太大意义。如果你不知道对方的地址和端口，不可能会调用connect）。
+// UDP分为链接和没有链接2种：
+// 1.没有链接的UDP不能调用getpeername，但是可以调用getsockname，和TCP一样，
+//   他的地址和端口不是在调用socket就指定了，而是在第一次调用sendto函数以后
+// 2.已经链接的UDP，在调用connect以后，这2个函数都是可以用的，同样，getpeername也没太大意义。
+//   如果不知道对方的地址和端口，不可能会调用connect。
 
 void showHost(int fd, const char *str) {
   struct sockaddr_in addr;
@@ -82,16 +82,16 @@ void func2() {
 
   // udp中使用connect可以提高效率，
   // 普通的udp发送两个报文内核做了如下：
-  // 1.建立连结；
+  // 1.建立连接；
   // 2.发送报文；
-  // 3.断开连结；
-  // 4.建立连结；
+  // 3.断开连接；
+  // 4.建立连接；
   // 5.发送报文；
-  // 6.断开连结。
+  // 6.断开连接。
   // 采用connect方式的udp发送两个报文内核如下处理：
   // 1.建立连结；
   // 2.发送报文；
-  // 3.发送报文另外一个报文；
+  // 3.发送报文另外一个报文。
 
   // 采用connect的udp发送接受报文可以用send，write和recv，read，也可以用sendto，recvfrom。
   // 调用sendto的时候第五个参数必须是NULL，第六个参数是0。

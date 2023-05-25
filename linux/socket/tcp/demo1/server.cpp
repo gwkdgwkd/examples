@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 // Windows下的socket程序和Linux思路相同，但细节有所差别：
-// 1.Windows下的socket程序依赖Winsock.dll或ws2_32.dll，必须提前加载，DLL有两种加载方式。
+// 1.Windows的socket依赖Winsock.dll或ws2_32.dll，必须提前加载，dll有两种加载方式。
 // 2.Linux使用文件描述符的概念，而Windows使用文件句柄的概念；
 //   Linux不区分socket文件和普通文件，而Windows区分；
 //   Linux下socket()函数的返回值为int类型，而Windows下为SOCKET类型，也就是句柄。
@@ -22,15 +22,15 @@
 
 int main() {
 #ifdef WIN32
-  // 使用DLL之前，还需要调用WSAStartup()函数进行初始化，以指明WinSock规范的版本，它的原型为：
+  // 使用DLL之前，还需要调用WSAStartup()函数进行初始化，以指明WinSock规范的版本，原型为：
   // int WSAStartup(WORD wVersionRequested, LPWSADATA lpWSAData);
   // wVersionRequested为WinSock规范的版本号，低字节为主版本号，高字节为副版本号（修正版本号）；
   // lpWSAData为指向WSAData结构体的指针。
-  // wVersionRequested参数用来指明我们希望使用的版本号，它的类型为WORD，
+  // wVersionRequested参数用来指明希望使用的版本号，它的类型为WORD，
   // 等价于unsigned short，是一个整数，所以需要用MAKEWORD()宏对版本号进行转换。
   // ws2_32.dll支持的最高版本为2.2，建议使用的版本也是2.2。
-  // 综上所述：
-  // WinSock编程的第一步就是加载ws2_32.dll，然后调用WSAStartup()函数进行初始化，并指明要使用的版本号。
+  // 综上所述，WinSock编程的第一步就是加载ws2_32.dll，
+  // 然后调用WSAStartup()函数进行初始化，并指明要使用的版本号。
   WSADATA wsaData;  // 初始化DLL
   WSAStartup(MAKEWORD(2, 2), &wsaData);
 #endif
@@ -165,7 +165,7 @@ int main() {
   // 如果不断有新的请求进来，它们就按照先后顺序在缓冲区中排队，直到缓冲区满。
   // 这个缓冲区，就称为请求队列（Request Queue）。
   // 缓冲区的长度（能存放多少个客户端请求）可以通过listen()函数的backlog参数指定，
-  // 但究竟为多少并没有什么标准，可以根据你的需求来定，并发量小的话可以是10或者20。
+  // 但究竟为多少并没有什么标准，可以根据需求来定，并发量小的话可以是10或者20。
   // 如果将backlog的值设置为SOMAXCONN，就由系统来决定请求队列长度，
   // 这个值一般比较大，可能是几百，或者更多。
 
@@ -182,7 +182,7 @@ int main() {
   // 而sock是服务器端的套接字，大家注意区分。
   // 后面和客户端通信时，要使用这个新生成的套接字，而不是原来服务器端的套接字。
 
-  // 最后需要说明的是：listen()只是让套接字进入监听状态，并没有真正接收客户端请求，
+  // 最后需要说明的是，listen()只是让套接字进入监听状态，并没有真正接收客户端请求，
   // listen()后面的代码会继续执行，直到遇到accept()。
   // accept()会阻塞程序执行（后面代码不能被执行），直到有新的请求到来。
 
