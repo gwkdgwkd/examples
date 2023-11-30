@@ -1,1 +1,0 @@
-../polymorphism_virtual_function/item_m24.cpp

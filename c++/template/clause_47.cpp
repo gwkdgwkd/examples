@@ -1,1 +1,0 @@
-../effective_c++/clause_47.cpp

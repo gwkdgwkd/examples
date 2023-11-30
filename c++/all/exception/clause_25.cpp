@@ -1,0 +1,1 @@
+../../book/effective_c++/clause_25.cpp

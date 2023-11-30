@@ -1,1 +1,0 @@
-../skill_improvement/item_m30.cpp

@@ -1,0 +1,1 @@
+../../version/c++11/auto_decltype/diff.cpp

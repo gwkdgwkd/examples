@@ -1,1 +1,0 @@
-../operator/item_m6.cpp

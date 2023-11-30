@@ -1,1 +1,0 @@
-../operator/item_m22.cpp

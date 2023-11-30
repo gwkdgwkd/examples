@@ -1,0 +1,1 @@
+../../version/c++11/class/inherit_delegate_constructor.cpp

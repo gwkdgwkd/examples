@@ -1,0 +1,1 @@
+../../../book/effective_stl/41.cpp

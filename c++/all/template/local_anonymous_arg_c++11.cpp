@@ -1,0 +1,1 @@
+../../version/c++11/template/local_anonymous_arg.cpp

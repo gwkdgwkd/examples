@@ -1,0 +1,1 @@
+../../book/more_effecitve_c++/item_m5.cpp

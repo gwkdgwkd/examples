@@ -1,0 +1,1 @@
+../../version/c++11/improve/quick_exit.cpp

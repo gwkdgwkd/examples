@@ -1,0 +1,1 @@
+../../version/c++11/improve/inline_namespace.cpp
