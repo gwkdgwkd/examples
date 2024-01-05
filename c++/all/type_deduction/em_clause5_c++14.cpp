@@ -1,0 +1,1 @@
+../../book/effective_modern_c++/chapter2_auto/em_clause5.cpp

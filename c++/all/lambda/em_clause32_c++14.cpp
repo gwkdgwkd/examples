@@ -1,0 +1,1 @@
+../../book/effective_modern_c++/chapter6_lambda/em_clause32.cpp

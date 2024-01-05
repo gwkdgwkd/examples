@@ -1,0 +1,1 @@
+../../book/effective_modern_c++/chapter1_type_deduction/em_clause2.cpp

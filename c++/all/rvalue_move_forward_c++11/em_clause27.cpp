@@ -1,0 +1,1 @@
+../../book/effective_modern_c++/chapter5_rvalue_move_forward/em_clause27.cpp
