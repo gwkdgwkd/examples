@@ -63,12 +63,12 @@ namespace n1 {
 // [[attr6]]作用于goto语句。
 
 // [[attr1]] for(int i=0;i<top;i++){
-// }
+//           }
 // [[attr2]] return top;
 
 // [[attr1]] int func([[attr2]] int i,[[attr3]] int j) {
-// [[attr4]] return i+j;
-// }
+// [[attr4]]   return i+j;
+//           }
 // [[attr1]]作用于函数func,
 // [[attr2]]和[[attr3]]分别作用于整型参数i和j,
 // [[attr4]]作用于return语句。
@@ -115,7 +115,6 @@ void func1() {
 // 另外一个通用属性[[carries_dependency]]则跟并行情况下的编译器优化有关。
 // 主要是为了解决弱内存模型平台上使用memory_order_consume内存顺序枚举问题。
 // 该通用属性既可以标识函数参数，又可以标识函数的返回值。
-
 }  // namespace n1
 
 int main(int argc, char* argv[]) {

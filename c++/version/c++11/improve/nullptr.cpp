@@ -16,7 +16,7 @@
 // 它是C++为事先定义好的一个宏，并且它的值往往就是字面量0（#define NULL 0）。
 
 // C++中将NULL定义为字面常量0，虽然能满足大部分场景的需要，
-// 但个别情况下，它会导致程序的运行和预期不符:
+// 但个别情况下，它会导致程序的运行和预期不符：
 void isnull(void *c) { std::cout << "void *c" << std::endl; }
 void isnull(int n) { std::cout << "int n" << std::endl; }
 

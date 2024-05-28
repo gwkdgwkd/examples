@@ -7,8 +7,7 @@
 // 例如从int到double、从派生类到基类、从type *到void *、从double到Complex等。
 // type*是具体类型的指针（int*、double*、Student*等），它们都可以直接赋值给void*指针。
 // 而反过来是不行的，必须使用强制类型转换才能将void*转换为type*，
-// 例如，malloc()返回的是一个void
-// *指针，必须进行强制类型转换后才能赋值给指针变量。
+// 例如，malloc()返回的是一个void*指针，必须进行强制类型转换后才能赋值给指针变量。
 // 当隐式转换不能完成类型转换工作时，就必须使用强制类型转换了。
 // 强制类型转换的语法也很简单，只需要在表达式的前面增加新类型的名称，格式为：
 // (new_type) expression
@@ -32,7 +31,7 @@
 // 为了使潜在风险更加细化，使问题追溯更加方便，使书写格式更加规范，
 // C++对类型转换进行了分类，并新增了四个关键字来予以支持，它们分别是：
 // 1.static_cast 	      用于良性转换，一般不会导致意外发生，风险很低；
-// 2.const_cast 用于const与非const、volatile与非volatile之间的转换；
+// 2.const_cast         用于const与非const、volatile与非volatile之间的转换；
 // 3.dynamic_cast 	    借助RTTI，用于类型安全的向下转型（Downcasting）；
 // 4.reinterpret_cast 	高度危险的转换，这种转换仅仅是对二进制位的重新解释，
 //                      不会借助已有的转换规则对数据进行调整，但是可以实现最灵活的C++类型转换。

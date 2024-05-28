@@ -114,7 +114,7 @@ void func() {
   for (int i = 0; i < 10; ++i) {
     // 希望编译器能报出各种各样的警告信息，但是它根本没有，编译器当成下面这样：
     // if(a == static_cast< Array<int> >(b[i]))
-    if (a == b[i]) {  // a应该是a[i]
+    if (a == b[i]) {  // 编辑错误，a应该是a[i]
       std::cout << "a[" << i << "] == b[" << i << "]" << std::endl;
     } else {
       std::cout << "a[" << i << "] != b[" << i << "]" << std::endl;

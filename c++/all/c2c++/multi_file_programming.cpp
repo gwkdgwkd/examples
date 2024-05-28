@@ -26,18 +26,18 @@
 // 大多是已经编译好的二进制文件，其中可能仅包含.h文件，而没有.cpp文件。
 
 // 总之项目越大，多文件编程的优势越明显：
-// 项目─┐
-//       ├ student.h
-//       ├ student.cpp
-//       └ main.cpp
-// 项目─┐
-//       ├─ include ┐
-//       │           ├ student.h
-//       │           └ ...
-//       ├─ source ┐
-//        ...        ├ student.cpp
-//                   ├ main.cpp
-//                   └ ...
+//    ─┐
+//     ├ student.h
+//     ├ student.cpp
+//     └ main.cpp
+//    ─┐
+//     ├─ include ┐
+//     │          ├ student.h
+//     │          └ ...
+//     ├─ source ┐
+//     ...       ├ student.cpp
+//               ├ main.cpp
+//               └ ...
 
 // C或者C++程序的执行过程分为4步，依次是预处理、编译、汇编和链接。
 // 在执行C++项目时，头文件是不需要经历以上这4个阶段的，

@@ -98,7 +98,7 @@ void func() {
   auto result2 = lockAndCall(f2, f2m, nullptr);  // 正确
   auto result3 = lockAndCall(f3, f3m, nullptr);  // 正确
   // 使用nullptr是没问题的，当nullptr传给lockAndCall，
-  // ptr被推导 成std::nullptr_t，ptr再传给f3时，
+  // ptr被推导成std::nullptr_t，ptr再传给f3时，
   // std::nullptr_t可以隐式转换为任意类型的指针，也包括Widget*。
 }
 

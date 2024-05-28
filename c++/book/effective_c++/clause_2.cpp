@@ -103,7 +103,7 @@ void func2() {
 }
 }  // namespace n2
 
-// 有了const、enum和inline，对预处理器（特别是#define）的需求降低了，但并非完全消除。
+// 有了const、enum和inline，对预处理器特别是#define的需求降低了，但并非完全消除。
 // #include仍然是必须品，而#ifdef/#ifndef也继续扮演控制编译的重要角色，
 // 还不到预处理器全面隐退的时候。
 

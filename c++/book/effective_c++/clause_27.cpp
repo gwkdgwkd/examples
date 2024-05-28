@@ -66,7 +66,7 @@ class SpecialWindow1 : public Window {
 // 之所以需要dynameic_cast，通常是因为想在derived class对象上执行derived class操作函数，
 // 但手上却只有一个指向base的指针或引用。
 // 有两个一般性做法可以避免这个问题：
-// 1.使用容器并在其中保存执行derived class对象的指针;
+// 1.使用容器并在其中保存执行derived class对象的指针；
 // 2.在base class内提供virtual函数，可以通过base class指针或引用处理所有可能的各种派生类。
 
 // 绝对必须避免连串的dynamic_cast，有好多分支，每个分支都要执行dynameic_cast，可以用虚函数代替。
