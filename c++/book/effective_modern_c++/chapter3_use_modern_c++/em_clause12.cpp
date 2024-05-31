@@ -40,8 +40,9 @@ Base makeBase() {  // 工厂函数，返回右值
 void func() {
   Base w;  // 普通对象，左值
 
-  w.doWork();           // void Base::doWork() &
-  makeBase().doWork();  // void Base::doWork() &&
+  w.doWork();             // void Base::doWork() &
+  std::move(w).doWork();  // void Base::doWork() &&
+  makeBase().doWork();    // void Base::doWork() &&
 }
 }  // namespace test1
 
@@ -82,7 +83,7 @@ class Base {
   void mf4() const;
 };
 
-// Derived它没有任何虚函数重写，但代码是合法的，而且编译器不一定会有warnings：
+// Derived没有任何虚函数重写，但代码是合法的，而且编译器不一定会有warnings：
 class Derived1 : public Base {
  public:
   // mf1在Base基类声明为const，但是Derived派生类没有这个常量限定符：

@@ -412,7 +412,7 @@ class A {
   void testThis() {
     std::cout << "this :" << static_cast<void *>(this) << std::endl;
 
-    // this只能用在类的内部，通过this可以访问所有（private、protected、public）成员：
+    // this只能用在类的内部，通过this可以访问所有private、protected、public成员：
     this->a = 5;
     std::cout << this->a << " " << (*this).b << " " << this->getC()
               << std::endl;

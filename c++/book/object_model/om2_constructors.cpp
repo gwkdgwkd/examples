@@ -19,8 +19,7 @@ namespace test1 {
 // 在C++各个不同的编译模块中，编译器如何避免合成出多个默认构造函数呢？
 // 解决方法是把合成的默认构造函数、拷贝构造函数、析构函数、赋值操作符都以内联方式完成。
 // 一个内联函数有静态链接，不会被模块以外看到。
-// 如果函数太复杂，不适合做成内联，就会合成出一个explicit non-inline
-// static实体。
+// 如果函数太复杂，不适合内联，就会合成出一个explicit non-inline static实体。
 class A1 {
  public:
   A1() { std::cout << "A1" << std::endl; }
@@ -272,8 +271,8 @@ namespace test2 {
 // 2.被赋值，调用赋值操作符。
 // 与默认构造函数一样，如果没有声明一个拷贝构造函数，就会有隐式的声明或隐式的定义出现。
 // C++标准把拷贝构造函数区分为有用和无用两种，只有有用的实体才会被合成于程序之中。
-// 决定拷贝构造函数是否有用的标准在于：类是否展现出所谓的bitwise copy
-// semantics。
+// 决定拷贝构造函数是否有用的标准在于：
+// 类是否展现出所谓的bitwise copy semantics。
 
 // 什么时候一个类不展现出bitwise copy semantics呢？
 // 也就是说需要生成拷贝构造函数，有四种情况：
@@ -286,9 +285,9 @@ namespace test2 {
 // 如果编译器对于每一个新产生的对象的vptr不能成功而正确地设好其初值，将导致可怕的后果。
 // 因此，当编译器导入一个vptr到class中时，该class就不再展现bitwise semantics了。
 // 编译器需要合成出一个拷贝构造函数，以求将vptr适当地初始化。
-// 对于4，需要处理Virtual Base Class
-// Subobject，一个对象如果以另一个object作为初值， 而后者有一个Virtual Base
-// Class Subobject，那么bitwise copy semantics失效。
+// 对于4，需要处理Virtual Base Class Subobject，
+// 一个对象如果以另一个object作为初值，而后者有Virtual Base Class Subobject，
+// 那么bitwise copy semantics失效。
 // 编译器对于虚拟继承的支持承诺，都表示必须让派生对象中的Subobject位置在执行期就准备妥当。
 // 维护位置的完整性是编译器的责任，bitwise copy semantics可能会破坏这个位置，
 // 所以编译器必须在它自己合成出来的拷贝构造函数中做出仲裁。
@@ -514,7 +513,7 @@ class D2 : public B {
 void func() {
   // 2
 
-  // 初始化列表中次序：先所以的基类，然后是所以的成员对象，无论是基类还是成员对象，
+  // 初始化列表中次序：先所以的基类，然后是所有的成员对象，无论是基类还是成员对象，
   // 当多于一个时，是由成员声明次序决定，不是由初始化列表中的排列次序决定：
   D1 d1(1);
   // 1

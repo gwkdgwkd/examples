@@ -50,11 +50,11 @@ int main() {
   n1::HomeForSale h1, h2;
   // 当企图拷贝HomeForSale对象，编译会阻止他：
   // h1 = h2;
-  // HomeForSale h3(h1);
+  // n1::HomeForSale h3(h1);
 
-  n2::HomeForSale h4, h5;
+  // n2::HomeForSale h4, h5;
   // h4 = h5;
-  // HomeForSale1 h6(h4);
+  // n2::HomeForSale1 h6(h4);
 
   return 0;
 }
