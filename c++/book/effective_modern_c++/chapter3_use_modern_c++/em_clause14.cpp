@@ -138,8 +138,7 @@ struct pair {
 
 namespace n4 {
 // 对于一些函数，使其成为noexcept是很重要的，它们应当默认如是。
-// 在C++98，允许operator delete、operator
-// delete[]和析构函数抛出异常是糟糕的代码设计，
+// C++98允许operator delete、operator delete[]和析构函数抛出异常是糟糕的设计，
 // C++11将这种作风升级为语言规则，默认情况下，内存释放函数和析构函数都是隐式noexcept。
 // 不管是用户定义的还是编译器生成的都是noexcept，因此它们不需要声明noexcept。
 // 析构函数非隐式noexcept的情况仅当类的数据成员，包括继承的成员还有继承成员内的数据成员，

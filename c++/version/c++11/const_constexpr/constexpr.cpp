@@ -86,7 +86,7 @@ struct myType {
   constexpr myType(char *name, int age)
       : name(name),
         age(age){
- // constexpr修饰类的构造函数时，要求该构造函数的函数体必须为空，
+            // constexpr修饰类的构造函数时，要求该构造函数的函数体必须为空，
             // 且采用初始化列表的方式为各个成员赋值时，必须使用常量表达式。
         };
   // constexpr可用于修饰函数，而类中的成员方法就是位于类这命名空间中的函数，

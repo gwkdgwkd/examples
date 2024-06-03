@@ -7,7 +7,7 @@
 
 namespace n1 {
 // C++98中，在函数声明时，使用throw指定一个函数可以抛出异常的类型：
-void func1() { throw(5); }           // 可以抛出任何异常(默认)；
+void func1() { throw(5); }           // 默认的，可以抛出任何异常；
 void func2() throw();                // 不可以抛出任何异常；
 void func3() throw(char *, double);  // 只可以抛出char*和double类型异常。
 
@@ -150,7 +150,7 @@ void func() {
 
   // 从语法上讲，noexcept修饰符有两种形式：
   // void excpt_func() noexcept;  // 简单地在函数声明后加上noexcept关键字
-  // void excpt_func() noexcept (常量表达式);  // 可以接受一个常量表达式作为参数
+  // void excpt_func() noexcept(常量表达式);  // 可以接受一个常量表达式作为参数
   // 常量表达式的结果会被转换成一个bool类型的值。
   // 该值为true，表示函数不会抛出异常，反之，则有可能抛出异常。
   // 不带常量表达式的noexcept相当于声明了noexcept(true)，即不会抛出异常。

@@ -14,7 +14,7 @@
 namespace n1 {
 char greeting[] = "Hello";
 char* p1 = greeting;
-const char* p2 = greeting;  // char const* p = greeting;
+const char* p2 = greeting;  // char const* p2 = greeting;
 char* const p3 = greeting;
 const char* const p4 = greeting;
 
@@ -165,7 +165,7 @@ std::size_t A::length() const {
 }  // namespace n4
 
 // 请记住：
-// 1.声明为const可帮助编译器侦测出错误用法，
+// 1.声明为const可帮助编译器检测出错误用法，
 //   const可被施加于任何作用域内的对象、函数参数、函数返回类型、成员函数本体；
 // 2.编译器强制实施bitwise constness，但编写程序时应该使用概念上的常量性；
 // 3.当const和non-const成员函数实现相同时，令non-const调用const可避免重复，

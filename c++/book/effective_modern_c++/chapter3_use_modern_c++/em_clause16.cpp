@@ -149,7 +149,7 @@ namespace test3 {
 class Widget {
  public:
   // 这里有一个坑，对于需要同步的是单个的变量或者内存位置，使用std::atomic就足够了。
-  // 不过，一旦你需要对两个以上的变量或内存位置作为一个单元来操作的话，就应该使用互斥量：
+  // 不过，一旦需要对两个以上的变量或内存位置作为一个单元来操作的话，就应该使用互斥量：
   int magicValue() const {
     std::lock_guard<std::mutex> guard(m);
 
