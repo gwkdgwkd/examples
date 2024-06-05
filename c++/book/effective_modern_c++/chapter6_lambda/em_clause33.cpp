@@ -89,8 +89,8 @@ void func() {
     return fun(std::forward<decltype(param)>(param));
   };
 
-  f(i);
-  f(std::move(i));
+  f(i);             // lvalue
+  f(std::move(i));  // rvalue
 }
 }  // namespace n2
 

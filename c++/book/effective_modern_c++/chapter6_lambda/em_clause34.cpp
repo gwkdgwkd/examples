@@ -12,7 +12,7 @@
 // 这样的历史意味着，有些开发者已经有了十多年std::bind的开发经验，
 // 那么可能不太愿意放弃这么一个运作良好的工具，这可以理解，但是对于这个特定的情况，
 // 改变是有收益的，因为在C++11中，相对于std::bind，lambda几乎总是更好的选择，
-// 到了C++14,lambda不仅是优势变强，简直已成为不二之选。
+// 到了C++14，lambda不仅是优势变强，简直已成为不二之选。
 
 using namespace std::chrono;
 using namespace std::placeholders;
