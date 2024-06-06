@@ -12,7 +12,7 @@
 
 // 定制一个operator new，协助检查：
 // overruns，写入点在分配区块尾端之后；
-// underruns写入点在分配区块起始点之前。
+// underruns，写入点在分配区块起始点之前。
 static const int signature = 0xDEADBEEEF;
 typedef unsigned char Byte;
 void *operator new(size_t size) throw(std::bad_alloc) {
