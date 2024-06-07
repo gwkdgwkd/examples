@@ -39,6 +39,7 @@ void func() {
   // D1 d1;  // 没有全部实现纯虚函数，也无法创建对象
 }
 }  // namespace test1
+
 namespace test2 {
 class D : public Interface {  // 派生类必须实现纯虚函数才能被实例化
  public:

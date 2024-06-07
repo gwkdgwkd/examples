@@ -16,8 +16,7 @@ namespace n1 {
 
 // 名称的特殊处理（Name Mangling）
 // 一般而言，member的名称会被加上class名称，形成独一无二的命名。
-// 为了重载，名称还要加上它们的参数链表，目前C++编译器对name
-// mangling的做法还没统一。
+// 为了重载，名称还要加上参数链表，目前C++编译器对name mangling的做法还没统一。
 
 // Virtual Member Function(虚拟成员函数)
 // ptr->normalize();
@@ -120,7 +119,7 @@ class Point2d : public Point {
   //   是该函数实体会被拷贝到派生类的virtual table相对应的slot中；
   // 2.可以使用自己的函数实体，这表示它自己的函数实体地址必须放在对应的slot中；
   // 3.可以加入一个新的virtual function，这时候virtual table的尺寸会增加一个，
-  //   而新的函数实体被被放进该slot中。
+  //   而新的函数实体被放进该slot中。
 };
 class Point3d : public Point2d {
  public:
@@ -262,25 +261,30 @@ class Derived : public Base1, public Base2 {
 // 也就是说，offset的大小，以及把offset加到this指针上头的那一小段代码，
 // 必须有编译器插入到某个地方，问题是在哪个地方？
 // 比较有效率的解决方法是理由所谓的thunk。
-// 是一小段assembly码，用来以适当的offset值调整this指针和跳到virtual function去。
-// pbbase2_dtor_thunk:
+// 是一小段assembly码，用来以适当的offset值调整this指针和跳到virtual
+// function去。 pbbase2_dtor_thunk:
 //  this += sizeof(base1);
 //  Derived::~Derived(this);
-// thunk允许virtual table slot内含一个简单的指针，因此多重继承不需要空间上的额外负担。
-// slot中的地址可以指向virtual function，也可以指向thunk（如果需要调整this指针的话）。
-// 因此对于那些不需要调整this指针的virtual function而言，也就不需承载效率上的额外负担。
+// thunk允许virtual table
+// slot内含一个简单的指针，因此多重继承不需要空间上的额外负担。
+// slot中的地址可以指向virtual function，
+// 也可以指向thunk（如果需要调整this指针的话）。
+// 因此对于那些不需要调整this指针的virtual
+// function而言，也就不需承载效率上的额外负担。
 // 调整this指针的第二个额外负担就是，由于两种不同的可能：
 // 1.经由派生类（或第一个基类）调用；
-// 2.经由第二个（或其后继）基类调用，同一函数在virtual table中可能需要多个对应的slots，
+// 2.经由第二个（或其后继）基类调用，同一函数在virtual
+// table中可能需要多个对应的slots，
 //   Base1 *pbase1 = new Derived;
 //   Base2 *pbase2 = new Derived;
 //   delete pbase1;
 //   delete pbase2;
 //   虽然两个delete操作导致调用相同的派生类析构函数，
 //   但它们需要两个不同的vitrual table slots:
-//   pbase1不需要调整this，因为Base1是最左端的base class，已经指向了Derived的起始处。
-//   vitrual table slot放置的是真正的destructor地址。
-//   pbase2需要调整this指针，其vitrual table slot需要相关的thunk地址。
+//   pbase1不需要调整this，因为Base1是最左端的base
+//   class，已经指向了Derived的起始处。 vitrual table
+//   slot放置的是真正的destructor地址。 pbase2需要调整this指针，其vitrual table
+//   slot需要相关的thunk地址。
 // 在多重继承下，一个派生类内含n-1个额外的virtual tables，
 // n表示上一层次基类的数目，单一继承不会有额外的virtual tables。
 
@@ -300,8 +304,10 @@ void func() {
   pder->mumble();  // pder必须调整sizeof（Base1）个btyes
 
   // 3.发生于一个语言扩充性质之下：
-  //   允许虚函数返回值类型有所变化，可能是基类类型，也可能是publicly derived type。
-  //   Derived::clone()函数返回一个Derived class指针，默默改写了两个基类函数实体。
+  //   允许虚函数返回值类型有所变化，可能是基类类型，
+  //   也可能是publicly derived type。
+  //   Derived::clone()函数返回一个Derived class指针，
+  //   默默改写了两个基类函数实体。
   Base2 *pb1 = new Derived;
   //   当通过指向第二个基类的指针来调用clone()时，this指针的offset问题于是诞生：
   Base2 *pb2 = pb1->clone();
@@ -432,7 +438,8 @@ void func() {
 // 这种方法收到的批评是，每一个调用操作都得付出上述成本，
 // 微软把这个检查拿掉，导入一个所谓的vcall thunk。
 // faddr要不就是成员函数地址，要不是就是vcall thunk的地址。
-// 上面结构的另一个副作用是，当传递不变值的指针给memver function时，会产生临时对象。
+// 上面结构的另一个副作用是，当传递不变值的指针给memver
+// function时，会产生临时对象。
 // 许多编译器在自身内部根据不同的类特性提供多种指向member functions的指针形式。
 }  // namespace n4
 
