@@ -35,6 +35,7 @@ class Bird {
 };
 class Penguin : public Bird {};  // 企鹅是一种鸟，但实际不会飞
 }  // namespace test1
+
 namespace test2 {
 // 应该像下面这样，这样更能反映真正的意思：
 class Bird {};
@@ -44,6 +45,7 @@ class FlyingBird : public Bird {
 };
 class Penguin : public Bird {};
 }  // namespace test2
+
 namespace test3 {
 // 另一个思想派别的想法是，为企鹅重新定义fly函数，令它产生一个运行期错误。
 // 表明企鹅会飞，但尝试那么做是一种错误，企鹅不会飞的限制应该由编译器来实施。
@@ -89,7 +91,7 @@ void func() {
 
 // 请记住：
 // 1.public继承意味is-a；
-// 2.适用于base class身上的每一件事件一定也适用与derived class身上，
+// 2.适用于base class身上的每一件事也一定也适用与derived class身上，
 //   因为每一个derived class对象也都是一个base class对象。
 
 int main(int argc, char* argv[]) {
