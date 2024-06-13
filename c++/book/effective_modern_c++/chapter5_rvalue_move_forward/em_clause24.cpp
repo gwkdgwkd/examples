@@ -30,7 +30,7 @@ void f1(Widget&& param);  // 右值引用
 template <typename T>
 void f2(std::vector<T>&& param) {}  // 右值引用
 
-// 在模板f的内部，param的类型需要被推导：
+// 在模板的内部，param的类型需要被推导：
 template <typename T>
 void f3(T&& param) {}  // 通用引用
 
@@ -61,6 +61,7 @@ void func() {
   // f2(v);
   // cannot bind rvalue reference of type ‘std::vector<int>&&’ to lvalue of type
   // ‘std::vector<int>’
+  f2(std::move(v));
 }
 }  // namespace n1
 
@@ -104,7 +105,7 @@ namespace n3 {
 // 而它们在C++14中出现得更多，因为C++14的lambda表达式可以声明auto&&类型的形参。
 auto f = [](auto&& func, auto&&... params) {
   // func是一个通用引用，可以被绑定到任何可调用对象，无论左值还是右值。
-  // args是0个或者多个通用引用，它可以绑定到任意数目、任意类型的对象上。
+  // params是0个或者多个通用引用，它可以绑定到任意数目、任意类型的对象上。
   // 多亏了auto类型的通用引用，函数f可以对近乎任意函数进行调用：
   std::forward<decltype(func)>(func)(std::forward<delctype(params)>(params)...);
 };

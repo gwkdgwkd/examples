@@ -21,7 +21,7 @@ void f(T&& param) {
 void func1() {
   Widget w;  // 变量，左值
   f(w);      // 调用f并传入左值，T的推导结果类型为Widget&
-  f(widgetFactory());  // 调用f并传入左值，T的推导结果类型为Widget
+  f(widgetFactory());  // 调用f并传入右值，T的推导结果类型为Widget
 
   // 两个f的调用，传递的实参类型都为Widget，不同之处仅在于，一个是左值而另一个是右值，
   // 而这个不同之处却导致了针对模板形参T得出了不同的类型推导结果。

@@ -202,8 +202,8 @@ struct Widget {
 };
 
 namespace test1 {
-// 如果对要被拷贝到返回值的右值引用形参使用std::move，会把拷贝构造变为移动构造，
-// 也可以对要返回的局部对象应用同样的优化：
+// 如果对要被拷贝到返回值的右值引用形参使用std::move，
+// 会把拷贝构造变为移动构造，也可以对要返回的局部对象应用同样的优化：
 Widget makeWidget() {
   Widget w;
   return w;  // 拷贝w到返回值中

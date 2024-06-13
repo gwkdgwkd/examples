@@ -5,7 +5,7 @@
 
 // 为了了解move和forward，一种有用的方式是从它们不做什么这个角度来了解它们。
 // std::move不移动任何东西，std::forward也不转发任何东西。
-// 在运行时，它们不做任何事情。它们不产生任何可执行代码，一字节也没有。
+// 在运行时，它们不做任何事情，它们不产生任何可执行代码，一字节也没有。
 
 // std::move和std::forward仅仅是执行转换（cast）的函数，事实上是函数模板。
 // move无条件的将它的实参转换为右值，而forward只在特定情况满足时下进行转换。
@@ -102,7 +102,7 @@ void f(int&& rvalArg) { std::cout << "f(int&&)" << std::endl; }
 template <typename T>
 void fun(T&& param) {
   // std::forward是怎么知道它的实参是否是被一个右值初始化的。
-  // 简短的说，该信息藏在函数logAndProcess的模板参数T中。
+  // 简短的说，该信息藏在函数fun的模板参数T中。
   // 该参数被传递给了函数std::forward，它解开了含在其中的信息，详见条款28。
   f(std::forward<T>(param));
 }
