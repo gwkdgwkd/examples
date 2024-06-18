@@ -2,10 +2,9 @@
 
 // 考虑使用lazy evaluation（懒惰计算法）
 
-// 在计算机科学中，称这样的延迟为lazy evaluation（懒惰计算法）。
-// 当使用了lazy
-// evaluation后，采用此种方法的类将推迟计算工作直到系统需要这些计算的结果。 lazy
-// evaluation广泛适用于各种应用领域，所以将分四个部分讲述。
+// 在计算机科学中，称这样的延迟为lazy evaluation（懒惰计算法），
+// 采用此种方法的类将推迟计算工作直到系统需要这些计算的结果。
+// lazy evaluation广泛适用于各种应用领域，所以将分四个部分讲述。
 
 namespace n1 {
 // 引用计数
@@ -34,8 +33,8 @@ namespace n1 {
 // 应能够区别对待读调用和写调用，因为读取reference-counted string是很容易的，
 // 而写入这个string则需要在写入前对该string值制作一个新拷贝。
 // 如何判断调用operator[]的context是读取操作还是写入操作呢？
-// 残酷的事实是不可能判断出来，通过使用lazy evaluation和条款M30中讲述的proxy
-// class， 可以推迟做出是读操作还是写操作的决定，直到能判断出正确的答案。
+// 残酷的事实是不可能判断出来，通过使用lazy evaluation和条款M30中的proxy class，
+// 可以推迟做出是读操作还是写操作的决定，直到能判断出正确的答案。
 }  // namespace n1
 
 namespace n2 {
@@ -124,10 +123,10 @@ class LargeObject {
   std::string* field1Value;  // 不声明为mutable，因为老的编译器不支持
 };
 const std::string& LargeObject::field1() const {
-  // 声明指针fakeThis，其与this指向同样的对象但是已经去掉了对象的常量属性
+  // 声明指针fakeThis，其与this指向同样的对象但是已经去掉了对象的常量属性：
   LargeObject* const fakeThis = const_cast<LargeObject* const>(this);
   // 这个函数使用了const_cast，去除了*this的const属性。
-  // 如果你的编译器不支持cosnt_cast，可以使用老式C风格的cast：
+  // 如果编译器不支持cosnt_cast，可以使用老式C风格的cast：
   // LargeObject* const fakeThis = (LargeObject * const)this;
   if (field1Value == 0) {
     // 正确的，因为fakeThis指向的对象不是const：
@@ -160,7 +159,8 @@ class Matrix {};
 // cout << m3;
 // 打印m3所有的值，一切都完了，必须计算m3的全部数值。
 // 因为需要存储两个值之间的依赖关系，维护存储值、依赖关系或上述两者，
-// 重载操作符例如赋值符、拷贝操作和加法操作，所以lazy evaluation在数字领域应用得很多。
+// 重载操作符例如赋值符、拷贝操作和加法操作，
+// 所以lazy evaluation在数字领域应用得很多。
 // 另一方面运行程序时它经常节省大量的时间和空间。
 }  // namespace n3
 
@@ -168,12 +168,14 @@ class Matrix {};
 // 能避免不需要的对象拷贝，通过使用operator[]区分出读操作，
 // 避免不需要的数据库读取操作，避免不需要的数字操作，但是它并不总是有用。
 // 实际上，如果计算都是重要的，lazy evaluation可能会减慢速度并增加内存的使用，
-// 因为除了进行所有的计算以外，还必须维护数据结构让lazy evaluation尽可能地在第一时间运行。
+// 因为除了进行所有的计算以外，
+// 还必须维护数据结构让lazy evaluation尽可能地在第一时间运行。
 // 在某些情况下要求软件进行原来可以避免的计算，这时lazy evaluation才是有用的。
 // lazy evaluation对于C++来说没有什么特殊的东西，这个技术能被运用于各种语言里，
-// 所有的数据流语言例如著名的APL、dialects of Lisp，都把这种思想做为语言的一个基本部分。
+// 所有的数据流语言例如著名的APL、dialects of Lisp，
+// 都把这种思想做为语言的一个基本部分。
 // 然而主流程序设计语言采用的是eager evaluation，C++是主流语言。
 // 不过C++特别适合用户实现lazy evaluation，
-// 因为它对封装的支持使得能在类里加入lazy evaluation，而根本不用让类的使用者知道。
+// 因为它对封装的支持使得能在类里加入lazy evaluation，而根本不用让使用者知道。
 
 int main() { return 0; }

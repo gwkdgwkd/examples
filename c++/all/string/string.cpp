@@ -1,5 +1,6 @@
 #include <string.h>  // C风格字符串相关函数的头文件，比如strlen
 
+#include <cstring>  // 也是C风格相关函数的头文件
 #include <iostream>
 #include <string>  // string类库的头文件
 

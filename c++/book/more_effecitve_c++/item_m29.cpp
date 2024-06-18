@@ -366,13 +366,14 @@ class RCObject {
   RCObject& operator=(const RCObject& rhs) { return *this; }
 
   // removeReference不但负责减少对象的refCount值，还负责当refCount值为0时析构对象。
-  // 后者是通过delete this来实现的，如Item
-  // M27中解释的，这只当知道*this是堆对象时才安全。
-  // 要让这个类正确，必须确保RCObject只能被构建在堆中，实现这一点的常用方法见Item
-  // M27。 另外一个习惯方法：RCObject被设计为只作被引用计数的值对象的基类使用，
+  // 后者是通过delete this来实现的，
+  // 如Item M27中解释的，这只当知道*this是堆对象时才安全。
+  // 要让这个类正确，必须确保RCObject只能被构建在堆中，
+  // 实现这一点的常用方法见Item M27。
+  // 另外一个习惯方法：RCObject被设计为只作被引用计数的值对象的基类使用，
   // 而这些值对象应该只通过灵巧指针RCPtr引用。
   // 此外，值对象应该只能由值会共享的对象来实例化，它们不能被按通常的方法使用。
-  // 在例子中，值对象的类是StringValue，通过将它申明为String的私有而限制其使用。
+  // 在例子中，值对象的类是StringValue，通过将它声明为String的私有而限制其使用。
   // 只有String可以创建StringValue，所以String的作者应该确保这些对象都是通过new产成的。
   // 于是，限制RCObject只能在堆上创建的方法就是指定一组满足这个要求的类，
   // 并确保只有这些类能创建RCObject对象。
@@ -444,7 +445,7 @@ class RCPtr {
 
 class String {
  public:
-  // 不用实现拷贝构造函数、赋值运算在哪里和析构函数：不再需要那些函数了！
+  // 没有实现拷贝构造函数、赋值运算符和析构函数：不再需要那些函数了！
   // 确实，String对象的拷贝仍然被支持，
   // 并且，这个拷贝将正确处理藏在后面的被引用计数的StringValue对象，
   // 但String类不需要写下哪怕一行代码来让它发生。
@@ -600,7 +601,7 @@ class RCIPtr {
   }
 
   // RCIPtr与RCPtr只两处不同：
-  // 1.RCPtr对象直接指向值对象，而RCIptr对象通过中间层的CountHolder对象指向值对象；
+  // 1.RCPtr对象直接指向值对象，而RCIPtr对象通过中间层的CountHolder对象指向值对象；
   // 2.RCIPtr重载了operator->和operator*，当有对被指向的对象的非const的操作时，
   //   写时拷贝自动被执行。
 };
@@ -634,11 +635,13 @@ class RCWidget {
  private:
   RCIPtr<Widget> value;
 };
-// 注意RCWidget的构造函数是怎么用它的参数调用Widget的构造函数的，通过new，见Item M8；
-// RCWidget的doThis怎么调用Widget的doThis函数的；
-// 以及RCWidget的showThat怎么返回Widget的showThat的返回值的。
-// 同样要注意RCWidget没有申明拷贝构造函数和赋值操作函数，也没有析构函数。
-// 如同String类一样，它不需要这些函数，感谢于RCIPtr，RCWidget的默认版本将完成正确的事情。
+// 注意：
+// 1.RCWidget构造函数是怎么用参数调用Widget构造函数的，通过new，见Item M8；
+// 2.RCWidget的doThis怎么调用Widget的doThis函数的；
+// 3.RCWidget的showThat怎么返回Widget的showThat的返回值的；
+// 4.RCWidget没有生明拷贝构造函数和赋值操作函数，也没有析构函数，
+//   如同String类一样，它不需要这些函数，感谢于RCIPtr，
+//   RCWidget的默认版本将完成正确的事情。
 
 void func() {
   RCWidget w1(1);

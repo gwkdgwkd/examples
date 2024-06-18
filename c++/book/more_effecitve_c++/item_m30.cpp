@@ -29,7 +29,7 @@ class Array2D {
  public:
   Array2D(int dim1, int dim2) {}
 
-  // 最初的冲动可能是申明一个operator[][]函数：
+  // 最初的冲动可能是生明一个operator[][]函数：
   // T& operator[][](int index1, int index2);
   // const T& operator[][](int index1, int index2) const;
   // 然而并没有operator[][]这种东西，所有可以重载的运算符见Item M7。
@@ -201,7 +201,7 @@ void func() {
   Array<int> a(10);
   Array<int> b(10);
 
-  // 事实上仍旧能够安心地构造Array对象，不过这样做能够避免类型转换:
+  // 事实上仍旧能够安心地构造Array对象，不过这样做能够避免类型转换：
   for (int i = 0; i < 10; ++i) {
     // 为了调用operator==函数，编译器要求Array<int>对象在==右侧，
     // 但是不存在一个参数为int的单参数构造函数。
@@ -273,7 +273,7 @@ void func() {
 
 namespace test2 {
 // 也许不可能在operator[]内部区分左值还是右值操作，但仍然能区别对待读操作和写操作，
-// 如果将判断读还是写的行为推迟到知道operator[]的结果被怎么使用之后的话。
+// 如果将判断读还是写的行为推迟到直到operator[]的结果被怎么使用之后的话。
 // 所需要的是有一个方法将读或写的判断推迟到operator[]返回之后。
 // 这是lazy原则（见Item M17）的一个例子。
 

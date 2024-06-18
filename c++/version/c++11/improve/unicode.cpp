@@ -22,10 +22,9 @@ namespace n1 {
 // 导致使用wchar_t的代码在不同平台间移植时，可能出现问题。
 
 // 这一状况在C++11中得到了一定的改善，从此Unicode字符的存储有了统一类型：
-// 1.char16_t：用于存储UTF-16编码的Unicode字符。
-// 2.char32_t：用于存储UTF-32编码的Unicode字符。
-// 3.至于UTF-8编码的Unicode数据，
-//   C++11还是使用了8bits宽度的char类型数组来表示。
+// 1.char16_t用于存储UTF-16编码的Unicode字符；
+// 2.char32_t用于存储UTF-32编码的Unicode字符；
+// 3.UTF-8编码的Unicode数据，C++11使用了8bits宽度的char类型数组来表示。
 
 void func() {
   // C++98中有两种定义字符串的方式：
@@ -105,7 +104,7 @@ void func2() {
   // 原因是使用编译选项-finput-charset=utf-8指定代码文件编码为UTF-8，
   // 而实际上代码文件编码为GBK，导致编译器出现错误的认知。
   // 如果使用-finput-charset=gbk，
-  // 那么编译器在编译时会将GBK编码的“你好”转换为UTF-8编码，
+  // 那么编译器在编译时会将GBK编码的你好转换为UTF-8编码，
   // 正确输出E4 BD A0 E5 A5 BD
 }
 

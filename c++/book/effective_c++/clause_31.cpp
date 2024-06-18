@@ -49,7 +49,8 @@ class Person {
 // 1.string不是class，它是个typedef，前置声明错了，
 //   正确的前置声明比较复杂，因为涉及额外的template，然而那并不要紧，
 //   因为本来就不该尝试手工声明一部分标准程序库，应该仅仅使用适当的#incldue完成目标。
-// 2.编译器必须在编译期间知道对象的大小，怎么知道呢？唯一办法就是查看对象的定义。
+// 2.编译器必须在编译期间知道对象的大小才能分配内存，怎么知道呢？
+//   唯一办法就是查看对象的定义。
 int main() {
   int x;
   Person p(params);
@@ -172,7 +173,7 @@ shared_ptr<Person> create(const string& name,
 //   从函数声明所在的头文件移到内含函数调用的客户文件，
 //   便可将并非正真必要的类型定义与客户端的编译依赖性去除掉。
 // 3.为声明和定义提供不同的头文件，需要两个头文件，一个用于声明，一个用于定义。
-//   如果有个声明被改来，两个文件都得改。
+//   如果有个声明被修改，两个文件都得改。
 //   程序库客户应该总是#include一个声明文件而非前置声明若干函数。
 //   #include "datefwd.h"  // 参考C++标准程序库文件的<iosfwd>。
 //   Date today();
@@ -195,12 +196,12 @@ shared_ptr<Person> create(const string& name,
 
 // 最后，不论Handle class还是Interface class，一旦脱离inline函数都无法有太大作为。
 // 条款30解释了函数本体为了被inline必须置于头文件内，
-// 但Handle和Interface 这是特别被设计出来的，用来隐藏实现细节的，如函数本体。
+// 但Handle和Interface class是被特别设计出来的，用来隐藏实现细节的，如函数本体。
 
 // 如果因为若干额外成本便不考虑Handle class和Interface class，将是严重的错误。
 
 // 请记住：
-// 1.支持编译依存性最小化的一般构想是：相依于声明，不要相依于定义；
+// 1.支持编译依存性最小化的一般构想是：依赖于声明，不要依赖于定义；
 // 2.基于此构想的两个手段是handle class和interface class；
 // 3.程序库头文件应该以完全且仅有声明的形式存在，不论是否涉及template都适用。
 
