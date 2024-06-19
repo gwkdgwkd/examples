@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 
+#include "helper.h"
+
 // decltype是C++11新增的一个关键字，它和auto的功能一样，
 // 都用来在编译时期进行自动类型推导，是declare type的缩写。
 // 既然已经有了auto关键字，为什么还需要decltype关键字呢？
@@ -14,22 +16,6 @@
 // 其中，varname表示变量名，value表示赋给变量的值，exp表示一个表达式。
 
 // decltype推导过程是在编译期完成的，并且不会真正计算表达式的值。
-
-#include <cxxabi.h>
-const std::string GetClearName(const char *name) {
-  int status = -1;
-  char *clearName = abi::__cxa_demangle(name, NULL, NULL, &status);
-  const char *const demangledName = (status == 0) ? clearName : name;
-  std::string ret_val(demangledName);
-  free(clearName);
-  return ret_val;
-}
-
-template <typename T>
-void printType(T val) {
-  std::cout << typeid(T).name() << " " << GetClearName(typeid(T).name())
-            << std::endl;
-}
 
 namespace n1 {
 // 当使用decltype(exp)获取类型时，根据以下三条规则得出结果：

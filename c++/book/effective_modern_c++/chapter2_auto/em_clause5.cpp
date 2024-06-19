@@ -99,7 +99,7 @@ void func() {
   }
 
   // 上面代码看上去合理，但有一个问题：
-  // std::unorder_map的key是const，std::pair不是std::pair<std::string,int>，
+  // std::unorder_map的key是const，不是std::pair<std::string,int>，
   // 而是std::pair<const std::string,int>，但这不是p的声明类型，
   // 后果就是编译器竭尽全力把哈希表中的std::pair<const std::string,int>转换，
   // 转成p声明的类型std::pair<std::string,int>。

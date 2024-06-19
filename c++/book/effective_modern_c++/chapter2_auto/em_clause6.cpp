@@ -40,7 +40,7 @@ void func2() {
   auto hightPriority = features(w)[5];  // 换成auto
   processWidget(w, hightPriority);  // 行为未定义，highPriority含有悬空指针
 
-  // 和前面一样,features返回了一个std::vector<bool>对象，然后针对该对象执行operator[]，
+  // 和前面一样，features返回了一个std::vector<bool>对象，然后针对该对象执行operator[]，
   // 然后，operator[]返回一个std::vector<bool>::reference类型的对象，从这里开始不一样，
   // auto会把highPriority的类型推导成std::vector<bool>::reference，这么一来，
   // highPriority的值就完全不可能会是features所返回的std::vector<bool>对象的第5个比特了，
