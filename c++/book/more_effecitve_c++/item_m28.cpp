@@ -92,6 +92,7 @@ class SmartPtr {
  private:
   T* pointee;  // 智能指针所指的真正对象
 };
+
 class C {
  public:
   C(int d = 0) : data(d) { std::cout << "C" << std::endl; }
@@ -151,7 +152,7 @@ void func2() {
   print2(std::cout, sp);          // 5
   std::cout << *sp << std::endl;  // 5
   print1(std::cout, sp);          // 5
-  // std::cout << *sp4 << std::endl;  // 崩溃
+  // std::cout << *sp << std::endl;  // 崩溃
 }
 
 void func3() {
@@ -310,7 +311,7 @@ C merge(const C& c1, const C& c2) {}
 void func3() {
   // 通常，智能指针提供的智能行为特性是设计中的主要组成部分，
   // 所以允许用户使用dumb指针会导致灾难性的后果。
-  // 甚至即使你提供一个从智能指针到dumb指针的隐式转换操作符，
+  // 甚至即使提供一个从智能指针到dumb指针的隐式转换操作符，
   // 智能指针也不能真正地做到与dumb指针互换。
   // 因为从智能指针到dumb指针的转换是用户定义类型转换，
   // 在同一时间编译器进行这种转换的次数不能超过一次。
@@ -374,6 +375,7 @@ class D2 : public Base {
  public:
   virtual void show() const { std::cout << "D2::show" << std::endl; }
 };
+
 namespace test1 {
 void show(const Base* pmp, int numTimes) {
   for (int i = 1; i <= numTimes; ++i) {
@@ -404,10 +406,10 @@ void func2() {
   // show(d2ptr, 2);  // 报错
 
   // 既然智能指针这么聪明，为什么不能编译这些代码呢？
-  // 因为不能把SmartPtr<D>或SmartPtr<DD>转换成SmartPtr<Base>。
+  // 因为不能把SmartPtr<D1>或SmartPtr<D2>转换成SmartPtr<Base>。
   // 从编译器的观点来看，这些类之间没有任何关系。
   // 为什么编译器的会这样认为呢？
-  // 毕竟SmartPtr<D>或SmartPtr<DD>不是从SmartPtr<Base>继承过来的，
+  // 毕竟SmartPtr<D1>或SmartPtr<D2>不是从SmartPtr<Base>继承过来的，
   // 这些类之间没有继承关系，编译器不能把对象转换成完全不同的另一种类型的对象。
 }
 
@@ -522,10 +524,10 @@ void func1() {
   show(d1ptr, 2);
   show(d2ptr, 2);
 
-  // D::show
-  // D::show
-  // DD::show
-  // DD::show
+  // D1::show
+  // D1::show
+  // D2::show
+  // D2::show
 
   // 复制构造函数没写好，导致崩溃：
   // free(): double free detected in tcache 2
@@ -657,8 +659,7 @@ class SmartPtr : public SmartPtrToConst<T> {
 // 一种在C世界里的老式武器可以解决这个问题，这就是union，它在C++中同样有用。
 // union在protected中，所以所以两个类都可以访问它，
 // 它包含两个必须的dumb指针类型，这就是union美丽的地方。
-// 当然两个类的成员函数必须约束它们自己仅仅使用适合的指针，
-// 这是使用union所冒的风险。
+// 当然两个类的成员函数必须约束它们自己仅仅使用适合的指针，这是使用union所冒的风险。
 // 利用这种设计，能够获得所要的行为特性：
 SmartPtr<int> p1(new int(6));
 // SmartPtrToConst<const int> p2(p1);

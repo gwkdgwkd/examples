@@ -13,6 +13,7 @@ Investment *createInvestment() { return new (Investment); };
 void f() {
   Investment *pInv = createInvestment();
   // ...
+
   // 若干情况下，f可能无法删除它得自createInvestment的对象：
   // 1.这个区域有一个过早return语句；
   // 2.createInvestment和delete位于循环内时，continue和goto语句过早退出；
@@ -60,7 +61,7 @@ void f1() {
 // 因为vector和string几乎总是可以取代动态分配的数组。
 
 // 请记住：
-// 1.为防止资源泄露，请使用RAII对象，在构造函数中获得资源并在析构函数中释放资源。
+// 1.为防止资源泄露，请使用RAII对象，在构造函数中获得资源并在析构函数中释放资源；
 // 2.两个常被使用的RAII class分别是shared_ptr和auto_ptr，
 //   前者比较好，copy行为比较直观，后者复制动作会使被复制的对象指向null。
 

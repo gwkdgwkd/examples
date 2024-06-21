@@ -132,7 +132,7 @@ Widget::Widget() : pImpl(make_unique<Impl>()) {}
 namespace n4 {
 // 为了解决这个问题，只需要确保在编译器生成销毁std::unique_ptr<Widget::Impl>的代码之前，
 // Widget::Impl已经是一个完成类型，当编译器看到它的定义的时候，该类型就成为完成类型了。
-// 但是 Widget::Impl的定义在widget.cpp里。
+// 但是Widget::Impl的定义在widget.cpp里。
 // 成功编译的关键，就是在widget.cpp文件内，让编译器在看到Widget的析构函数实现之前，
 // 也即编译器插入的，用来销毁unique_ptr这个数据成员的代码的那个位置，先定义Widget::Impl。
 
@@ -160,7 +160,7 @@ Widget::Widget() : pImpl(make_unique<Impl>()) {}
 Widget::~Widget() {}
 
 // 这样就可以了，增加的代码也最少，声明Widget析构函数只是为了在widget.cpp写出它的定义，
-// 但是如果你想强调编译器自动生成的析构函数会做和你一样正确的事情，
+// 但是如果想强调编译器自动生成的析构函数会做和你一样正确的事情，
 // 可以直接使用=default定义析构函数体：
 // Widget::~Widget() = default;  // 代码效果一致
 }  // namespace n4

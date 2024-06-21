@@ -151,10 +151,10 @@ void func5() {
 void func6() {
   std::shared_ptr<A> p(new A());
   std::shared_ptr<A> p1 = p;
-  std::cout << "p count: " << p.use_count() << std::endl;    // 1
-  std::cout << "p1 count: " << p1.use_count() << std::endl;  // 1
+  std::cout << "p count: " << p.use_count() << std::endl;    // 2
+  std::cout << "p1 count: " << p1.use_count() << std::endl;  // 2
   p = nullptr;
-  std::cout << "p count: " << p.use_count() << std::endl;    // 1
+  std::cout << "p count: " << p.use_count() << std::endl;    // 0
   std::cout << "p1 count: " << p1.use_count() << std::endl;  // 1
 }
 }  // namespace n1
@@ -166,12 +166,9 @@ namespace n2 {
 // operator->()   重载->号，当智能指针指向的数据类型为自定义的结构体时，
 //                通过->运算符可以获取其内部的指定成员。
 // swap() 	      交2个相同类型shared_pt智能指针的内容。
-// reset() 	      当函数没有实参时，
-//                该函数会使当前shared_ptr所指堆内存的引用计数减1，
-//                同时将当前对象重置为一个空指针；
-//                当为函数传递一个新申请的堆内存时，
-//                则调用该函数的shared_ptr对象会获得该存储空间的所有权，
-//                并且引用计数的初始值为1。
+// reset() 	      当函数没有实参时会使shared_ptr所指堆内存的引用计数减1，
+//                同时将当前对象重置为一个空指针；当为函数传递一个新申请的堆内存时，
+//                则调用shared_ptr的对象会获得该存储空间的所有权，并且引用计数为1。
 // get() 	        获得shared_ptr对象内部包含的普通指针。
 // use_count() 	  返回同当前shared_ptr对象，包括它，
 //                指向相同的所有shared_ptr对象的数量。
@@ -289,6 +286,7 @@ void func1() {
   // munmap_chunk(): invalid pointer
   // 已放弃 (核心已转储)
 }
+
 void func2() {
   // 对于申请的动态数组，可以使用C++11中提供的default_delete<T>模板类：
   std::shared_ptr<A> p(new A[2], std::default_delete<A[]>());
@@ -298,6 +296,7 @@ void func2() {
   // delete A
   // delete A
 }
+
 void deleteA(A* p) {  // 自定义释放规则
   std::cout << "run func deletorA" << std::endl;
   delete[] p;
@@ -312,6 +311,7 @@ void func3() {
   // delete A
   // delete A
 }
+
 void func4() {
   // 使用lambda表达式：
   std::shared_ptr<A> p(new A[2], [](A* p) {
@@ -336,6 +336,7 @@ void func1() {
   // 错误，导致两次释放同一块内存：
   // free(): double free detected in tcache 2
 }
+
 A* getA() { return new A(); }
 void func2() {
   std::shared_ptr<A> p1(getA());  // 可以管理指针

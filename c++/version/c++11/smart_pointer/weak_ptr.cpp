@@ -55,8 +55,7 @@ void func() {
 
 namespace n2 {
 // weak_ptr模板类提供的成员方法：
-// operator=()  重载=赋值运算符，
-//              使得weak_ptr指针可以用weak_ptr或shared_ptr指针赋值。
+// operator=()  重载=赋值运算符，可以用weak_ptr或shared_ptr给weak_ptr赋值。
 // swap(x) 	    其中x表示一个同类型的weak_ptr类型指针，
 //              该函数可以互换2个同类型weak_ptr指针的内容。
 // reset() 	    将当前weak_ptr指针置为空指针。
@@ -83,40 +82,40 @@ void func1() {
 }
 
 void func2() {
-  std::shared_ptr<int> p1(new int(5));
-  std::weak_ptr<int> wp1(p1);
+  std::shared_ptr<int> p(new int(5));
+  std::weak_ptr<int> wp1(p);
   std::cout.setf(std::ios_base::boolalpha);
-  std::cout << wp1.expired() << " " << wp1.use_count() << " " << p1.use_count()
+  std::cout << wp1.expired() << " " << wp1.use_count() << " " << p.use_count()
             << std::endl;  // false 1 1
 
   wp1.reset();
-  std::cout << wp1.expired() << " " << wp1.use_count() << " " << p1.use_count()
+  std::cout << wp1.expired() << " " << wp1.use_count() << " " << p.use_count()
             << std::endl;  // true 0 1
 
-  std::weak_ptr<int> wp2(p1);
-  std::cout << wp2.expired() << " " << wp2.use_count() << " " << p1.use_count()
+  std::weak_ptr<int> wp2(p);
+  std::cout << wp2.expired() << " " << wp2.use_count() << " " << p.use_count()
             << std::endl;  // false 1 1
 
-  p1.reset();
-  std::cout << wp2.expired() << " " << wp2.use_count() << " " << p1.use_count()
+  p.reset();
+  std::cout << wp2.expired() << " " << wp2.use_count() << " " << p.use_count()
             << std::endl;  // true 0 0
 }
 
 void func3() {
-  std::shared_ptr<int> p1(new int(6));
-  std::weak_ptr<int> wp1(p1);
+  std::shared_ptr<int> p(new int(6));
+  std::weak_ptr<int> wp1(p);
   std::cout.setf(std::ios_base::boolalpha);
   std::cout << wp1.expired() << " " << *(wp1.lock()) << std::endl;  // false 6
 
   wp1.reset();
   std::cout << wp1.expired() << std::endl;  // true
 
-  std::weak_ptr<int> wp2(p1);
+  std::weak_ptr<int> wp2(p);
   *(wp2.lock()) = 7;
   std::cout << wp2.expired() << " " << *(wp2.lock().get()) << std::endl;
   // false 7
 
-  p1.reset();
+  p.reset();
   std::cout << wp2.expired() << std::endl;  // true
 }
 }  // namespace n2

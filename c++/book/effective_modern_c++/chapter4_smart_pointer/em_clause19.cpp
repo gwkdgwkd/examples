@@ -162,7 +162,7 @@ namespace n3 {
 // std::shared_ptr给我们上了两堂课：
 // 1.避免传给std::shared_ptr构造函数原始指针，通常替代方案是使用std::make_shared，
 //   不过上面例子中，使用了自定义删除器，用std::make_shared就没办法做到；
-// 2.如果你必须传给std::shared_ptr构造函数原始指针，直接传new出来的结果，不要传指针变量。
+// 2.如果必须传给std::shared_ptr构造函数原始指针，直接传new出来的结果，不要传指针变量。
 
 void func() {
   std::shared_ptr<Widget> spw1(new Widget, loggingDel);  // 使用new的结果

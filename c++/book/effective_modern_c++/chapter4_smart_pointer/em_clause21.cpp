@@ -69,8 +69,8 @@ void func1() {
   // 2.负责管理new出来指针的std::shared_ptr<Widget>构造函数必须被执行；
   // 3.computePriority必须运行。
 
-  // 编译器不需要按照执行顺序生成代码，new
-  // Widget必须在shared_ptr的构造函数被调用前执行，
+  // 编译器不需要按照执行顺序生成代码，
+  // new Widget必须在shared_ptr的构造函数被调用前执行，
   // 因为new出来的结果作为构造函数的实参，但computePriority可能在之前，之后，或之间执行。
   // 也就是说，编译器可能按照这个执行顺序生成代码：
   // 1.执行new Widget；

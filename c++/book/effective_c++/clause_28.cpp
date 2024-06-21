@@ -31,8 +31,7 @@ class Rectangle {
   // Rectangle的客户必须能够计算Rectangle的范围，所以提供下面两个函数：
   Point &upperLeft() const { return pData->ulhc; }
   Point &lowerRight() const { return pData->lrhc; }
-  // 根据条款20（以引用的方式传递比by
-  // value方式传递更高效），所以上面函数返回引用。
+  // 根据条款20（以引用的方式传递比by value方式传递更高效），所以函数返回引用。
   // 这样设计可以通过编译，但却是错误的，实际上它是自我矛盾的：
   // 1.一方面upperLefr和lowerRight为const成员函数，因为只提供了获取能力，而不让修改；
   // 2.另一方面两个函数都返回引用指向内部数据，调用者可以通过这些引用更改内部数据。
