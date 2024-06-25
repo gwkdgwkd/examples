@@ -282,7 +282,7 @@ volatile std::atomic<int> vai;  // 针对vai的操作时原子的，并且不可
 // 这与在std::atomic和volatile之间进行的选择有着非常不同的性质。
 
 // 要记住的东西：
-// 1.std::atomic用于多线程访问的数据，且不用互斥量，他是撰写并发软件的工具；
+// 1.std::atomic用于多线程访问的数据，且不用互斥量，它是撰写并发软件的工具；
 // 2.volatile用于读写操作不可以被优化掉的内存，它是在面对特种内存时使用的工具。
 
 int main() { return 0; }

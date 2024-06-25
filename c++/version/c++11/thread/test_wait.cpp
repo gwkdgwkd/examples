@@ -135,6 +135,7 @@ void func() {
   // wait第二个参数返回值不为真，一直阻塞。
 }
 }  // namespace test1
+
 namespace test2 {
 void func() {
   flag = true;

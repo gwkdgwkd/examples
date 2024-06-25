@@ -62,7 +62,7 @@ namespace n2 {
 // 使用的都是线程中的同一个变量，也印证了thread_local变量会自动static。
 void f(const std::string& thread_name) {
   for (int i = 0; i < 3; ++i) {
-    thread_local int x = 1;
+    thread_local int x = 1;  // 自动static
     x++;
     std::lock_guard<std::mutex> lock(cout_mutex);
     std::cout << "thread[" << thread_name << "]: x = " << x << std::endl;

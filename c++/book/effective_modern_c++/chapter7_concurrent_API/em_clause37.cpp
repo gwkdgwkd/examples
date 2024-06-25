@@ -82,7 +82,7 @@ bool doWork(std::function<bool(int)> filters, int maxVal = tenMillion) {
   //   在doWork调用方此后的语句中，在某个时刻，会调用其他函数，
   //   而至少会有一个函数可能会使用一部分或者全部doWork栈帧占用过的内存，
   //   不妨把这个函数称为f，当f运行时，doWork发起的lambda式依然在异步执行，
-  //   该lambda式在原先的栈上对goodVals调用push_back,不过那已是在f的栈帧中了，
+  //   该lambda式在原先的栈上对goodVals调用push_back，不过那已是在f的栈帧中了，
   //   这样的调用会修改过去属于goodVals的内存，而意味着从f的视角看，
   //   栈帧上的内存内容会莫名奇妙地改变。
 
@@ -170,10 +170,10 @@ bool doWork(std::function<bool(int)> filters, int maxVal = tenMillion) {
                  }
                }),
                ThreadRAII::DtorAction::join);
-  // 择在ThreadRAII析构函数中对异步执行线程调用join。
+  // 选择在ThreadRAII析构函数中对异步执行线程调用join。
   // 因为之前已经看到了，调用detach函数会导致噩梦般的调试。
   // 之前也看到过join会导致性能异常，但detach导致的未定义行为、
-  // 裸std::thread产生的程序终止和性能异常之间做出选择，
+  // 可在std::thread产生的程序终止和性能异常之间做出选择，
   // 性能异常也是权衡之下选取的弊端最小的一个。
 
   auto nh = t.getThread().native_handle();

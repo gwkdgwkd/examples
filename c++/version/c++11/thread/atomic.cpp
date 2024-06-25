@@ -119,6 +119,7 @@ void func1() {
   ai3 = 10;
   // ai3 = ai1;  // 不支持赋值运算符号
 }
+
 void func2() {
   std::atomic_int ai1{10};
   std::atomic_int ai2;
@@ -132,6 +133,7 @@ void func2() {
   std::cout << "ai1 is " << ai1 << std::endl;  // 36，把ai2换给了ai1
   std::cout << "ai2 is " << ai2 << std::endl;  // 36，ai2不变
 }
+
 void func3() {
   std::atomic_int ai1{10};
   std::atomic_int ai2{10};

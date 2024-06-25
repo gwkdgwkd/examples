@@ -7,7 +7,7 @@
 #include <vector>
 
 // 保护共享数据结构的最基本的方式，是使用C++标准库提供的互斥量。
-// mutex（互斥量）的种类:
+// mutex（互斥量）的种类：
 // 1.std::mutex，最基本的mutex类，提供了独占所有权的特性，
 //   即不支持递归地对std::mutex对象上锁；
 // 2.std::recursive_mutex，递归mutex类；
@@ -411,6 +411,7 @@ void func() {
   // 结束时析构unique会解锁
 }
 }  // namespace test4
+
 namespace test5 {
 // lock_guard不能移动，unique_lock可以，它们都不可以复制。
 void func() {

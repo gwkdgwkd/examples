@@ -260,7 +260,6 @@ namespace n5 {
 
 std::mutex m;
 namespace test1 {
-std::mutex m;
 std::condition_variable cv;
 void f() {
   std::unique_lock<std::mutex> lck(m);
@@ -276,7 +275,6 @@ void func() {
 }  // namespace test1
 
 namespace test2 {
-std::mutex m;
 std::condition_variable_any cv;
 void f() {
   std::unique_lock<std::mutex> lck(m);
@@ -291,7 +289,6 @@ void func() {
 }  // namespace test2
 
 namespace test3 {
-std::mutex m;
 std::condition_variable_any cv;
 void f() {
   m.lock();
@@ -310,7 +307,6 @@ namespace test4 {
 // 1.cv_status::no_timeout，wait_for或者wait_until没有超时；
 // 2.cv_status::timeout，wait_for或者wait_until超时。
 
-std::mutex m;
 std::condition_variable cv;
 bool ready = false;
 void f1(int id) {
