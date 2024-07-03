@@ -139,8 +139,8 @@ class CoutPrinter : public Printer {
 };
 void func() {
   // CoutPrinter().print("Hello ").SetConsoleColor(5).println("Printer!");
-  //   前半段CoutPrinter().print("Hello ")调用的是Printer实例，
-  //   后面接着SetConsoleColor(5)又需要调用CoutPrinter实例，这样编译器就会报错。
+  // 前半段CoutPrinter().print("Hello ")调用的是Printer实例，
+  // 后面接着SetConsoleColor(5)又需要调用CoutPrinter实例，这样编译器就会报错。
 }
 }  // namespace test1
 

@@ -102,7 +102,6 @@ void func() {
   std::cout << Func(&i) << std::endl;  // 5
 }
 }  // namespace test2
-void func() {}
 }  // namespace n2
 
 namespace n3 {
@@ -166,6 +165,7 @@ inline typename unknown_class_traits<unknown_class>::return_type Func(
   typedef typename unknown_class_traits<unknown_class>::return_type return_type;
   return __Func(u, return_type());  // 需要调用构造函数当tag
 }
+
 void func() {
   unknown_class<A> a;
   A ra = Func(a);  // use A flag

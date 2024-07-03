@@ -112,6 +112,7 @@ void func1() {
   Swap(a, b);
   std::cout << a << "," << b << std::endl;  // 4,5
 }
+
 void func2() {
   double a = 4.1, b = 5.2;
   std::cout << a << "," << b << std::endl;  // 4.1,5.2
@@ -120,6 +121,7 @@ void func2() {
   Swap(a, b);
   std::cout << a << "," << b << std::endl;  // 4.1,5.2
 }
+
 void func3() {
   bool a = true, b = false;
   std::cout.setf(std::ios::boolalpha);
@@ -129,6 +131,7 @@ void func3() {
   Swap(a, b);
   std::cout << a << "," << b << std::endl;  // true,false
 }
+
 void func4() {
   char a = 'a', b = 'b';
   std::cout << a << "," << b << std::endl;  // a,b
@@ -137,6 +140,7 @@ void func4() {
   Swap(a, b);
   std::cout << a << "," << b << std::endl;  // a,b
 }
+
 void func5() {
   auto print = [](int *arr, int len) {
     for (int i = 0; i < len; ++i) {
@@ -242,6 +246,7 @@ template <typename T>
 void fun8(T a, T b) {
   std::cout << "void fun8(T a, T b) : " << typeid(T).name() << std::endl;
 }
+
 void func() {
   // name的类型从int[20]换转换为int*，所以T的真实类型为int：
   int name[20];

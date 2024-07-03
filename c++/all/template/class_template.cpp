@@ -86,16 +86,16 @@ template <>
 int A<double>::count = 0;
 
 void func() {
-  // A<int>和A<double>是两个不同的类，都有count变量：
   A<int> ia1, ia2;
-  A<int> ia3;
-  A<double> da;
-
-  // A<int>的对象和A<double>的对象不会共享一份count：
   ia1.PrintCount();  // 2
   ia2.PrintCount();  // 2
+
+  A<int> ia3;
   ia3.PrintCount();  // 3
-  da.PrintCount();   // 1
+
+  A<double> da;
+  da.PrintCount();  // 1
+  // A<int>和A<double>是两个不同的类，都有count变量。
 }
 }  // namespace test1
 
