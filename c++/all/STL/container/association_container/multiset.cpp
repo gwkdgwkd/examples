@@ -87,6 +87,7 @@ void func1() {
     std::cout << *i << " ";
   }
   std::cout << std::endl;  // 1 3
+
   for (; it != ms.end(); ++it) {
     std::cout << *it << " ";
   }
@@ -97,6 +98,7 @@ void func1() {
     std::cout << *i << " ";
   }
   std::cout << std::endl;  // 1 3 4 4 4 4
+  
   for (; it != ms.end(); ++it) {
     std::cout << *it << " ";
   }

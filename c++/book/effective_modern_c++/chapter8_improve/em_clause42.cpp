@@ -30,8 +30,6 @@ namespace test1 {
 // }
 
 void func() {
-  vw.reserve(10);
-
   vw.push_back("xyy");
   // Widget(const char *)
   // Widget(Widget &&)
@@ -67,12 +65,10 @@ void func() {
 namespace test2 {
 // 对于n1中的问题，emplace_back可以解决：
 // 它使用传入的任何实参在std::vector内构造一个Widget，不会涉及任何临时对象。
-// emplace_back使用了完美转发，所以只要你没有遭遇完美转发的限制，
+// emplace_back使用了完美转发，所以只要没有遭遇完美转发的限制，
 // 就可以通过emplace_back传递任意类型的任意数量和任意组合的实参。
 
 void func() {
-  vw.reserve(10);
-
   vw.emplace_back("xyy");
   // Widget(const char *)
   // ~Widget()
@@ -313,6 +309,9 @@ int main(int argc, char* argv[]) {
       break;
     case 1:
       n1::test2::func();
+      break;
+    case 2:
+      n2::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;
