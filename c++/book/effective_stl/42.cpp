@@ -39,7 +39,7 @@ void func() {
 
 namespace n2 {
 // operator<不仅仅是less的默认实现方式，也是程序员期望less所做的事情。
-// 让less不调用operator<而取做别的事，这会无端地违背程序员的意愿，
+// 让less不调用operator<而去做别的事，这会无端地违背程序员的意愿，
 // 这与少带给人惊奇的原则完全背道而驰，这很不好，应该尽量避免这样做，也没有理由这样做。
 // 在STL中，凡是使用了less的地方都可以指定另外一个不同的比较类型。
 struct MaxSpeedCompare : public std::binary_function<Widget, Widget, bool> {

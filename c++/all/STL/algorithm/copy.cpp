@@ -103,8 +103,9 @@ namespace n4 {
 // 在这种情况下，copy_backward()可以达到目的。
 // 相反在需要将元素复制到序列的左边时，copy()可以做到，但copy_backward()做不到。
 
+std::deque<std::string> q{"1", "2", "3", "4", "5", "6"};
+
 void func1() {  // copy
-  std::deque<std::string> q{"1", "2", "3", "4", "5", "6"};
   q.resize(q.size() + 2);
   std::cout << q.size() << std::endl;  // 8
   std::copy(std::begin(q), std::begin(q) + 6, std::end(q));
@@ -123,7 +124,6 @@ void func2() {  // copy_backward
   // 为了能够在右边进行序列的反向复制操作，需要添加一些额外的元素，
   // 可以通过使用deque的成员函数resize()来增加deque容器的元素个数。
   // copy_backward()会将原有的元素复制到向右的两个位置，前两个保持元素不变：
-  std::deque<std::string> q{"1", "2", "3", "4", "5", "6"};
   q.resize(q.size() + 2);  // Add 2 elements
   std::copy_backward(std::begin(q), std::begin(q) + 6, std::end(q));
 

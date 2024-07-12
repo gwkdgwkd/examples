@@ -10,7 +10,7 @@
 // 2.迭代器适配器；
 // 3.函数适配器。
 
-// 函数适配器（function adapter），自身也是个function object
+// 函数适配器（function adapter），自身也是个function object，
 // 是指能够将不同的function object（或是和某值或某寻常函数）结合起来的东西。
 
 // STL中定义了大量的函数对象，但是有时候需要对函数返回值进一步的简单计算，
@@ -39,7 +39,7 @@
 // 6.mem_fun
 // 7.mem_fun_ref
 // 这些适配器都需要使用定义于function object中的若干类型。
-// 为了定义那些类型，C++标准库为function object提供了特殊的base calss，
+// 为了定义那些类型，C++标准库为function object提供了特殊的base class，
 // std::unary_function<>和std::binary_function<>，这些class如今都已过时。
 
 // C++98提供的函数适配器特性在C++11的到来后，全部过时，
@@ -217,7 +217,7 @@ void func1() {
   // 3:true
 
   // 将一个非成员函数传递给一个STL组件时，多数时候是一个STL算法，
-  // 为了避免你为此感到困惑（不加应该也行），要在函数前加一个ptr_fun：
+  // 为了避免感到困惑（不加应该也行），要在函数前加一个ptr_fun：
   std::for_each(v.begin(), v.end(), std::ptr_fun(testOdd));
   // 1:true
   // 2:false

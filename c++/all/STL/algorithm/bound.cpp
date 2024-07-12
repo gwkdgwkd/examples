@@ -278,8 +278,6 @@ void func() {
 namespace n5 {
 bool mycomp(int i, int j) { return i > j; }  // 降序
 void func() {
-  std::vector<int> v{5, 4, 3, 3, 3, 2, 1};
-
   std::vector<int>::iterator it =
       std::lower_bound(v.begin(), v.end(), 3, mycomp);
   std::cout << "it[" << std::distance(v.begin(), it) << "]=" << *it

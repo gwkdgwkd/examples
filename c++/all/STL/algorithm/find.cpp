@@ -301,7 +301,7 @@ class mycomp2 {
 void func() {
   char str[] = "abctefstl/";
   char ch[] = "stlopq";
-  // 调用第一种语法格式，找到str1中和stl任一字符相同的第一个字符：
+  // 调用第一种语法格式，找到str中和ch中任一字符相同的第一个字符：
   char* p = std::find_first_of(str, str + strlen(str), ch, ch + 4);
   if (p != str + strlen(str)) {
     std::cout << "p[" << p - str << "] = " << *p << std::endl;
@@ -316,7 +316,7 @@ void func() {
 
   std::vector<int> v{5, 7, 3, 9};
   int inter[] = {4, 6, 8};
-  // 调用第二种语法格式，找到v容器中和3、5、7任一元素有c2%c1=0关系的第一个元素：
+  // 调用第二种语法格式，找到v容器中和4、6、8任一元素有c2%c1=0关系的第一个元素：
   std::vector<int>::iterator it =
       find_first_of(v.begin(), v.end(), inter, inter + 3, mycomp2());
   if (it != v.end()) {

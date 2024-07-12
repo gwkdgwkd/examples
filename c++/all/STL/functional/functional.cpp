@@ -80,6 +80,7 @@ void func2() {
   std::copy(dq.begin(), dq.end(), std::ostream_iterator<int>(std::cout, " "));
   std::cout << std::endl;  // 24 23 22 21 20
 }
+
 // 2.函数对象有类型，而普通函数无类型，这种特性对于C++标准库来说是至关重要的。
 //   这样在使用STL中的函数时，可以传递相应的类型作为参数来实例化相应的模板，
 //   从而实现自己定义的规则，比如容器的排序规则。

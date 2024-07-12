@@ -50,7 +50,6 @@ namespace n2 {
 // set_union、set_intersection、set_difference、
 // set_symmetric_difference提供了线性时间效率的集合操作，
 // 如果不满足排序条件，就无法在线性时间内完成工作。
-
 }
 
 namespace n3 {

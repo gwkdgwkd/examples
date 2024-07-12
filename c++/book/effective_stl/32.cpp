@@ -54,9 +54,9 @@ void func2() {
 namespace test2 {
 void func() {
   std::list<int> l(v.begin(), v.end());
-  print(l);
+  print(l);  // 1 99 5 4 7 6 99 9 8 99 [10]
   l.remove(99);
-  print(l);
+  print(l);  // 1 5 4 7 6 9 8 [7]
 }
 }  // namespace test2
 }  // namespace n1

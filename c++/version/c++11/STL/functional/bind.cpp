@@ -83,10 +83,10 @@ void func() {
   std::cout << f1() << std::endl;  // 3
 
   auto f2 = std::bind(plus, std::placeholders::_1, 2);
-  std::cout << f2(1) << std::endl;  // 5
+  std::cout << f2(1) << std::endl;  // 3
 
   auto f3 = std::bind(plus, std::placeholders::_1, std::placeholders::_2);
-  std::cout << f3(1, 2) << std::endl;  // 7
+  std::cout << f3(1, 2) << std::endl;  // 3
 }
 }  // namespace test1
 
@@ -275,7 +275,7 @@ void func() {
 }  // namespace n2
 
 namespace n3 {
-// std::placeholders::_1是占位符，其中_1,是数字对象，用于function的bind中。
+// std::placeholders::_1是占位符，其中_1，是数字对象，用于function的bind中。
 // _1用于代替回调函数（给bind函数传入的函数对象）中的第一个参数，
 // _2用于代替回调函数中的第二个参数，以此类推。
 
