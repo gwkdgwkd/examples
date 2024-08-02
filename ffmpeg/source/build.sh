@@ -275,7 +275,7 @@ build()
 	cd ${FFMPEGDIR}
 
 	build_yasm
-    build_nasm
+	build_nasm
 	build_x264
 	build_x265
 	build_vpx
