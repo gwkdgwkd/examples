@@ -90,7 +90,6 @@ class Widget {
  private:
   std::shared_future<double> fut;
 };
-
 }  // namespace n2
 
 namespace n3 {

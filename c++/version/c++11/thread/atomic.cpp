@@ -88,14 +88,12 @@ namespace n2 {
 // 2.一个是添加_explict后缀和额外的参数作为内存顺序的标签。
 
 //                                    原子类型的可用操作
-// 操作 	    atomic_flag atomic<bool> atomic<T*> atomic<integral> atomic<other>
-// test_and_set 	√
-// clear 	        √
-// is_lock_free 	  	        √ 	          √ 	         √ 	           √
-// load 	  	                √ 	          √ 	         √ 	           √
-// store 	  	                √ 	          √ 	         √ 	           √
-// exchange 	  	            √ 	          √ 	         √ 	           √
-// compare_exchange_weak 	    √ 	          √ 	         √ 	           √
+// 操作 	    atomic_flag atomic<bool> atomic<T*> atomic<integral>
+// atomic<other> test_and_set 	√ clear 	        √ is_lock_free √ √ √ √
+// load 	  	                √ 	          √ 	         √ √
+// store 	  	                √ 	          √ 	         √ √
+// exchange 	  	            √ 	          √ 	         √ √
+// compare_exchange_weak 	    √ 	          √ 	         √ √
 // compare_exchange_strong
 // fetch_add, += 	  	  	                  √ 	         √
 // fetch_sub, -= 	  	  	                  √ 	         √
@@ -210,16 +208,12 @@ class lock_free_stack {  // 栈的底层数据结构采用单向链表实现
   void push(T const& data) {
     node* const new_node = new node(data);
     new_node->next = head.load();  // 每次从链表头插入
-    // 若head==new_node->next则更新head为new_node，返回true结束循环，
-    // 插入成功；
+    // 若head==new_node->next则更新head为new_node，返回true结束循环，插入成功；
     // 若head!=new_node->next表明有其它线程在此期间对head操作了，
-    // 将new_node->next更新为新的head，
-    // 返回false，继续进入下一次while循环。
+    // 将new_node->next更新为新的head，返回false，继续进入下一次while循环。
     // atomic::compare_exchange_weak比strong快，
-    // 因为compare_exchange_weak可能在元素相等的时候，
-    // 返回false所以适合在循环中，
-    // 而atomic::compare_exchange_strong保证了比较的正确性，
-    // 不适合用于循环。
+    // 因为compare_exchange_weak可能在元素相等的时候，返回false所以适合在循环中，
+    // 而atomic::compare_exchange_strong保证了比较的正确性，不适合用于循环。
     while (!head.compare_exchange_weak(new_node->next, new_node))
       ;
   }
@@ -231,14 +225,13 @@ class lock_free_stack {  // 栈的底层数据结构采用单向链表实现
     // 若head==old_head则更新head为old_head->next并返回true，
     // 结束循环，删除栈顶元素成功;
     // 若head!=old_head表明有其它线程操作了head，
-    // 因此更新old_head为新的head，
-    // 返回false进入下一轮循环，直至删除成功。
+    // 因此更新old_head为新的head，返回false进入下一轮循环，直至删除成功。
     while (old_head && !head.compare_exchange_weak(old_head, old_head->next))
       ;
     // 空链表时返回的是一个空的shared_ptr对象
     return old_head ? old_head->data : std::shared_ptr<T>();
   }
-  // 这只是lock free，由于while可能无限期循环不能在有限步骤内完成，故不是wait free。
+  // 这只是lock_free，由于while可能无限期循环不能在有限步骤内完成，故不是wait_free。
 };
 }  // namespace n3
 
@@ -294,6 +287,36 @@ void func2() {
   // func2 start
   // func1 do something
 }
+
+// 自旋锁是一种基于忙等待（Busy-Waiting）的同步机制，
+// 主要用于多线程/多处理器环境中保护共享资源的互斥访问，其核心特点与实现原理如下：
+// 1.‌非阻塞式等待‌，当线程无法获取锁时，不会进入休眠状态，
+//   而是通过循环（自旋）持续检测锁状态，直到成功获取锁，
+//   这种机制避免了线程上下文切换的开销，但会持续占用CPU资源；
+// 2.‌适用场景‌，适合锁持有时间极短的场景（如内核中断处理、短临界区代码），
+//   若锁竞争激烈或持有时间较长，会导致CPU资源浪费；
+// 3.‌与互斥锁对比‌，
+//   ‌自旋锁‌：通过循环忙等，无上下文切换，适合高并发短任务；
+//   互斥锁‌：线程阻塞并休眠，适合长临界区或低竞争场景。
+
+// ‌实现原理‌
+// 通常基于原子操作（如CAS）实现锁状态检测。例如：
+// while (!atomic_compare_exchange(&lock, 0, 1)); // 自旋直到获取锁
+// 公平性优化‌
+// Ticket Lock‌：通过排队号和服务号实现先到先得的公平性。
+// CLH/MCS Lock‌：基于链表减少共享变量争用，提升扩展性。
+
+// ‌潜在问题‌：
+// 1.CPU资源浪费‌，长时间自旋会导致CPU空转，尤其在单核系统中性能下降显著；
+// 2.‌死锁风险‌，递归获取同一自旋锁会引发死锁，需严格避免；
+// 3.非公平性‌，基础自旋锁可能导致线程饥饿，需通过Ticket_Lock等改进。
+
+// ‌典型应用‌
+// 操作系统内核‌：如Linux中断处理、短临界区保护。
+// ‌高性能并发库‌：适用于锁竞争少且执行快的场景。
+
+// ‌总结‌
+// 自旋锁通过牺牲CPU资源换取低延迟，是高性能场景下的重要同步工具，但需结合业务场景权衡。
 }  // namespace n4
 
 namespace n5 {
@@ -316,13 +339,13 @@ namespace n5 {
 
 // 在C++11中一共有7种memory_order枚举值，默认按照memory_order_seq_cst执行：
 // typedef enum memory_order {
-//   memory_order_relaxed,  // 不对执行顺序做保证
-//   memory_order_acquire,  // 本线程中，所有后续的读操作必须在本条原子操作完成后执行
-//   memory_order_release,  // 本线程中，所有之前的写操作完成后才能执行本条原子操作
-//   memory_order_acq_rel,  // 同时包含memory_order_acquire和memory_order_release
-//   memory_order_consume,  // 本线程中，所有后续的有关本原子类型的操作，
-//                          // 必须在本条原子操作完成之后执行
-//   memory_order_seq_cst   // 全部存取都按顺序执行
+//   memory_order_relaxed,//不对执行顺序做保证
+//   memory_order_acquire,//本线程中，所有后续的读操作必须在本条原子操作完成后执行
+//   memory_order_release,//本线程中，所有之前的写操作完成后才能执行本条原子操作
+//   memory_order_acq_rel,//同时包含memory_order_acquire和memory_order_release
+//   memory_order_consume,//本线程中，所有后续的有关本原子类型的操作，
+//                        //必须在本条原子操作完成之后执行
+//   memory_order_seq_cst //全部存取都按顺序执行
 // } memory_order;
 
 // 需要注意的是，不是所有的memory_order都能被atomic成员使用：

@@ -27,7 +27,7 @@ namespace n1 {
 void func1() {
   // unique_ptr智能指针的创建
 
-  // 1.通过以下2种方式，可以创建出空的unique_ptr指针：
+  // 1.通过以下3种方式，可以创建出空的unique_ptr指针：
   std::unique_ptr<A> p1;
   std::unique_ptr<A> p2(nullptr);
   std::unique_ptr<A> p3 = nullptr;
@@ -76,8 +76,10 @@ namespace n2 {
 // get_deleter() 	获取当前unique_ptr指针释放堆内存空间所用的规则。
 // operator bool()unique_ptr指针可直接作为if语句的判断条件，
 //                以判断该指针是否为空，如果为空，则为false，反之为true。
-// release() 	    释放当前unique_ptr指针对所指堆内存的所有权，但该存储空间并不会被销毁。
-// reset(p) 	    其中p表示一个普通指针，如果p为nullptr，则当前unique_ptr也变成空指针；
+// release()      释放当前unique_ptr指针对所指堆内存的所有权，
+//                但该存储空间并不会被销毁。
+// reset(p)       其中p表示一个普通指针，如果p为nullptr，
+//                则当前unique_ptr也变成空指针；
 //                反之，则该函数会释放当前unique_ptr指针指向的堆内存（如果有），
 //                然后获取p所指堆内存的所有权（p为nullptr）。
 // swap(x) 	      交换当前unique_ptr指针和同类型的x指针。
@@ -197,7 +199,7 @@ void func() {
   // delete A
   // delete A
 }
-}  // namespace deletor
+}  // namespace n3
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {

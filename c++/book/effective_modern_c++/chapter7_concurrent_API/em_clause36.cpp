@@ -107,7 +107,7 @@ inline auto reallyAsync(F&& f, Ts&&... params) {
   return std::async(std::launch::async, std::forward<F>(f),
                     std::forward<Ts>(params)...);
 }
-// reallyAsync所做的一起，就是以std::launch::asyn启动策略来调整了std::async。
+// reallyAsync所做的一起，就是以std::launch::async启动策略来调整了std::async。
 #elif __cplusplus == 201103L
 template <typename F, typename... Ts>
 inline std::future<typename std::result_of<F(Ts...)>::type> reallyAsync(
@@ -117,7 +117,7 @@ inline std::future<typename std::result_of<F(Ts...)>::type> reallyAsync(
 }
 // 该函数接受一个可调用对象，以及零个或多个形参params，
 // 并将后者完美转发给std::async，同时传递std::launch::async作为启动策略。
-// 就像std::async,它会返回一个类型为std::future的对象作为使用params调用f的结果。
+// 就像std::async，它会返回一个类型为std::future的对象作为使用params调用f的结果。
 // 决定该结果的类型很容易，std::result_of这个类型特征就会把结果调用者。
 #endif
 

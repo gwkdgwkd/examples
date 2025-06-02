@@ -47,7 +47,7 @@ void f1(int id) {
   while (!ready) {  // 如果标志位不为true, 则等待
     cv.wait(lck);   // 当前线程被阻塞
   }
-  // 当全局标志位变为true之后，线程被唤醒, 继续执行打印线程编号：
+  // 当全局标志位变为true之后，线程被唤醒，继续执行打印线程编号：
   std::cout << "thread " << id << '\n';
 }
 void f2() {

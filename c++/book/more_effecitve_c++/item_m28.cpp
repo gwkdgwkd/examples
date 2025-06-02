@@ -256,7 +256,7 @@ void func() {
 
 namespace n3 {
 // 把智能指针转变成dumb指针
-// 有时你要在一个程序里或已经使用dumb指针的程序库中添加智能指针。
+// 有时要在一个程序里或已经使用dumb指针的程序库中添加智能指针。
 template <class T>
 class SmartPtr {
  public:
