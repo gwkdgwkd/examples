@@ -1,0 +1,1 @@
+../../version/c++11/smart_pointer/enable_shared_from_this.cpp

@@ -120,6 +120,16 @@ void func3() {
 }
 }  // namespace n2
 
+namespace n3 {
+// shared_ptr可以隐式转换成weak_ptr：
+void f(std::weak_ptr<int> p) { std::cout << *(p.lock()) << std::endl; }
+
+void func() {
+  std::shared_ptr<int> ptr = std::make_shared<int>(5);
+  f(ptr);
+}
+}  // namespace n3
+
 int main(int argc, char *argv[]) {
   if (argc < 2) {
     std::cout << argv[0] << " i [0 - 2]" << std::endl;
@@ -138,6 +148,9 @@ int main(int argc, char *argv[]) {
       break;
     case 3:
       n2::func3();
+      break;
+    case 4:
+      n3::func();
       break;
     default:
       std::cout << "invalid type" << std::endl;
